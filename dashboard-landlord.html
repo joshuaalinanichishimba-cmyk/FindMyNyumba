@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landlord Dashboard - FindMyNyumba Zambian Housing</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .sidebar-open {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        .sidebar-closed {
+            transform: translateX(-100%);
+            opacity: 0;
+            visibility: hidden;
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        .step-active {
+            background-color: var(--orange);
+            color: white;
+        }
+        .step-inactive {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+        .form-step {
+            display: none;
+        }
+        .form-step-active {
+            display: block;
+        }
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .testimonial-card {
+            transition: all 0.3s ease;
+        }
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, var(--orange), #ff9800);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Mobile Menu Button -->
+    <div class="fixed top-20 left-4 z-50 md:hidden">
+        <button id="toggle-sidebar" class="bg-white p-3 rounded-lg shadow-md">
+            <i class="fas fa-bars text-gray-700"></i>
+        </button>
+    </div>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:relative z-40 w-64 bg-white h-screen shadow-lg transition-all sidebar-open">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-orange-600 mb-8">FindMyNyumba</h1>
+                
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center px-4 py-3 bg-orange-100 text-orange-700 rounded-lg font-medium">
+                        <i class="fas fa-home mr-3"></i> Overview
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-home mr-3"></i> My Listings
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-plus-circle mr-3"></i> Add Listing
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-comments mr-3"></i> Inquiries
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-shield-alt mr-3"></i> Verification Status
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg mt-8">
+                        <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Landlord Dashboard</h1>
+                    <p class="text-gray-600">Manage your properties and inquiries</p>
+                </div>
+
+                <!-- Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-orange-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600">Total Listings</p>
+                                <p class="text-2xl font-bold">8</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600">Verified</p>
+                                <p class="text-2xl font-bold">6</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-comments text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600">New Inquiries</p>
+                                <p class="text-2xl font-bold">12</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-600">Bookings</p>
+                                <p class="text-2xl font-bold">5</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Listing Form -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Listing</h2>
+                    
+                    <!-- Progress Steps -->
+                    <div class="flex justify-between mb-8 max-w-2xl mx-auto">
+                        <div class="flex flex-col items-center w-1/4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center step-active mb-2">
+                                <span>1</span>
+                            </div>
+                            <span class="text-sm text-center">Basic Info</span>
+                        </div>
+                        <div class="flex flex-col items-center w-1/4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center step-inactive mb-2">
+                                <span>2</span>
+                            </div>
+                            <span class="text-sm text-center">Details</span>
+                        </div>
+                        <div class="flex flex-col items-center w-1/4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center step-inactive mb-2">
+                                <span>3</span>
+                            </div>
+                            <span class="text-sm text-center">Images</span>
+                        </div>
+                        <div class="flex flex-col items-center w-1/4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center step-inactive mb-2">
+                                <span>4</span>
+                            </div>
+                            <span class="text-sm text-center">Payment</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Steps -->
+                    <form id="add-listing-form">
+                        <!-- Step 1: Basic Info -->
+                        <div id="step-1" class="form-step form-step-active">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Property Title</label>
+                                    <input type="text" name="title" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">University</label>
+                                    <select name="university" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <option value="">Select University</option>
+                                        <option value="university-of-zambia">University of Zambia</option>
+                                        <option value="cavendish-university">Cavendish University Zambia</option>
+                                        <option value="ict-college">Information and Communication Technology College</option>
+                                        <option value="zambia-catholic-university">Zambia Catholic University</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Price (KSh)</label>
+                                    <input type="number" name="price" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Distance from Campus (m)</label>
+                                    <input type="number" name="distance" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Gender Restriction</label>
+                                    <select name="gender" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <option value="unisex">Unisex</option>
+                                        <option value="male">Male Only</option>
+                                        <option value="female">Female Only</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
+                                    <select name="roomType" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <option value="single">Single Room</option>
+                                        <option value="shared">Shared Room</option>
+                                        <option value="studio">Studio</option>
+                                        <option value="apartment">Apartment</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="button" id="next-to-step-2" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg transform transition duration-500 hover:scale-105">
+                                    Next: Property Details
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Property Details -->
+                        <div id="step-2" class="form-step">
+                            <div class="grid grid-cols-1 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                    <textarea name="description" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent"></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    <input type="text" name="address" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                        <input type="text" name="city" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Postal Code</label>
+                                        <input type="text" name="postalCode" required class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="wifi" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">WiFi</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="kitchen" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">Kitchen</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="bathroom" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">Bathroom</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="laundry" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">Laundry</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="parking" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">Parking</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="security" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">Security</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="water" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">Water</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="amenities" value="electricity" class="rounded text-orange-600 focus:ring-orange-500">
+                                            <span class="ml-2 text-gray-700">Electricity</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button type="button" id="prev-to-step-1" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg transform transition duration-500 hover:scale-105">
+                                    Previous
+                                </button>
+                                <button type="button" id="next-to-step-3" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg transform transition duration-500 hover:scale-105">
+                                    Next: Upload Images
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Upload Images -->
+                        <div id="step-3" class="form-step">
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Upload Property Images</label>
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600 mb-4">Drag & drop images here or click to browse</p>
+                                    <input type="file" id="image-upload" accept="image/*" multiple class="hidden">
+                                    <button type="button" id="upload-trigger" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transform transition duration-500 hover:scale-105">
+                                        Select Images
+                                    </button>
+                                    <p class="text-sm text-gray-500 mt-2">Upload up to 5 images (JPG, PNG)</p>
+                                </div>
+                                
+                                <div id="image-preview" class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4 hidden">
+                                    <!-- Preview images will appear here -->
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button type="button" id="prev-to-step-2" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg transform transition duration-500 hover:scale-105">
+                                    Previous
+                                </button>
+                                <button type="button" id="next-to-step-4" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg transform transition duration-500 hover:scale-105">
+                                    Next: Payment Options
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 4: Payment Options -->
+                        <div id="step-4" class="form-step">
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-4">Payment Options</label>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="accept-mobile-money" name="paymentOptions" value="mobileMoney" class="h-4 w-4 text-orange-600 rounded focus:ring-orange-500">
+                                        <label for="accept-mobile-money" class="ml-3 flex items-center">
+                                            <i class="fab fa-cc-visa text-2xl text-green-500 mr-2"></i>
+                                            <span class="text-gray-700">Accept Mobile Money (M-Pesa, Airtel Money, etc.)</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="accept-bank-transfer" name="paymentOptions" value="bankTransfer" class="h-4 w-4 text-orange-600 rounded focus:ring-orange-500">
+                                        <label for="accept-bank-transfer" class="ml-3 flex items-center">
+                                            <i class="fas fa-piggy-bank text-2xl text-blue-500 mr-2"></i>
+                                            <span class="text-gray-700">Bank Transfer</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="accept-cash" name="paymentOptions" value="cash" class="h-4 w-4 text-orange-600 rounded focus:ring-orange-500">
+                                        <label for="accept-cash" class="ml-3 flex items-center">
+                                            <i class="fas fa-money-bill-wave text-2xl text-yellow-500 mr-2"></i>
+                                            <span class="text-gray-700">Cash Payment</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Payment Notes</label>
+                                    <textarea name="paymentNotes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Any special payment arrangements or notes..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button type="button" id="prev-to-step-3" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg transform transition duration-500 hover:scale-105">
+                                    Previous
+                                </button>
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transform transition duration-500 hover:scale-105">
+                                    <i class="fas fa-check-circle mr-2"></i> Publish Listing
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- My Listings -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">My Listings</h2>
+                        <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transform transition duration-500 hover:scale-105">
+                            <i class="fas fa-plus mr-2"></i> Add New
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Single Room - UNZA</div>
+                                        <div class="text-sm text-gray-500">University of Zambia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ZMW 8,500</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">142</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <a href="#" class="text-orange-600 hover:text-orange-900 mr-3">Edit</a>
+                                        <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Shared Room - CUZ</div>
+                                        <div class="text-sm text-gray-500">Cavendish University Zambia</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ZMW 12,000</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">89</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <a href="#" class="text-orange-600 hover:text-orange-900 mr-3">Edit</a>
+                                        <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">Studio - ICTC</div>
+                                        <div class="text-sm text-gray-500">Information and Communication Technology College</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ZMW 15,000</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">201</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <a href="#" class="text-orange-600 hover:text-orange-900 mr-3">Edit</a>
+                                        <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 bg-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">What Our Users Say</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Real experiences from students who found their perfect home</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                            <span class="font-bold text-orange-600">JS</span>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">John S.</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"FindmyNyumba helped me find a safe, verified room just 300m from campus. The verification process gave me peace of mind!"</p>
+                </div>
+                
+                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="font-bold text-blue-600">ME</span>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Mary E.</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"As a landlord, I love how easy it is to post properties and connect with verified students. The platform is trustworthy!"</p>
+                </div>
+                
+                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <span class="font-bold text-green-600">TK</span>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Thomas K.</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"The search filters saved me so much time. Found my ideal room in just 2 days with no fake listings!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('sidebar-open');
+            sidebar.classList.toggle('sidebar-closed');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleButton = document.getElementById('toggle-sidebar');
+            
+            if (window.innerWidth < 768) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnToggle = toggleButton.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('sidebar-open')) {
+                    sidebar.classList.remove('sidebar-open');
+                    sidebar.classList.add('sidebar-closed');
+                }
+            }
+        });
+
+        // Update active nav item
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function() {
+                document.querySelectorAll('nav a').forEach(a => {
+                    a.classList.remove('bg-orange-100', 'text-orange-700');
+                    a.classList.add('text-gray-700');
+                });
+                
+                this.classList.remove('text-gray-700');
+                this.classList.add('bg-orange-100', 'text-orange-700');
+            });
+        });
+
+        // Handle window resize to adjust sidebar visibility
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth >= 768) {
+                sidebar.classList.add('sidebar-open');
+                sidebar.classList.remove('sidebar-closed');
+            } else {
+                sidebar.classList.remove('sidebar-open');
+                sidebar.classList.add('sidebar-closed');
+            }
+        });
+
+        // Initialize sidebar state based on screen size
+        window.addEventListener('load', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('sidebar-open');
+                sidebar.classList.add('sidebar-closed');
+            }
+        });
+
+        // Multi-step form functionality
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.form-step').forEach(formStep => {
+                formStep.classList.remove('form-step-active');
+            });
+            
+            // Show current step
+            document.getElementById(`step-${step}`).classList.add('form-step-active');
+            
+            // Update progress steps
+            for (let i = 1; i <= totalSteps; i++) {
+                const stepElement = document.querySelector(`.flex div:nth-child(${i}) .w-10`);
+                if (i <= step) {
+                    stepElement.classList.remove('step-inactive');
+                    stepElement.classList.add('step-active');
+                } else {
+                    stepElement.classList.remove('step-active');
+                    stepElement.classList.add('step-inactive');
+                }
+            }
+            
+            currentStep = step;
+        }
+
+        // Navigation between steps
+        document.getElementById('next-to-step-2').addEventListener('click', function() {
+            // Validate step 1
+            const title = document.querySelector('input[name="title"]').value;
+            const price = document.querySelector('input[name="price"]').value;
+            
+            if (!title || !price) {
+                alert('Please fill in all required fields in Basic Info');
+                return;
+            }
+            
+            showStep(2);
+        });
+
+        document.getElementById('prev-to-step-1').addEventListener('click', function() {
+            showStep(1);
+        });
+
+        document.getElementById('next-to-step-3').addEventListener('click', function() {
+            showStep(3);
+        });
+
+        document.getElementById('prev-to-step-2').addEventListener('click', function() {
+            showStep(2);
+        });
+
+        document.getElementById('next-to-step-4').addEventListener('click', function() {
+            showStep(4);
+        });
+
+        document.getElementById('prev-to-step-3').addEventListener('click', function() {
+            showStep(3);
+        });
+
+        // Image upload functionality
+        document.getElementById('upload-trigger').addEventListener('click', function() {
+            document.getElementById('image-upload').click();
+        });
+
+        document.getElementById('image-upload').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const previewContainer = document.getElementById('image-preview');
+            previewContainer.innerHTML = '';
+            
+            if (files.length > 0) {
+                previewContainer.classList.remove('hidden');
+            }
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = 'relative group';
+                    
+                    imgDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview" class="w-full h-24 object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="text-white text-sm">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    previewContainer.appendChild(imgDiv);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submission
+        document.getElementById('add-listing-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const listingData = Object.fromEntries(formData.entries());
+            
+            // Convert amenities and payment options to arrays
+            listingData.amenities = Array.from(document.querySelectorAll('input[name="amenities"]:checked')).map(cb => cb.value);
+            listingData.paymentOptions = Array.from(document.querySelectorAll('input[name="paymentOptions"]:checked')).map(cb => cb.value);
+            
+            // In a real application, this would send the data to the server
+            console.log('Listing data:', listingData);
+            
+            // Show success message
+            alert('Listing published successfully!');
+            
+            // Reset form and go back to step 1
+            this.reset();
+            showStep(1);
+        });
+
+        // Initialize with step 1
+        showStep(1);
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
