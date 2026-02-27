@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 from app.models.listing import Listing
 from app.schemas.listing import ListingCreate
 
@@ -13,34 +12,14 @@ class ListingService:
         return db_listing
 
     @staticmethod
-    def get_all_listings(db: Session, skip: int = 0, limit: int = 100, 
-                         location: str = None, max_price: float = None):
+    def get_all_listings(db: Session, skip: int = 0, limit: int = 100, location: str = None, max_price: float = None):
         query = db.query(Listing)
-        
-        # Apply filters only if they are provided
         if location:
             query = query.filter(Listing.location.icontains(location))
         if max_price:
             query = query.filter(Listing.price <= max_price)
-            
         return query.offset(skip).limit(limit).all()
 
     @staticmethod
-    def update_listing(db: Session, listing_id: int, landlord_id: int, update_data: dict):
-        db_listing = db.query(Listing).filter(Listing.id == listing_id, Listing.owner_id == landlord_id).first()
-        if not db_listing:
-            return None
-        for key, value in update_data.items():
-            setattr(db_listing, key, value)
-        db.commit()
-        db.refresh(db_listing)
-        return db_listing
-
-    @staticmethod
-    def delete_listing(db: Session, listing_id: int, landlord_id: int):
-        db_listing = db.query(Listing).filter(Listing.id == listing_id, Listing.owner_id == landlord_id).first()
-        if db_listing:
-            db.delete(db_listing)
-            db.commit()
-            return True
-        return False
+    def get_user_listings(db: Session, user_id: int):
+        return db.query(Listing).filter(Listing.owner_id == user_id).all()
