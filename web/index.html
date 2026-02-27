@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindMyNyumba | Student Housing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <nav class="bg-blue-600 p-4 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold italic">FindMyNyumba</h1>
+            <div id="auth-links">
+                <a href="#" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold">Landlord Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6">
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Find your next home</h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input id="search-location" type="text" placeholder="Location (e.g. Handsworth)" class="border p-3 rounded-lg flex-1">
+                <input id="search-price" type="number" placeholder="Max Price (K)" class="border p-3 rounded-lg flex-1">
+                <button onclick="fetchListings()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition">Search</button>
+            </div>
+        </div>
+
+        <div id="listings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="text-gray-500">Loading houses...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

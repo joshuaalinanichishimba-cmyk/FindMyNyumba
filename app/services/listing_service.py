@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from app.models.listing import Listing
 from app.schemas.listing import ListingCreate
 
@@ -12,8 +13,17 @@ class ListingService:
         return db_listing
 
     @staticmethod
-    def get_all_listings(db: Session, skip: int = 0, limit: int = 100):
-        return db.query(Listing).offset(skip).limit(limit).all()
+    def get_all_listings(db: Session, skip: int = 0, limit: int = 100, 
+                         location: str = None, max_price: float = None):
+        query = db.query(Listing)
+        
+        # Apply filters only if they are provided
+        if location:
+            query = query.filter(Listing.location.icontains(location))
+        if max_price:
+            query = query.filter(Listing.price <= max_price)
+            
+        return query.offset(skip).limit(limit).all()
 
     @staticmethod
     def update_listing(db: Session, listing_id: int, landlord_id: int, update_data: dict):
