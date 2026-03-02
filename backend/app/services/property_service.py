@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+﻿from sqlalchemy.orm import Session
 from models.property import Property
 from schemas.property import PropertyUpdate
 from typing import List, Optional

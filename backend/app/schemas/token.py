@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+﻿from pydantic import BaseModel
 
 class TokenResponse(BaseModel):
     """Schema for token response"""

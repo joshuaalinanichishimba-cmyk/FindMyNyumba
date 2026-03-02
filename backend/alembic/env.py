@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 from os.path import abspath, dirname
 from logging.config import fileConfig
 
