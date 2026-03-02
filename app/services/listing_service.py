@@ -1,4 +1,4 @@
-﻿from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
 from app.models.listing import Listing
 from app.schemas.listing import ListingCreate
 

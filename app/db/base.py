@@ -1,4 +1,4 @@
-﻿# app/db/base.py
+# app/db/base.py
 
 # 1. Import the Base from the source of truth (database.py)
 from app.db.database import Base 
