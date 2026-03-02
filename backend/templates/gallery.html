@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FindMyNyumba - Property Gallery</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 200px; object-fit: cover; background: #ddd; }
+        .content { padding: 15px; }
+        .price { color: #2ecc71; font-weight: bold; font-size: 1.2em; }
+        .location { color: #7f8c8d; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>?? Available Listings</h1>
+    <div class="grid">
+        {% for prop in properties %}
+        <div class="card">
+            <img src="{{ prop.image_url or 'https://placehold.co/600x400?text=No+Image' }}" alt="Property">
+            <div class="content">
+                <h3>{{ prop.title }}</h3>
+                <p class="location">?? {{ prop.location }}</p>
+                <p class="price">KES {{ "{:,.2f}".format(prop.price) }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
