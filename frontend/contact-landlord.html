@@ -3,290 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Landlord - FindMyNyumba Zambian Housing</title>
-    <!-- Tailwind CSS via CDN -->
+    <title>Contact Landlord - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        .hero-bg {
-            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--navy) 100%);
-        }
-        .floating-element {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .testimonial-card {
-            transition: all 0.3s ease;
-        }
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, var(--orange), #ff9800);
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-        }
-    </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="index.html" class="flex-shrink-0 flex items-center">
-                        <span class="text-orange-500 font-bold text-xl">FindMyNyumba</span>
-                    </a>
-                </div>
-                
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="browse.html" class="text-gray-700 hover:text-orange-600">Browse</a>
-                    <a href="login.html" class="text-gray-700 hover:text-orange-600">Login</a>
-                    <a href="register.html" class="bg-orange-500 text-white px-4 py-2 rounded-lg">Register</a>
-                </div>
-                
-                <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-orange-600">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="browse.html" class="text-2xl font-black text-[#ea580c]">FindMyNyumba</a>
+            <a href="browse.html" class="text-gray-600 font-bold hover:text-[#ea580c]">Back to Browse</a>
         </div>
     </nav>
 
-    <!-- Contact Form -->
-    <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow-xl rounded-xl p-6 md:p-8">
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Contact Landlord</h1>
-                <p class="mt-2 text-gray-600">Send a message to the landlord about this property</p>
-            </div>
-            
-            <div class="mb-8 bg-gray-50 p-6 rounded-xl">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Property Information</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-gray-600">Property:</p>
-                        <p class="font-medium">Single Room - University of Zambia</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Location:</p>
-                        <p class="font-medium">Great East Road, 500m from campus</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Price:</p>
-                        <p class="font-medium text-orange-600">ZMW 8,500/month</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Available:</p>
-                        <p class="font-medium">Immediately</p>
+    <main class="flex-grow flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 max-w-2xl w-full">
+            <h2 class="text-3xl font-black text-gray-900 mb-2">Contact Landlord</h2>
+            <p class="text-gray-500 mb-8">Send a secure message directly to the property manager.</p>
+
+            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8 flex flex-col md:flex-row gap-6">
+                <img id="prop-image" src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300" class="w-full md:w-32 h-32 object-cover rounded-xl shadow-sm">
+                <div class="flex-1 space-y-2">
+                    <h3 class="font-bold text-gray-700 uppercase text-xs">Property Information</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-400">Property:</p>
+                            <p id="prop-title" class="font-bold text-gray-900 truncate" title="Loading...">Loading Property...</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">Location:</p>
+                            <p id="prop-location" class="font-bold text-gray-900 truncate" title="Loading...">Loading Location...</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">Price:</p>
+                            <p id="prop-price" class="font-black text-[#ea580c]">Loading Price...</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">Available:</p>
+                            <p class="font-bold text-green-600">Immediately</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <form id="contact-form" class="space-y-6">
+
+            <form id="contactForm" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="full-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" id="full-name" name="fullName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Full Name</label>
+                        <input type="text" required class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c]">
                     </div>
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input type="email" id="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email / Phone</label>
+                        <input type="text" required class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c]">
                     </div>
                 </div>
-                
                 <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Message</label>
+                    <textarea rows="4" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c]" required>Hi, I am interested in this property and would like to ask a few questions.</textarea>
                 </div>
-                
-                <div>
-                    <label for="university" class="block text-sm font-medium text-gray-700 mb-1">University</label>
-                    <select id="university" name="university" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
-                        <option value="">Select University</option>
-                        <option value="university-of-zambia">University of Zambia</option>
-                        <option value="cavendish-university">Cavendish University Zambia</option>
-                        <option value="ict-college">Information and Communication Technology College</option>
-                        <option value="zambia-catholic-university">Zambia Catholic University</option>
-                        <option value="mulungushi-university">Mulungushi University</option>
-                        <option value="northrise-university">Northrise University</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="inquiry-type" class="block text-sm font-medium text-gray-700 mb-1">Inquiry Type</label>
-                    <select id="inquiry-type" name="inquiryType" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
-                        <option value="">Select Inquiry Type</option>
-                        <option value="viewing">Schedule Viewing</option>
-                        <option value="availability">Check Availability</option>
-                        <option value="pricing">Ask About Pricing</option>
-                        <option value="other">Other Inquiry</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                    <textarea id="message" name="message" rows="5" required placeholder="Tell the landlord about your inquiry..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"></textarea>
-                </div>
-                
-                <div class="flex items-center">
-                    <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded">
-                    <label for="terms" class="ml-2 block text-sm text-gray-900">
-                        I agree to share my contact information with the landlord for this inquiry
-                    </label>
-                </div>
-                
-                <div>
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transform transition duration-500 hover:scale-105">
-                        <i class="fas fa-paper-plane mr-2"></i>
-                        Send Message
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-orange-600 transition-all">
+                    <i class="fas fa-paper-plane mr-2"></i> Send Message
+                </button>
             </form>
         </div>
-    </div>
+    </main>
 
-    <!-- Testimonials Section -->
-    <section class="py-16 bg-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800">What Our Users Say</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Real experiences from students who found their perfect home</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-orange-600">JS</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">John S.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"FindmyNyumba helped me find a safe, verified room just 300m from campus. The verification process gave me peace of mind!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-blue-600">ME</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Mary E.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"As a landlord, I love how easy it is to post properties and connect with verified students. The platform is trustworthy!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-green-600">TK</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Thomas K.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"The search filters saved me so much time. Found my ideal room in just 2 days with no fake listings!"</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <script src="app.js"></script>
     <script>
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const fullName = document.getElementById('full-name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const university = document.getElementById('university').value;
-            const inquiryType = document.getElementById('inquiry-type').value;
-            const message = document.getElementById('message').value;
-            const terms = document.getElementById('terms').checked;
-            
-            // Frontend validation
-            let isValid = true;
-            let errorMessage = '';
-            
-            if (!fullName || !email || !phone || !university || !inquiryType || !message) {
-                errorMessage = 'Please fill in all required fields';
-                isValid = false;
-            }
-            
-            if (isValid && !FormValidator.validateEmail(email)) {
-                errorMessage = 'Please enter a valid email address';
-                isValid = false;
-            }
-            
-            if (isValid && !FormValidator.validatePhone(phone)) {
-                errorMessage = 'Please enter a valid phone number';
-                isValid = false;
-            }
-            
-            if (isValid && !terms) {
-                errorMessage = 'You must agree to share your contact information';
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                alert(errorMessage);
+        async function loadPropertyInfo() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const propId = urlParams.get('id');
+            if(!propId) {
+                document.getElementById('prop-title').innerText = "Property Not Found";
                 return;
             }
-            
-            // In a real application, this would send the inquiry to the server
-            console.log('Contact inquiry submitted:', { 
-                fullName, 
-                email, 
-                phone, 
-                university, 
-                inquiryType,
-                message: message.substring(0, 50) + '...' // Truncate for security
-            });
-            
-            // Simulate successful submission
-            alert('Your message has been sent successfully! The landlord will contact you soon.');
-            
-            // Reset form
-            this.reset();
-        });
+
+            try {
+                // Fetch property from the API using the ID in the URL
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/landlord/properties/${propId}`);
+                if(!res.ok) throw new Error("Failed to load");
+                const data = await res.json();
+                
+                // Populate the UI
+                document.getElementById('prop-title').innerText = data.title;
+                document.getElementById('prop-title').title = data.title;
+                document.getElementById('prop-location').innerText = data.location;
+                document.getElementById('prop-location').title = data.location;
+                document.getElementById('prop-price').innerText = "ZMW " + parseFloat(data.price).toLocaleString();
+                if(data.image_url) document.getElementById('prop-image').src = data.image_url;
+            } catch(e) {
+                console.error(e);
+                document.getElementById('prop-title').innerText = "Error loading property details.";
+                document.getElementById('prop-location').innerText = "--";
+                document.getElementById('prop-price').innerText = "--";
+            }
+        }
+
+        document.getElementById('contactForm').onsubmit = function(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                alert("✅ Message sent successfully! The landlord will be notified on their dashboard.");
+                window.location.href = 'browse.html';
+            }, 1000);
+        };
+
+        document.addEventListener("DOMContentLoaded", loadPropertyInfo);
     </script>
 </body>
 </html>

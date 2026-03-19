@@ -1,22 +1,24 @@
-from sqlalchemy import create_engine
+﻿from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-# 1. Create the Engine
-# 'check_same_thread' is only needed for SQLite
+# Use the dual-attribute logic to prevent the previous AttributeError
+DATABASE_URL = getattr(settings, "DATABASE_URL", "sqlite:///./findmynyumba.db")
+
 engine = create_engine(
-    settings.DATABASE_URL, 
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+    DATABASE_URL, connect_args={"check_same_thread": False}
 )
 
-# 2. Create a Session factory
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=engine
+)
 
-# 3. Create the Base class for models
 Base = declarative_base()
 
-# 4. The missing piece: The get_db dependency
+# RESTORING THE CRITICAL FUNCTION
 def get_db():
     db = SessionLocal()
     try:

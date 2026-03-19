@@ -6,7 +6,7 @@ from app.core.config import settings
 # 1. Create database engine
 engine = create_engine(
     settings.DATABASE_URL,
-    echo=settings.DEBUG,  
+    echo=getattr(settings, 'DEBUG', False),  
     pool_pre_ping=True    
 )
 

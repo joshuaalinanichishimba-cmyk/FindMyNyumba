@@ -1,18 +1,11 @@
-﻿import sys
-import os
-sys.path.append(os.getcwd())
-from app.core.database import engine, Base
-from app.models.user import User
-from app.models.property import Property
+﻿from app.core.database import engine
+from sqlalchemy import text
 
-def init_db():
-    print("🚀 Initializing FindMyNyumba Database...")
+with engine.connect() as conn:
+    print("Checking for photo_url column...")
     try:
-        # This will create the tables in the database you saw in your \l list
-        Base.metadata.create_all(bind=engine)
-        print("✅ Success! Tables created correctly.")
+        conn.execute(text("ALTER TABLE properties ADD COLUMN photo_url VARCHAR;"))
+        conn.commit()
+        print("✅ photo_url column added successfully!")
     except Exception as e:
-        print(f"❌ Error: {e}")
-
-if __name__ == "__main__":
-    init_db()
+        print("ℹ️ Column might already exist or: ", e)

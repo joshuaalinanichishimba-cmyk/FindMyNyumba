@@ -3,399 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - FindMyNyumba Zambian Housing</title>
-    <!-- Tailwind CSS via CDN -->
+    <title>Student Dashboard - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
+    <script>
+        tailwind.config = { theme: { extend: { colors: { orange: { 600: '#ea580c' } } } } }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
     <style>
-        .sidebar-open {
-            transform: translateX(0);
-            opacity: 1;
-            visibility: visible;
-        }
-        .sidebar-closed {
-            transform: translateX(-100%);
-            opacity: 0;
-            visibility: hidden;
-        }
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-        .floating-element {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .testimonial-card {
-            transition: all 0.3s ease;
-        }
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, var(--orange), #ff9800);
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-        }
+        :root { --orange: #ea580c; --light-gray: #f9fafb; --dark-gray: #4b5563; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dropdown-hidden { opacity: 0; pointer-events: none; transform: translateY(-10px); }
+        .dropdown-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Mobile Menu Button -->
-    <div class="fixed top-20 left-4 z-50 md:hidden">
-        <button id="toggle-sidebar" class="bg-white p-3 rounded-lg shadow-md">
-            <i class="fas fa-bars text-gray-700"></i>
-        </button>
-    </div>
+<body class="bg-[var(--light-gray)] font-sans flex h-screen overflow-hidden">
 
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed md:relative z-40 w-64 bg-white h-screen shadow-lg transition-all sidebar-open">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold text-orange-600 mb-8">FindMyNyumba</h1>
-                
-                <nav class="space-y-2">
-                    <a href="#" class="flex items-center px-4 py-3 bg-orange-100 text-orange-700 rounded-lg font-medium">
-                        <i class="fas fa-home mr-3"></i> Overview
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-heart mr-3"></i> Saved Listings
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-comments mr-3"></i> My Inquiries
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-user mr-3"></i> Profile
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-cog mr-3"></i> Settings
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg mt-8">
-                        <i class="fas fa-sign-out-alt mr-3"></i> Logout
-                    </a>
-                </nav>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 md:ml-0">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-gray-800">Student Dashboard</h1>
-                    <p class="text-gray-600">Manage your housing search and inquiries</p>
-                </div>
-
-                <!-- Overview Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-heart text-orange-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Saved Listings</p>
-                                <p class="text-2xl font-bold">12</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Verified Bookings</p>
-                                <p class="text-2xl font-bold">3</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-comments text-purple-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Active Inquiries</p>
-                                <p class="text-2xl font-bold">5</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Saved Listings -->
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold text-gray-800">Saved Listings</h2>
-                        <a href="browse.html" class="text-orange-600 hover:text-orange-800">View All</a>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Saved Listing 1 -->
-                        <div class="border rounded-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2">
-                            <img src="https://placehold.co/300x200/e2e8f0/64748b?text=Student+Room" alt="Student Room" class="w-full h-40 object-cover">
-                            <div class="p-4">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-bold text-gray-800">Single Room</h3>
-                                    <span class="font-bold text-orange-600">ZMW 8,500</span>
-                                </div>
-                                <div class="flex flex-wrap gap-2 mb-3">
-                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Univ. of Zambia</span>
-                                    <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded verified-badge">Verified</span>
-                                    <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded">500m</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Male Only</span>
-                                    <a href="listing.html?id=1" class="text-orange-600 hover:text-orange-800 text-sm">View Details</a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Saved Listing 2 -->
-                        <div class="border rounded-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2">
-                            <img src="https://placehold.co/300x200/fef3c7/d97706?text=Student+Apartment" alt="Student Apartment" class="w-full h-40 object-cover">
-                            <div class="p-4">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-bold text-gray-800">Shared Room</h3>
-                                    <span class="font-bold text-orange-600">ZMW 12,000</span>
-                                </div>
-                                <div class="flex flex-wrap gap-2 mb-3">
-                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Cavendish Univ.</span>
-                                    <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded verified-badge">Verified</span>
-                                    <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded">800m</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Unisex</span>
-                                    <a href="listing.html?id=2" class="text-orange-600 hover:text-orange-800 text-sm">View Details</a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Saved Listing 3 -->
-                        <div class="border rounded-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2">
-                            <img src="https://placehold.co/300x200/ddd6fe/7c3aed?text=Student+House" alt="Student House" class="w-full h-40 object-cover">
-                            <div class="p-4">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-bold text-gray-800">Studio Apartment</h3>
-                                    <span class="font-bold text-orange-600">ZMW 15,000</span>
-                                </div>
-                                <div class="flex flex-wrap gap-2 mb-3">
-                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">ICT College</span>
-                                    <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded verified-badge">Verified</span>
-                                    <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded">1.2km</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Female Only</span>
-                                    <a href="listing.html?id=3" class="text-orange-600 hover:text-orange-800 text-sm">View Details</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Inquiries -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold text-gray-800">Recent Inquiries</h2>
-                        <a href="#" class="text-orange-600 hover:text-orange-800">View All</a>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Single Room - UNZA</div>
-                                        <div class="text-sm text-gray-500">University of Zambia</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Feb 15, 2024</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Confirmed</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="listing.html?id=1" class="text-orange-600 hover:text-orange-900">View</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Shared Room - CUZ</div>
-                                        <div class="text-sm text-gray-500">Cavendish University Zambia</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Feb 12, 2024</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="listing.html?id=2" class="text-orange-600 hover:text-orange-900">View</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Studio - ICTC</div>
-                                        <div class="text-sm text-gray-500">Information and Communication Technology College</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Feb 10, 2024</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="listing.html?id=3" class="text-orange-600 hover:text-orange-900">View</a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Testimonials Section -->
-    <section class="py-16 bg-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800">What Our Users Say</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Real experiences from students who found their perfect home</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-orange-600">JS</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">John S.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"FindmyNyumba helped me find a safe, verified room just 300m from campus. The verification process gave me peace of mind!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-blue-600">ME</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Mary E.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"As a landlord, I love how easy it is to post properties and connect with verified students. The platform is trustworthy!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-green-600">TK</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Thomas K.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"The search filters saved me so much time. Found my ideal room in just 2 days with no fake listings!"</p>
-                </div>
-            </div>
+    <aside class="w-64 bg-white shadow-xl flex flex-col z-20">
+        <div class="p-6">
+            <h1 class="text-2xl font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></h1>
         </div>
-    </section>
+        <nav class="flex-1 space-y-1 mt-4">
+            <button id="nav-overview" onclick="switchTab('overview')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-home w-6"></i> Overview
+            </button>
+            <button id="nav-saved" onclick="switchTab('saved')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-heart w-6"></i> Saved Rooms
+            </button>
+            <button id="nav-messages" onclick="switchTab('messages')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-comments w-6"></i> Messages
+            </button>
+            <button id="nav-profile" onclick="switchTab('profile')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-user w-6"></i> Profile
+            </button>
+            <button id="nav-settings" onclick="switchTab('settings')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-cog w-6"></i> Settings
+            </button>
+        </nav>
+        <div class="p-4 border-t border-gray-100">
+            <button onclick="logout()" class="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 font-bold rounded-xl transition">
+                <i class="fas fa-sign-out-alt w-6"></i> Logout
+            </button>
+        </div>
+    </aside>
 
-    <script>
-        // Toggle sidebar on mobile
-        document.getElementById('toggle-sidebar').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('sidebar-open');
-            sidebar.classList.toggle('sidebar-closed');
-        });
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <header class="flex justify-between items-center p-8 bg-white border-b border-gray-100 shrink-0 shadow-sm z-10">
+            <h2 id="page-title" class="text-2xl font-black text-black uppercase tracking-tight">Overview</h2>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p id="header-name" class="font-black text-black text-sm">Joshua</p>
+                    <p class="text-xs text-[var(--dark-gray)] font-bold">Student Account</p>
+                </div>
+                <img id="header-avatar" src="https://ui-avatars.com/api/?name=JS&background=ea580c&color=fff" class="w-10 h-10 rounded-full shadow-md object-cover border-2 border-white cursor-pointer" onclick="switchTab('profile')" alt="Profile">
+            </div>
+        </header>
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const toggleButton = document.getElementById('toggle-sidebar');
+        <div class="flex-1 overflow-y-auto p-8 relative">
             
-            if (window.innerWidth < 768) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnToggle = toggleButton.contains(event.target);
+                        <div id="overview-section" class="dashboard-section">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Saved Rooms</p>
+                            <h3 id="stat-saved" class="text-4xl font-black text-black"><i class="fas fa-spinner fa-spin text-lg text-gray-300"></i></h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl"><i class="fas fa-heart"></i></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Active Messages</p>
+                            <h3 id="stat-messages" class="text-4xl font-black text-[#ea580c]"><i class="fas fa-spinner fa-spin text-lg text-orange-300"></i></h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl"><i class="fas fa-envelope"></i></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Recent Searches</p>
+                            <h3 class="text-4xl font-black text-black">12</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center text-xl"><i class="fas fa-search"></i></div>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-black mb-4 text-black">Find a Room</h3>
+                <div class="mb-8 flex space-x-3 mt-4">
+                    <input type="text" id="search-input" placeholder="Search by location, price, or keyword..." class="flex-1 p-4 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-[#ea580c] font-bold text-sm text-gray-800">
+                    <button onclick="window.searchProperties()" class="bg-[#ea580c] text-white px-8 py-4 rounded-xl font-black shadow-md hover:bg-black transition flex items-center justify-center">
+                        <i class="fas fa-search mr-2"></i> Find
+                    </button>
+                </div>
                 
-                if (!isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('sidebar-open')) {
-                    sidebar.classList.remove('sidebar-open');
-                    sidebar.classList.add('sidebar-closed');
-                }
-            }
-        });
-
-        // Update active nav item
-        document.querySelectorAll('nav a').forEach(link => {
-            link.addEventListener('click', function() {
-                document.querySelectorAll('nav a').forEach(a => {
-                    a.classList.remove('bg-orange-100', 'text-orange-700');
-                    a.classList.add('text-gray-700');
-                });
+                <div id="search-results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 hidden"></div>
                 
-                this.classList.remove('text-gray-700');
-                this.classList.add('bg-orange-100', 'text-orange-700');
-            });
-        });
+                <h3 class="text-xl font-black mb-4 text-black mt-8">Recent Listings</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="recent-listings-container">
+                    </div>
+            </div>            <div id="saved-section" class="dashboard-section hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                    <h2 class="text-xl font-black mb-6 text-black">Saved Properties</h2>
+                    
+                    <div id="saved-loading" class="text-center py-12 hidden">
+                        <i class="fas fa-circle-notch fa-spin text-4xl text-[#ea580c] mb-4"></i>
+                        <p class="text-gray-400 font-bold">Loading your saved rooms...</p>
+                    </div>
 
-        // Handle window resize to adjust sidebar visibility
-        window.addEventListener('resize', function() {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth >= 768) {
-                sidebar.classList.add('sidebar-open');
-                sidebar.classList.remove('sidebar-closed');
-            } else {
-                sidebar.classList.remove('sidebar-open');
-                sidebar.classList.add('sidebar-closed');
-            }
-        });
+                    <div id="saved-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    
+                    <div id="saved-empty" class="text-center py-12 hidden">
+                        <i class="fas fa-heart text-gray-200 text-5xl mb-4"></i>
+                        <p class="text-gray-400 font-bold mb-4">You haven't saved any rooms yet.</p>
+                        <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow-md hover:bg-black transition inline-block">Browse Properties</a>
+                    </div>
+                </div>
+            </div>
+            <div id="messages-section" class="dashboard-section hidden h-[calc(100vh-12rem)]">
+                <div class="flex h-full bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div class="w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col">
+                        <div class="p-6 border-b border-gray-200 bg-white">
+                            <h3 class="font-black text-xl text-black">Conversations</h3>
+                        </div>
+                        <div id="conversation-list" class="flex-1 overflow-y-auto">
+                            </div>
+                    </div>
+                    
+                    <div class="w-2/3 flex flex-col bg-white relative">
+                        <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-400">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4"><i class="fas fa-comments text-3xl text-gray-300"></i></div>
+                            <p class="font-bold">Select a conversation to start messaging</p>
+                        </div>
 
-        // Initialize sidebar state based on screen size
-        window.addEventListener('load', function() {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('sidebar-open');
-                sidebar.classList.add('sidebar-closed');
-            }
-        });
-    </script>
-    <script src="app.js"></script>
+                        <div id="chat-header" class="p-6 border-b border-gray-200 bg-white hidden items-center justify-between relative">
+                            <div>
+                                <h4 id="chat-landlord-name" class="font-black text-xl text-black">Landlord Name</h4>
+                                <p id="chat-property-ref" class="text-sm font-bold text-[#ea580c] mt-1">Property Reference</p>
+                            </div>
+                            <div class="flex space-x-2 relative">
+                                <button onclick="startInAppCall('Mr. Phiri')" class="w-10 h-10 rounded-full bg-gray-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition shadow-sm"><i class="fas fa-phone-alt"></i></button>
+                                
+                                <button onclick="window.toggleThreeDotMenu(event)" class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition shadow-sm"><i class="fas fa-ellipsis-v"></i></button>
+                                
+                                <div id="chat-dropdown" class="absolute right-0 top-12 w-48 bg-white border border-gray-100 rounded-xl shadow-xl transition-all duration-200 dropdown-hidden z-50 overflow-hidden">
+                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-eye w-5 text-gray-400"></i> View property</button>
+                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-address-book w-5 text-gray-400"></i> Contact details</button>
+                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 transition"><i class="fas fa-flag w-5 text-red-400"></i> Report listing</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/30 hidden">
+                            </div>
+
+                        <div id="chat-input-area" class="p-4 bg-white border-t border-gray-200 hidden">
+                            <form id="chat-form" class="flex items-center space-x-2 relative w-full" onsubmit="window.sendStudentMessage(event)">
+                                <button type="button" onclick="document.getElementById('hidden-chat-file').click()" class="w-12 h-12 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#ea580c] flex items-center justify-center transition"><i class="fas fa-paperclip"></i></button>
+                                
+                                <input type="text" id="chat-input" required class="flex-1 bg-gray-50 p-4 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-medium" placeholder="Type a message..." autocomplete="off">
+                                <button type="submit" class="bg-[#ea580c] text-white w-14 h-12 rounded-xl flex items-center justify-center hover:bg-black transition shadow-md"><i class="fas fa-paper-plane"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="profile-section" class="dashboard-section hidden">
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 max-w-2xl shadow-sm">
+                    <div class="flex items-center space-x-6 mb-8">
+                        <div class="relative group cursor-pointer" onclick="document.getElementById('profile-pic-upload').click()">
+                            <img id="profile-avatar-preview" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-full object-cover shadow-md border-4 border-white group-hover:opacity-75 transition" alt="Profile Avatar">
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <i class="fas fa-camera text-white text-xl drop-shadow-md"></i>
+                            </div>
+                            <input type="file" id="profile-pic-upload" class="hidden" accept="image/*" onchange="window.handleProfilePicUpdate(event)">
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-black">Profile Details</h3>
+                            <p class="text-gray-400 text-sm font-bold">Click your avatar to upload a new photo</p>
+                        </div>
+                    </div>
+                    <form onsubmit="window.saveProfile(event)" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Full Name</label>
+                                <input type="text" id="profile-name" required class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Phone Number</label>
+                                <input type="tel" id="profile-phone" class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black" placeholder="+260...">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Email Address</label>
+                            <input type="email" id="profile-email" required class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black">
+                        </div>
+                        <button type="submit" id="profile-save-btn" class="bg-[#ea580c] text-white px-8 py-4 rounded-xl font-black hover:bg-black transition shadow-lg w-full md:w-auto">SAVE CHANGES</button>
+                    </form>
+                </div>
+            </div>
+            <div id="settings-section" class="dashboard-section hidden">
+                <div class="max-w-3xl space-y-6">
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                        <h4 class="text-lg font-black text-black mb-4 border-b border-gray-100 pb-2"><i class="fas fa-bell text-[#ea580c] mr-2"></i> Notification Preferences</h4>
+                        <div class="space-y-4">
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <span class="font-bold text-gray-700">Email alerts for new properties</span>
+                                <input type="checkbox" id="pref-email" onchange="window.savePreferences()" class="form-checkbox h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
+                            </label>
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <span class="font-bold text-gray-700">SMS alerts for landlord messages</span>
+                                <input type="checkbox" id="pref-sms" onchange="window.savePreferences()" class="form-checkbox h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                        <h4 class="text-lg font-black text-black mb-4 border-b border-gray-100 pb-2"><i class="fas fa-shield-alt text-[#ea580c] mr-2"></i> Account Security</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Change Password</label>
+                                <form onsubmit="window.updatePassword(event)" class="space-y-3">
+                                    <input type="password" id="current-password" required placeholder="Current password" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium">
+                                    <div class="flex space-x-2">
+                                        <input type="password" id="new-password" required placeholder="New password" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium">
+                                        <button type="submit" id="update-pwd-btn" class="bg-black text-white px-8 rounded-xl font-bold hover:bg-gray-800 transition">Update</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="pt-6 mt-6 border-t border-red-100">
+                                <button onclick="window.deleteAccount()" class="text-red-500 font-bold hover:text-red-700 transition flex items-center p-2 rounded-lg hover:bg-red-50"><i class="fas fa-trash-alt mr-2"></i> Delete Account Permanently</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div></div>
+    </main>
+
+    <script src="student-dashboard.js?v=639094871086827883"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

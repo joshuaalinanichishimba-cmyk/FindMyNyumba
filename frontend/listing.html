@@ -3,440 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Details - FindMyNyumba Zambian Housing</title>
-    <!-- Tailwind CSS via CDN -->
+    <title>FindMyNyumba - Property Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        .verified-badge {
-            background-color: var(--orange);
-            color: white;
-        }
-        .mobile-money-badge {
-            background-color: var(--light-orange);
-            color: white;
-        }
-        .gallery-image {
-            transition: opacity 0.3s ease;
-        }
-        .gallery-thumbnail {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .gallery-thumbnail.active {
-            border: 2px solid var(--orange);
-        }
-        .sticky-bottom-cta {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 40;
-        }
-        .floating-element {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .testimonial-card {
-            transition: all 0.3s ease;
-        }
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, var(--orange), #ff9800);
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>#map { height: 350px; border-radius: 1.5rem; z-index: 1; border: 1px solid #e5e7eb; }</style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="index.html" class="flex-shrink-0 flex items-center">
-                        <span class="text-orange-500 font-bold text-xl">FindMyNyumba</span>
-                    </a>
-                </div>
-                
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="browse.html" class="text-gray-700 hover:text-orange-600">Browse</a>
-                    <a href="index.html#how-it-works" class="text-gray-700 hover:text-orange-600">How It Works</a>
-                    <a href="login.html" class="text-gray-700 hover:text-orange-600">Login</a>
-                    <a href="register.html" class="text-gray-700 hover:text-orange-600">Register</a>
-                    <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg">Post Property</button>
-                </div>
-                
-                <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-orange-600">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="browse.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-100">Browse</a>
-                <a href="index.html#how-it-works" class="block px-3 py-2 text-gray-700 hover:bg-gray-100">How It Works</a>
-                <a href="login.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-100">Login</a>
-                <a href="register.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-100">Register</a>
-                <button class="w-full text-left bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg mt-2">Post Property</button>
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="browse.html" class="flex items-center gap-2"><img src="logo.png" alt="Logo" class="h-10 w-auto object-contain" onerror="this.style.display='none'"><span class="text-2xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></span></a>
+            <div class="space-x-6 font-bold text-gray-600">
+                <a href="browse.html" class="hover:text-[#ea580c]">Browse</a>
+                <a href="dashboard-student.html" class="hover:text-[#ea580c]">Dashboard</a>
             </div>
         </div>
     </nav>
 
-    <!-- Property Details Content -->
-    <div class="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-        <!-- Image Gallery -->
-        <div class="mb-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="lg:col-span-2">
-                    <div id="main-image" class="relative">
-                        <img src="https://placehold.co/800x500/e2e8f0/64748b?text=Main+Room+Image" alt="Main Room View" class="w-full h-96 object-cover rounded-xl">
-                        <div class="absolute top-4 right-4">
-                            <span class="bg-orange-100 text-orange-800 text-sm px-3 py-1 rounded-full verified-badge flex items-center">
-                                <i class="fas fa-check-circle mr-1"></i> Verified
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-2">
-                        <img src="https://placehold.co/300x200/fef3c7/d97706?text=Kitchen" alt="Kitchen" class="w-full h-32 object-cover rounded-lg gallery-thumbnail active">
-                        <img src="https://placehold.co/300x200/ddd6fe/7c3aed?text=Bathroom" alt="Bathroom" class="w-full h-32 object-cover rounded-lg gallery-thumbnail">
-                        <img src="https://placehold.co/300x200/dcfce7/16a34a?text=Balcony" alt="Balcony" class="w-full h-32 object-cover rounded-lg gallery-thumbnail">
-                        <img src="https://placehold.co/300x200/fed7d7/ef4444?text=Dormitory" alt="Dormitory" class="w-full h-32 object-cover rounded-lg gallery-thumbnail">
-                    </div>
-                    
-                    <div class="bg-white p-4 rounded-xl shadow-sm">
-                        <h3 class="font-bold text-lg mb-2">Trust Indicators</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center">
-                                <i class="fas fa-id-card text-orange-500 mr-2"></i>
-                                <span>ID Verified</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-phone text-orange-500 mr-2"></i>
-                                <span>Phone Verified</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-mobile-alt text-orange-500 mr-2"></i>
-                                <span>Mobile Money Accepted</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Property Info -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
-                <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
-                    <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="relative bg-gray-200 aspect-video rounded-3xl overflow-hidden shadow-inner flex items-center justify-center">
+                    <img id="main-img" src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200" class="w-full h-full object-cover">
+<button onclick="toggleSave()" id="save-btn" class="absolute top-6 right-6 bg-white/95 backdrop-blur-sm w-12 h-12 rounded-full shadow-md flex items-center justify-center hover:shadow-lg transition-all duration-300 z-10 transform hover:scale-110 group border border-gray-100" title="Save to Shortlist">
+    <i id="save-icon" class="far fa-heart text-2xl text-gray-400 group-hover:text-red-500 transition-colors"></i>
+</button>
+                </div>
+                
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    <h1 id="prop-title" class="text-4xl font-black text-gray-900 mb-2">Loading Property...</h1>
+                    <p id="prop-location" class="text-gray-500 font-medium flex items-center mb-6">
+                        <i class="fas fa-map-marker-alt mr-2 text-[#ea580c]"></i> --
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-gray-100 mb-6 font-bold">
+                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Type</p><p id="prop-type">--</p></div>
+                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Gender</p><p id="prop-gender">Mixed</p></div>
+                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Status</p><p class="text-green-600">Verified</p></div>
+                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Distance</p><p>~850m</p></div>
+                    </div>
+                    <h2 class="text-xl font-black mb-4">About this Nyumba</h2>
+                    <p id="prop-description" class="text-gray-600 leading-relaxed italic">No description available.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-black">Student Reviews</h2>
+                        <button onclick="document.getElementById('review-form-container').classList.toggle('hidden')" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold">Write a Review</button>
+                    </div>
+
+                    <div id="review-form-container" class="hidden mt-6 p-6 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner mb-8">
+                        <h3 class="font-black text-gray-900 mb-4">Submit Your Review</h3>
+                        <div class="flex gap-2 text-2xl text-yellow-400 mb-4" id="star-input">
+                            <i class="fas fa-star cursor-pointer" onclick="setRating(1)"></i>
+                            <i class="fas fa-star cursor-pointer" onclick="setRating(2)"></i>
+                            <i class="fas fa-star cursor-pointer" onclick="setRating(3)"></i>
+                            <i class="fas fa-star cursor-pointer" onclick="setRating(4)"></i>
+                            <i class="fas fa-star cursor-pointer" onclick="setRating(5)"></i>
+                        </div>
+                        <input type="hidden" id="rev-rating-val" value="5">
+                        <input type="text" id="rev-name" placeholder="Your Name" class="w-full p-3 mb-3 rounded-xl border border-gray-200 outline-none">
+                        <textarea id="rev-comment" placeholder="How was your stay?" class="w-full p-3 mb-3 rounded-xl border border-gray-200 outline-none" rows="3"></textarea>
+                        <button onclick="handleReviewSubmit()" class="w-full md:w-auto bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-orange-600 transition-all">Post Review</button>
+                    </div>
+
+                    <div id="reviews-container" class="space-y-4">
+                        <p class="text-gray-400 italic">Loading reviews...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 sticky top-28">
+                    <div class="mb-6">
+                        <p class="text-xs font-black text-gray-400 uppercase">Monthly Price</p>
+                        <div class="flex items-baseline">
+                            <span class="text-4xl font-black text-[#ea580c]">ZMW</span>
+                            <span id="prop-price" class="text-4xl font-black text-[#ea580c] ml-2">--</span>
+                        </div>
+                                        </div>
+                    
+                    <div class="flex items-center gap-4 mb-6 p-4 bg-orange-50/50 rounded-2xl border border-orange-100/50">
+                        <img src="https://ui-avatars.com/api/?name=Verified+Host&background=ea580c&color=fff&rounded=true&bold=true" alt="Landlord Avatar" class="w-12 h-12 rounded-full shadow-sm ring-2 ring-white">
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-800 mb-2">Single Room - University of Zambia</h1>
-                            <div class="flex flex-wrap items-center gap-2 mb-3">
-                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Univ. of Zambia</span>
-                                <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm verified-badge">Verified</span>
-                                <span class="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">500m from campus</span>
-                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">Male Only</span>
-                            </div>
-                        </div>
-                        <div class="mt-2 md:mt-0">
-                            <div class="text-3xl font-bold text-orange-600">ZMW 8,500</div>
-                            <div class="text-gray-600">per month</div>
+                            <p class="font-black text-gray-900 text-sm flex items-center">
+                                Verified Host <i class="fas fa-check-circle text-blue-500 ml-1.5 text-xs" title="Identity Verified"></i>
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1 font-bold">
+                                <i class="fas fa-bolt text-yellow-500 mr-1"></i> Responds in ~1 hr
+                            </p>
                         </div>
                     </div>
                     
-                    <div class="mb-6">
-                        <h2 class="text-xl font-semibold mb-3">Description</h2>
-                        <p class="text-gray-700 leading-relaxed">
-                            Comfortable single room located just 500 meters from the University of Nairobi campus. 
-                            The room features a single bed, study desk, chair, and wardrobe. Shared kitchen and bathroom facilities 
-                            with other residents. Ideal for students who prioritize convenience and proximity to campus.
-                        </p>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <h2 class="text-xl font-semibold mb-3">Amenities</h2>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            <div class="flex items-center">
-                                <i class="fas fa-wifi text-orange-500 mr-2"></i>
-                                <span>WiFi</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-bath text-orange-500 mr-2"></i>
-                                <span>Shared Bathroom</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-utensils text-orange-500 mr-2"></i>
-                                <span>Shared Kitchen</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-lock text-orange-500 mr-2"></i>
-                                <span>Security Lock</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-lightbulb text-orange-500 mr-2"></i>
-                                <span>Electricity</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-tint text-orange-500 mr-2"></i>
-                                <span>Water</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <h2 class="text-xl font-semibold mb-3">Location</h2>
-                        <div class="bg-gray-200 h-48 rounded-xl flex items-center justify-center">
-                            <div class="text-center">
-                                <i class="fas fa-map-marked-alt text-4xl text-gray-500 mb-2"></i>
-                                <p class="text-gray-600">Map showing property location</p>
-                            </div>
-                        </div>
-                        <p class="mt-2 text-gray-700">Located on Hillside Road, just 500 meters from University of Zambia main gate.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Sidebar -->
-            <div class="lg:col-span-1">
-                <div class="bg-white p-6 rounded-xl shadow-sm sticky top-24">
-                    <div class="mb-6">
-                        <h2 class="text-xl font-semibold mb-4">Landlord Information</h2>
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-user text-gray-600"></i>
-                            </div>
-                            <div>
-                                <div class="font-medium">John Kamau</div>
-                                <div class="text-sm text-gray-600">Verified Landlord</div>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-3">
-                            <button id="contact-landlord" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium flex items-center justify-center transform transition duration-500 hover:scale-105">
-                                <i class="fas fa-phone-alt mr-2"></i> Contact Landlord
-                            </button>
-                            
-                            <button id="save-listing" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-medium flex items-center justify-center transform transition duration-500 hover:scale-105">
-                                <i class="far fa-bookmark mr-2"></i> Save Listing
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t pt-4">
-                        <a href="#" class="text-red-600 hover:text-red-800 flex items-center">
-                            <i class="fas fa-flag mr-2"></i> Report Listing
-                        </a>
-                    </div>
+                    <button id="msg-landlord-btn" class="w-full bg-[#ea580c] text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-orange-600 transition-all mb-6">
+                        <i class="fas fa-paper-plane mr-2"></i> Message Landlord
+                    </button>
+                    <div id="map"></div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Testimonials Section -->
-    <section class="py-16 bg-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800">What Our Users Say</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Real experiences from students who found their perfect home</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-orange-600">JS</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">John S.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"FindmyNyumba helped me find a safe, verified room just 300m from campus. The verification process gave me peace of mind!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-blue-600">ME</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Mary E.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"As a landlord, I love how easy it is to post properties and connect with verified students. The platform is trustworthy!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-green-600">TK</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Thomas K.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"The search filters saved me so much time. Found my ideal room in just 2 days with no fake listings!"</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sticky Bottom CTA for Mobile -->
-    <div class="sticky-bottom-cta bg-white border-t md:hidden">
-        <div class="max-w-7xl mx-auto px-4 py-3">
-            <div class="flex gap-3">
-                <button id="mobile-contact-landlord" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transform transition duration-500 hover:scale-105">
-                    <i class="fas fa-phone-alt mr-2"></i> Contact Landlord
-                </button>
-                <button id="mobile-save-listing" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-lg">
-                    <i class="far fa-bookmark"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
+        let listingMap = null;
+        let currentRatingValue = 5;
 
-        // Gallery thumbnail selection
-        const thumbnails = document.querySelectorAll('.gallery-thumbnail');
-        thumbnails.forEach(thumb => {
-            thumb.addEventListener('click', function() {
-                // Remove active class from all thumbnails
-                thumbnails.forEach(t => t.classList.remove('active'));
-                // Add active class to clicked thumbnail
-                this.classList.add('active');
+                function toggleSave() {
+            const propId = new URLSearchParams(window.location.search).get('id');
+            if (!propId) return;
+            
+            let saved = JSON.parse(localStorage.getItem('saved_nyumbas') || '[]');
+            const icon = document.getElementById('save-icon');
+            
+            if (saved.includes(propId)) {
+                // Remove from saved
+                saved = saved.filter(id => id !== propId);
+                icon.className = 'far fa-heart text-2xl text-gray-400 group-hover:text-red-500 transition-colors';
+            } else {
+                // Add to saved
+                saved.push(propId);
+                icon.className = 'fas fa-heart text-2xl text-red-500 transition-colors transform scale-110';
+            }
+            
+            localStorage.setItem('saved_nyumbas', JSON.stringify(saved));
+        }
+
+        async function initPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const propId = urlParams.get('id');
+            if (!propId) return;
+
+            try {
+                // 1. Fetch Backend Data
+                const [pRes, rRes] = await Promise.all([
+                    fetch(`http://127.0.0.1:8000/api/v1/landlord/properties/${propId}`),
+                    Promise.resolve(new Response(JSON.stringify([])))
+                ]);
+
+                const p = await pRes.json();
+                const reviews = await rRes.json();
+
+                // 2. Populate UI
+                document.getElementById('prop-title').innerText = p.title || "Premium Student Room";
+                document.getElementById('prop-price').innerText = parseFloat(p.price || 0).toLocaleString();
+                document.getElementById('prop-location').innerText = p.location || "Lusaka, Zambia";
+                document.getElementById('prop-description').innerText = p.description || "Beautiful verified student accommodation close to campus. Highly secure with great amenities. Contact the landlord for viewing arrangements.";
+                document.getElementById('prop-type').innerText = p.title ? p.title.split(' ')[0] : "Room";
                 
-                // In a real implementation, this would change the main image
-                // For now, we'll just show an alert
-                // document.getElementById('main-image').src = this.src;
+                // 2.5 Inject the actual database image!
+                const mainImg = document.getElementById('main-img');
+                if (mainImg) {
+                    mainImg.src = p.image_url || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200";
+                    mainImg.alt = p.title || "Property Image";
+                }
+
+                // 3. Render Reviews
+                const revCont = document.getElementById('reviews-container');
+                revCont.innerHTML = reviews.length > 0 
+                    ? reviews.map(r => `<div class="p-4 bg-gray-50 rounded-2xl"><p class="font-bold text-gray-900">${r.student_name}</p><p class="text-gray-600 text-sm">${r.comment}</p></div>`).join('')
+                    : '<p class="text-gray-400 italic">No reviews yet. Be the first!</p>';
+
+                // 4. Map Logic
+                if (!listingMap) {
+                    listingMap = L.map('map').setView([-15.3875, 28.3228], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(listingMap);
+                    L.marker([-15.3875, 28.3228]).addTo(listingMap).bindPopup(p.title);
+                }
+
+                // 5. Message Landlord Logic
+                document.getElementById('msg-landlord-btn').onclick = () => {
+                    window.location.href = `contact-landlord.html?id=${propId}`;
+                };
+
+            } catch (err) {
+                console.error("Failed to load page:", err);
+            }
+        }
+
+        function setRating(v) {
+            currentRatingValue = v;
+            document.getElementById('rev-rating-val').value = v;
+            const stars = document.querySelectorAll('#star-input i');
+            stars.forEach((s, i) => {
+                s.style.color = (i < v) ? '#facc15' : '#d1d5db';
             });
-        });
+        }
 
-        // Contact landlord button functionality
-        document.getElementById('contact-landlord').addEventListener('click', function() {
-            alert('Contacting landlord...');
-            // In a real implementation, this would initiate a call or message
-        });
-
-        document.getElementById('mobile-contact-landlord').addEventListener('click', function() {
-            alert('Contacting landlord...');
-            // In a real implementation, this would initiate a call or message
-        });
-
-        // Save listing functionality
-        document.getElementById('save-listing').addEventListener('click', function() {
-            const icon = this.querySelector('i');
-            if (icon.classList.contains('far')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas', 'text-orange-600');
-                this.innerHTML = '<i class="fas fa-bookmark text-orange-600 mr-2"></i> Saved';
-                this.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800');
-                this.classList.add('bg-orange-100', 'hover:bg-orange-200', 'text-orange-800');
-            } else {
-                icon.classList.remove('fas', 'text-orange-600');
-                icon.classList.add('far');
-                this.innerHTML = '<i class="far fa-bookmark mr-2"></i> Save Listing';
-                this.classList.remove('bg-orange-100', 'hover:bg-orange-200', 'text-orange-800');
-                this.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800');
-            }
-        });
-
-        document.getElementById('mobile-save-listing').addEventListener('click', function() {
-            const saveBtn = document.getElementById('save-listing');
-            const icon = saveBtn.querySelector('i');
-            const mobileIcon = this.querySelector('i');
+        async function handleReviewSubmit() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const propId = urlParams.get('id');
+            const name = document.getElementById('rev-name').value;
+            const comment = document.getElementById('rev-comment').value;
+            const rating = document.getElementById('rev-rating-val').value;
             
-            if (icon.classList.contains('far')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas', 'text-orange-600');
-                saveBtn.innerHTML = '<i class="fas fa-bookmark text-orange-600 mr-2"></i> Saved';
-                saveBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800');
-                saveBtn.classList.add('bg-orange-100', 'hover:bg-orange-200', 'text-orange-800');
-                
-                mobileIcon.classList.remove('far');
-                mobileIcon.classList.add('fas', 'text-orange-600');
-            } else {
-                icon.classList.remove('fas', 'text-orange-600');
-                icon.classList.add('far');
-                saveBtn.innerHTML = '<i class="far fa-bookmark mr-2"></i> Save Listing';
-                saveBtn.classList.remove('bg-orange-100', 'hover:bg-orange-200', 'text-orange-800');
-                saveBtn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800');
-                
-                mobileIcon.classList.remove('fas', 'text-orange-600');
-                mobileIcon.classList.add('far');
-            }
-        });
+            if(!name || !comment) return alert("Please fill in all fields!");
 
-        // Initialize saved state from localStorage
-        window.addEventListener('load', function() {
-            const savedListings = JSON.parse(localStorage.getItem('savedListings')) || [];
-            const listingId = new URLSearchParams(window.location.search).get('id') || '1'; // Default to '1' for demo
-            
-            if (savedListings.includes(listingId)) {
-                const saveBtn = document.getElementById('save-listing');
-                const mobileSaveBtn = document.getElementById('mobile-save-listing');
-                const icon = saveBtn.querySelector('i');
-                const mobileIcon = mobileSaveBtn.querySelector('i');
-                
-                icon.classList.remove('far');
-                icon.classList.add('fas', 'text-orange-600');
-                saveBtn.innerHTML = '<i class="fas fa-bookmark text-orange-600 mr-2"></i> Saved';
-                saveBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-800');
-                saveBtn.classList.add('bg-orange-100', 'hover:bg-orange-200', 'text-orange-800');
-                
-                mobileIcon.classList.remove('far');
-                mobileIcon.classList.add('fas', 'text-orange-600');
-            }
-        });
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/v1/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ property_id: parseInt(propId), student_name: name, rating: parseInt(rating), comment: comment })
+                });
+                if (res.ok) { alert("Review posted!"); location.reload(); }
+            } catch (err) { console.error("Review failed:", err); }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
-    <script src="app.js"></script>
+    <script>
+        // This function extends your existing property fetch logic
+        function populateSharedDetails(p) {
+            const container = document.getElementById('shared-housing-info');
+            const sharedTypes = ['shared_room', 'bedspace', 'squatting_space'];
+            
+            // Only show the card if it's a shared housing type
+            if (sharedTypes.includes(p.property_type?.toLowerCase()) || p.rent_split_amount > 0) {
+                container.classList.remove('hidden');
+                
+                document.getElementById('display-gender').textContent = p.gender_preference || "Unisex";
+                document.getElementById('display-occupancy').textContent = `${p.number_of_current_occupants || 0} / ${p.total_capacity || 0} Students`;
+                document.getElementById('display-split').textContent = `ZMW ${p.rent_split_amount || 0}/mo`;
+                
+                if (p.quiet_study_environment) document.getElementById('badge-study').classList.remove('hidden');
+                if (p.furnished) document.getElementById('badge-furnished').classList.remove('hidden');
+            }
+        }
+    </script>
 </body>
 </html>
+
+
+
+

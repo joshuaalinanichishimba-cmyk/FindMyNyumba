@@ -1,16 +1,20 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
+import os
 
 class Settings(BaseSettings):
+    DEBUG: bool = True
     PROJECT_NAME: str = "FindMyNyumba"
-    SECRET_KEY: str = "SUPER_SECRET_KEY_123_DO_NOT_USE_IN_PRODUCTION"
+    API_V1_STR: str = "/api/v1"
+    SECRET_KEY: str = "your-super-secret-key-here"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    DATABASE_URL: str = "sqlite:///./test.db"
-    DEBUG: bool = False  # Add this to handle the 'debug' input
+    
+    # We provide EVERY possible name the app might ask for
+    SQLALCHEMY_DATABASE_URL: str = "sqlite:///./findmynyumba.db"
+    DATABASE_URL: str = "sqlite:///./findmynyumba.db"
 
     class Config:
-        env_file = ".env"
-        extra = "ignore"  # This tells Pydantic: "If you see extra stuff, just ignore it"
+        case_sensitive = True
 
 settings = Settings()
+print("--- [SYSTEM CHECK]: Settings Loaded with DATABASE_URL! ---")

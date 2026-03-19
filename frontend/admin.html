@@ -3,409 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - FindMyNyumba Zambian Housing</title>
-    <!-- Tailwind CSS via CDN -->
+    <title>FindMyNyumba - Master Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
     <style>
-        .sidebar-open {
-            transform: translateX(0);
-            opacity: 1;
-            visibility: visible;
-        }
-        .sidebar-closed {
-            transform: translateX(-100%);
-            opacity: 0;
-            visibility: hidden;
-        }
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-        .floating-element {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .testimonial-card {
-            transition: all 0.3s ease;
-        }
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, var(--orange), #ff9800);
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-        }
+        .hidden-view { display: none !important; }
+        .sidebar-active { background-color: #ea580c; color: white; font-weight: bold; border-radius: 0.5rem; }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Mobile Menu Button -->
-    <div class="fixed top-20 left-4 z-50 md:hidden">
-        <button id="toggle-sidebar" class="bg-white p-3 rounded-lg shadow-md">
-            <i class="fas fa-bars text-gray-700"></i>
-        </button>
-    </div>
+<body class="bg-gray-50 flex h-screen overflow-hidden font-sans">
+    
+    <aside class="w-64 bg-white border-r shadow-lg flex flex-col h-full z-20">
+        <div class="p-6 border-b text-center">
+            <h1 class="text-2xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></h1>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Admin Control v1.0</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <button onclick="switchView('dashboard')" id="btn-dashboard" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">📊 Dashboard</button>
+            <button onclick="switchView('users')" id="btn-users" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">👥 Users</button>
+            <button onclick="switchView('properties')" id="btn-properties" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">🏠 Properties</button>
+            <button onclick="switchView('reports')" id="btn-reports" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">🚩 Reports</button>
+            <button onclick="switchView('announcements')" id="btn-announcements" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">📣 Announcements</button>
+            <button onclick="switchView('verifications')" id="btn-verifications" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">🛡️ Verifications</button>
+            <button onclick="switchView('reviews')" id="btn-reviews" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">⭐ Reviews</button>
+            <button onclick="switchView('messages')" id="btn-messages" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">💬 Messages</button>
+            <button onclick="switchView('analytics')" id="btn-analytics" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">📈 Analytics</button>
+            <button onclick="switchView('settings')" id="btn-settings" class="sidebar-btn w-full text-left p-3 text-gray-600 rounded-md text-sm transition">⚙️ Settings</button>
+        </nav>
+        <div class="p-4 border-t">
+            <button onclick="logout()" class="w-full text-left p-3 text-red-600 font-bold hover:bg-red-50 rounded">🚪 Logout</button>
+        </div>
+    </aside>
 
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed md:relative z-40 w-64 bg-white h-screen shadow-lg transition-all sidebar-open">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold text-orange-600 mb-8">FindMyNyumba Admin</h1>
-                
-                <nav class="space-y-2">
-                    <a href="#" class="flex items-center px-4 py-3 bg-orange-100 text-orange-700 rounded-lg font-medium">
-                        <i class="fas fa-home mr-3"></i> Dashboard
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-home mr-3"></i> Manage Listings
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-users mr-3"></i> Manage Users
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-user-shield mr-3"></i> Verify Landlords
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-exclamation-triangle mr-3"></i> Reports
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fas fa-cog mr-3"></i> Settings
-                    </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg mt-8">
-                        <i class="fas fa-sign-out-alt mr-3"></i> Logout
-                    </a>
-                </nav>
+    <main class="flex-1 overflow-y-auto p-8 bg-gray-50">
+        
+        <div id="view-dashboard" class="admin-view">
+            <h2 class="text-3xl font-bold mb-8">Platform Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-[#ea580c]"><h3 class="text-gray-400 text-xs font-bold">TOTAL USERS</h3><div id="stat-total-users" class="text-3xl font-black mt-2">...</div></div>
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-blue-600"><h3 class="text-gray-400 text-xs font-bold">TOTAL PROPERTIES</h3><div id="stat-total-props" class="text-3xl font-black mt-2">...</div></div>
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-500"><h3 class="text-gray-400 text-xs font-bold">NEW USERS TODAY</h3><div id="stat-today-users" class="text-3xl font-black mt-2 text-green-600">0</div></div>
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-purple-500"><h3 class="text-gray-400 text-xs font-bold">NEW PROPERTIES</h3><div id="stat-today-props" class="text-3xl font-black mt-2 text-purple-600">0</div></div>
             </div>
-        </aside>
+        </div>
 
-        <!-- Main Content -->
-        <main class="flex-1 md:ml-0">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-                    <p class="text-gray-600">Manage platform listings and users</p>
-                </div>
-
-                <!-- Stats Overview -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-home text-orange-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Total Listings</p>
-                                <p class="text-2xl font-bold">142</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-users text-blue-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Total Users</p>
-                                <p class="text-2xl font-bold">842</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Verified Landlords</p>
-                                <p class="text-2xl font-bold">56</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-xl shadow-sm transform transition duration-500 hover:scale-105">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Pending Reviews</p>
-                                <p class="text-2xl font-bold">12</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Listings -->
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold text-gray-800">Recent Listings</h2>
-                        <a href="#" class="text-orange-600 hover:text-orange-800">View All</a>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Landlord</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Single Room - UNZA</div>
-                                        <div class="text-sm text-gray-500">University of Zambia</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">John Kamau</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ZMW 8,500</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="#" class="text-orange-600 hover:text-orange-900 mr-3">View</a>
-                                        <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                                        <a href="#" class="text-red-600 hover:text-red-900">Suspend</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Shared Room - CUZ</div>
-                                        <div class="text-sm text-gray-500">Cavendish University Zambia</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jane Mwangi</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ZMW 12,000</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="#" class="text-orange-600 hover:text-orange-900 mr-3">View</a>
-                                        <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                                        <a href="#" class="text-red-600 hover:text-red-900">Suspend</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Studio - ICTC</div>
-                                        <div class="text-sm text-gray-500">Information and Communication Technology College</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Samuel Ochieng</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ZMW 15,000</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Suspended</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="#" class="text-orange-600 hover:text-orange-900 mr-3">View</a>
-                                        <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                                        <a href="#" class="text-green-600 hover:text-green-900">Activate</a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Pending Verifications -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold text-gray-800">Pending Landlord Verifications</h2>
-                        <a href="#" class="text-orange-600 hover:text-orange-800">View All</a>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Landlord</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documents</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Applied</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Michael Phiri</div>
-                                        <div class="text-sm text-gray-500">michael.phiri@example.com</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">+260 97 123 4567</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">ID: Yes</span>
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded ml-1">Proof: Yes</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Feb 15, 2024</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="#" class="text-green-600 hover:text-green-900 mr-3">Approve</a>
-                                        <a href="#" class="text-red-600 hover:text-red-900">Reject</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">Agnes Chanda</div>
-                                        <div class="text-sm text-gray-500">agnes.chanda@example.com</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">+260 96 987 6543</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">ID: Yes</span>
-                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded ml-1">Proof: No</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Feb 12, 2024</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a href="#" class="text-green-600 hover:text-green-900 mr-3">Approve</a>
-                                        <a href="#" class="text-red-600 hover:text-red-900">Reject</a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div id="view-users" class="admin-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8">👥 User Management</h2>
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <table class="w-full text-left"><thead class="bg-gray-100"><tr class="text-xs font-bold uppercase"><th class="p-4">Name</th><th class="p-4">Email</th><th class="p-4">Role</th><th class="p-4">Actions</th></tr></thead><tbody id="users-table-body" class="text-sm"></tbody></table>
             </div>
-        </main>
-    </div>
+        </div>
 
-    <!-- Testimonials Section -->
-    <section class="py-16 bg-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800">What Our Users Say</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Real experiences from students who found their perfect home</p>
+        <div id="view-properties" class="admin-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8">🏠 Property Management</h2>
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <table class="w-full text-left"><thead class="bg-gray-100"><tr class="text-xs font-bold uppercase"><th class="p-4">Property</th><th class="p-4">Location</th><th class="p-4">Price</th><th class="p-4">Action</th></tr></thead><tbody id="props-table-body" class="text-sm"></tbody></table>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-orange-600">JS</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">John S.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
+        </div>
+
+        <div id="view-reports" class="admin-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8">🚩 Reports & Complaints</h2>
+            <div class="bg-white rounded-xl shadow overflow-hidden border">
+                <table class="w-full text-left"><thead class="bg-gray-100 border-b"><tr class="text-gray-500 text-[11px] uppercase font-bold"><th class="p-4">Reported Property</th><th class="p-4">Reporter</th><th class="p-4">Reason</th><th class="p-4">Actions</th></tr></thead><tbody id="reports-table-body" class="text-sm"></tbody></table>
+            </div>
+        </div>
+
+        <div id="view-announcements" class="admin-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8">📣 Announcements</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow border"><form id="announcementForm" class="space-y-4"><input type="text" id="ann-subject" placeholder="Subject" class="w-full p-3 border rounded-md text-sm outline-none" required><textarea id="ann-message" placeholder="Message content..." class="w-full p-3 border rounded-md text-sm h-32 outline-none" required></textarea><button type="submit" class="w-full bg-[#ea580c] text-white p-3 rounded-md font-bold">Send Broadcast</button></form></div>
+                <div class="bg-white p-6 rounded-xl shadow border"><h3 class="font-bold mb-4">Recent History</h3><div id="ann-history" class="space-y-3"></div></div>
+            </div>
+        </div>
+
+        <div id="view-verifications" class="admin-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8 text-gray-800">🛡️ Landlord Verification</h2>
+            <div class="bg-white rounded-xl shadow overflow-hidden border">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-100 border-b">
+                        <tr class="text-gray-500 text-[11px] uppercase font-bold tracking-wider">
+                            <th class="p-4">Landlord Name</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Document</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="verify-table-body" class="text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="view-reviews" class="admin-view hidden-view"><h2 class="text-3xl font-bold">⭐ Reviews</h2><p class="mt-4 text-gray-500 italic">No new ratings.</p></div>
+        <div id="view-messages" class="admin-view hidden-view"><h2 class="text-3xl font-bold">💬 Messages</h2><p class="mt-4 text-gray-500 italic">No suspicious activity.</p></div>
+        
+        <div id="view-analytics" class="admin-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8 text-gray-800">📈 Platform Analytics</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-100">
+                    <h3 class="font-bold mb-6 text-gray-700">6-Month User Growth</h3>
+                    <div id="growth-chart" class="flex items-end justify-between h-48 px-4 border-b">
                     </div>
-                    <p class="text-gray-600">"FindmyNyumba helped me find a safe, verified room just 300m from campus. The verification process gave me peace of mind!"</p>
+                    <div class="flex justify-between mt-2 text-[10px] font-bold text-gray-400 uppercase">
+                        <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+                    </div>
                 </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-blue-600">ME</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Mary E.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-100">
+                    <h3 class="font-bold mb-6 text-gray-700">Most Searched Locations</h3>
+                    <div id="location-stats" class="space-y-4">
                     </div>
-                    <p class="text-gray-600">"As a landlord, I love how easy it is to post properties and connect with verified students. The platform is trustworthy!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-green-600">TK</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Thomas K.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"The search filters saved me so much time. Found my ideal room in just 2 days with no fake listings!"</p>
                 </div>
             </div>
         </div>
-    </section>
+        <div id="view-settings" class="admin-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8 text-gray-800">⚙️ System Configuration</h2>
+            <div class="max-w-2xl bg-white p-8 rounded-xl shadow border border-gray-100">
+                <form id="settingsForm" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Platform Name</label>
+                        <input type="text" id="set-name" value="FindMyNyumba" class="w-full p-3 border rounded-md outline-none focus:ring-1 focus:ring-[#ea580c]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Primary Theme Color</label>
+                        <div class="flex gap-4 items-center">
+                            <input type="color" id="set-color" value="#ea580c" class="h-10 w-20 border rounded cursor-pointer">
+                            <span class="text-sm text-gray-500 italic">This affects buttons and highlights</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Support Email</label>
+                        <input type="email" id="set-email" value="support@findmynyumba.zm" class="w-full p-3 border rounded-md outline-none focus:ring-1 focus:ring-[#ea580c]">
+                    </div>
+                    <hr>
+                    <button type="submit" class="bg-[#ea580c] text-white px-8 py-3 rounded-md font-bold hover:bg-[#c2410c] transition">Apply Global Changes</button>
+                </form>
+            </div>
+        </div>
 
-    <script src="app.js"></script>
+    </main>
+
     <script>
-        // Toggle sidebar on mobile
-        document.getElementById('toggle-sidebar').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('sidebar-open');
-            sidebar.classList.toggle('sidebar-closed');
-        });
+        var API_BASE = "http://127.0.0.1:8000/api/v1/admin";
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const toggleButton = document.getElementById('toggle-sidebar');
+        window.switchView = function(viewId) {
+            document.querySelectorAll('.admin-view').forEach(function(v) { v.classList.add('hidden-view'); });
+            var target = document.getElementById('view-' + viewId);
+            if (target) target.classList.remove('hidden-view');
+
+            document.querySelectorAll('.sidebar-btn').forEach(function(b) { b.classList.remove('sidebar-active'); });
+            var btn = document.getElementById('btn-' + viewId);
+            if (btn) btn.classList.add('sidebar-active');
             
-            if (window.innerWidth < 768) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnToggle = toggleButton.contains(event.target);
-                
-                if (!isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('sidebar-open')) {
-                    sidebar.classList.remove('sidebar-open');
-                    sidebar.classList.add('sidebar-closed');
+            // === BUG FIX: Removed duplicated function calls! ===
+            if (viewId === 'dashboard') window.loadStats();
+            if (viewId === 'users') window.loadUsers();
+            if (viewId === 'properties') window.loadProperties();
+            if (viewId === 'reports') window.loadReports();
+            if (viewId === 'verifications') window.loadVerifications();
+            if (viewId === 'analytics') window.loadAnalytics();
+            if (viewId === 'settings') window.handleSettings();
+        };
+
+        window.loadStats = async function() {
+            var res = await fetch(API_BASE + "/stats", { headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')} });
+            var data = await res.json();
+            document.getElementById('stat-total-users').innerText = data.total_users;
+            document.getElementById('stat-total-props').innerText = data.total_properties;
+            document.getElementById('stat-today-users').innerText = data.new_users_today;
+            document.getElementById('stat-today-props').innerText = data.new_properties_today;
+        }
+
+        window.loadUsers = async function() {
+            var res = await fetch(API_BASE + "/users", { headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')} });
+            var users = await res.json();
+            var html = '';
+            for (var i = 0; i < users.length; i++) {
+                html += '<tr class="border-b"><td class="p-4 font-bold">' + (users[i].full_name || 'User') + '</td><td class="p-4">' + users[i].email + '</td><td class="p-4 uppercase text-[10px] font-bold">' + users[i].role + '</td><td class="p-4"><button class="text-orange-600 font-bold hover:underline">Suspend</button></td></tr>';
+            }
+            document.getElementById('users-table-body').innerHTML = html;
+        }
+
+        window.loadProperties = async function() {
+            var res = await fetch(API_BASE + "/all-listings", { headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')} });
+            var props = await res.json();
+            var html = '';
+            for (var i = 0; i < props.length; i++) {
+                html += '<tr class="border-b"><td class="p-4 font-bold">' + props[i].title + '</td><td class="p-4">' + props[i].location + '</td><td class="p-4 font-mono">ZMW ' + props[i].price + '</td><td class="p-4"><button onclick="deleteProp(' + props[i].id + ')" class="text-red-600 font-bold hover:underline">Delete</button></td></tr>';
+            }
+            document.getElementById('props-table-body').innerHTML = html;
+        }
+
+        window.loadReports = async function() {
+            try {
+                var res = await fetch(API_BASE + "/reports", { headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')} });
+                var reports = await res.json();
+                var html = '';
+                for (var i = 0; i < reports.length; i++) {
+                    html += '<tr class="border-b"><td class="p-4 font-bold text-blue-900">' + reports[i].property_name + '</td><td class="p-4">' + reports[i].reporter + '</td><td class="p-4 text-red-500">' + reports[i].reason + '</td><td class="p-4"><button class="text-blue-600 font-bold hover:underline">Investigate</button></td></tr>';
                 }
-            }
-        });
+                document.getElementById('reports-table-body').innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
 
-        // Update active nav item
-        document.querySelectorAll('nav a').forEach(link => {
-            link.addEventListener('click', function() {
-                document.querySelectorAll('nav a').forEach(a => {
-                    a.classList.remove('bg-orange-100', 'text-orange-700');
-                    a.classList.add('text-gray-700');
+        window.deleteProp = async function(id) {
+            if (!confirm("Delete?")) return;
+            await fetch(API_BASE + '/listings/' + id, { method: 'DELETE', headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')} });
+            window.loadProperties();
+        }
+
+        window.loadVerifications = async function() {
+            try {
+                const res = await fetch(API_BASE + "/verifications", { 
+                    headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')} 
                 });
-                
-                this.classList.remove('text-gray-700');
-                this.classList.add('bg-orange-100', 'text-orange-700');
+                const list = await res.json();
+                const tbody = document.getElementById('verify-table-body');
+                if (tbody) {
+                    tbody.innerHTML = list.map(v => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-4 font-bold text-blue-900">
+                                ${v.name}<br><span class="text-[10px] text-gray-400 font-normal">${v.email}</span>
+                            </td>
+                            <td class="p-4"><span class="px-2 py-1 rounded-md text-[10px] font-black uppercase ${v.role === 'landlord' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-[#ea580c]'}">${v.role}</span></td>
+                            <td class="p-4 text-xs font-bold text-slate-500">${v.university || 'N/A'}</td>
+                            <td class="p-4 text-blue-600 font-bold text-xs uppercase cursor-pointer hover:underline">
+                                <i class="fas fa-file-alt mr-1"></i> ${v.document_type.replace(/_/g, ' ')}
+                            </td>
+                            <td class="p-4 flex gap-2">
+                                <button onclick="approveProvider(${v.id}, 'approved')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black hover:bg-green-700 uppercase">Approve</button>
+                                <button onclick="approveProvider(${v.id}, 'rejected')" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-black hover:bg-red-600 hover:text-white uppercase">Reject</button>
+                            </td>
+                        </tr>
+                    `).join("");
+                }
+            } catch(e) { console.error("Verify Load Error:", e); }
+        };
+
+        window.approveProvider = async function(id, status) {
+            if(!confirm(`Are you sure you want to ${status} this provider?`)) return;
+            await fetch(API_BASE + '/verifications/' + id + '/process', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token') 
+                },
+                body: JSON.stringify({ status: status })
             });
-        });
+            alert(`Provider ${status === 'approved' ? 'Verified' : 'Rejected'} Successfully!`);
+            window.loadVerifications();
+        };
+        
+        window.loadAnalytics = async function() {
+            try {
+                var res = await fetch(API_BASE + "/analytics/growth", { 
+                    headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')} 
+                });
+                var data = await res.json() || {};
+                
+                var chart = document.getElementById('growth-chart');
+                var growthData = Array.isArray(data.user_growth) ? data.user_growth : [];
+                
+                if (chart && growthData.length > 0) {
+                    chart.innerHTML = growthData.map(val => {
+                        var height = Math.min((val / 500) * 100, 100); 
+                        return '<div class="w-8 bg-[#ea580c] rounded-t-sm transition-all duration-500" style="height: ' + height + '%"></div>';
+                    }).join('');
+                } else if (chart) {
+                    chart.innerHTML = '<p class="text-gray-400 text-xs italic w-full text-center pb-4">No growth data available</p>';
+                }
 
-        // Handle window resize to adjust sidebar visibility
-        window.addEventListener('resize', function() {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth >= 768) {
-                sidebar.classList.add('sidebar-open');
-                sidebar.classList.remove('sidebar-closed');
-            } else {
-                sidebar.classList.remove('sidebar-open');
-                sidebar.classList.add('sidebar-closed');
+                var locDiv = document.getElementById('location-stats');
+                var locationData = Array.isArray(data.top_locations) ? data.top_locations : [];
+                
+                if (locDiv && locationData.length > 0) {
+                    locDiv.innerHTML = locationData.map(loc => {
+                        var percent = Math.min((loc.count / 150) * 100, 100);
+                        return '<div class="space-y-1">' +
+                               '<div class="flex justify-between text-xs font-bold"><span>' + (loc.name || 'Unknown') + '</span><span class="text-gray-400">' + (loc.count || 0) + ' items</span></div>' +
+                               '<div class="w-full bg-gray-100 rounded-full h-1.5"><div class="bg-blue-600 h-1.5 rounded-full" style="width: ' + percent + '%"></div></div>' +
+                               '</div>';
+                    }).join('');
+                } else if (locDiv) {
+                    locDiv.innerHTML = '<p class="text-gray-400 text-xs italic w-full text-center">No location data yet</p>';
+                }
+            } catch(e) { console.error("Analytics Load Error:", e); }
+        };
+        
+        window.handleSettings = function() {
+            var sForm = document.getElementById('settingsForm');
+            if (sForm) {
+                sForm.onsubmit = async function(e) {
+                    e.preventDefault();
+                    var payload = {
+                        platform_name: document.getElementById('set-name').value,
+                        primary_color: document.getElementById('set-color').value,
+                        admin_email: document.getElementById('set-email').value
+                    };
+                    
+                    try {
+                        var res = await fetch('http://127.0.0.1:8000/api/v1/admin/settings/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) {
+                            alert("Settings applied! Refreshing brand...");
+                            document.querySelector('h1').innerHTML = payload.platform_name.replace('Nyumba', '<span class="text-blue-900">Nyumba</span>');
+                        }
+                    } catch(err) { alert("Failed to save settings."); }
+                };
             }
-        });
+        };
 
-        // Initialize sidebar state based on screen size
-        window.addEventListener('load', function() {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('sidebar-open');
-                sidebar.classList.add('sidebar-closed');
-            }
+        // Announcement Logic
+        var annForm = document.getElementById('announcementForm');
+        if (annForm) {
+            annForm.onsubmit = async function(e) {
+                e.preventDefault();
+                var payload = { subject: document.getElementById('ann-subject').value, message: document.getElementById('ann-message').value };
+                var res = await fetch(API_BASE + "/announcements", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert("Broadcast Sent!");
+                    annForm.reset();
+                    document.getElementById('ann-history').innerHTML = '<div class="p-3 bg-orange-50 rounded border"><b>' + payload.subject + '</b></div>' + document.getElementById('ann-history').innerHTML;
+                }
+            };
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'admin-login.html'; }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.switchView('dashboard');
         });
     </script>
 </body>

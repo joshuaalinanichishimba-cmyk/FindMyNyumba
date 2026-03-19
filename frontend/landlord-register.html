@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <style>
         .hero-bg {
             background: linear-gradient(135deg, var(--dark-navy) 0%, var(--navy) 100%);
@@ -39,6 +39,11 @@
             margin: 0 auto 1rem;
         }
     </style>
+
+
+
+
+
 </head>
 <body class="bg-gray-50">
     <!-- Navbar -->
@@ -129,7 +134,11 @@
                         Register as Landlord
                     </button>
                 </div>
-            </form>
+            <input type="hidden" name="role" value="landlord">
+
+<div id="googleSignInButton" data-role="landlord" class="mt-4 flex justify-center"></div>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</form>
             
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-600">
@@ -142,78 +151,11 @@
         </div>
     </div>
 
-    <!-- Testimonials Section -->
-    <section class="py-16 bg-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800">What Our Users Say</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Real experiences from students who found their perfect home</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-orange-600">JS</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">John S.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"FindmyNyumba helped me find a safe, verified room just 300m from campus. The verification process gave me peace of mind!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-blue-600">ME</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Mary E.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"As a landlord, I love how easy it is to post properties and connect with verified students. The platform is trustworthy!"</p>
-                </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-green-600">TK</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Thomas K.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-gray-600">"The search filters saved me so much time. Found my ideal room in just 2 days with no fake listings!"</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    
 
-    <script src="app.js"></script>
+    <script src="js/app.js"></script>
     <script>
-        document.getElementById('landlord-register-form').addEventListener('submit', function(e) {
+        document.getElementById('landlord-register-form')?.addEventListener('submit', function(e) {
             e.preventDefault();
             
             const fullName = document.getElementById('full-name').value;
@@ -287,3 +229,7 @@
     </script>
 </body>
 </html>
+
+
+
+

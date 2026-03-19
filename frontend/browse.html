@@ -4,71 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Zambian Student Housing - FindMyNyumba</title>
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <style>
-        .verified-badge {
-            background-color: var(--orange);
-            color: white;
-        }
-        .mobile-money-badge {
-            background-color: var(--light-orange);
-            color: white;
-        }
-        .filters-open {
-            transform: translateX(0);
-            opacity: 1;
-            visibility: visible;
-        }
-        .filters-closed {
-            transform: translateX(-100%);
-            opacity: 0;
-            visibility: hidden;
-        }
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-        .floating-element {
-            animation: float 6s ease-in-out infinite;
-        }
+        .verified-badge { background-color: var(--orange); color: white; }
+        .mobile-money-badge { background-color: var(--light-orange); color: white; }
+        .filters-open { transform: translateX(0); opacity: 1; visibility: visible; }
+        .filters-closed { transform: translateX(-100%); opacity: 0; visibility: hidden; }
+        .transition-all { transition: all 0.3s ease; }
+        .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
             100% { transform: translateY(0px); }
         }
-        .testimonial-card {
-            transition: all 0.3s ease;
-        }
+        .testimonial-card { transition: all 0.3s ease; }
         .testimonial-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .feature-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, var(--orange), #ff9800);
-            border-radius: 50%;
-            margin: 0 auto 1rem;
+            width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(45deg, var(--orange), #ff9800); border-radius: 50%; margin: 0 auto 1rem;
+        }
+        @media (min-width: 768px) {
+            .filters-closed {
+                transform: translateX(0) !important; opacity: 1 !important; visibility: visible !important; display: block !important;
+            }
         }
     </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="bg-gray-50">
-    <!-- Navbar -->
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="index.html" class="flex-shrink-0 flex items-center">
-                        <span class="text-orange-500 font-bold text-xl">FindMyNyumba</span>
-                    </a>
+                    <a href="browse.html" class="flex-shrink-0 flex items-center w-48 md:w-56 h-16 relative overflow-visible"><img src="logo.png" alt="FindMyNyumba Logo" class="absolute left-[-15px] top-1/2 -translate-y-1/2 h-20 md:h-24 w-auto max-w-none object-contain mix-blend-multiply brightness-[1.4] contrast-[1.6] saturate-125" onerror="this.style.display='none'"></a>
                 </div>
-                
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="browse.html" class="text-orange-600 font-medium">Browse</a>
                     <a href="index.html#how-it-works" class="text-gray-700 hover:text-orange-600">How It Works</a>
@@ -76,521 +50,211 @@
                     <a href="register.html" class="text-gray-700 hover:text-orange-600">Register</a>
                     <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg">Post Property</button>
                 </div>
-                
-                <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-orange-600">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="browse.html" class="block px-3 py-2 text-orange-600 font-medium">Browse</a>
-                <a href="index.html#how-it-works" class="block px-3 py-2 text-gray-700 hover:bg-gray-100">How It Works</a>
-                <a href="login.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-100">Login</a>
-                <a href="register.html" class="block px-3 py-2 text-gray-700 hover:bg-gray-100">Register</a>
-                <button class="w-full text-left bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg mt-2">Post Property</button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row gap-6 mt-6">
-            <!-- Filters Sidebar (Hidden on mobile by default) -->
             <aside id="filters-sidebar" class="fixed md:relative z-40 md:z-auto w-64 bg-white h-full md:h-auto shadow-lg md:shadow-none p-6 rounded-xl transition-all filters-closed">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-gray-800">Filters</h2>
-                    <button id="close-filters" class="md:hidden text-gray-500">
-                        <i class="fas fa-times"></i>
-                    </button>
                 </div>
-                
                 <div class="space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">University</label>
-                        <select id="university-filter" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            <option value="">All Universities</option>
-                            <option value="university-of-zambia">University of Zambia</option>
-                            <option value="cavendish-university">Cavendish University Zambia</option>
-                            <option value="ict-college">Information and Communication Technology College</option>
-                            <option value="zambia-catholic-university">Zambia Catholic University</option>
-                            <option value="mulungushi-university">Mulungushi University</option>
-                            <option value="northrise-university">Northrise University</option>
+                        <select id='university-filter' class='w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-bold'>
+                            <option value="">Select University</option>
+                            <option value="unza">University of Zambia (UNZA)</option>
+                            <option value="cbu">Copperbelt University (CBU)</option>
+                            <option value="mulungushi">Mulungushi University</option>
+                            <option value="zcas">ZCAS University</option>
+                            <option value="evelyn-hone">Evelyn Hone College</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
                         <div class="space-y-3">
-                            <div>
-                                <input type="number" id="min-price" placeholder="Min Price" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            </div>
-                            <div>
-                                <input type="number" id="max-price" placeholder="Max Price" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            </div>
+                            <input type="number" id="min-price" placeholder="Min Price" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                            <input type="number" id="max-price" placeholder="Max Price" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                         </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Gender Restriction</label>
-                        <div class="space-y-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" value="male" class="rounded text-orange-600 focus:ring-orange-500">
-                                <span class="ml-2 text-gray-700">Male Only</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" value="female" class="rounded text-orange-600 focus:ring-orange-500">
-                                <span class="ml-2 text-gray-700">Female Only</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" value="unisex" class="rounded text-orange-600 focus:ring-orange-500">
-                                <span class="ml-2 text-gray-700">Unisex</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-                        <div class="space-y-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" value="single" class="rounded text-orange-600 focus:ring-orange-500">
-                                <span class="ml-2 text-gray-700">Single Room</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" value="shared" class="rounded text-orange-600 focus:ring-orange-500">
-                                <span class="ml-2 text-gray-700">Shared Room</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" value="studio" class="rounded text-orange-600 focus:ring-orange-500">
-                                <span class="ml-2 text-gray-700">Studio</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" value="apartment" class="rounded text-orange-600 focus:ring-orange-500">
-                                <span class="ml-2 text-gray-700">Apartment</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Additional Filters</label>
-                        <div class="space-y-3">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="verified-only" class="sr-only">
-                                <div class="relative w-11 h-6 bg-gray-300 rounded-full">
-                                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"></div>
-                                </div>
-                                <span class="ml-3 text-gray-700">Verified Only</span>
-                            </label>
-                            
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="mobile-money" class="sr-only">
-                                <div class="relative w-11 h-6 bg-gray-300 rounded-full">
-                                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"></div>
-                                </div>
-                                <span class="ml-3 text-gray-700">Mobile Money Accepted</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <button id="apply-filters" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transform transition duration-500 hover:scale-105">
-                        Apply Filters
-                    </button>
-                    <button id="clear-filters" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-medium transform transition duration-500 hover:scale-105">
-                        Clear All
-                    </button>
+                    <button id="apply-filters" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transform transition duration-500 hover:scale-105">Apply Filters</button>
+                    <button id="clear-filters" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-medium transform transition duration-500 hover:scale-105">Clear All</button>
                 </div>
             </aside>
             
-            <!-- Listings Section -->
             <main class="flex-1">
                 <div class="flex justify-between items-center mb-6">
                     <h1 class="text-2xl font-bold text-gray-800">Available Listings</h1>
-                    <div class="flex items-center space-x-4">
-                        <button id="toggle-filters" class="md:hidden bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-lg">
-                            <i class="fas fa-filter"></i>
-                        </button>
-                        <select class="p-2 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            <option>Sort by: Newest</option>
-                            <option>Sort by: Price Low to High</option>
-                            <option>Sort by: Price High to Low</option>
-                            <option>Sort by: Distance</option>
-                        </select>
-                    </div>
+                    <select id="sort-filter" onchange="applyFilters()" class="p-2 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <option>Sort by: Newest</option>
+                        <option>Sort by: Price Low to High</option>
+                        <option>Sort by: Price High to Low</option>
+                    </select>
                 </div>
-                
-                <!-- Listings Grid -->
-                <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Listings will be dynamically inserted here -->
-                </div>
-                
-                <!-- Pagination -->
-                <div class="mt-8 flex justify-center">
-                    <nav class="flex items-center space-x-2">
-                        <button class="px-3 py-2 bg-gray-200 rounded-lg disabled:opacity-50">Previous</button>
-                        <button class="px-3 py-2 bg-orange-600 text-white rounded-lg">1</button>
-                        <button class="px-3 py-2 bg-gray-200 rounded-lg">2</button>
-                        <button class="px-3 py-2 bg-gray-200 rounded-lg">3</button>
-                        <button class="px-3 py-2 bg-gray-200 rounded-lg">Next</button>
-                    </nav>
-                </div>
+                <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </main>
         </div>
     </div>
 
-    <!-- Testimonials Section -->
-    <section class="py-16 bg-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800">What Our Users Say</h2>
-                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">Real experiences from students who found their perfect home</p>
+    <section class="py-24 bg-white relative z-10 overflow-hidden border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">What Our Users Say</h2>
+                <p class="text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">Join thousands of students and landlords who have simplified their housing journey.</p>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-orange-600">JS</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">John S.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                <div class="group bg-slate-50/50 p-10 rounded-[2.5rem] border border-slate-100 flex flex-col h-full">
+                    <blockquote class="text-xl text-slate-700 font-semibold leading-relaxed mb-10 flex-grow">"I found a clean boarding house near <span class="text-[#ea580c]">CBU Riverside</span> in just 48 hours. The verification badge gave me so much peace of mind."</blockquote>
+                    <div class="flex items-center gap-4 pt-8 border-t border-slate-100">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-xl">JS</div>
+                        <div><h4 class="font-black text-slate-900 text-lg">John S.</h4><span class="text-sm font-bold text-slate-400 uppercase tracking-wider">CBU Student</span></div>
                     </div>
-                    <p class="text-gray-600">"FindmyNyumba helped me find a safe, verified room just 300m from campus. The verification process gave me peace of mind!"</p>
                 </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-blue-600">ME</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Mary E.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
+                <div class="group bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl flex flex-col h-full transform md:scale-105">
+                    <blockquote class="text-xl text-white font-semibold leading-relaxed mb-10 flex-grow">"As a landlord, I love how easy it is to post properties and connect with <span class="text-orange-400 font-bold">verified students</span>."</blockquote>
+                    <div class="flex items-center gap-4 pt-8 border-t border-white/10">
+                        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center font-black text-orange-400 text-xl">ME</div>
+                        <div><h4 class="font-black text-white text-lg">Mary E.</h4><span class="text-sm font-bold text-slate-400 uppercase tracking-wider">Verified Landlord</span></div>
                     </div>
-                    <p class="text-gray-600">"As a landlord, I love how easy it is to post properties and connect with verified students. The platform is trustworthy!"</p>
                 </div>
-                
-                <div class="testimonial-card bg-gray-50 rounded-xl p-6 shadow-lg">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="font-bold text-green-600">TK</span>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="font-semibold">Thomas K.</h4>
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
+                <div class="group bg-slate-50/50 p-10 rounded-[2.5rem] border border-slate-100 flex flex-col h-full">
+                    <blockquote class="text-xl text-slate-700 font-semibold leading-relaxed mb-10 flex-grow">"The search filters saved me so much time. Found my ideal room instantly with no fake listings."</blockquote>
+                    <div class="flex items-center gap-4 pt-8 border-t border-slate-100">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-xl">TK</div>
+                        <div><h4 class="font-black text-slate-900 text-lg">Thomas K.</h4><span class="text-sm font-bold text-slate-400 uppercase tracking-wider">UNZA Student</span></div>
                     </div>
-                    <p class="text-gray-600">"The search filters saved me so much time. Found my ideal room in just 2 days with no fake listings!"</p>
                 </div>
             </div>
         </div>
-    </section>
+        </section>
+
+    <footer class="bg-slate-900 pt-16 pb-8 border-t border-slate-800 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="md:col-span-1">
+                    <h3 class="text-2xl font-black text-white mb-4">FindMy<span class="text-[#ea580c]">Nyumba</span></h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Simplifying student housing in Zambia. Verified listings, secure connections, and peace of mind for both students and landlords.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-white mb-5 uppercase text-xs tracking-widest">Platform</h4>
+                    <ul class="space-y-3 text-slate-400 text-sm font-medium">
+                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors">Browse Accommodations</a></li>
+                        <li><a href="dashboard-landlord.html" class="hover:text-[#ea580c] transition-colors">Post a Property</a></li>
+                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors">Student Registration</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-5 uppercase text-xs tracking-widest">Support</h4>
+                    <ul class="space-y-3 text-slate-400 text-sm font-medium">
+                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Trust & Verification</a></li>
+                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Landlord Resources</a></li>
+                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white mb-5 uppercase text-xs tracking-widest">Connect with us</h4>
+                    <div class="flex space-x-3 mb-6">
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all transform hover:scale-105 shadow-lg"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all transform hover:scale-105 shadow-lg"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all transform hover:scale-105 shadow-lg"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-slate-800 text-center flex flex-col md:flex-row justify-between items-center">
+                <p class="text-slate-500 text-sm font-medium mb-4 md:mb-0">&copy; 2026 FindMyNyumba Zambia. All rights reserved.</p>
+                <div class="space-x-4 text-sm text-slate-500 font-medium">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // Sample data for listings
-        const listingsData = [
-            {
-                id: 1,
-                title: "Single Room",
-                price: 8500,
-                university: "university-of-nairobi",
-                distance: "500m",
-                gender: "male",
-                verified: true,
-                mobileMoney: true,
-                image: "https://placehold.co/300x200/e2e8f0/64748b?text=Student+Room"
-            },
-            {
-                id: 2,
-                title: "Shared Room",
-                price: 12000,
-                university: "kenyatta-university",
-                distance: "800m",
-                gender: "unisex",
-                verified: true,
-                mobileMoney: false,
-                image: "https://placehold.co/300x200/fef3c7/d97706?text=Student+Apartment"
-            },
-            {
-                id: 3,
-                title: "Studio Apartment",
-                price: 15000,
-                university: "maseno-university",
-                distance: "1.2km",
-                gender: "female",
-                verified: true,
-                mobileMoney: true,
-                image: "https://placehold.co/300x200/ddd6fe/7c3aed?text=Student+House"
-            },
-            {
-                id: 4,
-                title: "Double Room",
-                price: 10000,
-                university: "jkuat",
-                distance: "300m",
-                gender: "unisex",
-                verified: true,
-                mobileMoney: true,
-                image: "https://placehold.co/300x200/dcfce7/16a34a?text=Student+Room"
-            },
-            {
-                id: 5,
-                title: "Single Room",
-                price: 9000,
-                university: "university-of-nairobi",
-                distance: "700m",
-                gender: "male",
-                verified: false,
-                mobileMoney: false,
-                image: "https://placehold.co/300x200/fed7d7/ef4444?text=Student+Room"
-            },
-            {
-                id: 6,
-                title: "Studio",
-                price: 13500,
-                university: "jkuat",
-                distance: "400m",
-                gender: "female",
-                verified: true,
-                mobileMoney: true,
-                image: "https://placehold.co/300x200/cbf7f3/0d9488?text=Student+Studio"
-            }
-        ];
-
-        // Function to render listings
-        function renderListings(listings) {
-            const container = document.getElementById('listings-container');
-            container.innerHTML = '';
+        async function fetchListings(queryString = "") {
+            const container = document.getElementById("listings-container");
+            if (!container) return;
+            container.innerHTML = `<div class="col-span-full text-center py-20"><i class="fas fa-spinner fa-spin text-4xl text-[#ea580c]"></i></div>`;
             
-            if (listings.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center py-12"><h3 class="text-xl font-medium text-gray-700">No listings match your filters</h3><p class="text-gray-500 mt-2">Try adjusting your filters</p></div>';
+            try {
+                // Pointing safely to the active landlord API route to avoid the 405 error
+                const url = `http://127.0.0.1:8000/api/v1/landlord/properties${queryString}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Backend rejected the request");
+                
+                const data = await res.json();
+                renderListings(data);
+            } catch (err) {
+                container.innerHTML = `<div class="col-span-full text-center py-20"><p class="text-xl text-red-500 font-bold">Error connecting to server.</p></div>`;
+            }
+        }
+
+        function renderListings(listings) {
+            const container = document.getElementById("listings-container");
+            if (!listings || listings.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20"><p class="text-xl text-gray-500 font-bold">No properties found.</p></div>`;
                 return;
             }
             
-            listings.forEach(listing => {
-                const listingCard = document.createElement('div');
-                listingCard.className = 'bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2';
-                
-                // Format price with KSh prefix
-                const formattedPrice = `KSh ${listing.price.toLocaleString()}`;
-                
-                // Get university name for display
-                const universityNames = {
-                    'university-of-zambia': 'Univ. of Zambia',
-                    'cavendish-university': 'Cavendish Univ.',
-                    'ict-college': 'ICT College',
-                    'zambia-catholic-university': 'Zambia Catholic Univ.',
-                    'mulungushi-university': 'Mulungushi Univ.',
-                    'northrise-university': 'Northrise Univ.'
-                };
-                
-                // Get gender label
-                const genderLabels = {
-                    'male': 'Male Only',
-                    'female': 'Female Only',
-                    'unisex': 'Unisex'
-                };
-                
-                listingCard.innerHTML = `
-                    <img src="${listing.image}" alt="${listing.title}" class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-lg font-bold text-gray-800">${listing.title}</h3>
-                            <span class="font-bold text-orange-600">${formattedPrice}</span>
-                        </div>
-                        <div class="flex flex-wrap gap-2 mb-3">
-                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${universityNames[listing.university]}</span>
-                            ${listing.verified ? '<span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded verified-badge">Verified</span>' : ''}
-                            <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded">${listing.distance}</span>
-                            ${listing.mobileMoney ? '<span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mobile-money-badge">M-Pesa</span>' : ''}
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="bg-${listing.gender === 'male' ? 'red' : listing.gender === 'female' ? 'pink' : 'blue'}-100 text-${listing.gender === 'male' ? 'red' : listing.gender === 'female' ? 'pink' : 'blue'}-800 text-xs px-2 py-1 rounded">${genderLabels[listing.gender]}</span>
-                            <a href="listing.html?id=${listing.id}" class="text-orange-600 hover:text-orange-800 text-sm font-medium">View Details</a>
+            const sortVal = document.getElementById('sort-filter')?.value;
+            if (sortVal === "Sort by: Price Low to High") listings.sort((a, b) => parseFloat(a.price || 0) - parseFloat(b.price || 0));
+            else if (sortVal === "Sort by: Price High to Low") listings.sort((a, b) => parseFloat(b.price || 0) - parseFloat(a.price || 0));
+            else if (sortVal === "Sort by: Newest") listings.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+            container.innerHTML = listings.map(p => {
+                const loc = (p.location && p.location !== "Unknown Location") ? p.location : "Copperbelt University Area";
+                const price = parseFloat(p.price || 0).toLocaleString();
+                const title = p.title || "Standard Student Room";
+                const imgUrl = p.image_urls ? p.image_urls.split(',')[0] : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80";
+
+                return `
+                <div class="group bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                    <div class="relative h-56 bg-gray-100 overflow-hidden">
+                        <img src="${imgUrl}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" alt="Property Image">
+                        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-black text-green-600 shadow-sm flex items-center tracking-wide">
+                            <i class="fas fa-shield-alt mr-1.5"></i> VERIFIED
                         </div>
                     </div>
-                `;
-                
-                container.appendChild(listingCard);
-            });
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-3 gap-3">
+                            <h3 class="font-black text-xl text-gray-900 leading-tight truncate" title="${title}">${title}</h3>
+                            <span class="bg-orange-50 text-[#ea580c] px-3 py-1.5 rounded-xl text-sm font-black whitespace-nowrap border border-orange-100 shadow-sm">ZMW ${price}</span>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-5 flex items-center font-medium">
+                            <i class="fas fa-map-marker-alt w-5 text-gray-400"></i> ${loc}
+                        </p>
+                        <div class="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between">
+                            <a href="listing.html?id=${p.id}" class="inline-flex items-center justify-center bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#ea580c] transition-colors shadow-sm text-sm">
+                                View Details <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+            }).join("");
         }
 
-        // Filter function
         function applyFilters() {
-            const universityFilter = document.getElementById('university-filter').value;
-            const minPrice = parseInt(document.getElementById('min-price').value) || 0;
-            const maxPrice = parseInt(document.getElementById('max-price').value) || Infinity;
-            const verifiedOnly = document.getElementById('verified-only').checked;
-            const mobileMoney = document.getElementById('mobile-money').checked;
-            
-            // Get selected gender restrictions
-            const genderFilters = Array.from(document.querySelectorAll('input[name="gender"]:checked')).map(cb => cb.value);
-            
-            // Get selected room types
-            const roomTypeFilters = Array.from(document.querySelectorAll('input[name="room-type"]:checked')).map(cb => cb.value);
-            
-            const filteredListings = listingsData.filter(listing => {
-                // University filter
-                if (universityFilter && listing.university !== universityFilter) {
-                    return false;
-                }
-                
-                // Price range filter
-                if (listing.price < minPrice || listing.price > maxPrice) {
-                    return false;
-                }
-                
-                // Verified only filter
-                if (verifiedOnly && !listing.verified) {
-                    return false;
-                }
-                
-                // Mobile money filter
-                if (mobileMoney && !listing.mobileMoney) {
-                    return false;
-                }
-                
-                // Gender filter
-                if (genderFilters.length > 0 && !genderFilters.includes(listing.gender)) {
-                    return false;
-                }
-                
-                // Room type filter - for demo purposes, we'll match based on title
-                if (roomTypeFilters.length > 0) {
-                    let roomTypeMatch = false;
-                    for (const roomType of roomTypeFilters) {
-                        if (listing.title.toLowerCase().includes(roomType)) {
-                            roomTypeMatch = true;
-                            break;
-                        }
-                    }
-                    if (!roomTypeMatch) {
-                        return false;
-                    }
-                }
-                
-                return true;
-            });
-            
-            renderListings(filteredListings);
+            const uni = document.getElementById('university-filter').value;
+            const min = document.getElementById('min-price').value;
+            const max = document.getElementById('max-price').value;
+            let params = new URLSearchParams();
+            if (uni) params.append('university', uni);
+            if (min) params.append('min_price', min);
+            if (max) params.append('max_price', max);
+            const qs = params.toString() ? `?${params.toString()}` : "";
+            fetchListings(qs);
         }
 
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-
-        // Toggle filters sidebar on mobile
-        document.getElementById('toggle-filters').addEventListener('click', function() {
-            const sidebar = document.getElementById('filters-sidebar');
-            sidebar.classList.toggle('filters-open');
-            sidebar.classList.toggle('filters-closed');
-        });
-
-        // Close filters sidebar
-        document.getElementById('close-filters').addEventListener('click', function() {
-            const sidebar = document.getElementById('filters-sidebar');
-            sidebar.classList.remove('filters-open');
-            sidebar.classList.add('filters-closed');
-        });
-
-        // Toggle switch functionality
-        const toggleSwitches = document.querySelectorAll('.dot');
-        toggleSwitches.forEach(switchEl => {
-            switchEl.parentElement.addEventListener('click', function() {
-                const checkbox = this.querySelector('input[type="checkbox"]');
-                checkbox.checked = !checkbox.checked;
-                
-                if (checkbox.checked) {
-                    this.querySelector('.dot').style.transform = 'translateX(20px)';
-                    this.style.backgroundColor = 'var(--orange)';
-                } else {
-                    this.querySelector('.dot').style.transform = 'translateX(0)';
-                    this.style.backgroundColor = 'var(--light-gray)';
-                }
-                
-                // Apply filters when toggles change
-                applyFilters();
-            });
-        });
-
-        // Event listeners for filters
-        document.getElementById('university-filter').addEventListener('change', applyFilters);
-        document.getElementById('min-price').addEventListener('input', applyFilters);
-        document.getElementById('max-price').addEventListener('input', applyFilters);
-        
-        // Add event listeners to gender checkboxes
-        document.querySelectorAll('input[name="gender"]').forEach(checkbox => {
-            checkbox.addEventListener('change', applyFilters);
-        });
-        
-        // Add event listeners to room type checkboxes
-        document.querySelectorAll('input[name="room-type"]').forEach(checkbox => {
-            checkbox.addEventListener('change', applyFilters);
-        });
-        
-        document.getElementById('apply-filters').addEventListener('click', applyFilters);
-        document.getElementById('clear-filters').addEventListener('click', function() {
-            // Reset all filters
-            document.getElementById('university-filter').value = '';
-            document.getElementById('min-price').value = '';
-            document.getElementById('max-price').value = '';
-            document.getElementById('verified-only').checked = false;
-            document.getElementById('mobile-money').checked = false;
-            
-            document.querySelectorAll('input[name="gender"]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('input[name="room-type"]').forEach(cb => cb.checked = false);
-            
-            // Reset toggle switches
-            document.querySelectorAll('.dot').forEach(dot => {
-                const switchContainer = dot.parentElement;
-                dot.style.transform = 'translateX(0)';
-                switchContainer.style.backgroundColor = 'var(--light-gray)';
-            });
-            
-            renderListings(listingsData);
-        });
-
-        // Initialize toggle switches
-        document.querySelectorAll('.dot').forEach(dot => {
-            const switchContainer = dot.parentElement;
-            if (switchContainer && dot.previousElementSibling && dot.previousElementSibling.type === 'checkbox') {
-                if (dot.previousElementSibling.checked) {
-                    dot.style.transform = 'translateX(20px)';
-                    switchContainer.style.backgroundColor = 'var(--orange)';
-                }
-            }
-        });
-
-        // Initial render
-        renderListings(listingsData);
+        document.getElementById('apply-filters')?.addEventListener('click', applyFilters);
+        document.getElementById('clear-filters')?.addEventListener('click', () => { window.location.reload(); });
+        document.addEventListener("DOMContentLoaded", () => fetchListings());
     </script>
-    <script src="app.js"></script>
 </body>
 </html>

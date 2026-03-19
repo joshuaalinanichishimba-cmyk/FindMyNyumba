@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindMyNyumba - Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .input-stack:focus-within { z-index: 10; position: relative; }
+        .hidden-field { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8 font-sans">
+    
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="text-center text-4xl font-extrabold text-[#ea580c] mb-1">FindMy<span class="text-[#ea580c]">Nyumba</span></h2>
+        <h3 class="text-center text-lg font-bold text-gray-900 mb-2" id="form-title">Admin Portal</h3>
+        <p class="text-center text-sm text-red-500 font-medium mb-8 border border-red-100 bg-red-50 py-1 rounded">Strictly limited to 3 Administrators</p>
+    </div>
+
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-10 px-4 sm:px-10 border border-gray-100 shadow-sm rounded-md">
+            
+            <form class="space-y-6" id="adminAuthForm">
+                <div class="rounded-md border border-gray-300 -space-y-px">
+                    <input id="admin-name" type="text" placeholder="Full Name" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 border-b border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
+                    <input id="admin-email" type="email" placeholder="Email address" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 border-b border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
+                    <input id="admin-password" type="password" placeholder="Password" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 border-b border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
+                    <input id="admin-confirm" type="password" placeholder="Confirm Password" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
+                </div>
+
+                <div id="terms-container" class="flex items-center">
+                    <input id="terms" type="checkbox" required class="h-4 w-4 text-[#ea580c] focus:ring-[#ea580c] border-gray-300 rounded">
+                    <label for="terms" class="ml-2 block text-sm text-gray-900">
+                        I agree to the <a href="#" class="text-[#ea580c] hover:underline">Terms and Conditions</a>
+                    </label>
+                </div>
+
+                <div id="forgot-password-container" class="flex items-center justify-end hidden-field mt-2 mb-4">
+                    <a href="#" onclick="handleResetPassword(event)" class="text-sm font-medium text-[#ea580c] hover:text-[#c2410c] transition">Forgot your password?</a>
+                </div>
+
+                <div>
+                    <button type="submit" id="submit-btn" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#ea580c] hover:bg-[#c2410c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ea580c] transition">
+                        Register as Admin
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-gray-600">
+                <span id="toggle-text">Already have an account?</span> 
+                <button type="button" onclick="toggleAuthMode()" id="toggle-btn" class="text-[#ea580c] font-medium hover:underline focus:outline-none">Sign in</button>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-gray-200">
+                <div class="flex justify-center">
+                    <div id="googleSignInButton" data-role="admin"></div>
+                </div>
+            </div>
+
+            <div id="auth-message" class="mt-4 text-center text-sm font-bold hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        let isLoginMode = false;
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            const nameInput = document.getElementById('admin-name');
+            const confirmInput = document.getElementById('admin-confirm');
+            const termsContainer = document.getElementById('terms-container');
+            const forgotContainer = document.getElementById('forgot-password-container');
+            const submitBtn = document.getElementById('submit-btn');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleBtn = document.getElementById('toggle-btn');
+            const formTitle = document.getElementById('form-title');
+            const emailInput = document.getElementById('admin-email');
+
+            if (isLoginMode) {
+                nameInput.classList.add('hidden-field'); nameInput.removeAttribute('required');
+                confirmInput.classList.add('hidden-field'); confirmInput.removeAttribute('required');
+                termsContainer.classList.add('hidden-field'); document.getElementById('terms').removeAttribute('required');
+                forgotContainer.classList.remove('hidden-field');
+                emailInput.classList.add('rounded-t-md');
+                
+                submitBtn.innerText = 'Sign In';
+                toggleText.innerText = "Don't have an account?";
+                toggleBtn.innerText = 'Register';
+                formTitle.innerText = 'Admin Login';
+            } else {
+                nameInput.classList.remove('hidden-field'); nameInput.setAttribute('required', 'true');
+                confirmInput.classList.remove('hidden-field'); confirmInput.setAttribute('required', 'true');
+                termsContainer.classList.remove('hidden-field'); document.getElementById('terms').setAttribute('required', 'true');
+                forgotContainer.classList.add('hidden-field');
+                emailInput.classList.remove('rounded-t-md');
+                
+                submitBtn.innerText = 'Register as Admin';
+                toggleText.innerText = 'Already have an account?';
+                toggleBtn.innerText = 'Sign in';
+                formTitle.innerText = 'Admin Portal';
+            }
+        }
+
+        async function handleResetPassword(e) {
+            e.preventDefault();
+            const email = document.getElementById('admin-email').value;
+            const msgBox = document.getElementById('auth-message');
+            msgBox.classList.remove('hidden', 'text-green-600', 'text-red-600');
+
+            if (!email) {
+                msgBox.innerText = "Please enter your email address first.";
+                msgBox.classList.add('text-red-600');
+                return;
+            }
+
+            msgBox.innerText = "Sending reset link...";
+            msgBox.classList.add('text-[#ea580c]');
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/v1/admin/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                const data = await res.json();
+                msgBox.innerText = data.message || "Reset link sent.";
+                msgBox.classList.replace('text-[#ea580c]', 'text-green-600');
+            } catch (err) {
+                msgBox.innerText = "Network error. Backend not running?";
+                msgBox.classList.add('text-red-600');
+            }
+        }
+
+        document.getElementById('adminAuthForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgBox = document.getElementById('auth-message');
+            msgBox.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            
+            if (!isLoginMode) {
+                const confirmPassword = document.getElementById('admin-confirm').value;
+                if (password !== confirmPassword) {
+                    msgBox.innerText = "Passwords do not match!";
+                    msgBox.classList.add('text-red-600');
+                    return;
+                }
+            }
+
+            const endpoint = isLoginMode ? 'http://127.0.0.1:8000/api/v1/admin/login' : 'http://127.0.0.1:8000/api/v1/admin/register';
+            const payload = isLoginMode 
+                ? { email, password } 
+                : { full_name: document.getElementById('admin-name').value, email, password };
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    msgBox.innerText = "Success! Redirecting...";
+                    msgBox.classList.add('text-green-600');
+                    localStorage.setItem('token', data.access_token);
+                    setTimeout(() => window.location.href = 'admin.html', 1000);
+                } else {
+                    msgBox.innerText = data.detail || "Authentication failed.";
+                    msgBox.classList.add('text-red-600');
+                }
+            } catch (err) {
+                msgBox.innerText = "Server error. Is the backend running?";
+                msgBox.classList.add('text-red-600');
+            }
+        });
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>
