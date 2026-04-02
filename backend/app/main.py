@@ -27,6 +27,20 @@ os.makedirs("static/uploads/properties",    exist_ok=True)
 os.makedirs("static/uploads/verification",  exist_ok=True)
 
 # ── App ───────────────────────────────────────────────────────────────────────
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "http://localhost:3000",
+    "https://findmynyumba-web.vercel.app"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="1.0.0",
