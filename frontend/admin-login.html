@@ -3,181 +3,529 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyNyumba - Admin Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>FindMyNyumba — Admin Portal</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        .input-stack:focus-within { z-index: 10; position: relative; }
-        .hidden-field { display: none !important; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0a0c10;
+            --panel:     #111318;
+            --border:    rgba(255,255,255,0.07);
+            --border-hi: rgba(234,88,12,0.5);
+            --text:      #f0f2f5;
+            --muted:     #6b7280;
+            --accent:    #ea580c;
+            --accent-hi: #fb923c;
+            --danger:    #ef4444;
+            --success:   #22c55e;
+            --warn:      #f59e0b;
+            --input-bg:  #1a1d24;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 10% 20%, rgba(234,88,12,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 90% 80%, rgba(234,88,12,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .header { text-align: center; margin-bottom: 2rem; }
+
+        .logo-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            text-decoration: none;
+        }
+
+        .logo-wrap img {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+            filter: brightness(1.2);
+        }
+
+        .logo-fallback {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+            display: none;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text);
+            margin-bottom: 0.6rem;
+        }
+
+        .access-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.25);
+            color: #fca5a5;
+            font-size: 0.68rem;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 99px;
+        }
+
+        .badge-dot {
+            width: 6px; height: 6px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: pulse 2s ease infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.4; transform: scale(0.75); }
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 24px 48px rgba(0,0,0,0.4);
+        }
+
+        /* ── Alert ── */
+        .alert {
+            display: none;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 1.25rem;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert.error   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.2);  color: #fca5a5; display: flex; }
+        .alert.success { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.2);  color: #86efac; display: flex; }
+        .alert.warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fcd34d; display: flex; }
+        .alert svg { flex-shrink: 0; margin-top: 1px; }
+
+        /* ── Fields ── */
+        .field { margin-bottom: 1rem; }
+
+        .field label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .input-wrap { position: relative; }
+
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 11px 42px 11px 40px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .field input:focus {
+            border-color: var(--border-hi);
+            box-shadow: 0 0 0 3px rgba(234,88,12,0.12);
+        }
+
+        .field input:focus + .input-icon,
+        .field input:focus ~ .input-icon { color: var(--accent); }
+        .field input::placeholder { color: #2d3340; }
+
+        .pwd-toggle {
+            position: absolute;
+            right: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .pwd-toggle:hover { color: var(--text); }
+
+        /* ── Submit button ── */
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s, opacity 0.2s;
+            margin-top: 1.25rem;
+        }
+        .btn-submit:hover:not(:disabled) { background: var(--accent-hi); }
+        .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .spinner {
+            display: none;
+            width: 15px; height: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Attempt counter ── */
+        .attempt-bar {
+            display: none;
+            margin-top: 0.75rem;
+            font-size: 0.72rem;
+            font-family: 'DM Mono', monospace;
+            color: var(--warn);
+            text-align: center;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Divider / footer ── */
+        .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+        .security-note {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 0.75rem;
+            color: var(--muted);
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .security-note svg { flex-shrink: 0; color: var(--accent); opacity: 0.6; }
+
+        .links-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.25rem;
+        }
+
+        .back-link, .forgot-link {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-link:hover  { color: var(--text); }
+        .forgot-link      { color: var(--accent-hi); font-weight: 600; }
+        .forgot-link:hover { color: var(--accent); }
+
+        .footnote {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.68rem;
+            color: #2d3340;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.04em;
+        }
     </style>
 </head>
-<body class="bg-gray-50 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8 font-sans">
-    
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="text-center text-4xl font-extrabold text-[#ea580c] mb-1">FindMy<span class="text-[#ea580c]">Nyumba</span></h2>
-        <h3 class="text-center text-lg font-bold text-gray-900 mb-2" id="form-title">Admin Portal</h3>
-        <p class="text-center text-sm text-red-500 font-medium mb-8 border border-red-100 bg-red-50 py-1 rounded">Strictly limited to 3 Administrators</p>
-    </div>
+<body>
 
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-10 px-4 sm:px-10 border border-gray-100 shadow-sm rounded-md">
-            
-            <form class="space-y-6" id="adminAuthForm">
-                <div class="rounded-md border border-gray-300 -space-y-px">
-                    <input id="admin-name" type="text" placeholder="Full Name" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 border-b border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
-                    <input id="admin-email" type="email" placeholder="Email address" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 border-b border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
-                    <input id="admin-password" type="password" placeholder="Password" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 border-b border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
-                    <input id="admin-confirm" type="password" placeholder="Confirm Password" required class="input-stack appearance-none rounded-none relative block w-full px-4 py-4 border-0 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-1 focus:ring-[#ea580c] focus:border-[#ea580c] sm:text-sm">
-                </div>
+<div class="container">
 
-                <div id="terms-container" class="flex items-center">
-                    <input id="terms" type="checkbox" required class="h-4 w-4 text-[#ea580c] focus:ring-[#ea580c] border-gray-300 rounded">
-                    <label for="terms" class="ml-2 block text-sm text-gray-900">
-                        I agree to the <a href="#" class="text-[#ea580c] hover:underline">Terms and Conditions</a>
-                    </label>
-                </div>
-
-                <div id="forgot-password-container" class="flex items-center justify-end hidden-field mt-2 mb-4">
-                    <a href="#" onclick="handleResetPassword(event)" class="text-sm font-medium text-[#ea580c] hover:text-[#c2410c] transition">Forgot your password?</a>
-                </div>
-
-                <div>
-                    <button type="submit" id="submit-btn" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#ea580c] hover:bg-[#c2410c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ea580c] transition">
-                        Register as Admin
-                    </button>
-                </div>
-            </form>
-
-            <div class="mt-6 text-center text-sm text-gray-600">
-                <span id="toggle-text">Already have an account?</span> 
-                <button type="button" onclick="toggleAuthMode()" id="toggle-btn" class="text-[#ea580c] font-medium hover:underline focus:outline-none">Sign in</button>
-            </div>
-
-            <div class="mt-8 pt-8 border-t border-gray-200">
-                <div class="flex justify-center">
-                    <div id="googleSignInButton" data-role="admin"></div>
-                </div>
-            </div>
-
-            <div id="auth-message" class="mt-4 text-center text-sm font-bold hidden"></div>
+    <div class="header">
+        <a href="browse.html" class="logo-wrap">
+            <img src="logo.png" alt="FindMyNyumba"
+                 onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block'">
+            <span id="logo-fallback" class="logo-fallback">FindMyNyumba</span>
+        </a>
+        <h1>Admin Portal</h1>
+        <div class="access-badge">
+            <span class="badge-dot"></span>
+            Authorised Personnel Only
         </div>
     </div>
 
-    <script>
-        let isLoginMode = false;
+    <div class="card">
 
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            const nameInput = document.getElementById('admin-name');
-            const confirmInput = document.getElementById('admin-confirm');
-            const termsContainer = document.getElementById('terms-container');
-            const forgotContainer = document.getElementById('forgot-password-container');
-            const submitBtn = document.getElementById('submit-btn');
-            const toggleText = document.getElementById('toggle-text');
-            const toggleBtn = document.getElementById('toggle-btn');
-            const formTitle = document.getElementById('form-title');
-            const emailInput = document.getElementById('admin-email');
+        <div id="alert" class="alert" role="alert" aria-live="polite">
+            <svg id="alert-icon" width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span id="alert-text"></span>
+        </div>
 
-            if (isLoginMode) {
-                nameInput.classList.add('hidden-field'); nameInput.removeAttribute('required');
-                confirmInput.classList.add('hidden-field'); confirmInput.removeAttribute('required');
-                termsContainer.classList.add('hidden-field'); document.getElementById('terms').removeAttribute('required');
-                forgotContainer.classList.remove('hidden-field');
-                emailInput.classList.add('rounded-t-md');
-                
-                submitBtn.innerText = 'Sign In';
-                toggleText.innerText = "Don't have an account?";
-                toggleBtn.innerText = 'Register';
-                formTitle.innerText = 'Admin Login';
-            } else {
-                nameInput.classList.remove('hidden-field'); nameInput.setAttribute('required', 'true');
-                confirmInput.classList.remove('hidden-field'); confirmInput.setAttribute('required', 'true');
-                termsContainer.classList.remove('hidden-field'); document.getElementById('terms').setAttribute('required', 'true');
-                forgotContainer.classList.add('hidden-field');
-                emailInput.classList.remove('rounded-t-md');
-                
-                submitBtn.innerText = 'Register as Admin';
-                toggleText.innerText = 'Already have an account?';
-                toggleBtn.innerText = 'Sign in';
-                formTitle.innerText = 'Admin Portal';
-            }
-        }
+        <form id="admin-form" novalidate>
 
-        async function handleResetPassword(e) {
-            e.preventDefault();
-            const email = document.getElementById('admin-email').value;
-            const msgBox = document.getElementById('auth-message');
-            msgBox.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            <div class="field">
+                <label for="admin-email">Admin Email</label>
+                <div class="input-wrap">
+                    <input id="admin-email" type="email" placeholder="admin@findmynyumba.zm"
+                           autocomplete="email" required>
+                    <svg class="input-icon" width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                    </svg>
+                </div>
+            </div>
 
-            if (!email) {
-                msgBox.innerText = "Please enter your email address first.";
-                msgBox.classList.add('text-red-600');
-                return;
-            }
+            <div class="field">
+                <label for="admin-password">Master Password</label>
+                <div class="input-wrap">
+                    <input id="admin-password" type="password" placeholder="••••••••"
+                           autocomplete="current-password" required>
+                    <svg class="input-icon" width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <button type="button" class="pwd-toggle" id="pwd-toggle" aria-label="Toggle password visibility">
+                        <svg id="eye-icon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-            msgBox.innerText = "Sending reset link...";
-            msgBox.classList.add('text-[#ea580c]');
+            <button type="submit" class="btn-submit" id="submit-btn">
+                <span id="btn-text">Authenticate</span>
+                <div class="spinner" id="spinner"></div>
+            </button>
 
-            try {
-                const res = await fetch('http://127.0.0.1:8000/api/v1/admin/reset-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email })
-                });
-                const data = await res.json();
-                msgBox.innerText = data.message || "Reset link sent.";
-                msgBox.classList.replace('text-[#ea580c]', 'text-green-600');
-            } catch (err) {
-                msgBox.innerText = "Network error. Backend not running?";
-                msgBox.classList.add('text-red-600');
-            }
-        }
+            <!-- Shown after a failed attempt so admin knows they have limited tries -->
+            <div class="attempt-bar" id="attempt-bar"></div>
 
-        document.getElementById('adminAuthForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const msgBox = document.getElementById('auth-message');
-            msgBox.classList.remove('hidden', 'text-green-600', 'text-red-600');
-            
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            
-            if (!isLoginMode) {
-                const confirmPassword = document.getElementById('admin-confirm').value;
-                if (password !== confirmPassword) {
-                    msgBox.innerText = "Passwords do not match!";
-                    msgBox.classList.add('text-red-600');
-                    return;
-                }
-            }
+        </form>
 
-            const endpoint = isLoginMode ? 'http://127.0.0.1:8000/api/v1/admin/login' : 'http://127.0.0.1:8000/api/v1/admin/register';
-            const payload = isLoginMode 
-                ? { email, password } 
-                : { full_name: document.getElementById('admin-name').value, email, password };
+        <div class="divider"></div>
 
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+        <div class="security-note">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Session ends automatically when you close this tab
+        </div>
 
-                const data = await response.json();
+    </div>
 
-                if (response.ok) {
-                    msgBox.innerText = "Success! Redirecting...";
-                    msgBox.classList.add('text-green-600');
-                    localStorage.setItem('token', data.access_token);
-                    setTimeout(() => window.location.href = 'admin.html', 1000);
-                } else {
-                    msgBox.innerText = data.detail || "Authentication failed.";
-                    msgBox.classList.add('text-red-600');
-                }
-            } catch (err) {
-                msgBox.innerText = "Server error. Is the backend running?";
-                msgBox.classList.add('text-red-600');
-            }
+    <div class="links-row">
+        <a href="login.html" class="back-link">← Regular login</a>
+        <a href="admin-forgot-password.html" class="forgot-link">Forgot password?</a>
+    </div>
+
+    <p class="footnote">FindMyNyumba © 2026 · Admin access is logged and monitored</p>
+
+</div>
+
+<script>
+'use strict';
+const API = 'http://127.0.0.1:8000/api/v1';
+
+// ── Redirect if already authenticated ────────────────────────────────────────
+(function () {
+    const token = sessionStorage.getItem('adminToken');
+    const role  = sessionStorage.getItem('adminRole');
+    if (token && role === 'admin') window.location.replace('admin.html');
+})();
+
+// ── Password visibility toggle ────────────────────────────────────────────────
+const pwdInput = document.getElementById('admin-password');
+const eyeIcon  = document.getElementById('eye-icon');
+
+const EYE_OPEN = `<path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+<path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>`;
+
+const EYE_SHUT = `<path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/>
+<path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>`;
+
+document.getElementById('pwd-toggle').addEventListener('click', () => {
+    const show = pwdInput.type === 'password';
+    pwdInput.type = show ? 'text' : 'password';
+    eyeIcon.innerHTML = show ? EYE_SHUT : EYE_OPEN;
+});
+
+// Tab: email → password
+document.getElementById('admin-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); pwdInput.focus(); }
+});
+
+// ── Alert helpers ─────────────────────────────────────────────────────────────
+const ICONS = {
+    error: `<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>`,
+    success: `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>`,
+    warning: `<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>`,
+};
+
+function showAlert(msg, type = 'error') {
+    const el   = document.getElementById('alert');
+    const icon = document.getElementById('alert-icon');
+    el.className = `alert ${type}`;
+    icon.innerHTML = ICONS[type] || ICONS.error;
+    document.getElementById('alert-text').textContent = msg;
+}
+
+function hideAlert() {
+    const el = document.getElementById('alert');
+    el.style.display = 'none';
+    el.className = 'alert';
+}
+
+// ── Form submit ───────────────────────────────────────────────────────────────
+document.getElementById('admin-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    hideAlert();
+
+    const email    = document.getElementById('admin-email').value.trim();
+    const password = document.getElementById('admin-password').value;
+
+    if (!email || !password) {
+        showAlert('Please enter your email and password.', 'error');
+        return;
+    }
+
+    const btn        = document.getElementById('submit-btn');
+    const btnText    = document.getElementById('btn-text');
+    const spinner    = document.getElementById('spinner');
+    const attemptBar = document.getElementById('attempt-bar');
+
+    btn.disabled          = true;
+    btnText.textContent   = 'Verifying…';
+    spinner.style.display = 'block';
+
+    try {
+        const res  = await fetch(`${API}/admin/login`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email, password }),
         });
-    </script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+        const data = await res.json();
+
+        if (res.status === 429) {
+            // Account locked
+            showAlert(data.detail || 'Too many failed attempts. Account locked.', 'warning');
+            attemptBar.style.display = 'none';
+            btn.disabled = true; // keep disabled while locked
+            btnText.textContent = 'Locked';
+            spinner.style.display = 'none';
+            return;
+        }
+
+        if (!res.ok) {
+            throw new Error(data.detail || 'Authentication failed. Access denied.');
+        }
+
+        // Success — store in sessionStorage only (clears on tab close)
+        sessionStorage.setItem('adminToken', data.access_token);
+        sessionStorage.setItem('adminRole',  'admin');
+        sessionStorage.setItem('adminName',  data.user?.name || 'Admin');
+
+        attemptBar.style.display = 'none';
+        showAlert('Access granted. Redirecting…', 'success');
+        setTimeout(() => window.location.replace('admin.html'), 900);
+
+    } catch (err) {
+        const msg = err.message || 'Authentication failed.';
+
+        // Extract remaining attempts hint from message if present
+        const match = msg.match(/(\d+) attempt/);
+        if (match) {
+            attemptBar.style.display = 'block';
+            attemptBar.textContent   = `⚠ ${match[1]} attempt(s) remaining before lockout`;
+        }
+
+        showAlert(msg, 'error');
+        btn.disabled          = false;
+        btnText.textContent   = 'Authenticate';
+        spinner.style.display = 'none';
+    }
+});
+</script>
+
 </body>
 </html>

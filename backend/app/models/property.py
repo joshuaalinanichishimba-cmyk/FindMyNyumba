@@ -1,12 +1,15 @@
-﻿from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
+﻿from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime
+from datetime import datetime
 from app.core.database import Base
 
 class Property(Base):
     __tablename__ = "properties"
+
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    location = Column(String, index=True)
+    title = Column(String)
+    description = Column(String)
+    location = Column(String)
     price = Column(Float)
-    owner_id = Column(Integer, ForeignKey("users.id"))
-    owner = relationship("User", back_populates="owned_properties")
+    status = Column(String, default="pending") # pending, approved, rejected
+    is_verified = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

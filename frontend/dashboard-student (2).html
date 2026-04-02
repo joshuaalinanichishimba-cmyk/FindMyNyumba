@@ -1,0 +1,558 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --orange: #ea580c; --light-gray: #f9fafb; --dark-gray: #4b5563; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Sidebar slide-in on mobile */
+        #sidebar {
+            transition: transform 0.3s ease;
+        }
+        #sidebar-overlay {
+            transition: opacity 0.3s ease;
+        }
+
+        /* Active nav link style */
+        .nav-link-active {
+            background-color: #fff7ed;
+            color: #ea580c;
+            border-right: 3px solid #ea580c;
+        }
+        .nav-link:hover:not(.nav-link-active) {
+            background-color: #f9fafb;
+        }
+
+        /* Chat bubble styles */
+        .bubble-me   { background-color: #ea580c; color: white; border-bottom-right-radius: 0; }
+        .bubble-them { background-color: #f3f4f6; color: #1f2937; border-bottom-left-radius: 0; }
+
+        .dropdown-hidden  { opacity: 0; pointer-events: none; transform: translateY(-8px); transition: all 0.15s ease; }
+        .dropdown-visible { opacity: 1; pointer-events: auto; transform: translateY(0);     transition: all 0.15s ease; }
+
+        /* Message panel — full height on desktop, collapsible on mobile */
+        #messages-panel {
+            height: calc(100vh - 8rem);
+        }
+        @media (max-width: 767px) {
+            #messages-panel { height: calc(100vh - 7rem); }
+            /* On mobile, conversation list and chat pane stack */
+            #conv-pane  { width: 100%; }
+            #chat-pane  { width: 100%; display: none; }
+            #chat-pane.mobile-chat-open { display: flex; }
+            #conv-pane.mobile-chat-open { display: none; }
+        }
+    </style>
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body class="bg-[var(--light-gray)] font-sans" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
+
+    <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 shadow-sm shrink-0 z-30">
+        <button id="mobile-menu-btn" onclick="openSidebar()"
+                class="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 transition">
+            <i class="fas fa-bars text-lg"></i>
+        </button>
+        <h1 class="text-lg font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></h1>
+        <img id="mobile-avatar"
+             src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+             class="w-9 h-9 rounded-full object-cover border-2 border-white shadow cursor-pointer"
+             onclick="switchTab('profile')" alt="Profile">
+    </div>
+
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <div id="sidebar-overlay"
+             class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"
+             onclick="closeSidebar()"></div>
+
+        <aside id="sidebar"
+               class="fixed md:relative -translate-x-full md:translate-x-0
+                      w-64 bg-white shadow-xl flex flex-col z-40 md:z-20
+                      h-full top-0 left-0">
+            <div class="p-6 border-b border-gray-50 flex items-center justify-between">
+                <h1 class="text-xl font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></h1>
+                <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <nav class="flex-1 py-3 overflow-y-auto">
+                <button id="nav-overview"  onclick="switchTab('overview')"  class="nav-link nav-link-active w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-[#ea580c]"><i class="fas fa-home w-5 text-center"></i> Overview</button>
+                <button id="nav-saved"     onclick="switchTab('saved')"     class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600"><i class="fas fa-heart w-5 text-center"></i> Saved Rooms</button>
+                <button id="nav-messages"  onclick="switchTab('messages')"  class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600"><i class="fas fa-comments w-5 text-center"></i> Messages</button>
+                <button id="nav-profile"   onclick="switchTab('profile')"   class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600"><i class="fas fa-user w-5 text-center"></i> Profile</button>
+                <button id="nav-settings"  onclick="switchTab('settings')"  class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600"><i class="fas fa-cog w-5 text-center"></i> Settings</button>
+            </nav>
+            <div class="p-4 border-t border-gray-100">
+                <button onclick="logout()"
+                        class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 font-bold rounded-xl transition text-sm">
+                    <i class="fas fa-sign-out-alt w-5 text-center"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+
+            <header class="hidden md:flex justify-between items-center px-8 py-5 bg-white border-b border-gray-100 shrink-0 shadow-sm z-10">
+                <h2 id="page-title" class="text-xl font-black text-black uppercase tracking-tight">Overview</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p id="header-name" class="font-black text-black text-sm">Student</p>
+                        <p class="text-xs text-[var(--dark-gray)] font-bold">Student Account</p>
+                    </div>
+                    <img id="header-avatar"
+                         src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+                         class="w-10 h-10 rounded-full shadow-md object-cover border-2 border-white cursor-pointer"
+                         onclick="switchTab('profile')" alt="Profile">
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+
+                <div id="overview-section" class="dashboard-section">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-xs font-black uppercase tracking-wider mb-1">Saved Rooms</p>
+                                <h3 id="stat-saved" class="text-3xl font-black text-black"><i class="fas fa-spinner fa-spin text-gray-300"></i></h3>
+                            </div>
+                            <div class="w-11 h-11 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-heart"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-xs font-black uppercase tracking-wider mb-1">Active Messages</p>
+                                <h3 id="stat-messages" class="text-3xl font-black text-[#ea580c]"><i class="fas fa-spinner fa-spin text-orange-300"></i></h3>
+                            </div>
+                            <div class="w-11 h-11 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-envelope"></i></div>
+                        </div>
+                        <div class="bg-[#ea580c] p-5 rounded-2xl shadow-sm flex items-center justify-between cursor-pointer hover:bg-orange-700 transition"
+                             onclick="window.location.href='browse.html'">
+                            <div>
+                                <p class="text-orange-200 text-xs font-black uppercase tracking-wider mb-1">Find a Room</p>
+                                <h3 class="text-base font-black text-white">Browse All Properties</h3>
+                            </div>
+                            <div class="w-11 h-11 rounded-full bg-white/20 text-white flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-search"></i></div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-black mb-3 text-black">Find a Room</h3>
+                    <div class="mb-6 flex gap-2">
+                        <input type="text" id="search-input"
+                               placeholder="Search by location, price, or keyword..."
+                               class="flex-1 min-w-0 p-3 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-[#ea580c] font-bold text-sm text-gray-800">
+                        <button onclick="window.searchProperties()"
+                                class="bg-[#ea580c] text-white px-5 py-3 rounded-xl font-black shadow hover:bg-black transition flex items-center gap-2 whitespace-nowrap shrink-0">
+                            <i class="fas fa-search"></i><span class="hidden sm:inline">Find</span>
+                        </button>
+                    </div>
+
+                    <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6 hidden"></div>
+
+                    <h3 class="text-base font-black mb-3 text-black">Recent Listings</h3>
+                    <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                </div>
+
+                <div id="saved-section" class="dashboard-section hidden">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8">
+                        <h2 class="text-lg font-black mb-6 text-black">Saved Properties</h2>
+                        <div id="saved-loading" class="text-center py-12 hidden">
+                            <i class="fas fa-circle-notch fa-spin text-4xl text-[#ea580c] mb-4"></i>
+                            <p class="text-gray-400 font-bold">Loading your saved rooms...</p>
+                        </div>
+                        <div id="saved-rooms-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                        <div id="saved-empty" class="text-center py-12 hidden">
+                            <i class="fas fa-heart text-gray-200 text-5xl mb-4 block"></i>
+                            <p class="text-gray-400 font-bold mb-4">You haven't saved any rooms yet.</p>
+                            <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition inline-block">Browse Properties</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="messages-section" class="dashboard-section hidden">
+                    <div id="messages-panel" class="flex bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+
+                        <div id="conv-pane" class="w-full md:w-2/5 lg:w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col flex-shrink-0">
+                            <div class="p-4 border-b border-gray-200 bg-white">
+                                <h3 class="font-black text-base text-black">Conversations</h3>
+                            </div>
+                            <div id="conversation-list" class="flex-1 overflow-y-auto"></div>
+                        </div>
+
+                        <div id="chat-pane" class="hidden md:flex flex-col flex-1 bg-white relative min-w-0">
+
+                            <button id="chat-back-btn"
+                                    onclick="closeMobileChat()"
+                                    class="md:hidden flex items-center gap-2 px-4 py-3 text-[#ea580c] font-bold text-sm border-b border-gray-100 bg-white">
+                                <i class="fas fa-arrow-left"></i> Back to conversations
+                            </button>
+
+                            <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-400 p-6">
+                                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-comments text-3xl text-gray-200"></i>
+                                </div>
+                                <p class="font-bold text-sm text-center">Select a conversation to start messaging</p>
+                            </div>
+
+                            <div id="chat-header" class="p-4 border-b border-gray-200 bg-white hidden items-center justify-between">
+                                <div class="min-w-0">
+                                    <h4 id="chat-landlord-name" class="font-black text-base text-black truncate">Landlord Name</h4>
+                                    <p id="chat-property-ref" class="text-xs font-bold text-[#ea580c] mt-0.5 truncate">Property Reference</p>
+                                </div>
+                                <div class="flex gap-2 ml-3 relative flex-shrink-0">
+                                    <button onclick="window.toggleThreeDotMenu(event)"
+                                            class="w-9 h-9 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition">
+                                        <i class="fas fa-ellipsis-v text-sm"></i>
+                                    </button>
+                                    <div id="chat-dropdown"
+                                         class="absolute right-0 top-11 w-48 bg-white border border-gray-100 rounded-xl shadow-xl z-50 overflow-hidden dropdown-hidden">
+                                        <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50"><i class="fas fa-eye w-5 text-gray-400 mr-1"></i> View property</button>
+                                        <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50"><i class="fas fa-address-book w-5 text-gray-400 mr-1"></i> Contact details</button>
+                                        <button class="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50"><i class="fas fa-flag w-5 text-red-400 mr-1"></i> Report listing</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 hidden"></div>
+
+                            <div id="chat-input-area" class="p-3 bg-white border-t border-gray-200 hidden">
+                                <input type="file" id="hidden-chat-file" class="hidden" accept="image/*,.pdf,.doc,.docx">
+                                <form id="chat-form" class="flex items-center gap-2" onsubmit="window.sendStudentMessage(event)">
+                                    <button type="button" onclick="document.getElementById('hidden-chat-file').click()"
+                                            class="w-10 h-10 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#ea580c] flex items-center justify-center transition flex-shrink-0">
+                                        <i class="fas fa-paperclip"></i>
+                                    </button>
+                                    <input type="text" id="chat-input" required autocomplete="off"
+                                           class="flex-1 min-w-0 bg-gray-50 px-4 py-3 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-medium text-sm"
+                                           placeholder="Type a message...">
+                                    <button type="submit"
+                                            class="bg-[#ea580c] text-white w-11 h-11 rounded-xl flex items-center justify-center hover:bg-black transition shadow flex-shrink-0">
+                                        <i class="fas fa-paper-plane text-sm"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="profile-section" class="dashboard-section hidden">
+                    <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 max-w-2xl shadow-sm">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-8">
+                            <div class="relative group cursor-pointer flex-shrink-0"
+                                 onclick="document.getElementById('profile-pic-upload').click()">
+                                <img id="profile-avatar-preview"
+                                     src="https://via.placeholder.com/150"
+                                     class="w-20 h-20 rounded-full object-cover shadow-md border-4 border-white group-hover:opacity-75 transition"
+                                     alt="Profile Avatar">
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <i class="fas fa-camera text-white text-lg drop-shadow-md"></i>
+                                </div>
+                                <input type="file" id="profile-pic-upload" class="hidden" accept="image/*"
+                                       onchange="window.handleProfilePicUpdate(event)">
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-black">Profile Details</h3>
+                                <p class="text-gray-400 text-sm font-bold">Click your avatar to upload a new photo</p>
+                            </div>
+                        </div>
+                        <form onsubmit="window.saveProfile(event)" class="space-y-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Full Name</label>
+                                    <input type="text" id="profile-name" required
+                                           class="w-full p-3 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Phone Number</label>
+                                    <input type="tel" id="profile-phone" placeholder="+260..."
+                                           class="w-full p-3 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Email Address</label>
+                                <input type="email" id="profile-email" required
+                                       class="w-full p-3 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black text-sm">
+                            </div>
+                            <button type="submit" id="profile-save-btn"
+                                    class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-black transition shadow w-full sm:w-auto text-sm">
+                                Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="settings-section" class="dashboard-section hidden">
+                    <div class="max-w-2xl space-y-5">
+                        <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
+                            <h4 class="text-base font-black text-black mb-4 border-b border-gray-100 pb-3">
+                                <i class="fas fa-bell text-[#ea580c] mr-2"></i> Notification Preferences
+                            </h4>
+                            <div class="space-y-4">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="font-bold text-gray-700 text-sm">Email alerts for new properties</span>
+                                    <input type="checkbox" id="pref-email" onchange="window.savePreferences()"
+                                           class="h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
+                                </label>
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="font-bold text-gray-700 text-sm">SMS alerts for landlord messages</span>
+                                    <input type="checkbox" id="pref-sms" onchange="window.savePreferences()"
+                                           class="h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
+                            <h4 class="text-base font-black text-black mb-4 border-b border-gray-100 pb-3">
+                                <i class="fas fa-shield-alt text-[#ea580c] mr-2"></i> Account Security
+                            </h4>
+                            <div class="space-y-4">
+                                <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Change Password</label>
+                                <form onsubmit="window.updatePassword(event)" class="space-y-3">
+                                    <input type="password" id="current-password" required placeholder="Current password"
+                                           class="w-full p-3 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium text-sm">
+                                    <input type="password" id="new-password" required placeholder="New password (8-12 chars, mixed case, number, symbol)"
+                                           class="w-full p-3 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium text-sm">
+                                    <button type="submit" id="update-pwd-btn"
+                                            class="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-800 transition text-sm w-full sm:w-auto">
+                                        Update Password
+                                    </button>
+                                </form>
+                                <div class="pt-5 mt-5 border-t border-red-100">
+                                    <button onclick="window.deleteAccount()"
+                                            class="text-red-500 font-bold hover:text-red-700 transition flex items-center p-2 rounded-lg hover:bg-red-50 text-sm">
+                                        <i class="fas fa-trash-alt mr-2"></i> Delete Account Permanently
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div></main>
+    </div><div id="fmn-toast"
+         class="fixed bottom-5 right-4 z-[9999] hidden items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white transition-all duration-300">
+    </div>
+
+    <script src="student-dashboard.js"></script>
+    <script>
+    'use strict';
+    const API = 'http://127.0.0.1:8000/api/v1';
+
+    // ── Auth guard ────────────────────────────────────────────────────────────
+    (function guardAccess() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) window.location.replace('login.html');
+    })();
+
+    // ── Sidebar helpers (mobile) ──────────────────────────────────────────────
+    function openSidebar() {
+        document.getElementById('sidebar').classList.remove('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // ── Mobile chat pane open/close ───────────────────────────────────────────
+    function openMobileChat() {
+        if (window.innerWidth < 768) {
+            document.getElementById('conv-pane').classList.add('mobile-chat-open');
+            document.getElementById('chat-pane').classList.add('mobile-chat-open');
+            document.getElementById('chat-pane').classList.remove('hidden');
+            document.getElementById('chat-pane').style.display = 'flex';
+        }
+    }
+    function closeMobileChat() {
+        document.getElementById('conv-pane').classList.remove('mobile-chat-open');
+        document.getElementById('chat-pane').classList.remove('mobile-chat-open');
+        if (window.innerWidth < 768) {
+            document.getElementById('chat-pane').style.display = 'none';
+        }
+    }
+    window.openMobileChat  = openMobileChat;
+    window.closeMobileChat = closeMobileChat;
+
+    // ── Tab switcher ──────────────────────────────────────────────────────────
+    function switchTab(tab) {
+        // Hide all sections
+        document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden'));
+        // Deactivate all nav buttons
+        document.querySelectorAll('.nav-link').forEach(b => {
+            b.classList.remove('nav-link-active', 'text-[#ea580c]');
+            b.classList.add('text-gray-600');
+        });
+
+        const section = document.getElementById(`${tab}-section`);
+        const navBtn  = document.getElementById(`nav-${tab}`);
+        if (section) section.classList.remove('hidden');
+        if (navBtn)  {
+            navBtn.classList.add('nav-link-active', 'text-[#ea580c]');
+            navBtn.classList.remove('text-gray-600');
+        }
+
+        // Update desktop page title
+        const titles = { overview: 'Overview', saved: 'Saved Rooms', messages: 'Messages', profile: 'Profile', settings: 'Settings' };
+        const titleEl = document.getElementById('page-title');
+        if (titleEl) titleEl.textContent = titles[tab] || tab;
+
+        closeSidebar();
+
+        // Lazy-load section data
+        if (tab === 'saved'    && typeof window.loadSavedProperties === 'function')  window.loadSavedProperties();
+        if (tab === 'messages' && typeof window.loadConversations  === 'function')   window.loadConversations();
+        if (tab === 'profile'  && typeof window.loadProfileData    === 'function')   window.loadProfileData();
+        if (tab === 'settings' && typeof window.loadSettingsData   === 'function')   window.loadSettingsData();
+    }
+    window.switchTab = switchTab;
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+        const el = document.getElementById('fmn-toast');
+        el.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white
+                        ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        el.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+        el.classList.remove('hidden');
+        setTimeout(() => el.classList.add('hidden'), 3500);
+    }
+    window.showToast = showToast;
+
+    // ── Logout ────────────────────────────────────────────────────────────────
+    function logout() {
+        ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+        window.location.replace('login.html');
+    }
+    window.logout = logout;
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    async function initDashboard() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+        try {
+            const res = await fetch(`${API}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.status === 401) {
+                ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+                window.location.replace('login.html');
+                return;
+            }
+            if (!res.ok) throw new Error('Profile load failed');
+
+            const user = await res.json();
+
+            if (user.role !== 'student') {
+                const dest = { student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+                window.location.replace(dest[user.role] || 'login.html');
+                return;
+            }
+
+            window._currentUser = user;
+
+            const nameStr  = user.full_name || 'Student';
+            const initials = nameStr.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+            const avatarSrc = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=ea580c&color=fff`;
+
+            const headerName   = document.getElementById('header-name');
+            const headerAvatar = document.getElementById('header-avatar');
+            const mobileAvatar = document.getElementById('mobile-avatar');
+            if (headerName)   headerName.textContent = nameStr;
+            if (headerAvatar) headerAvatar.src = avatarSrc;
+            if (mobileAvatar) mobileAvatar.src = avatarSrc;
+
+        } catch (e) {
+            console.warn('initDashboard error:', e.message);
+        }
+
+        loadOverviewStats();
+    }
+
+    // ── Overview stats + recent listings ─────────────────────────────────────
+    async function loadOverviewStats() {
+        const token      = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const statSaved  = document.getElementById('stat-saved');
+        const statMsgs   = document.getElementById('stat-messages');
+        const recentGrid = document.getElementById('recent-listings-container');
+
+        if (statSaved)  statSaved.innerHTML  = '<i class="fas fa-spinner fa-spin text-gray-300"></i>';
+        if (statMsgs)   statMsgs.innerHTML   = '<i class="fas fa-spinner fa-spin text-orange-300"></i>';
+        if (recentGrid) recentGrid.innerHTML = `
+            <div class="col-span-full py-10 text-center text-gray-400">
+                <i class="fas fa-circle-notch fa-spin text-3xl text-[#ea580c] mb-3 block"></i>
+                <p class="font-bold text-sm">Loading recent listings...</p>
+            </div>`;
+
+        try {
+            const res = await fetch(`${API}/students/dashboard/overview`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.status === 401) {
+                ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+                window.location.replace('login.html');
+                return;
+            }
+            if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+            const data = await res.json();
+
+            if (statSaved) statSaved.textContent = data.stats?.saved_count           ?? '0';
+            if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count ?? '0';
+
+            const props = data.recent_properties || [];
+            if (!props.length) {
+                recentGrid.innerHTML = `
+                    <div class="col-span-full py-10 text-center bg-white rounded-2xl border border-gray-100">
+                        <i class="fas fa-home text-5xl text-gray-200 mb-4 block"></i>
+                        <p class="text-gray-400 font-bold mb-4 text-sm">No listings available right now.</p>
+                        <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition inline-block text-sm">Browse All Properties</a>
+                    </div>`;
+                return;
+            }
+
+            recentGrid.innerHTML = props.map(prop => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer flex flex-col group hover:shadow-md transition"
+                     onclick="window.location.href='listing.html?id=${encodeURIComponent(prop.id)}'">
+                    <div class="h-44 bg-gray-100 relative overflow-hidden flex-shrink-0">
+                        <img src="${prop.image_url || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                             onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'"
+                             alt="${String(prop.title || '').replace(/"/g,'&quot;')}">
+                        ${prop.is_boosted ? '<div class="absolute top-3 left-3 bg-[#ea580c] text-white text-[10px] font-black px-2 py-1 rounded-lg"><i class="fas fa-bolt mr-1"></i>Featured</div>' : ''}
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <h4 class="font-black text-sm text-black truncate mb-1">${prop.title}</h4>
+                        <p class="text-[#ea580c] font-black text-sm mb-1">ZMW ${Number(prop.price).toLocaleString()}</p>
+                        <p class="text-gray-400 text-xs font-medium truncate"><i class="fas fa-map-marker-alt mr-1"></i>${prop.location}</p>
+                    </div>
+                </div>`).join('');
+
+        } catch (e) {
+            if (statSaved) statSaved.innerHTML = '<span class="text-red-400 text-sm font-bold">—</span>';
+            if (statMsgs)  statMsgs.innerHTML  = '<span class="text-red-400 text-sm font-bold">—</span>';
+            if (recentGrid) recentGrid.innerHTML = `
+                <div class="col-span-full py-10 text-center bg-red-50 rounded-2xl border border-red-100">
+                    <i class="fas fa-wifi text-4xl text-red-300 mb-3 block"></i>
+                    <p class="text-red-500 font-bold mb-4 text-sm">Could not connect to server.</p>
+                    <button onclick="loadOverviewStats()" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition text-sm">
+                        <i class="fas fa-redo mr-2"></i>Try Again
+                    </button>
+                </div>`;
+            console.error('loadOverviewStats error:', e.message);
+        }
+    }
+    window.loadOverviewStats = loadOverviewStats;
+
+    document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
+

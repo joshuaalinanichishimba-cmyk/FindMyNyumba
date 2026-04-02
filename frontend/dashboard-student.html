@@ -1,252 +1,691 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { theme: { extend: { colors: { orange: { 600: '#ea580c' } } } } }
-    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
     <style>
-        :root { --orange: #ea580c; --light-gray: #f9fafb; --dark-gray: #4b5563; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dropdown-hidden { opacity: 0; pointer-events: none; transform: translateY(-10px); }
-        .dropdown-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        :root { --orange: #ea580c; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        #sidebar { transition: transform 0.3s ease; }
+        .nav-link-active { background-color: #fff7ed; color: #ea580c; border-right: 3px solid #ea580c; }
+        .bubble-me   { background-color: #ea580c; color: white; border-bottom-right-radius: 0; }
+        .bubble-them { background-color: #f3f4f6; color: #1f2937; border-bottom-left-radius: 0; }
+        #messages-panel { height: calc(100vh - 8rem); }
+        @media (max-width: 767px) {
+            #messages-panel { height: calc(100vh - 7rem); }
+            #conv-pane  { width: 100%; }
+            #chat-pane  { width: 100%; display: none; }
+            #chat-pane.mobile-chat-open  { display: flex; }
+            #conv-pane.mobile-chat-open  { display: none; }
+        }
     </style>
 </head>
-<body class="bg-[var(--light-gray)] font-sans flex h-screen overflow-hidden">
+<body class="bg-gray-50 font-sans" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
 
-    <aside class="w-64 bg-white shadow-xl flex flex-col z-20">
-        <div class="p-6">
-            <h1 class="text-2xl font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></h1>
+    <!-- Mobile top bar -->
+    <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 shadow-sm shrink-0 z-30">
+        <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 transition">
+            <i class="fas fa-bars text-lg"></i>
+        </button>
+        <div class="flex items-center gap-2">
+            <img src="logo.png" alt="FindMyNyumba"
+                 class="h-8 w-auto object-contain mix-blend-multiply brightness-125"
+                 onerror="this.style.display='none'">
+            <span class="text-base font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
         </div>
-        <nav class="flex-1 space-y-1 mt-4">
-            <button id="nav-overview" onclick="switchTab('overview')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
-                <i class="fas fa-home w-6"></i> Overview
-            </button>
-            <button id="nav-saved" onclick="switchTab('saved')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
-                <i class="fas fa-heart w-6"></i> Saved Rooms
-            </button>
-            <button id="nav-messages" onclick="switchTab('messages')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
-                <i class="fas fa-comments w-6"></i> Messages
-            </button>
-            <button id="nav-profile" onclick="switchTab('profile')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
-                <i class="fas fa-user w-6"></i> Profile
-            </button>
-            <button id="nav-settings" onclick="switchTab('settings')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
-                <i class="fas fa-cog w-6"></i> Settings
-            </button>
-        </nav>
-        <div class="p-4 border-t border-gray-100">
-            <button onclick="logout()" class="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 font-bold rounded-xl transition">
-                <i class="fas fa-sign-out-alt w-6"></i> Logout
-            </button>
-        </div>
-    </aside>
+        <img id="mobile-avatar"
+             src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+             class="w-9 h-9 rounded-full object-cover border-2 border-white shadow cursor-pointer"
+             onclick="switchTab('profile')" alt="Profile">
+    </div>
 
-    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <header class="flex justify-between items-center p-8 bg-white border-b border-gray-100 shrink-0 shadow-sm z-10">
-            <h2 id="page-title" class="text-2xl font-black text-black uppercase tracking-tight">Overview</h2>
-            <div class="flex items-center space-x-4">
-                <div class="text-right">
-                    <p id="header-name" class="font-black text-black text-sm">Joshua</p>
-                    <p class="text-xs text-[var(--dark-gray)] font-bold">Student Account</p>
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+        <aside id="sidebar"
+               class="fixed md:relative -translate-x-full md:translate-x-0
+                      w-64 bg-white shadow-xl flex flex-col z-40 md:z-20 h-full top-0 left-0">
+
+            <!-- Logo in sidebar -->
+            <div class="p-5 border-b border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <img src="logo.png" alt="FindMyNyumba"
+                         class="h-8 w-auto object-contain mix-blend-multiply brightness-125"
+                         onerror="this.style.display='none'">
+                    <span class="text-lg font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
                 </div>
-                <img id="header-avatar" src="https://ui-avatars.com/api/?name=JS&background=ea580c&color=fff" class="w-10 h-10 rounded-full shadow-md object-cover border-2 border-white cursor-pointer" onclick="switchTab('profile')" alt="Profile">
+                <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
             </div>
-        </header>
 
-        <div class="flex-1 overflow-y-auto p-8 relative">
-            
-                        <div id="overview-section" class="dashboard-section">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div>
-                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Saved Rooms</p>
-                            <h3 id="stat-saved" class="text-4xl font-black text-black"><i class="fas fa-spinner fa-spin text-lg text-gray-300"></i></h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl"><i class="fas fa-heart"></i></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div>
-                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Active Messages</p>
-                            <h3 id="stat-messages" class="text-4xl font-black text-[#ea580c]"><i class="fas fa-spinner fa-spin text-lg text-orange-300"></i></h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl"><i class="fas fa-envelope"></i></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div>
-                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Recent Searches</p>
-                            <h3 class="text-4xl font-black text-black">12</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center text-xl"><i class="fas fa-search"></i></div>
-                    </div>
-                </div>
+            <nav class="flex-1 py-3 overflow-y-auto">
+                <button id="nav-overview"  onclick="switchTab('overview')"  class="nav-link nav-link-active w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-[#ea580c]"><i class="fas fa-home w-5 text-center"></i> Overview</button>
+                <button id="nav-saved"     onclick="switchTab('saved')"     class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-heart w-5 text-center"></i> Saved Rooms</button>
+                <button id="nav-messages"  onclick="switchTab('messages')"  class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-comments w-5 text-center"></i> Messages</button>
+                <button id="nav-profile"   onclick="switchTab('profile')"   class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-user w-5 text-center"></i> Profile</button>
+                <button id="nav-settings"  onclick="switchTab('settings')"  class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-cog w-5 text-center"></i> Settings</button>
+            </nav>
 
-                <h3 class="text-xl font-black mb-4 text-black">Find a Room</h3>
-                <div class="mb-8 flex space-x-3 mt-4">
-                    <input type="text" id="search-input" placeholder="Search by location, price, or keyword..." class="flex-1 p-4 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-[#ea580c] font-bold text-sm text-gray-800">
-                    <button onclick="window.searchProperties()" class="bg-[#ea580c] text-white px-8 py-4 rounded-xl font-black shadow-md hover:bg-black transition flex items-center justify-center">
-                        <i class="fas fa-search mr-2"></i> Find
-                    </button>
-                </div>
-                
-                <div id="search-results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 hidden"></div>
-                
-                <h3 class="text-xl font-black mb-4 text-black mt-8">Recent Listings</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="recent-listings-container">
-                    </div>
-            </div>            <div id="saved-section" class="dashboard-section hidden">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                    <h2 class="text-xl font-black mb-6 text-black">Saved Properties</h2>
-                    
-                    <div id="saved-loading" class="text-center py-12 hidden">
-                        <i class="fas fa-circle-notch fa-spin text-4xl text-[#ea580c] mb-4"></i>
-                        <p class="text-gray-400 font-bold">Loading your saved rooms...</p>
-                    </div>
-
-                    <div id="saved-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                    
-                    <div id="saved-empty" class="text-center py-12 hidden">
-                        <i class="fas fa-heart text-gray-200 text-5xl mb-4"></i>
-                        <p class="text-gray-400 font-bold mb-4">You haven't saved any rooms yet.</p>
-                        <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow-md hover:bg-black transition inline-block">Browse Properties</a>
-                    </div>
-                </div>
+            <div class="p-4 border-t border-gray-100">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 font-bold rounded-xl transition text-sm">
+                    <i class="fas fa-sign-out-alt w-5 text-center"></i> Logout
+                </button>
             </div>
-            <div id="messages-section" class="dashboard-section hidden h-[calc(100vh-12rem)]">
-                <div class="flex h-full bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
-                    <div class="w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col">
-                        <div class="p-6 border-b border-gray-200 bg-white">
-                            <h3 class="font-black text-xl text-black">Conversations</h3>
-                        </div>
-                        <div id="conversation-list" class="flex-1 overflow-y-auto">
-                            </div>
-                    </div>
-                    
-                    <div class="w-2/3 flex flex-col bg-white relative">
-                        <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-400">
-                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4"><i class="fas fa-comments text-3xl text-gray-300"></i></div>
-                            <p class="font-bold">Select a conversation to start messaging</p>
-                        </div>
+        </aside>
 
-                        <div id="chat-header" class="p-6 border-b border-gray-200 bg-white hidden items-center justify-between relative">
+        <main class="flex-1 flex flex-col overflow-hidden">
+
+            <!-- Desktop header -->
+            <header class="hidden md:flex justify-between items-center px-8 py-4 bg-white border-b border-gray-100 shrink-0 shadow-sm z-10">
+                <h2 id="page-title" class="text-xl font-black text-black uppercase tracking-tight">Overview</h2>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p id="header-name" class="font-black text-black text-sm">Student</p>
+                        <p class="text-xs text-gray-400 font-semibold">Student Account</p>
+                    </div>
+                    <img id="header-avatar"
+                         src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+                         class="w-10 h-10 rounded-full shadow-md object-cover border-2 border-white cursor-pointer"
+                         onclick="switchTab('profile')" alt="Profile">
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+
+                <!-- ── OVERVIEW ──────────────────────────────────── -->
+                <div id="overview-section" class="dashboard-section">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
                             <div>
-                                <h4 id="chat-landlord-name" class="font-black text-xl text-black">Landlord Name</h4>
-                                <p id="chat-property-ref" class="text-sm font-bold text-[#ea580c] mt-1">Property Reference</p>
+                                <p class="text-gray-400 text-xs font-black uppercase tracking-wider mb-1">Saved Rooms</p>
+                                <h3 id="stat-saved" class="text-3xl font-black text-black"><i class="fas fa-spinner fa-spin text-gray-300 text-2xl"></i></h3>
                             </div>
-                            <div class="flex space-x-2 relative">
-                                <button onclick="startInAppCall('Mr. Phiri')" class="w-10 h-10 rounded-full bg-gray-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition shadow-sm"><i class="fas fa-phone-alt"></i></button>
-                                
-                                <button onclick="window.toggleThreeDotMenu(event)" class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition shadow-sm"><i class="fas fa-ellipsis-v"></i></button>
-                                
-                                <div id="chat-dropdown" class="absolute right-0 top-12 w-48 bg-white border border-gray-100 rounded-xl shadow-xl transition-all duration-200 dropdown-hidden z-50 overflow-hidden">
-                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-eye w-5 text-gray-400"></i> View property</button>
-                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-address-book w-5 text-gray-400"></i> Contact details</button>
-                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 transition"><i class="fas fa-flag w-5 text-red-400"></i> Report listing</button>
+                            <div class="w-11 h-11 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-heart"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-xs font-black uppercase tracking-wider mb-1">Unread Messages</p>
+                                <h3 id="stat-messages" class="text-3xl font-black text-[#ea580c]"><i class="fas fa-spinner fa-spin text-orange-300 text-2xl"></i></h3>
+                            </div>
+                            <div class="w-11 h-11 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-envelope"></i></div>
+                        </div>
+                        <div class="bg-[#ea580c] p-5 rounded-2xl shadow-sm flex items-center justify-between cursor-pointer hover:bg-orange-700 transition"
+                             onclick="window.location.href='browse.html'">
+                            <div>
+                                <p class="text-orange-200 text-xs font-black uppercase tracking-wider mb-1">Find a Room</p>
+                                <h3 class="text-sm font-black text-white">Browse All Properties</h3>
+                            </div>
+                            <div class="w-11 h-11 rounded-full bg-white/20 text-white flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-search"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-5 flex gap-2">
+                        <input type="text" id="search-input"
+                               placeholder="Search by location, price, or keyword..."
+                               class="flex-1 min-w-0 p-3 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-[#ea580c] font-semibold text-sm text-gray-800">
+                        <button onclick="searchProperties()"
+                                class="bg-[#ea580c] text-white px-4 py-3 rounded-xl font-black shadow hover:bg-black transition flex items-center gap-2 flex-shrink-0 text-sm">
+                            <i class="fas fa-search"></i><span class="hidden sm:inline">Find</span>
+                        </button>
+                    </div>
+
+                    <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 hidden"></div>
+
+                    <h3 class="text-sm font-black mb-3 text-black uppercase tracking-wide">Recent Listings</h3>
+                    <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <!-- ── SAVED ROOMS ────────────────────────────────── -->
+                <div id="saved-section" class="dashboard-section hidden">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8">
+                        <h2 class="text-lg font-black mb-6 text-black">Saved Properties</h2>
+                        <div id="saved-rooms-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                        <div id="saved-empty" class="text-center py-12">
+                            <i class="fas fa-heart text-gray-200 text-5xl mb-4 block"></i>
+                            <p class="text-gray-400 font-bold mb-4 text-sm">You haven't saved any rooms yet.</p>
+                            <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition inline-block text-sm">Browse Properties</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── MESSAGES ───────────────────────────────────── -->
+                <div id="messages-section" class="dashboard-section hidden">
+                    <div id="messages-panel" class="flex bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+
+                        <!-- Conversation list pane -->
+                        <div id="conv-pane" class="w-full md:w-2/5 lg:w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col flex-shrink-0">
+                            <div class="p-4 border-b border-gray-200 bg-white">
+                                <h3 class="font-black text-sm text-black">Conversations</h3>
+                            </div>
+                            <div id="conversation-list" class="flex-1 overflow-y-auto">
+                                <div class="p-6 text-center text-gray-400 text-sm">
+                                    <i class="fas fa-comments text-3xl text-gray-200 mb-3 block"></i>
+                                    <p class="font-semibold">No conversations yet.</p>
+                                    <p class="text-xs mt-1">Message a landlord from a listing to get started.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/30 hidden">
+                        <!-- Chat pane -->
+                        <div id="chat-pane" class="hidden md:flex flex-col flex-1 bg-white relative min-w-0">
+                            <button id="chat-back-btn" onclick="closeMobileChat()"
+                                    class="md:hidden flex items-center gap-2 px-4 py-3 text-[#ea580c] font-bold text-sm border-b border-gray-100 bg-white">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-300 p-6">
+                                <i class="fas fa-comments text-4xl mb-3"></i>
+                                <p class="font-bold text-sm text-gray-400 text-center">Select a conversation to start messaging</p>
                             </div>
-
-                        <div id="chat-input-area" class="p-4 bg-white border-t border-gray-200 hidden">
-                            <form id="chat-form" class="flex items-center space-x-2 relative w-full" onsubmit="window.sendStudentMessage(event)">
-                                <button type="button" onclick="document.getElementById('hidden-chat-file').click()" class="w-12 h-12 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#ea580c] flex items-center justify-center transition"><i class="fas fa-paperclip"></i></button>
-                                
-                                <input type="text" id="chat-input" required class="flex-1 bg-gray-50 p-4 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-medium" placeholder="Type a message..." autocomplete="off">
-                                <button type="submit" class="bg-[#ea580c] text-white w-14 h-12 rounded-xl flex items-center justify-center hover:bg-black transition shadow-md"><i class="fas fa-paper-plane"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="profile-section" class="dashboard-section hidden">
-                <div class="bg-white p-8 rounded-3xl border border-gray-100 max-w-2xl shadow-sm">
-                    <div class="flex items-center space-x-6 mb-8">
-                        <div class="relative group cursor-pointer" onclick="document.getElementById('profile-pic-upload').click()">
-                            <img id="profile-avatar-preview" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-full object-cover shadow-md border-4 border-white group-hover:opacity-75 transition" alt="Profile Avatar">
-                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                                <i class="fas fa-camera text-white text-xl drop-shadow-md"></i>
+                            <div id="chat-header" class="p-4 border-b border-gray-200 bg-white hidden items-center">
+                                <div class="min-w-0 flex-1">
+                                    <h4 id="chat-landlord-name" class="font-black text-sm text-black truncate">Landlord</h4>
+                                    <p id="chat-property-ref" class="text-xs font-bold text-[#ea580c] truncate"></p>
+                                </div>
                             </div>
-                            <input type="file" id="profile-pic-upload" class="hidden" accept="image/*" onchange="window.handleProfilePicUpdate(event)">
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-black text-black">Profile Details</h3>
-                            <p class="text-gray-400 text-sm font-bold">Click your avatar to upload a new photo</p>
-                        </div>
-                    </div>
-                    <form onsubmit="window.saveProfile(event)" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Full Name</label>
-                                <input type="text" id="profile-name" required class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Phone Number</label>
-                                <input type="tel" id="profile-phone" class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black" placeholder="+260...">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Email Address</label>
-                            <input type="email" id="profile-email" required class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black">
-                        </div>
-                        <button type="submit" id="profile-save-btn" class="bg-[#ea580c] text-white px-8 py-4 rounded-xl font-black hover:bg-black transition shadow-lg w-full md:w-auto">SAVE CHANGES</button>
-                    </form>
-                </div>
-            </div>
-            <div id="settings-section" class="dashboard-section hidden">
-                <div class="max-w-3xl space-y-6">
-                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                        <h4 class="text-lg font-black text-black mb-4 border-b border-gray-100 pb-2"><i class="fas fa-bell text-[#ea580c] mr-2"></i> Notification Preferences</h4>
-                        <div class="space-y-4">
-                            <label class="flex items-center justify-between cursor-pointer">
-                                <span class="font-bold text-gray-700">Email alerts for new properties</span>
-                                <input type="checkbox" id="pref-email" onchange="window.savePreferences()" class="form-checkbox h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
-                            </label>
-                            <label class="flex items-center justify-between cursor-pointer">
-                                <span class="font-bold text-gray-700">SMS alerts for landlord messages</span>
-                                <input type="checkbox" id="pref-sms" onchange="window.savePreferences()" class="form-checkbox h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                        <h4 class="text-lg font-black text-black mb-4 border-b border-gray-100 pb-2"><i class="fas fa-shield-alt text-[#ea580c] mr-2"></i> Account Security</h4>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Change Password</label>
-                                <form onsubmit="window.updatePassword(event)" class="space-y-3">
-                                    <input type="password" id="current-password" required placeholder="Current password" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium">
-                                    <div class="flex space-x-2">
-                                        <input type="password" id="new-password" required placeholder="New password" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium">
-                                        <button type="submit" id="update-pwd-btn" class="bg-black text-white px-8 rounded-xl font-bold hover:bg-gray-800 transition">Update</button>
-                                    </div>
+                            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 hidden"></div>
+                            <div id="chat-input-area" class="p-3 bg-white border-t border-gray-100 hidden">
+                                <form id="chat-form" class="flex items-center gap-2" onsubmit="sendStudentMessage(event)">
+                                    <input type="text" id="chat-input" required autocomplete="off"
+                                           class="flex-1 bg-gray-50 px-4 py-3 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-medium text-sm"
+                                           placeholder="Type a message...">
+                                    <button type="submit" class="bg-[#ea580c] text-white w-11 h-11 rounded-xl flex items-center justify-center hover:bg-black transition flex-shrink-0">
+                                        <i class="fas fa-paper-plane text-sm"></i>
+                                    </button>
                                 </form>
                             </div>
-                            <div class="pt-6 mt-6 border-t border-red-100">
-                                <button onclick="window.deleteAccount()" class="text-red-500 font-bold hover:text-red-700 transition flex items-center p-2 rounded-lg hover:bg-red-50"><i class="fas fa-trash-alt mr-2"></i> Delete Account Permanently</button>
-                            </div>
                         </div>
                     </div>
                 </div>
-            </div></div>
-    </main>
 
-    <script src="student-dashboard.js?v=639094871086827883"></script>
+                <!-- ── PROFILE ────────────────────────────────────── -->
+                <div id="profile-section" class="dashboard-section hidden">
+                    <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 max-w-2xl shadow-sm">
+                        <h3 class="text-lg font-black text-black mb-6">Profile Details</h3>
+
+                        <div id="profile-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">Profile updated successfully!</div>
+                        <div id="profile-error"   class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
+
+                        <form id="profileForm" class="space-y-4" onsubmit="saveProfile(event)">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-1.5">Full Name</label>
+                                    <input type="text" id="profile-name" required
+                                           class="w-full p-3 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-1.5">Phone Number</label>
+                                    <input type="tel" id="profile-phone" placeholder="+260..."
+                                           class="w-full p-3 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-1.5">Email Address</label>
+                                <input type="email" id="profile-email" disabled
+                                       class="w-full p-3 bg-gray-100 border border-transparent rounded-xl text-gray-400 font-bold text-sm cursor-not-allowed">
+                                <p class="text-[10px] text-gray-400 mt-1 ml-1">Email cannot be changed here. Contact support.</p>
+                            </div>
+                            <button type="submit" id="profile-save-btn"
+                                    class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-black transition shadow text-sm">
+                                Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ── SETTINGS ───────────────────────────────────── -->
+                <div id="settings-section" class="dashboard-section hidden">
+                    <div class="max-w-2xl space-y-5">
+
+                        <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
+                            <h4 class="text-sm font-black text-black mb-4 border-b border-gray-100 pb-3">
+                                <i class="fas fa-shield-alt text-[#ea580c] mr-2"></i> Change Password
+                            </h4>
+                            <div id="pwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">Password updated!</div>
+                            <div id="pwd-error"   class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
+                            <form onsubmit="updatePassword(event)" class="space-y-3">
+                                <input type="password" id="current-password" required placeholder="Current password"
+                                       class="w-full p-3 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium text-sm">
+                                <input type="password" id="new-password" required placeholder="New password (8-12 chars, mixed case, number, symbol)"
+                                       class="w-full p-3 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium text-sm">
+                                <button type="submit" class="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-800 transition text-sm">
+                                    Update Password
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="fmn-toast" class="fixed bottom-5 right-4 z-[9999] hidden items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white"></div>
+
+<script>
+'use strict';
+const API = 'http://127.0.0.1:8000/api/v1';
+
+// ── XSS helper ────────────────────────────────────────────────────────────────
+function esc(str) {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Auth guard ────────────────────────────────────────────────────────────────
+(function() {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) window.location.replace('login.html');
+})();
+
+const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function openSidebar() {
+    document.getElementById('sidebar').classList.remove('-translate-x-full');
+    document.getElementById('sidebar-overlay').classList.remove('hidden');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('sidebar-overlay').classList.add('hidden');
+}
+
+// ── Mobile chat ───────────────────────────────────────────────────────────────
+function openMobileChat() {
+    if (window.innerWidth < 768) {
+        document.getElementById('conv-pane').classList.add('mobile-chat-open');
+        document.getElementById('chat-pane').classList.add('mobile-chat-open');
+        document.getElementById('chat-pane').style.display = 'flex';
+    }
+}
+function closeMobileChat() {
+    document.getElementById('conv-pane').classList.remove('mobile-chat-open');
+    document.getElementById('chat-pane').classList.remove('mobile-chat-open');
+    if (window.innerWidth < 768) document.getElementById('chat-pane').style.display = 'none';
+}
+
+// ── Tab switcher ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+    document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.nav-link').forEach(b => {
+        b.classList.remove('nav-link-active', 'text-[#ea580c]');
+        b.classList.add('text-gray-600');
+    });
+
+    const section = document.getElementById(`${tab}-section`);
+    const navBtn  = document.getElementById(`nav-${tab}`);
+    if (section) section.classList.remove('hidden');
+    if (navBtn)  { navBtn.classList.add('nav-link-active', 'text-[#ea580c]'); navBtn.classList.remove('text-gray-600'); }
+
+    const titles = { overview: 'Overview', saved: 'Saved Rooms', messages: 'Messages', profile: 'Profile', settings: 'Settings' };
+    const titleEl = document.getElementById('page-title');
+    if (titleEl) titleEl.textContent = titles[tab] || tab;
+
+    closeSidebar();
+
+    if (tab === 'messages') loadConversations();
+    if (tab === 'profile')  loadProfileData();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    const el = document.getElementById('fmn-toast');
+    el.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-gray-800'}`;
+    el.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${esc(msg)}`;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 3500);
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+function logout() {
+    ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    window.location.replace('login.html');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+async function initDashboard() {
+    const token = getToken();
+    try {
+        const res  = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.status === 401) { logout(); return; }
+        if (!res.ok) throw new Error();
+
+        const user = await res.json();
+
+        // Role guard — redirect wrong roles
+        if (user.role !== 'student') {
+            const dest = { student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+            window.location.replace(dest[user.role] || 'login.html');
+            return;
+        }
+
+        window._currentUser = user;
+        const initials  = (user.full_name || 'S').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        const avatarSrc = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=ea580c&color=fff`;
+
+        const headerName   = document.getElementById('header-name');
+        const headerAvatar = document.getElementById('header-avatar');
+        const mobileAvatar = document.getElementById('mobile-avatar');
+        if (headerName)   headerName.textContent = user.full_name || 'Student';
+        if (headerAvatar) headerAvatar.src = avatarSrc;
+        if (mobileAvatar) mobileAvatar.src = avatarSrc;
+
+    } catch { /* non-fatal */ }
+
+    loadOverviewStats();
+}
+
+// ── Overview stats — uses the real /students/dashboard/overview endpoint ──────
+async function loadOverviewStats() {
+    const token      = getToken();
+    const statSaved  = document.getElementById('stat-saved');
+    const statMsgs   = document.getElementById('stat-messages');
+    const recentGrid = document.getElementById('recent-listings-container');
+
+    try {
+        const res  = await fetch(`${API}/students/dashboard/overview`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (res.status === 401) { logout(); return; }
+        if (!res.ok) throw new Error(`${res.status}`);
+
+        const data = await res.json();
+
+        if (statSaved) statSaved.textContent = data.stats?.saved_count           ?? '0';
+        if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count ?? '0';
+
+        const props = data.recent_properties || [];
+        if (!props.length) {
+            if (recentGrid) recentGrid.innerHTML = `
+                <div class="col-span-full py-10 text-center bg-white rounded-2xl border border-gray-100">
+                    <i class="fas fa-home text-5xl text-gray-200 mb-4 block"></i>
+                    <p class="text-gray-400 font-bold mb-4 text-sm">No listings available right now.</p>
+                    <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition inline-block text-sm">Browse All Properties</a>
+                </div>`;
+            return;
+        }
+
+        if (recentGrid) recentGrid.innerHTML = props.map(prop => `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer flex flex-col group hover:shadow-md transition"
+                 onclick="window.location.href='listing.html?id=${encodeURIComponent(prop.id)}'">
+                <div class="h-44 bg-gray-100 relative overflow-hidden flex-shrink-0">
+                    <img src="${esc(prop.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'"
+                         alt="${esc(prop.title)}">
+                    ${prop.is_boosted ? '<div class="absolute top-2 left-2 bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-lg"><i class="fas fa-bolt mr-1"></i>Featured</div>' : ''}
+                </div>
+                <div class="p-4 flex-1 flex flex-col">
+                    <h4 class="font-black text-sm text-black truncate mb-1">${esc(prop.title)}</h4>
+                    <p class="text-[#ea580c] font-black text-sm mb-1">ZMW ${Number(prop.price).toLocaleString()}</p>
+                    <p class="text-gray-400 text-xs font-medium truncate"><i class="fas fa-map-marker-alt mr-1"></i>${esc(prop.location)}</p>
+                </div>
+            </div>`).join('');
+
+    } catch {
+        if (statSaved) statSaved.innerHTML = '<span class="text-base text-gray-400 font-bold">—</span>';
+        if (statMsgs)  statMsgs.innerHTML  = '<span class="text-base text-gray-400 font-bold">—</span>';
+        if (recentGrid) recentGrid.innerHTML = `
+            <div class="col-span-full py-10 text-center bg-red-50 rounded-2xl border border-red-100">
+                <i class="fas fa-wifi text-4xl text-red-300 mb-3 block"></i>
+                <p class="text-red-500 font-bold mb-4 text-sm">Could not connect to server.</p>
+                <button onclick="loadOverviewStats()" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition text-sm">
+                    <i class="fas fa-redo mr-2"></i>Retry
+                </button>
+            </div>`;
+    }
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+async function searchProperties() {
+    const q    = (document.getElementById('search-input')?.value || '').trim();
+    const grid = document.getElementById('search-results-grid');
+    if (!q) { grid.classList.add('hidden'); return; }
+
+    grid.classList.remove('hidden');
+    grid.innerHTML = '<div class="col-span-full text-center py-6 text-gray-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Searching...</div>';
+
+    try {
+        const res  = await fetch(`${API}/properties?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+
+        if (!data.length) {
+            grid.innerHTML = '<div class="col-span-full text-center py-6 text-gray-400 text-sm font-semibold">No results found for your search.</div>';
+            return;
+        }
+
+        grid.innerHTML = data.map(p => `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition"
+                 onclick="window.location.href='listing.html?id=${encodeURIComponent(p.id)}'">
+                <div class="h-36 bg-gray-100 overflow-hidden">
+                    <img src="${esc(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'}"
+                         class="w-full h-full object-cover"
+                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'"
+                         alt="${esc(p.title)}">
+                </div>
+                <div class="p-3">
+                    <h4 class="font-black text-sm text-black truncate">${esc(p.title)}</h4>
+                    <p class="text-[#ea580c] font-black text-sm">ZMW ${Number(p.price).toLocaleString()}</p>
+                    <p class="text-gray-400 text-xs truncate"><i class="fas fa-map-marker-alt mr-1"></i>${esc(p.location)}</p>
+                </div>
+            </div>`).join('');
+    } catch {
+        grid.innerHTML = '<div class="col-span-full text-center py-4 text-red-400 text-sm">Search failed. Please try again.</div>';
+    }
+}
+window.searchProperties = searchProperties;
+
+document.getElementById('search-input')?.addEventListener('keypress', e => {
+    if (e.key === 'Enter') searchProperties();
+});
+
+// ── Conversations ─────────────────────────────────────────────────────────────
+let _activePropId = null;
+let _activeOtherId = null;
+
+async function loadConversations() {
+    const token  = getToken();
+    const listEl = document.getElementById('conversation-list');
+    listEl.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
+
+    try {
+        const res   = await fetch(`${API}/messages/conversations`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const convs = await res.json();
+
+        if (!convs.length) {
+            listEl.innerHTML = `
+                <div class="p-6 text-center text-gray-400 text-sm">
+                    <i class="fas fa-comments text-3xl text-gray-200 mb-3 block"></i>
+                    <p class="font-semibold">No conversations yet.</p>
+                    <p class="text-xs mt-1">Message a landlord from a listing to get started.</p>
+                </div>`;
+            return;
+        }
+
+        listEl.innerHTML = convs.map(c => `
+            <div class="p-4 border-b border-gray-100 hover:bg-orange-50 cursor-pointer transition"
+                 onclick="openThread(${c.other_user_id}, ${c.property_id || 0}, '${esc(c.other_user_name)}', '${esc(c.property_title)}')">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 text-[#ea580c] flex items-center justify-center font-black text-sm flex-shrink-0">
+                        ${esc((c.other_user_name || 'U').charAt(0).toUpperCase())}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-sm text-black truncate">${esc(c.other_user_name)}</span>
+                            ${c.unread_count > 0 ? `<span class="bg-[#ea580c] text-white text-[10px] font-black rounded-full px-1.5 py-0.5 flex-shrink-0">${c.unread_count}</span>` : ''}
+                        </div>
+                        <p class="text-xs text-[#ea580c] font-semibold truncate">${esc(c.property_title)}</p>
+                        <p class="text-xs text-gray-400 truncate">${esc(c.last_message)}</p>
+                    </div>
+                </div>
+            </div>`).join('');
+    } catch {
+        listEl.innerHTML = '<div class="p-4 text-center text-red-400 text-sm">Failed to load conversations.</div>';
+    }
+}
+
+async function openThread(otherId, propId, otherName, propTitle) {
+    _activeOtherId = otherId;
+    _activePropId  = propId;
+
+    const header   = document.getElementById('chat-header');
+    const messages = document.getElementById('chat-messages');
+    const inputArea= document.getElementById('chat-input-area');
+    const emptyState = document.getElementById('chat-empty-state');
+
+    document.getElementById('chat-landlord-name').textContent = otherName;
+    document.getElementById('chat-property-ref').textContent  = propTitle;
+
+    header.classList.remove('hidden'); header.classList.add('flex');
+    messages.classList.remove('hidden');
+    inputArea.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    openMobileChat();
+
+    const token = getToken();
+    messages.innerHTML = '<div class="text-center text-gray-400 text-sm py-4"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
+
+    try {
+        const res  = await fetch(`${API}/messages/thread/${propId}/${otherId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const msgs = await res.json();
+
+        if (!msgs.length) {
+            messages.innerHTML = '<div class="text-center text-gray-400 text-sm py-8">No messages yet. Say hello!</div>';
+            return;
+        }
+
+        messages.innerHTML = msgs.map(m => `
+            <div class="flex ${m.is_mine ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm font-medium ${m.is_mine ? 'bubble-me' : 'bubble-them'}">
+                    ${esc(m.content)}
+                </div>
+            </div>`).join('');
+        messages.scrollTop = messages.scrollHeight;
+    } catch {
+        messages.innerHTML = '<div class="text-center text-red-400 text-sm py-4">Failed to load messages.</div>';
+    }
+}
+
+async function sendStudentMessage(e) {
+    e.preventDefault();
+    const input   = document.getElementById('chat-input');
+    const content = input.value.trim();
+    if (!content || !_activeOtherId) return;
+
+    const token = getToken();
+    input.value = '';
+
+    try {
+        const res = await fetch(`${API}/messages/send`, {
+            method:  'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content }),
+        });
+        if (res.ok) {
+            // Reload thread to show the new message
+            await openThread(_activeOtherId, _activePropId, document.getElementById('chat-landlord-name').textContent, document.getElementById('chat-property-ref').textContent);
+        }
+    } catch {
+        showToast('Failed to send message.', 'error');
+    }
+}
+window.sendStudentMessage = sendStudentMessage;
+
+// ── Profile ───────────────────────────────────────────────────────────────────
+function loadProfileData() {
+    const user = window._currentUser;
+    if (!user) return;
+    const nameEl  = document.getElementById('profile-name');
+    const phoneEl = document.getElementById('profile-phone');
+    const emailEl = document.getElementById('profile-email');
+    if (nameEl)  nameEl.value  = user.full_name    || '';
+    if (phoneEl) phoneEl.value = user.phone        || '';
+    if (emailEl) emailEl.value = user.email        || '';
+}
+
+async function saveProfile(e) {
+    e.preventDefault();
+    const token   = getToken();
+    const name    = document.getElementById('profile-name').value.trim();
+    const phone   = document.getElementById('profile-phone').value.trim();
+    const sucEl   = document.getElementById('profile-success');
+    const errEl   = document.getElementById('profile-error');
+    const btn     = document.getElementById('profile-save-btn');
+
+    sucEl.classList.add('hidden');
+    errEl.classList.add('hidden');
+
+    if (!name) { errEl.textContent = 'Full name cannot be empty.'; errEl.classList.remove('hidden'); return; }
+
+    btn.disabled = true; btn.textContent = 'Saving...';
+
+    try {
+        const res = await fetch(`${API}/students/profile`, {
+            method:  'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ full_name: name, phone }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to update profile.');
+        if (window._currentUser) { window._currentUser.full_name = name; window._currentUser.phone = phone; }
+        sucEl.classList.remove('hidden');
+        showToast('Profile updated!');
+    } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Save Changes';
+    }
+}
+
+// ── Password ──────────────────────────────────────────────────────────────────
+async function updatePassword(e) {
+    e.preventDefault();
+    const token   = getToken();
+    const current = document.getElementById('current-password').value;
+    const newPwd  = document.getElementById('new-password').value;
+    const sucEl   = document.getElementById('pwd-success');
+    const errEl   = document.getElementById('pwd-error');
+
+    sucEl.classList.add('hidden');
+    errEl.classList.add('hidden');
+
+    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
+    if (!pwdRegex.test(newPwd)) {
+        errEl.textContent = 'Password must be 8-12 characters with uppercase, lowercase, number, and special character.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        const res  = await fetch(`${API}/students/settings/password`, {
+            method:  'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ current_password: current, new_password: newPwd }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to update password.');
+        sucEl.classList.remove('hidden');
+        document.getElementById('current-password').value = '';
+        document.getElementById('new-password').value     = '';
+    } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initDashboard);
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-

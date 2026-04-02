@@ -1,0 +1,536 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Host Dashboard - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hidden-view { display: none !important; }
+        .nav-active { background-color: #fff7ed; color: #ea580c; border-right: 4px solid #ea580c; }
+        .badge-boosted { background: linear-gradient(45deg, #FFD700, #FFA500); color: #fff; text-shadow: 1px 1px 0px rgba(0,0,0,0.2); }
+        .stat-spinner { display: inline-block; width: 1.5rem; height: 1.5rem; border: 3px solid #e5e7eb; border-top-color: #ea580c; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden font-sans">
+    
+    <aside class="w-64 bg-white border-r shadow-lg flex flex-col h-full z-20">
+        <div class="p-6 border-b text-center">
+            <h1 class="text-2xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></h1>
+            <div class="mt-2 inline-block px-3 py-1 bg-gray-100 rounded-full shadow-inner">
+                <p id="role-badge" class="text-[10px] font-bold text-[#ea580c] uppercase tracking-wider">Loading Role...</p>
+            </div>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn nav-active w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition flex items-center"><i class="fas fa-chart-pie w-6"></i> Overview</button>
+            <button onclick="switchTab('listings')" id="nav-listings" class="nav-btn w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition hover:bg-orange-50 flex items-center"><i class="fas fa-building w-6"></i> My Listings</button>
+            <button onclick="switchTab('upload')" id="nav-upload" class="nav-btn w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition hover:bg-orange-50 flex items-center"><i class="fas fa-plus-circle w-6"></i> Add Listing</button>
+            <button onclick="switchTab('inquiries')" id="nav-inquiries" class="nav-btn w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition hover:bg-orange-50 flex items-center"><i class="fas fa-envelope w-6"></i> Inquiries</button>
+            <button onclick="switchTab('verification')" id="nav-verification" class="nav-btn w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition hover:bg-orange-50 flex items-center"><i class="fas fa-shield-alt w-6"></i> Verification</button>
+            <button onclick="switchTab('payments')" id="nav-payments" class="nav-btn w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition hover:bg-orange-50 flex items-center"><i class="fas fa-wallet w-6"></i> Monetization & Boosts</button>
+            <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition hover:bg-orange-50 flex items-center"><i class="fas fa-user-cog w-6"></i> Profile & Settings</button>
+        </nav>
+        <div class="p-4 border-t">
+            <button onclick="logout()" class="w-full text-left p-3 text-red-600 font-bold hover:bg-red-50 rounded flex items-center"><i class="fas fa-sign-out-alt w-6"></i> Logout</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-8 bg-gray-50">
+        
+        <div id="view-overview" class="dashboard-view">
+            <h2 class="text-3xl font-bold mb-2 text-gray-800">Dashboard Overview</h2>
+            <div id="verification-alert" class="hidden mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg shadow-sm">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 text-xl"></i>
+                    <div><h3 class="font-bold text-yellow-800">Action Required: Account Not Verified</h3></div>
+                    <button onclick="switchTab('verification')" class="ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-600">Verify Now</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-[#ea580c]"><h3 class="text-gray-400 text-xs font-bold uppercase">Active Listings</h3><div id="stat-active" class="text-3xl font-black mt-2">...</div></div>
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-blue-600"><h3 class="text-gray-400 text-xs font-bold uppercase">Pending Listings</h3><div id="stat-pending" class="text-3xl font-black mt-2">...</div></div>
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-500"><h3 class="text-gray-400 text-xs font-bold uppercase">Total Views</h3><div id="stat-views" class="text-3xl font-black mt-2 text-green-600">...</div></div>
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-purple-500"><h3 class="text-gray-400 text-xs font-bold uppercase">New Inquiries</h3><div id="stat-inquiries" class="text-3xl font-black mt-2 text-purple-600">...</div></div>
+            </div>
+        </div>
+
+        <div id="view-listings" class="dashboard-view hidden-view">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">ðŸ  My Listings</h2>
+                <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition">+ Add New Listing</button>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-hidden border">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-100 border-b">
+                        <tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Property Info</th><th class="p-4">Price</th><th class="p-4">Status / Visibility</th><th class="p-4">Actions</th></tr>
+                    </thead>
+                    <tbody id="my-listings-body" class="text-sm divide-y">
+                        <tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Loading your listings...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-upload" class="dashboard-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8 text-gray-800">ðŸš€ Publish New Accommodation</h2>
+            <div class="bg-white p-8 rounded-xl shadow border max-w-4xl">
+                <form id="uploadForm" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Property Title</label><input type="text" id="prop-title" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
+                        <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Price per Term/Month (ZMW)</label><input type="number" id="prop-price" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nearest Institution</label>
+                            <select id="prop-university" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none">
+                                <option value="UNZA">University of Zambia (UNZA)</option><option value="CBU">Copperbelt University (CBU)</option><option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Location/Area</label><input type="text" id="prop-location" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
+                    </div>
+                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Detailed Description</label><textarea id="prop-desc" rows="4" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></textarea></div>
+                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Upload Images</label><input type="file" id="prop-images" accept="image/*" multiple class="w-full p-3 border rounded-lg"></div>
+                    <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-lg hover:bg-[#c2410c] transition shadow-lg">Submit Property</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-verification" class="dashboard-view hidden-view">
+            <h2 class="text-3xl font-bold mb-2 text-gray-800">ðŸ›¡ï¸ Verification Center</h2>
+            <p class="text-gray-500 mb-8">Build trust with students by verifying your identity and your right to offer this bedspace.</p>
+            <div class="bg-white p-8 rounded-xl shadow border max-w-3xl">
+                <div id="verif-status-badge" class="mb-6 p-4 rounded-lg bg-yellow-50 text-yellow-800 font-bold border flex items-center"><i class="fas fa-clock mr-3 text-xl"></i> Status: Unverified - Action Required</div>
+                <form id="verificationForm" class="space-y-6">
+                    <div id="dynamic-docs-container"></div>
+                    <hr>
+                    <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 shadow transition">Securely Upload Documents</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="view-inquiries" class="dashboard-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8">ðŸ’¬ Student Inquiries</h2>
+            <div class="bg-white rounded-xl shadow border overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-100 border-b"><tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Student</th><th class="p-4">Interested In</th><th class="p-4">Message</th><th class="p-4">Action</th></tr></thead>
+                    <tbody id="inquiries-body" class="text-sm divide-y">
+                        <tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Loading inquiries...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-payments" class="dashboard-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8">ðŸ’³ Revenue & Boosts</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow border border-orange-100">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-rocket text-4xl text-yellow-500 mb-4"></i>
+                        <h3 class="text-2xl font-black text-gray-800">Boost Your Listing</h3>
+                        <p class="text-gray-500 mt-2">Get up to 5x more student views by pinning your property to the top of the search results.</p>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4 mb-6 border border-orange-200">
+                        <div class="flex justify-between items-center font-bold text-orange-800"><span>7-Day Boost</span><span>ZMW 150</span></div>
+                    </div>
+                    <button onclick="switchTab('listings')" class="w-full bg-yellow-500 text-white py-3 rounded-lg font-black hover:bg-yellow-600 transition shadow">Boost a Property Now</button>
+                </div>
+                <div class="bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-800 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">Most Popular</div>
+                    <div class="text-center mb-6 text-white">
+                        <i class="fas fa-crown text-4xl text-orange-400 mb-4"></i>
+                        <h3 class="text-2xl font-black">Premium Provider</h3>
+                        <p class="text-gray-400 mt-2">Unlimited listings, priority verification, and dedicated support.</p>
+                    </div>
+                    <div class="text-center mb-6"><span class="text-4xl font-black text-white">ZMW 499</span><span class="text-gray-400">/mo</span></div>
+                    <ul class="text-sm text-gray-300 space-y-3 mb-8">
+                        <li><i class="fas fa-check text-orange-400 mr-2"></i> Post Unlimited Properties</li>
+                        <li><i class="fas fa-check text-orange-400 mr-2"></i> Premium "Trusted" Badge</li>
+                        <li><i class="fas fa-check text-orange-400 mr-2"></i> Instant SMS Notifications</li>
+                    </ul>
+                    <button class="w-full bg-white text-gray-900 py-3 rounded-lg font-black hover:bg-gray-100 transition shadow">Upgrade via Mobile Money</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-profile" class="dashboard-view hidden-view">
+            <h2 class="text-3xl font-bold mb-8">âš™ï¸ Profile & Settings</h2>
+            <div class="bg-white p-8 rounded-xl shadow border max-w-2xl">
+                <form id="profileForm" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Full Name</label>
+                            <input type="text" id="prof-name" required class="w-full p-3 border rounded-md outline-none focus:ring-2 focus:ring-[#ea580c]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Account Type</label>
+                            <div class="w-full p-3 border rounded-md bg-gray-50 text-gray-500 text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-user-graduate text-[#ea580c]"></i> Student Host Account
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Mobile Money Number (For Receiving Payments)</label>
+                        <input type="text" id="prof-phone" placeholder="e.g. +2609..." required class="w-full p-3 border rounded-md outline-none focus:ring-2 focus:ring-[#ea580c]">
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-lg border border-blue-100 mt-4">
+                        <p class="text-xs text-blue-800"><i class="fas fa-info-circle"></i> <b>Note:</b> Your Mobile Money number will be used to receive payments from students who book your bedspace.</p>
+                    </div>
+                    <hr>
+                    <button type="submit" class="bg-[#ea580c] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#c2410c] shadow transition">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000/api/v1";
+
+        // â”€â”€â”€ Auth helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Single source of truth for the token. Every fetch uses these.
+        function getToken() {
+            return localStorage.getItem('token') || sessionStorage.getItem('token');
+        }
+
+        function authHeaders(isJson = true) {
+            const h = { 'Authorization': `Bearer ${getToken()}` };
+            if (isJson) h['Content-Type'] = 'application/json';
+            return h;
+        }
+
+        // â”€â”€â”€ Current user (populated from backend on boot) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Role is NEVER hardcoded. It comes from /student-host/me.
+        let currentUser = null;
+
+        // â”€â”€â”€ Boot sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        async function initDashboard() {
+            if (!getToken()) {
+                showFatalError('No login session found. Please <a href="login.html" class="underline font-bold">log in</a>.');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/student-host/me`, {
+                    headers: authHeaders()
+                });
+                if (res.status === 401) {
+                    showFatalError('Your session has expired. Please <a href="login.html" class="underline font-bold">log in again</a>.');
+                    return;
+                }
+                if (!res.ok) throw new Error('Profile load failed');
+
+                currentUser = await res.json();
+                // Role badge comes from backend â€” never hardcoded
+                document.getElementById('role-badge').innerText =
+                    (currentUser.role || 'student_host').replace(/_/g, ' ').toUpperCase();
+
+            } catch (e) {
+                // Non-fatal: profile call failed (e.g. network blip).
+                // Still let the dashboard load; badge shows a safe fallback.
+                console.warn('initDashboard profile fetch failed:', e.message);
+                document.getElementById('role-badge').innerText = 'STUDENT HOST';
+            }
+            switchTab('overview');
+        }
+
+        // Shows a full-screen error and blocks the dashboard (used for auth failures)
+        function showFatalError(msg) {
+            document.querySelector('main').innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="bg-white p-10 rounded-xl shadow border text-center max-w-md">
+                        <i class="fas fa-lock text-5xl text-red-300 mb-5"></i>
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">Access Denied</h2>
+                        <p class="text-gray-500 text-sm">${msg}</p>
+                    </div>
+                </div>`;
+        }
+
+        // â”€â”€â”€ Tab switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        function switchTab(tabId) {
+            document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden-view'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('view-' + tabId).classList.remove('hidden-view');
+            document.getElementById('nav-' + tabId).classList.add('nav-active');
+
+            if (tabId === 'overview')      loadOverview();
+            if (tabId === 'listings')      loadListings();
+            if (tabId === 'verification')  setupVerificationForm();
+            if (tabId === 'inquiries')     loadInquiries();
+            if (tabId === 'profile' && currentUser) {
+                // Pre-fill profile form with real data from backend
+                if (currentUser.full_name) document.getElementById('prof-name').value = currentUser.full_name;
+                if (currentUser.phone)     document.getElementById('prof-phone').value = currentUser.phone;
+                // Role is fixed on this dashboard â€” no dropdown change needed
+                const profRoleEl = document.getElementById('prof-role'); if (profRoleEl) profRoleEl.value = currentUser.role || 'student_host';
+            }
+        }
+
+        // â”€â”€â”€ OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        async function loadOverview() {
+            const activeEl    = document.getElementById('stat-active');
+            const pendingEl   = document.getElementById('stat-pending');
+            const viewsEl     = document.getElementById('stat-views');
+            const inquiriesEl = document.getElementById('stat-inquiries');
+            const alertBox    = document.getElementById('verification-alert');
+
+            // Guard: must have a token before making any request
+            if (!getToken()) {
+                const noAuth = `<span class="text-red-500 text-xs font-bold">Not logged in</span>`;
+                activeEl.innerHTML = noAuth; pendingEl.innerHTML = noAuth;
+                viewsEl.innerHTML  = noAuth; inquiriesEl.innerHTML = noAuth;
+                alertBox.classList.add('hidden');
+                return;
+            }
+
+            // Show spinners while waiting for the server
+            const spinner = `<i class="fas fa-circle-notch fa-spin text-gray-300 text-2xl"></i>`;
+            activeEl.innerHTML    = spinner; pendingEl.innerHTML = spinner;
+            viewsEl.innerHTML     = spinner; inquiriesEl.innerHTML = spinner;
+            alertBox.classList.add('hidden'); // hide any stale banner while reloading
+
+            try {
+                const res = await fetch(`${API_BASE}/student-host/dashboard/stats`, {
+                    headers: authHeaders(false) // No json content type needed for GET
+                });
+
+                // Session expired or token invalid
+                if (res.status === 401) {
+                    const expired = `<span class="text-red-500 text-xs font-bold">Session expired</span>`;
+                    activeEl.innerHTML    = expired; pendingEl.innerHTML = expired;
+                    viewsEl.innerHTML     = expired; inquiriesEl.innerHTML = expired;
+                    alertBox.classList.add('hidden');
+                    return;
+                }
+
+                if (!res.ok) throw new Error(`Server responded ${res.status}`);
+
+                const data = await res.json();
+
+                // Populate the four stat cards with real backend values
+                activeEl.innerText    = data.active_listings   ?? '0';
+                pendingEl.innerText   = data.pending_listings  ?? '0';
+                viewsEl.innerText     = data.total_views       ?? '0';
+                inquiriesEl.innerText = data.unread_inquiries  ?? '0';
+
+                // â”€â”€ Verification alert banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // All four statuses are handled. The old code only handled 'unverified'.
+                const vStatus = data.verification_status || 'unverified';
+
+                if (vStatus === 'unverified') {
+                    alertBox.className = 'mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg shadow-sm';
+                    alertBox.innerHTML = `
+                        <div class="flex items-center flex-wrap gap-3">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-yellow-800">Action Required: Account Not Verified</h3>
+                                <p class="text-xs text-yellow-700 mt-1">Upload your Student ID and proof of residence to start listing bedspaces.</p>
+                            </div>
+                            <button onclick="switchTab('verification')"
+                                class="ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-600 transition shadow whitespace-nowrap">
+                                Verify Now
+                            </button>
+                        </div>`;
+                    alertBox.classList.remove('hidden');
+
+                } else if (vStatus === 'pending') {
+                    alertBox.className = 'mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm';
+                    alertBox.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-hourglass-half text-blue-500 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-blue-800">Verification Under Review</h3>
+                                <p class="text-xs text-blue-700 mt-1">Your documents were submitted. We'll update you within 24â€“48 hours.</p>
+                            </div>
+                        </div>`;
+                    alertBox.classList.remove('hidden');
+
+                } else if (vStatus === 'rejected') {
+                    alertBox.className = 'mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm';
+                    alertBox.innerHTML = `
+                        <div class="flex items-center flex-wrap gap-3">
+                            <i class="fas fa-times-circle text-red-500 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-red-800">Verification Rejected</h3>
+                                <p class="text-xs text-red-700 mt-1">${data.rejection_reason || 'Your documents were not accepted. Please re-submit with clearer photos.'}</p>
+                            </div>
+                            <button onclick="switchTab('verification')"
+                                class="ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition shadow whitespace-nowrap">
+                                Re-submit
+                            </button>
+                        </div>`;
+                    alertBox.classList.remove('hidden');
+
+                } else if (vStatus === 'verified') {
+                    alertBox.className = 'mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg shadow-sm';
+                    alertBox.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            <div>
+                                <h3 class="font-bold text-green-800">
+                                    <i class="fas fa-shield-alt mr-1"></i> Verified Student Host
+                                </h3>
+                                <p class="text-xs text-green-700 mt-1">Your account is verified. Your listings display the Verified badge to students.</p>
+                            </div>
+                        </div>`;
+                    alertBox.classList.remove('hidden');
+                    // Auto-dismiss after 6 seconds so it doesn't clutter the dashboard permanently
+                    setTimeout(() => alertBox.classList.add('hidden'), 6000);
+
+                } else {
+                    alertBox.classList.add('hidden');
+                }
+
+            } catch (e) {
+                // Error state: show clearly in all four stat cards and offer a retry
+                const errIcon = `<i class="fas fa-exclamation-circle text-red-300 text-2xl"></i>`;
+                activeEl.innerHTML    = errIcon; pendingEl.innerHTML = errIcon;
+                viewsEl.innerHTML     = errIcon; inquiriesEl.innerHTML = errIcon;
+
+                alertBox.className = 'mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-sm';
+                alertBox.innerHTML = `
+                    <div class="flex items-center flex-wrap gap-3">
+                        <i class="fas fa-server text-red-400 text-xl"></i>
+                        <div>
+                            <h3 class="font-bold text-red-700">Could Not Load Dashboard</h3>
+                            <p class="text-xs text-red-600 mt-1">Check your connection or try refreshing.</p>
+                        </div>
+                        <button onclick="loadOverview()"
+                            class="ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition shadow whitespace-nowrap">
+                            <i class="fas fa-redo mr-1"></i> Retry
+                        </button>
+                    </div>`;
+                alertBox.classList.remove('hidden');
+                console.error('loadOverview failed:', e.message);
+            }
+        }
+
+        // â”€â”€â”€ MY LISTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        async function loadListings() {
+            const tbody = document.getElementById('my-listings-body');
+
+            if (!getToken()) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold">Not logged in. Please login first.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center"><i class="fas fa-circle-notch fa-spin text-gray-400"></i> Loading your bedspaces...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_BASE}/student-host/properties`, {
+                    headers: authHeaders(false)
+                });
+
+                if (res.status === 401) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold">Session invalid. Please log in again.</td></tr>';
+                    return;
+                }
+                if (!res.ok) throw new Error('Failed to load listings');
+
+                const myProps = await res.json();
+
+                if (myProps.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">
+                        You have no bedspaces yet.
+                        <button onclick="switchTab('upload')" class="text-[#ea580c] underline font-bold ml-1">Add one now.</button>
+                    </td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = myProps.map(p => `
+                    <tr class="hover:bg-gray-50 transition border-b">
+                        <td class="p-4">
+                            <p class="font-bold text-gray-800">${p.title}</p>
+                            <p class="text-xs text-gray-500"><i class="fas fa-map-marker-alt"></i> ${p.location}</p>
+                        </td>
+                        <td class="p-4 font-mono text-sm text-gray-600">ZMW ${p.price}</td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 ${p.status === 'active' ? 'bg-green-100 text-green-700' : (p.status === 'pending' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600')} text-[10px] font-bold rounded-md uppercase">${p.status || 'pending'}</span>
+                            ${p.is_boosted ? '<span class="ml-2 badge-boosted px-2 py-1 text-[10px] font-bold rounded-md uppercase"><i class="fas fa-rocket"></i> Boosted</span>' : ''}
+                        </td>
+                        <td class="p-4">
+                            <button onclick="deleteProperty(${p.id})" class="text-red-600 hover:text-red-800 transition" title="Delete Listing"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold italic">
+                    Could not load listings.
+                    <button onclick="loadListings()" class="underline ml-1">Retry</button>
+                </td></tr>`;
+            }
+        }
+
+        async function deleteProperty(id) {
+            if (!confirm('âš ï¸ Are you sure? This will permanently remove this bedspace.')) return;
+            try {
+                const res = await fetch(`${API_BASE}/student-host/properties/${id}`, {
+                    method: 'DELETE',
+                    headers: authHeaders(false)
+                });
+                if (res.ok) {
+                    loadListings();
+                    loadOverview();
+                } else {
+                    alert('Delete failed. You may not have permission.');
+                }
+            } catch (e) {
+                alert('Server error during deletion.');
+            }
+        }
+
+        // â”€â”€â”€ Stubs for future steps (kept so no errors are thrown) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        async function loadInquiries() {}
+        function setupVerificationForm() {}
+
+        // â”€â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                btn.innerText = 'Saving...';
+                btn.disabled  = true;
+
+                try {
+                    const res = await fetch(`${API_BASE}/student-host/profile`, {
+                        method: 'PUT',
+                        headers: authHeaders(true),
+                        body: JSON.stringify({
+                            full_name: document.getElementById('prof-name').value.trim(),
+                            phone:     document.getElementById('prof-phone').value.trim(),
+                        })
+                    });
+                    if (res.ok) {
+                        alert('âœ… Profile updated successfully.');
+                        if (currentUser) {
+                            currentUser.full_name = document.getElementById('prof-name').value.trim();
+                            currentUser.phone     = document.getElementById('prof-phone').value.trim();
+                        }
+                    } else {
+                        const data = await res.json();
+                        alert('âŒ ' + (data.detail || 'Could not save profile.'));
+                    }
+                } catch (err) {
+                    alert('âŒ Server error. Make sure the backend is running.');
+                } finally {
+                    btn.innerText = 'Save Settings';
+                    btn.disabled  = false;
+                }
+            });
+        });
+
+        // â”€â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        function logout() {
+            if (!confirm('Are you sure you want to log out?')) return;
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            window.location.href = 'login.html';
+        }
+
+        // â”€â”€â”€ Start the dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        initDashboard();
+    </script>
+</body>
+</html>
+
+

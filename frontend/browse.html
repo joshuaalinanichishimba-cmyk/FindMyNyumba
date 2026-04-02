@@ -1,70 +1,126 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Zambian Student Housing - FindMyNyumba</title>
+    <title>Browse Student Housing - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
     <style>
-        .verified-badge { background-color: var(--orange); color: white; }
-        .mobile-money-badge { background-color: var(--light-orange); color: white; }
-        .filters-open { transform: translateX(0); opacity: 1; visibility: visible; }
-        .filters-closed { transform: translateX(-100%); opacity: 0; visibility: hidden; }
-        .transition-all { transition: all 0.3s ease; }
-        .floating-element { animation: float 6s ease-in-out infinite; }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .testimonial-card { transition: all 0.3s ease; }
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .feature-icon {
-            width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(45deg, var(--orange), #ff9800); border-radius: 50%; margin: 0 auto 1rem;
-        }
+        #filters-sidebar { transition: transform 0.3s ease, opacity 0.3s ease; }
+        #filters-sidebar.sidebar-open  { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
+        #filters-sidebar.sidebar-closed { transform: translateX(-100%); opacity: 0; visibility: hidden; pointer-events: none; }
         @media (min-width: 768px) {
-            .filters-closed {
-                transform: translateX(0) !important; opacity: 1 !important; visibility: visible !important; display: block !important;
-            }
+            #filters-sidebar { transform: translateX(0) !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; position: relative !important; }
+            #sidebar-overlay, #filter-toggle-btn { display: none !important; }
         }
+        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
+        .listing-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .listing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12); }
     </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 </head>
 <body class="bg-gray-50">
+
+    <!-- ── NAV ─────────────────────────────────────────────────────────── -->
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="browse.html" class="flex-shrink-0 flex items-center w-48 md:w-56 h-16 relative overflow-visible"><img src="logo.png" alt="FindMyNyumba Logo" class="absolute left-[-15px] top-1/2 -translate-y-1/2 h-20 md:h-24 w-auto max-w-none object-contain mix-blend-multiply brightness-[1.4] contrast-[1.6] saturate-125" onerror="this.style.display='none'"></a>
+            <div class="flex justify-between items-center h-16">
+
+                <a href="browse.html" class="flex-shrink-0 flex items-center w-44 md:w-56 h-16 relative overflow-visible">
+                    <img src="logo.png" alt="FindMyNyumba"
+                         class="absolute left-[-12px] top-1/2 -translate-y-1/2 h-20 md:h-24 w-auto object-contain mix-blend-multiply brightness-[1.4] contrast-[1.6] saturate-125"
+                         onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden')">
+                    <span id="logo-fallback" class="hidden pl-1 text-xl font-black text-[#ea580c]">FindMyNyumba</span>
+                </a>
+
+                <!-- Desktop nav -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="browse.html" class="text-[#ea580c] font-semibold">Browse</a>
+                    <a id="nav-dashboard-desk" href="#" class="hidden text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Dashboard</a>
+                    <a id="nav-login-desk" href="login.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Login</a>
+                    <a id="nav-register-desk" href="register.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Register</a>
+                    <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors">Logout</a>
+                    <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm">Post Property</a>
                 </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="browse.html" class="text-orange-600 font-medium">Browse</a>
-                    <a href="index.html#how-it-works" class="text-gray-700 hover:text-orange-600">How It Works</a>
-                    <a href="login.html" class="text-gray-700 hover:text-orange-600">Login</a>
-                    <a href="register.html" class="text-gray-700 hover:text-orange-600">Register</a>
-                    <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg">Post Property</button>
-                </div>
+
+                <button id="mobile-nav-toggle" aria-label="Toggle navigation"
+                        class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                    <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
+            <div class="flex flex-col space-y-1 pt-3">
+                <a href="browse.html" class="px-3 py-3 rounded-lg text-[#ea580c] font-bold bg-orange-50">Browse</a>
+                <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50">Dashboard</a>
+                <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50">Login</a>
+                <a id="nav-register-mob" href="register.html" class="px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50">Register</a>
+                <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-lg text-red-600 font-semibold hover:bg-red-50">Logout</a>
+                <a href="register-landlord.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-bold transition-colors">Post Property</a>
             </div>
         </div>
     </nav>
 
+    <!-- Sidebar overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden" onclick="closeSidebar()"></div>
+
     <div class="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row gap-6 mt-6">
-            <aside id="filters-sidebar" class="fixed md:relative z-40 md:z-auto w-64 bg-white h-full md:h-auto shadow-lg md:shadow-none p-6 rounded-xl transition-all filters-closed">
+
+        <!-- Search bar row -->
+        <div class="mt-6 mb-4 flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                <input type="text" id="keyword-search"
+                       placeholder="Search by area, property name, university..."
+                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm text-sm">
+            </div>
+
+            <button id="filter-toggle-btn" onclick="toggleSidebar()"
+                    class="md:hidden flex items-center justify-center gap-2 px-5 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-bold shadow-sm hover:border-[#ea580c] hover:text-[#ea580c] transition-colors text-sm">
+                <i class="fas fa-sliders-h"></i> Filters
+            </button>
+
+            <div class="relative">
+                <select id="sort-filter" onchange="applyFilters()"
+                        class="appearance-none pl-4 pr-10 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-semibold focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm cursor-pointer w-full sm:w-auto text-sm">
+                    <option value="newest">Newest First</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+
+            <!-- Filter sidebar -->
+            <aside id="filters-sidebar"
+                   class="sidebar-closed fixed md:relative top-0 left-0 md:top-auto md:left-auto
+                          w-72 md:w-64 h-full md:h-auto bg-white
+                          shadow-2xl md:shadow-none z-40 md:z-auto
+                          rounded-r-2xl md:rounded-xl
+                          p-6 md:p-5 overflow-y-auto md:overflow-visible
+                          flex-shrink-0 md:self-start md:sticky md:top-24">
+
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-gray-800">Filters</h2>
+                    <h2 class="text-lg font-black text-gray-800">
+                        <i class="fas fa-sliders-h text-[#ea580c] mr-2"></i>Filters
+                    </h2>
+                    <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
                 </div>
-                <div class="space-y-6">
+
+                <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">University</label>
-                        <select id='university-filter' class='w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent font-bold'>
-                            <option value="">Select University</option>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">University</label>
+                        <select id="university-filter"
+                                class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                            <option value="">All Universities</option>
                             <option value="unza">University of Zambia (UNZA)</option>
                             <option value="cbu">Copperbelt University (CBU)</option>
                             <option value="mulungushi">Mulungushi University</option>
@@ -73,103 +129,132 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-                        <div class="space-y-3">
-                            <input type="number" id="min-price" placeholder="Min Price" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            <input type="number" id="max-price" placeholder="Max Price" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price Range (ZMW)</label>
+                        <div class="space-y-2">
+                            <input type="number" id="min-price" placeholder="Min Price" min="0"
+                                   class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none text-sm">
+                            <input type="number" id="max-price" placeholder="Max Price" min="0"
+                                   class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none text-sm">
                         </div>
                     </div>
-                    <button id="apply-filters" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transform transition duration-500 hover:scale-105">Apply Filters</button>
-                    <button id="clear-filters" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-medium transform transition duration-500 hover:scale-105">Clear All</button>
+
+                    <button id="apply-filters"
+                            class="w-full bg-[#ea580c] hover:bg-orange-700 text-white py-3 rounded-xl font-bold transition-colors shadow-sm text-sm">
+                        <i class="fas fa-check mr-2"></i>Apply Filters
+                    </button>
+                    <button id="clear-filters"
+                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold transition-colors text-sm">
+                        <i class="fas fa-times mr-2"></i>Clear All
+                    </button>
                 </div>
             </aside>
-            
-            <main class="flex-1">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Available Listings</h1>
-                    <select id="sort-filter" onchange="applyFilters()" class="p-2 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                        <option>Sort by: Newest</option>
-                        <option>Sort by: Price Low to High</option>
-                        <option>Sort by: Price High to Low</option>
-                    </select>
+
+            <!-- Listings grid -->
+            <main class="flex-1 min-w-0">
+                <div class="flex justify-between items-center mb-5">
+                    <h1 class="text-lg md:text-xl font-black text-gray-800">Available Listings</h1>
+                    <p id="results-count" class="text-sm text-gray-400 font-semibold"></p>
                 </div>
-                <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+                <div id="listings-container" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5"></div>
             </main>
         </div>
     </div>
 
-    <section class="py-24 bg-white relative z-10 overflow-hidden border-t border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center mb-20">
-                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">What Our Users Say</h2>
-                <p class="text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">Join thousands of students and landlords who have simplified their housing journey.</p>
+    <!-- Testimonials -->
+    <section class="py-16 md:py-24 bg-white mt-16 border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">What Our Users Say</h2>
+                <p class="text-base md:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+                    Join thousands of students and landlords who have simplified their housing journey.
+                </p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                <div class="group bg-slate-50/50 p-10 rounded-[2.5rem] border border-slate-100 flex flex-col h-full">
-                    <blockquote class="text-xl text-slate-700 font-semibold leading-relaxed mb-10 flex-grow">"I found a clean boarding house near <span class="text-[#ea580c]">CBU Riverside</span> in just 48 hours. The verification badge gave me so much peace of mind."</blockquote>
-                    <div class="flex items-center gap-4 pt-8 border-t border-slate-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-xl">JS</div>
-                        <div><h4 class="font-black text-slate-900 text-lg">John S.</h4><span class="text-sm font-bold text-slate-400 uppercase tracking-wider">CBU Student</span></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-stretch">
+                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col">
+                    <blockquote class="text-lg text-slate-700 font-semibold leading-relaxed mb-8 flex-grow">
+                        "I found a clean boarding house near <span class="text-[#ea580c]">CBU Riverside</span> in just 48 hours. The verification badge gave me peace of mind."
+                    </blockquote>
+                    <div class="flex items-center gap-4 pt-6 border-t border-slate-100">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-lg flex-shrink-0">JS</div>
+                        <div>
+                            <h4 class="font-black text-slate-900">John S.</h4>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">CBU Student</span>
+                        </div>
                     </div>
                 </div>
-                <div class="group bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl flex flex-col h-full transform md:scale-105">
-                    <blockquote class="text-xl text-white font-semibold leading-relaxed mb-10 flex-grow">"As a landlord, I love how easy it is to post properties and connect with <span class="text-orange-400 font-bold">verified students</span>."</blockquote>
-                    <div class="flex items-center gap-4 pt-8 border-t border-white/10">
-                        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center font-black text-orange-400 text-xl">ME</div>
-                        <div><h4 class="font-black text-white text-lg">Mary E.</h4><span class="text-sm font-bold text-slate-400 uppercase tracking-wider">Verified Landlord</span></div>
+                <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col md:scale-105">
+                    <blockquote class="text-lg text-white font-semibold leading-relaxed mb-8 flex-grow">
+                        "As a landlord, I love how easy it is to post properties and connect with <span class="text-orange-400 font-bold">verified students</span>."
+                    </blockquote>
+                    <div class="flex items-center gap-4 pt-6 border-t border-white/10">
+                        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center font-black text-orange-400 text-lg flex-shrink-0">ME</div>
+                        <div>
+                            <h4 class="font-black text-white">Mary E.</h4>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Verified Landlord</span>
+                        </div>
                     </div>
                 </div>
-                <div class="group bg-slate-50/50 p-10 rounded-[2.5rem] border border-slate-100 flex flex-col h-full">
-                    <blockquote class="text-xl text-slate-700 font-semibold leading-relaxed mb-10 flex-grow">"The search filters saved me so much time. Found my ideal room instantly with no fake listings."</blockquote>
-                    <div class="flex items-center gap-4 pt-8 border-t border-slate-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-xl">TK</div>
-                        <div><h4 class="font-black text-slate-900 text-lg">Thomas K.</h4><span class="text-sm font-bold text-slate-400 uppercase tracking-wider">UNZA Student</span></div>
+                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col">
+                    <blockquote class="text-lg text-slate-700 font-semibold leading-relaxed mb-8 flex-grow">
+                        "The search filters saved me so much time. Found my ideal room instantly with no fake listings."
+                    </blockquote>
+                    <div class="flex items-center gap-4 pt-6 border-t border-slate-100">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-lg flex-shrink-0">TK</div>
+                        <div>
+                            <h4 class="font-black text-slate-900">Thomas K.</h4>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">UNZA Student</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        </section>
+    </section>
 
-    <footer class="bg-slate-900 pt-16 pb-8 border-t border-slate-800 relative z-10">
+    <!-- Footer -->
+    <footer class="bg-slate-900 pt-14 pb-8 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                <div class="md:col-span-1">
-                    <h3 class="text-2xl font-black text-white mb-4">FindMy<span class="text-[#ea580c]">Nyumba</span></h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Simplifying student housing in Zambia. Verified listings, secure connections, and peace of mind for both students and landlords.</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <h3 class="text-xl font-black text-white mb-3">FindMy<span class="text-[#ea580c]">Nyumba</span></h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Simplifying student housing in Zambia. Verified listings, secure connections, peace of mind.</p>
                 </div>
-                
                 <div>
-                    <h4 class="font-bold text-white mb-5 uppercase text-xs tracking-widest">Platform</h4>
-                    <ul class="space-y-3 text-slate-400 text-sm font-medium">
+                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Platform</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm font-medium">
                         <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors">Browse Accommodations</a></li>
                         <li><a href="dashboard-landlord.html" class="hover:text-[#ea580c] transition-colors">Post a Property</a></li>
                         <li><a href="register.html" class="hover:text-[#ea580c] transition-colors">Student Registration</a></li>
                     </ul>
                 </div>
-
                 <div>
-                    <h4 class="font-bold text-white mb-5 uppercase text-xs tracking-widest">Support</h4>
-                    <ul class="space-y-3 text-slate-400 text-sm font-medium">
+                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Support</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm font-medium">
                         <li><a href="#" class="hover:text-[#ea580c] transition-colors">Trust & Verification</a></li>
                         <li><a href="#" class="hover:text-[#ea580c] transition-colors">Landlord Resources</a></li>
                         <li><a href="#" class="hover:text-[#ea580c] transition-colors">Contact Us</a></li>
                     </ul>
                 </div>
-
                 <div>
-                    <h4 class="font-bold text-white mb-5 uppercase text-xs tracking-widest">Connect with us</h4>
-                    <div class="flex space-x-3 mb-6">
-                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all transform hover:scale-105 shadow-lg"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all transform hover:scale-105 shadow-lg"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all transform hover:scale-105 shadow-lg"><i class="fab fa-instagram"></i></a>
+                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Connect</h4>
+                    <div class="flex space-x-3">
+                        <a href="#" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
+                            <i class="fab fa-facebook-f text-sm"></i>
+                        </a>
+                        <a href="#" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
+                            <i class="fab fa-twitter text-sm"></i>
+                        </a>
+                        <a href="#" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
+                            <i class="fab fa-instagram text-sm"></i>
+                        </a>
                     </div>
                 </div>
             </div>
-            
-            <div class="pt-8 border-t border-slate-800 text-center flex flex-col md:flex-row justify-between items-center">
-                <p class="text-slate-500 text-sm font-medium mb-4 md:mb-0">&copy; 2026 FindMyNyumba Zambia. All rights reserved.</p>
-                <div class="space-x-4 text-sm text-slate-500 font-medium">
+            <div class="pt-6 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-3">
+                <p class="text-slate-500 text-sm font-medium">&copy; 2026 FindMyNyumba Zambia. All rights reserved.</p>
+                <div class="flex gap-4 text-sm text-slate-500 font-medium">
                     <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
                     <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
                 </div>
@@ -178,83 +263,199 @@
     </footer>
 
     <script>
-        async function fetchListings(queryString = "") {
-            const container = document.getElementById("listings-container");
-            if (!container) return;
-            container.innerHTML = `<div class="col-span-full text-center py-20"><i class="fas fa-spinner fa-spin text-4xl text-[#ea580c]"></i></div>`;
-            
-            try {
-                // Pointing safely to the active landlord API route to avoid the 405 error
-                const url = `http://127.0.0.1:8000/api/v1/landlord/properties${queryString}`;
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("Backend rejected the request");
-                
-                const data = await res.json();
-                renderListings(data);
-            } catch (err) {
-                container.innerHTML = `<div class="col-span-full text-center py-20"><p class="text-xl text-red-500 font-bold">Error connecting to server.</p></div>`;
+    'use strict';
+    const API_BASE = 'http://127.0.0.1:8000/api/v1';
+
+    // ── Auth-aware nav ──────────────────────────────────────────────────────
+    (function initNav() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
+        if (!token || !role) return;
+
+        const routes = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+        const dest   = routes[role] || 'browse.html';
+
+        ['nav-dashboard-desk', 'nav-dashboard-mob'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.href = dest; el.classList.remove('hidden'); }
+        });
+        ['nav-login-desk', 'nav-register-desk', 'nav-login-mob', 'nav-register-mob'].forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
+        });
+        ['nav-logout-desk', 'nav-logout-mob'].forEach(id => {
+            document.getElementById(id)?.classList.remove('hidden');
+        });
+    })();
+
+    function logout() {
+        localStorage.removeItem('token'); localStorage.removeItem('role');
+        sessionStorage.removeItem('token'); sessionStorage.removeItem('role');
+        window.location.reload();
+    }
+
+    // ── Mobile nav toggle ───────────────────────────────────────────────────
+    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+    const mobileMenu      = document.getElementById('mobile-menu');
+    const hamburgerIcon   = document.getElementById('hamburger-icon');
+
+    mobileNavToggle.addEventListener('click', () => {
+        const isOpen = mobileMenu.classList.contains('menu-open');
+        mobileMenu.classList.toggle('menu-open', !isOpen);
+        hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+        mobileMenu.classList.remove('menu-open');
+        hamburgerIcon.className = 'fas fa-bars text-xl';
+    }));
+
+    // ── Filter sidebar (mobile) ─────────────────────────────────────────────
+    function toggleSidebar() {
+        const sidebar = document.getElementById('filters-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const isOpen  = sidebar.classList.contains('sidebar-open');
+        sidebar.classList.toggle('sidebar-open',   !isOpen);
+        sidebar.classList.toggle('sidebar-closed',  isOpen);
+        overlay.classList.toggle('hidden', isOpen);
+        document.body.style.overflow = isOpen ? '' : 'hidden';
+    }
+
+    function closeSidebar() {
+        document.getElementById('filters-sidebar').classList.remove('sidebar-open');
+        document.getElementById('filters-sidebar').classList.add('sidebar-closed');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+    // ── Fetch listings ──────────────────────────────────────────────────────
+    async function fetchListings(queryString = '') {
+        const container = document.getElementById('listings-container');
+        container.innerHTML = `
+            <div class="col-span-full text-center py-20">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-[#ea580c]"></i>
+                <p class="mt-4 text-gray-500 font-bold">Finding the best Nyumbas...</p>
+            </div>`;
+        document.getElementById('results-count').textContent = '';
+
+        try {
+            // API path: /api/v1/properties  (matches listings.py prefix="/properties")
+            const res = await fetch(`${API_BASE}/properties${queryString}`);
+            if (!res.ok) {
+                let detail = `Server error ${res.status}`;
+                try { const body = await res.json(); detail = body.detail || detail; } catch(_) {}
+                throw new Error(detail);
             }
-        }
-
-        function renderListings(listings) {
-            const container = document.getElementById("listings-container");
-            if (!listings || listings.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-20"><p class="text-xl text-gray-500 font-bold">No properties found.</p></div>`;
-                return;
-            }
-            
-            const sortVal = document.getElementById('sort-filter')?.value;
-            if (sortVal === "Sort by: Price Low to High") listings.sort((a, b) => parseFloat(a.price || 0) - parseFloat(b.price || 0));
-            else if (sortVal === "Sort by: Price High to Low") listings.sort((a, b) => parseFloat(b.price || 0) - parseFloat(a.price || 0));
-            else if (sortVal === "Sort by: Newest") listings.sort((a, b) => (b.id || 0) - (a.id || 0));
-
-            container.innerHTML = listings.map(p => {
-                const loc = (p.location && p.location !== "Unknown Location") ? p.location : "Copperbelt University Area";
-                const price = parseFloat(p.price || 0).toLocaleString();
-                const title = p.title || "Standard Student Room";
-                const imgUrl = p.image_urls ? p.image_urls.split(',')[0] : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80";
-
-                return `
-                <div class="group bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                    <div class="relative h-56 bg-gray-100 overflow-hidden">
-                        <img src="${imgUrl}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" alt="Property Image">
-                        <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-black text-green-600 shadow-sm flex items-center tracking-wide">
-                            <i class="fas fa-shield-alt mr-1.5"></i> VERIFIED
-                        </div>
-                    </div>
-                    <div class="p-6 flex flex-col flex-grow">
-                        <div class="flex justify-between items-start mb-3 gap-3">
-                            <h3 class="font-black text-xl text-gray-900 leading-tight truncate" title="${title}">${title}</h3>
-                            <span class="bg-orange-50 text-[#ea580c] px-3 py-1.5 rounded-xl text-sm font-black whitespace-nowrap border border-orange-100 shadow-sm">ZMW ${price}</span>
-                        </div>
-                        <p class="text-gray-500 text-sm mb-5 flex items-center font-medium">
-                            <i class="fas fa-map-marker-alt w-5 text-gray-400"></i> ${loc}
-                        </p>
-                        <div class="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between">
-                            <a href="listing.html?id=${p.id}" class="inline-flex items-center justify-center bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#ea580c] transition-colors shadow-sm text-sm">
-                                View Details <i class="fas fa-arrow-right ml-2 text-xs"></i>
-                            </a>
-                        </div>
-                    </div>
+            renderListings(await res.json());
+        } catch (err) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-16 bg-red-50 rounded-3xl border border-red-100 px-6">
+                    <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4 block"></i>
+                    <p class="text-lg text-red-600 font-black mb-1">Connection Issue</p>
+                    <p class="text-red-400 text-sm mb-6">Could not reach the server. Please check your connection.</p>
+                    <button onclick="fetchListings()"
+                            class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-orange-700 transition-colors text-sm">
+                        <i class="fas fa-redo mr-2"></i>Retry
+                    </button>
                 </div>`;
-            }).join("");
+        }
+    }
+
+    function renderListings(listings) {
+        const container = document.getElementById('listings-container');
+        const countEl   = document.getElementById('results-count');
+
+        const sortVal = document.getElementById('sort-filter')?.value || 'newest';
+        if (sortVal === 'price_asc')  listings.sort((a, b) => Number(a.price) - Number(b.price));
+        if (sortVal === 'price_desc') listings.sort((a, b) => Number(b.price) - Number(a.price));
+
+        if (!listings || !listings.length) {
+            countEl.textContent = '';
+            container.innerHTML = `
+                <div class="col-span-full text-center py-16 bg-gray-50 rounded-3xl border border-dashed border-gray-200 px-6">
+                    <i class="fas fa-search text-4xl text-gray-300 mb-4 block"></i>
+                    <p class="text-lg text-gray-500 font-black">No matching properties found.</p>
+                    <p class="text-gray-400 text-sm mt-2">Try adjusting your filters or search keywords.</p>
+                </div>`;
+            return;
         }
 
-        function applyFilters() {
-            const uni = document.getElementById('university-filter').value;
-            const min = document.getElementById('min-price').value;
-            const max = document.getElementById('max-price').value;
-            let params = new URLSearchParams();
-            if (uni) params.append('university', uni);
-            if (min) params.append('min_price', min);
-            if (max) params.append('max_price', max);
-            const qs = params.toString() ? `?${params.toString()}` : "";
-            fetchListings(qs);
+        countEl.textContent = `${listings.length} listing${listings.length !== 1 ? 's' : ''} found`;
+
+        container.innerHTML = listings.map(p => {
+            const price      = Number(p.price).toLocaleString();
+            const imgUrl     = p.image_url || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+            const safeTitle  = String(p.title    || '').replace(/"/g, '&quot;');
+            const safeLoc    = String(p.location || '').replace(/</g, '&lt;');
+
+            return `
+            <div class="listing-card group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                <div class="relative h-48 sm:h-52 bg-gray-100 overflow-hidden flex-shrink-0">
+                    <img src="${imgUrl}" loading="lazy"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         alt="${safeTitle}"
+                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-black text-green-600 shadow-sm flex items-center gap-1 uppercase tracking-wide">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                    ${p.is_boosted ? `
+                    <div class="absolute top-3 right-3 bg-[#ea580c] text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-md uppercase tracking-wide animate-pulse">
+                        ⚡ Featured
+                    </div>` : ''}
+                </div>
+                <div class="p-4 md:p-5 flex flex-col flex-grow">
+                    <h3 class="font-black text-base text-gray-900 leading-snug mb-1 line-clamp-2" title="${safeTitle}">${safeTitle}</h3>
+                    <p class="text-[#ea580c] font-black text-lg mb-2">ZMW ${price}</p>
+                    <p class="text-gray-500 text-xs font-semibold flex items-start gap-1.5 mb-4 flex-grow">
+                        <i class="fas fa-map-marker-alt text-[#ea580c] mt-0.5 flex-shrink-0"></i>
+                        <span class="line-clamp-2">${safeLoc}</span>
+                    </p>
+                    <a href="listing?id=${encodeURIComponent(p.id)}"
+                       class="w-full inline-flex items-center justify-center bg-gray-900 text-white px-4 py-2.5 rounded-xl font-black hover:bg-[#ea580c] transition-colors text-sm">
+                        View Details <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
+                    </a>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Filters ─────────────────────────────────────────────────────────────
+    function applyFilters() {
+        const uni     = document.getElementById('university-filter').value;
+        const min     = document.getElementById('min-price').value.trim();
+        const max     = document.getElementById('max-price').value.trim();
+        const keyword = (document.getElementById('keyword-search')?.value || '').trim();
+
+        const params = new URLSearchParams();
+        if (uni)     params.append('university', uni);
+        if (min)     params.append('min_price',  min);
+        if (max)     params.append('max_price',  max);
+        if (keyword) params.append('q',          keyword);
+
+        fetchListings(params.toString() ? `?${params}` : '');
+        closeSidebar();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const preQuery  = urlParams.get('q');
+        if (preQuery) {
+            const el = document.getElementById('keyword-search');
+            if (el) el.value = preQuery;
         }
 
         document.getElementById('apply-filters')?.addEventListener('click', applyFilters);
-        document.getElementById('clear-filters')?.addEventListener('click', () => { window.location.reload(); });
-        document.addEventListener("DOMContentLoaded", () => fetchListings());
+        document.getElementById('clear-filters')?.addEventListener('click', () => { window.location.href = 'browse.html'; });
+        document.getElementById('keyword-search')?.addEventListener('keypress', e => { if (e.key === 'Enter') applyFilters(); });
+
+        fetchListings(preQuery ? `?q=${encodeURIComponent(preQuery)}` : '');
+    });
     </script>
 </body>
 </html>
+
+
+
+
+

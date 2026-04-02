@@ -1,0 +1,431 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { orange: { 600: '#ea580c' } } } } }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --orange: #ea580c; --light-gray: #f9fafb; --dark-gray: #4b5563; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dropdown-hidden { opacity: 0; pointer-events: none; transform: translateY(-10px); }
+        .dropdown-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    </style>
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body class="bg-[var(--light-gray)] font-sans flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-white shadow-xl flex flex-col z-20">
+        <div class="p-6">
+            <h1 class="text-2xl font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></h1>
+        </div>
+        <nav class="flex-1 space-y-1 mt-4">
+            <button id="nav-overview" onclick="switchTab('overview')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-home w-6"></i> Overview
+            </button>
+            <button id="nav-saved" onclick="switchTab('saved')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-heart w-6"></i> Saved Rooms
+            </button>
+            <button id="nav-messages" onclick="switchTab('messages')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-comments w-6"></i> Messages
+            </button>
+            <button id="nav-profile" onclick="switchTab('profile')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-user w-6"></i> Profile
+            </button>
+            <button id="nav-settings" onclick="switchTab('settings')" class="nav-link w-full flex items-center px-6 py-4 text-left font-bold transition-all">
+                <i class="fas fa-cog w-6"></i> Settings
+            </button>
+        </nav>
+        <div class="p-4 border-t border-gray-100">
+            <button onclick="logout()" class="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 font-bold rounded-xl transition">
+                <i class="fas fa-sign-out-alt w-6"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <header class="flex justify-between items-center p-8 bg-white border-b border-gray-100 shrink-0 shadow-sm z-10">
+            <h2 id="page-title" class="text-2xl font-black text-black uppercase tracking-tight">Overview</h2>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p id="header-name" class="font-black text-black text-sm">Joshua</p>
+                    <p class="text-xs text-[var(--dark-gray)] font-bold">Student Account</p>
+                </div>
+                <img id="header-avatar" src="https://ui-avatars.com/api/?name=JS&background=ea580c&color=fff" class="w-10 h-10 rounded-full shadow-md object-cover border-2 border-white cursor-pointer" onclick="switchTab('profile')" alt="Profile">
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 relative">
+            
+                        <div id="overview-section" class="dashboard-section">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Saved Rooms</p>
+                            <h3 id="stat-saved" class="text-4xl font-black text-black"><i class="fas fa-spinner fa-spin text-lg text-gray-300"></i></h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl"><i class="fas fa-heart"></i></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[var(--dark-gray)] text-xs font-black uppercase tracking-wider mb-1">Active Messages</p>
+                            <h3 id="stat-messages" class="text-4xl font-black text-[#ea580c]"><i class="fas fa-spinner fa-spin text-lg text-orange-300"></i></h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl"><i class="fas fa-envelope"></i></div>
+                    </div>
+                    <div class="bg-[#ea580c] p-6 rounded-3xl shadow-sm border border-orange-500 flex items-center justify-between cursor-pointer hover:bg-[#c2410c] transition" onclick="window.location.href='browse.html'">
+                        <div>
+                            <p class="text-orange-200 text-xs font-black uppercase tracking-wider mb-1">Find a Room</p>
+                            <h3 class="text-xl font-black text-white mt-1">Browse All Properties</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center text-xl"><i class="fas fa-search"></i></div>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-black mb-4 text-black">Find a Room</h3>
+                <div class="mb-8 flex space-x-3 mt-4">
+                    <input type="text" id="search-input" placeholder="Search by location, price, or keyword..." class="flex-1 p-4 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-[#ea580c] font-bold text-sm text-gray-800">
+                    <button onclick="window.searchProperties()" class="bg-[#ea580c] text-white px-8 py-4 rounded-xl font-black shadow-md hover:bg-black transition flex items-center justify-center">
+                        <i class="fas fa-search mr-2"></i> Find
+                    </button>
+                </div>
+                
+                <div id="search-results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 hidden"></div>
+                
+                <h3 class="text-xl font-black mb-4 text-black mt-8">Recent Listings</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="recent-listings-container">
+                    </div>
+            </div>            <div id="saved-section" class="dashboard-section hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                    <h2 class="text-xl font-black mb-6 text-black">Saved Properties</h2>
+                    
+                    <div id="saved-loading" class="text-center py-12 hidden">
+                        <i class="fas fa-circle-notch fa-spin text-4xl text-[#ea580c] mb-4"></i>
+                        <p class="text-gray-400 font-bold">Loading your saved rooms...</p>
+                    </div>
+
+                    <div id="saved-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    
+                    <div id="saved-empty" class="text-center py-12 hidden">
+                        <i class="fas fa-heart text-gray-200 text-5xl mb-4"></i>
+                        <p class="text-gray-400 font-bold mb-4">You haven't saved any rooms yet.</p>
+                        <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow-md hover:bg-black transition inline-block">Browse Properties</a>
+                    </div>
+                </div>
+            </div>
+            <div id="messages-section" class="dashboard-section hidden h-[calc(100vh-12rem)]">
+                <div class="flex h-full bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div class="w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col">
+                        <div class="p-6 border-b border-gray-200 bg-white">
+                            <h3 class="font-black text-xl text-black">Conversations</h3>
+                        </div>
+                        <div id="conversation-list" class="flex-1 overflow-y-auto">
+                            </div>
+                    </div>
+                    
+                    <div class="w-2/3 flex flex-col bg-white relative">
+                        <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-400">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4"><i class="fas fa-comments text-3xl text-gray-300"></i></div>
+                            <p class="font-bold">Select a conversation to start messaging</p>
+                        </div>
+
+                        <div id="chat-header" class="p-6 border-b border-gray-200 bg-white hidden items-center justify-between relative">
+                            <div>
+                                <h4 id="chat-landlord-name" class="font-black text-xl text-black">Landlord Name</h4>
+                                <p id="chat-property-ref" class="text-sm font-bold text-[#ea580c] mt-1">Property Reference</p>
+                            </div>
+                            <div class="flex space-x-2 relative">
+                                <button onclick="startInAppCall('Mr. Phiri')" class="w-10 h-10 rounded-full bg-gray-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition shadow-sm"><i class="fas fa-phone-alt"></i></button>
+                                
+                                <button onclick="window.toggleThreeDotMenu(event)" class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition shadow-sm"><i class="fas fa-ellipsis-v"></i></button>
+                                
+                                <div id="chat-dropdown" class="absolute right-0 top-12 w-48 bg-white border border-gray-100 rounded-xl shadow-xl transition-all duration-200 dropdown-hidden z-50 overflow-hidden">
+                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-eye w-5 text-gray-400"></i> View property</button>
+                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-address-book w-5 text-gray-400"></i> Contact details</button>
+                                    <button class="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 transition"><i class="fas fa-flag w-5 text-red-400"></i> Report listing</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/30 hidden">
+                            </div>
+
+                        <div id="chat-input-area" class="p-4 bg-white border-t border-gray-200 hidden">
+                            <form id="chat-form" class="flex items-center space-x-2 relative w-full" onsubmit="window.sendStudentMessage(event)">
+                                <button type="button" onclick="document.getElementById('hidden-chat-file').click()" class="w-12 h-12 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#ea580c] flex items-center justify-center transition"><i class="fas fa-paperclip"></i></button>
+                                
+                                <input type="text" id="chat-input" required class="flex-1 bg-gray-50 p-4 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-medium" placeholder="Type a message..." autocomplete="off">
+                                <button type="submit" class="bg-[#ea580c] text-white w-14 h-12 rounded-xl flex items-center justify-center hover:bg-black transition shadow-md"><i class="fas fa-paper-plane"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="profile-section" class="dashboard-section hidden">
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 max-w-2xl shadow-sm">
+                    <div class="flex items-center space-x-6 mb-8">
+                        <div class="relative group cursor-pointer" onclick="document.getElementById('profile-pic-upload').click()">
+                            <img id="profile-avatar-preview" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-full object-cover shadow-md border-4 border-white group-hover:opacity-75 transition" alt="Profile Avatar">
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <i class="fas fa-camera text-white text-xl drop-shadow-md"></i>
+                            </div>
+                            <input type="file" id="profile-pic-upload" class="hidden" accept="image/*" onchange="window.handleProfilePicUpdate(event)">
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-black">Profile Details</h3>
+                            <p class="text-gray-400 text-sm font-bold">Click your avatar to upload a new photo</p>
+                        </div>
+                    </div>
+                    <form onsubmit="window.saveProfile(event)" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Full Name</label>
+                                <input type="text" id="profile-name" required class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Phone Number</label>
+                                <input type="tel" id="profile-phone" class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black" placeholder="+260...">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Email Address</label>
+                            <input type="email" id="profile-email" required class="w-full p-4 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black">
+                        </div>
+                        <button type="submit" id="profile-save-btn" class="bg-[#ea580c] text-white px-8 py-4 rounded-xl font-black hover:bg-black transition shadow-lg w-full md:w-auto">SAVE CHANGES</button>
+                    </form>
+                </div>
+            </div>
+            <div id="settings-section" class="dashboard-section hidden">
+                <div class="max-w-3xl space-y-6">
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                        <h4 class="text-lg font-black text-black mb-4 border-b border-gray-100 pb-2"><i class="fas fa-bell text-[#ea580c] mr-2"></i> Notification Preferences</h4>
+                        <div class="space-y-4">
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <span class="font-bold text-gray-700">Email alerts for new properties</span>
+                                <input type="checkbox" id="pref-email" onchange="window.savePreferences()" class="form-checkbox h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
+                            </label>
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <span class="font-bold text-gray-700">SMS alerts for landlord messages</span>
+                                <input type="checkbox" id="pref-sms" onchange="window.savePreferences()" class="form-checkbox h-5 w-5 text-[#ea580c] rounded focus:ring-[#ea580c]">
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                        <h4 class="text-lg font-black text-black mb-4 border-b border-gray-100 pb-2"><i class="fas fa-shield-alt text-[#ea580c] mr-2"></i> Account Security</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-black text-[var(--dark-gray)] uppercase tracking-wide mb-2">Change Password</label>
+                                <form onsubmit="window.updatePassword(event)" class="space-y-3">
+                                    <input type="password" id="current-password" required placeholder="Current password" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium">
+                                    <div class="flex space-x-2">
+                                        <input type="password" id="new-password" required placeholder="New password" class="w-full p-4 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium">
+                                        <button type="submit" id="update-pwd-btn" class="bg-black text-white px-8 rounded-xl font-bold hover:bg-gray-800 transition">Update</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="pt-6 mt-6 border-t border-red-100">
+                                <button onclick="window.deleteAccount()" class="text-red-500 font-bold hover:text-red-700 transition flex items-center p-2 rounded-lg hover:bg-red-50"><i class="fas fa-trash-alt mr-2"></i> Delete Account Permanently</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div></div>
+    </main>
+
+    <script src="student-dashboard.js?v=639094871086827883"></script>
+    <script>
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // OVERVIEW BOOT & AUTH â€” runs once on page load
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    const API = 'http://127.0.0.1:8000/api/v1';
+
+    function getToken() {
+        return localStorage.getItem('token');
+    }
+
+    function authHeaders() {
+        return { 'Authorization': `Bearer ${getToken()}` };
+    }
+
+    // â”€â”€ Auth guard: redirect immediately if no token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    (function guardAccess() {
+        if (!getToken()) {
+            window.location.replace('login.html');
+        }
+    })();
+
+    // â”€â”€ Boot sequence: verify token + role, load user profile â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function initDashboard() {
+        try {
+            const res = await fetch(`${API}/auth/me`, { headers: authHeaders() });
+
+            // Token invalid or expired
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user_role');
+                window.location.replace('login.html');
+                return;
+            }
+
+            if (!res.ok) throw new Error('Profile load failed');
+
+            const user = await res.json();
+
+            // Role guard: only students allowed on this dashboard
+            if (user.role !== 'student') {
+                const dest = user.role === 'student_host' ? 'dashboard-student-host.html'
+                           : user.role === 'landlord'     ? 'dashboard-landlord.html'
+                           : 'login.html';
+                window.location.replace(dest);
+                return;
+            }
+
+            // Populate header with real user data
+            const nameEl   = document.getElementById('header-name');
+            const avatarEl = document.getElementById('header-avatar');
+
+            if (nameEl)   nameEl.innerText = user.full_name || 'Student';
+            if (avatarEl) {
+                const initials = (user.full_name || 'S')
+                    .split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+                avatarEl.src = user.avatar_url ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=ea580c&color=fff`;
+            }
+
+            // Store for use by other sections without re-fetching
+            window._currentUser = user;
+
+        } catch (e) {
+            console.warn('initDashboard error:', e.message);
+            // Non-fatal: let the dashboard load, but header stays generic
+        }
+
+        // Always load overview after boot, even if profile fetch failed
+        loadOverviewStats();
+    }
+
+    // â”€â”€ Overview: load stats + recent listings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function loadOverviewStats() {
+        const statSaved    = document.getElementById('stat-saved');
+        const statMessages = document.getElementById('stat-messages');
+        const recentGrid   = document.getElementById('recent-listings-container');
+
+        // Show spinners (already set in HTML, but reset cleanly here)
+        if (statSaved)    statSaved.innerHTML    = '<i class="fas fa-spinner fa-spin text-lg text-gray-300"></i>';
+        if (statMessages) statMessages.innerHTML = '<i class="fas fa-spinner fa-spin text-lg text-orange-300"></i>';
+        if (recentGrid)   recentGrid.innerHTML   =
+            `<div class="col-span-full py-12 text-center text-gray-400">
+                <i class="fas fa-circle-notch fa-spin text-3xl text-[#ea580c] mb-3"></i>
+                <p class="font-bold">Loading recent listings...</p>
+             </div>`;
+
+        try {
+            const res = await fetch(`${API}/students/dashboard/overview`, {
+                headers: authHeaders()
+            });
+
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user_role');
+                window.location.replace('login.html');
+                return;
+            }
+
+            if (!res.ok) throw new Error(`Server responded ${res.status}`);
+
+            const data = await res.json();
+
+            // â”€â”€ Stat cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            if (statSaved) {
+                statSaved.innerText = data.stats?.saved_count ?? '0';
+            }
+            if (statMessages) {
+                statMessages.innerText = data.stats?.unread_messages_count ?? '0';
+            }
+
+            // â”€â”€ Recent listings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            const props = data.recent_properties || [];
+
+            if (!props.length) {
+                recentGrid.innerHTML =
+                    `<div class="col-span-full py-12 text-center bg-white rounded-2xl border border-gray-100">
+                        <i class="fas fa-home text-5xl text-gray-200 mb-4"></i>
+                        <p class="text-gray-400 font-bold mb-4">No listings available right now.</p>
+                        <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition inline-block">
+                            Browse All Properties
+                        </a>
+                     </div>`;
+                return;
+            }
+
+            recentGrid.innerHTML = props.map(prop => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
+                            hover:shadow-md transition cursor-pointer flex flex-col"
+                     onclick="window.location.href='listing.html?id=${prop.id}'">
+                    <div class="h-48 bg-gray-100 relative overflow-hidden">
+                        <img src="${prop.image_url || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}"
+                             class="w-full h-full object-cover"
+                             onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'"
+                             alt="${prop.title}">
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-black text-gray-800 shadow-sm">
+                            ${prop.status === 'active' || prop.status === 'Active'
+                                ? '<span class="text-green-500 mr-1">â—</span>Available'
+                                : '<span class="text-gray-400 mr-1">â—</span>Unavailable'}
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-black text-base text-black truncate pr-2">${prop.title}</h4>
+                                <span class="bg-orange-50 text-[#ea580c] px-2 py-1 rounded-lg text-xs font-black shrink-0">
+                                    ZMW ${Number(prop.price).toLocaleString()}
+                                </span>
+                            </div>
+                            <p class="text-gray-500 text-sm font-medium truncate">
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>${prop.location}
+                            </p>
+                        </div>
+                    </div>
+                </div>`).join('');
+
+        } catch (e) {
+            // Error state: show clear message + retry button, not silent failure
+            if (statSaved)    statSaved.innerHTML    = '<span class="text-red-400 text-sm font-bold">â€”</span>';
+            if (statMessages) statMessages.innerHTML = '<span class="text-red-400 text-sm font-bold">â€”</span>';
+
+            if (recentGrid) {
+                recentGrid.innerHTML =
+                    `<div class="col-span-full py-12 text-center bg-red-50 rounded-2xl border border-red-100">
+                        <i class="fas fa-wifi text-4xl text-red-300 mb-4"></i>
+                        <p class="text-red-500 font-bold mb-4">Could not connect to server.</p>
+                        <button onclick="loadOverviewStats()"
+                                class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition">
+                            <i class="fas fa-redo mr-2"></i>Try Again
+                        </button>
+                     </div>`;
+            }
+            console.error('loadOverviewStats error:', e.message);
+        }
+    }
+
+    // â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    function logout() {
+        if (!confirm('Are you sure you want to log out?')) return;
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_role');
+        window.location.replace('login.html');
+    }
+
+    // â”€â”€ Run on page load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
+

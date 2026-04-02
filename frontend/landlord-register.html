@@ -1,235 +1,200 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register as Landlord - FindMyNyumba Zambian Housing</title>
-    <!-- Tailwind CSS via CDN -->
+    <title>Register as Landlord - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
-    <style>
-        .hero-bg {
-            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--navy) 100%);
-        }
-        .floating-element {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .testimonial-card {
-            transition: all 0.3s ease;
-        }
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, var(--orange), #ff9800);
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-        }
-    </style>
-
-
-
-
-
+    <link rel="icon" type="image/png" href="logo.png">
 </head>
-<body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="index.html" class="flex-shrink-0 flex items-center">
-                        <span class="text-orange-500 font-bold text-xl">FindMyNyumba</span>
-                    </a>
-                </div>
-                
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="register.html" class="text-gray-700 hover:text-orange-600">Student Register</a>
-                    <a href="login.html" class="text-gray-700 hover:text-orange-600">Login</a>
-                </div>
-                
-                <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-orange-600">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Landlord Registration Form -->
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Register as a Landlord
-                </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
-                    List your properties and reach verified students
-                </p>
-            </div>
-            
-            <form class="mt-8 space-y-6" id="landlord-register-form">
-                <div class="rounded-md shadow-sm -space-y-px">
-                    <div>
-                        <label for="full-name" class="sr-only">Full Name</label>
-                        <input id="full-name" name="fullName" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="Full Name">
-                    </div>
-                    <div>
-                        <label for="email" class="sr-only">Email address</label>
-                        <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="Email address">
-                    </div>
-                    <div>
-                        <label for="phone" class="sr-only">Phone Number</label>
-                        <input id="phone" name="phone" type="tel" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="Phone Number">
-                    </div>
-                    <div>
-                        <label for="business-name" class="sr-only">Business Name</label>
-                        <input id="business-name" name="businessName" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="Business/Property Name">
-                    </div>
-                    <div>
-                        <label for="location" class="sr-only">Location</label>
-                        <input id="location" name="location" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="Property Location">
-                    </div>
-                    <div>
-                        <label for="id-number" class="sr-only">National ID/Passport Number</label>
-                        <input id="id-number" name="idNumber" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="National ID/Passport Number">
-                    </div>
-                    <div>
-                        <label for="password" class="sr-only">Password</label>
-                        <input id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="Password">
-                    </div>
-                    <div>
-                        <label for="confirm-password" class="sr-only">Confirm Password</label>
-                        <input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm" placeholder="Confirm Password">
-                    </div>
-                </div>
-
-                <div class="flex items-center">
-                    <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded">
-                    <label for="terms" class="ml-2 block text-sm text-gray-900">
-                        I agree to the <a href="#" class="text-orange-600 hover:text-orange-500">Terms and Conditions</a> and <a href="#" class="text-orange-600 hover:text-orange-500">Privacy Policy</a>
-                    </label>
-                </div>
-
-                <div>
-                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transform transition duration-500 hover:scale-105">
-                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <i class="fas fa-home text-orange-500 group-hover:text-orange-400"></i>
-                        </span>
-                        Register as Landlord
-                    </button>
-                </div>
-            <input type="hidden" name="role" value="landlord">
-
-<div id="googleSignInButton" data-role="landlord" class="mt-4 flex justify-center"></div>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-</form>
-            
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">
-                    Already have an account?
-                    <a href="login.html" class="font-medium text-orange-600 hover:text-orange-500">
-                        Sign in
-                    </a>
-                </p>
-            </div>
+<body class="bg-slate-50 flex flex-col items-center justify-center min-h-screen py-10">
+    <div class="text-center mb-6 flex flex-col items-center">
+        <a href="browse.html" class="mb-2 w-64 md:w-80 h-20 md:h-24 overflow-hidden flex justify-center items-center relative transition-transform duration-300 hover:scale-105">
+            <img src="logo.png" alt="FindMyNyumba Logo" class="absolute w-full h-full object-contain transform scale-[2.4] md:scale-[2.8] mix-blend-multiply brightness-[1.3] contrast-[1.5] saturate-125" onerror="this.style.display='none'">
+        </a>
+        <h1 class="text-4xl font-black text-slate-900">Landlord Registration</h1>
+        <div class="mt-2 text-slate-500 flex flex-col items-center space-y-1">
+            <span>Already have an account? <a href="login.html" class="text-[#ea580c] font-bold hover:underline">Sign in here</a></span>
+            <span>Are you a student? <a href="register.html" class="text-slate-800 font-bold hover:underline border-b-2 border-slate-800">Register as a Student</a></span>
         </div>
     </div>
 
-    
+    <div class="w-full max-w-xl bg-white rounded-xl shadow-md border border-slate-200 p-8 mb-10">
+        
+        <div id="error-message" class="hidden mb-6 p-3 bg-red-50 text-red-600 text-sm font-bold rounded-lg border border-red-100 flex items-start">
+            <i class="fas fa-exclamation-circle mt-1 mr-2 flex-shrink-0"></i>
+            <span id="error-text"></span>
+        </div>
 
-    <script src="js/app.js"></script>
+        <div id="success-message" class="hidden mb-6 p-4 bg-green-50 text-green-700 text-sm font-bold rounded-lg border border-green-200 flex flex-col items-center text-center">
+            <i class="fas fa-check-circle text-3xl mb-2"></i>
+            <span>Registration successful! Redirecting to login...</span>
+        </div>
+
+        <form id="landlordForm" class="space-y-5">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
+                    <input type="text" id="fullName" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number</label>
+                    <input type="tel" id="phone" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Business Name (Optional)</label>
+                    <input type="text" id="businessName" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Primary Location</label>
+                    <input type="text" id="location" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">National ID / Passport Number</label>
+                    <input type="text" id="idNumber" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                    <div class="mt-2 hidden" id="pwd-strength-container">
+                        <div class="flex justify-between mb-1">
+                            <span class="text-xs font-bold text-slate-500">Strength</span>
+                            <span class="text-xs font-bold" id="pwd-strength-text">Weak</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-1.5 flex gap-1">
+                            <div class="h-1.5 w-1/3 rounded-full transition-all duration-300" id="pwd-bar-1"></div>
+                            <div class="h-1.5 w-1/3 rounded-full transition-all duration-300" id="pwd-bar-2"></div>
+                            <div class="h-1.5 w-1/3 rounded-full transition-all duration-300" id="pwd-bar-3"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow">
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Must be 8-12 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character.</p>
+
+            <label class="flex items-center text-sm text-slate-600 cursor-pointer pt-2">
+                <input type="checkbox" id="terms" required class="mr-2 rounded border-slate-300 text-[#ea580c] focus:ring-[#ea580c]">
+                I agree to the <a href="#" class="text-[#ea580c] hover:underline ml-1">Terms and Conditions</a> and <a href="#" class="text-[#ea580c] hover:underline ml-1">Privacy Policy</a>
+            </label>
+
+            <button type="submit" id="submitBtn" class="w-full bg-slate-900 text-white font-bold py-4 rounded-lg hover:bg-black transition duration-200 flex justify-center items-center shadow-lg">
+                <span id="btn-text">Create Landlord Account</span>
+                <svg id="btn-spinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </button>
+        </form>
+    </div>
+
     <script>
-        document.getElementById('landlord-register-form')?.addEventListener('submit', function(e) {
+        const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+
+        function showError(msg) {
+            document.getElementById('error-text').innerText = msg;
+            document.getElementById('error-message').classList.remove('hidden');
+        }
+        function hideError() { document.getElementById('error-message').classList.add('hidden'); }
+
+        // Password Strength Logic
+        document.getElementById('password').addEventListener('input', (e) => {
+            const val = e.target.value;
+            const container = document.getElementById('pwd-strength-container');
+            if (val.length > 0) container.classList.remove('hidden');
+            else container.classList.add('hidden');
+
+            let strength = 0;
+            if (val.length >= 8 && val.length <= 12) strength++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) strength++;
+            if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) strength++;
+
+            const text = document.getElementById('pwd-strength-text');
+            const b1 = document.getElementById('pwd-bar-1');
+            const b2 = document.getElementById('pwd-bar-2');
+            const b3 = document.getElementById('pwd-bar-3');
+
+            b1.className = b2.className = b3.className = 'h-1.5 w-1/3 rounded-full transition-all duration-300 bg-slate-200';
+
+            if (strength === 1) { 
+                text.innerText = 'Weak'; text.className = 'text-xs font-bold text-red-500'; 
+                b1.classList.replace('bg-slate-200', 'bg-red-500'); 
+            } else if (strength === 2) { 
+                text.innerText = 'Medium'; text.className = 'text-xs font-bold text-yellow-500'; 
+                b1.classList.replace('bg-slate-200', 'bg-yellow-500'); b2.classList.replace('bg-slate-200', 'bg-yellow-500'); 
+            } else if (strength >= 3) { 
+                text.innerText = 'Strong'; text.className = 'text-xs font-bold text-green-500'; 
+                b1.classList.replace('bg-slate-200', 'bg-green-500'); b2.classList.replace('bg-slate-200', 'bg-green-500'); b3.classList.replace('bg-slate-200', 'bg-green-500'); 
+            }
+        });
+
+        document.getElementById('landlordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            hideError();
             
-            const fullName = document.getElementById('full-name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const businessName = document.getElementById('business-name').value;
-            const location = document.getElementById('location').value;
-            const idNumber = document.getElementById('id-number').value;
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const terms = document.getElementById('terms').checked;
+            const confirm = document.getElementById('confirmPassword').value;
             
-            // Frontend validation
-            let isValid = true;
-            let errorMessage = '';
+            if (password !== confirm) return showError("Passwords do not match.");
             
-            if (!fullName || !email || !phone || !businessName || !location || !idNumber || !password || !confirmPassword) {
-                errorMessage = 'Please fill in all fields';
-                isValid = false;
+            const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d\D]{8,12}$/;
+            if (!pwdRegex.test(password)) {
+                return showError("Password must be 8-12 characters and include an uppercase letter, lowercase letter, number, and special character.");
             }
-            
-            if (isValid && !FormValidator.validateEmail(email)) {
-                errorMessage = 'Please enter a valid email address';
-                isValid = false;
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            document.getElementById('btn-text').innerText = 'Creating Account...';
+            document.getElementById('btn-spinner').classList.remove('hidden');
+
+            const payload = {
+                full_name: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone_number: document.getElementById('phone').value.trim(),
+                password: password,
+                role: 'landlord',
+                // Optional backend payload mapping
+                business_name: document.getElementById('businessName').value.trim(),
+                location: document.getElementById('location').value.trim(),
+                id_number: document.getElementById('idNumber').value.trim()
+            };
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Registration failed.');
+
+                document.getElementById('landlordForm').classList.add('hidden');
+                document.getElementById('success-message').classList.remove('hidden');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+
+            } catch (err) {
+                showError(err.message);
+                btn.disabled = false;
+                document.getElementById('btn-text').innerText = 'Create Landlord Account';
+                document.getElementById('btn-spinner').classList.add('hidden');
             }
-            
-            if (isValid && !FormValidator.validatePhone(phone)) {
-                errorMessage = 'Please enter a valid phone number';
-                isValid = false;
-            }
-            
-            if (isValid && password !== confirmPassword) {
-                errorMessage = 'Passwords do not match';
-                isValid = false;
-            }
-            
-            if (isValid && password.length < 6) {
-                errorMessage = 'Password must be at least 6 characters long';
-                isValid = false;
-            }
-            
-            if (isValid && !terms) {
-                errorMessage = 'You must agree to the Terms and Conditions';
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                alert(errorMessage);
-                return;
-            }
-            
-            // In a real application, this would send registration data to the server
-            console.log('Landlord registration attempt with:', { 
-                fullName, 
-                email, 
-                phone, 
-                businessName, 
-                location,
-                idNumber,
-                password: '***' 
-            });
-            
-            // Simulate successful registration
-            alert('Registration successful! Your account is under review. You will receive an email once verified.');
-            
-            // Redirect to login page
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1000);
         });
     </script>
 </body>
 </html>
-
-
-
 

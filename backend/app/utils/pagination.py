@@ -1,27 +1,21 @@
-﻿import math
-from typing import Any, Dict
-from fastapi import Query
-from sqlalchemy.orm import Query as SAQuery
+from typing import Generic, TypeVar, List
+from pydantic import BaseModel
 
-class PaginationParams:
-    def __init__(
-        self,
-        page: int = Query(default=1, ge=1, description='Page number'),
-        limit: int = Query(default=20, ge=1, le=100, description='Max 100 per page'),
-    ):
-        self.page = page
-        self.limit = limit
-        self.offset = (page - 1) * limit
+T = TypeVar("T")
 
-def paginate(query: SAQuery, params: PaginationParams) -> Dict[str, Any]:
-    total = query.count()
-    items = query.offset(params.offset).limit(params.limit).all()
-    total_pages = math.ceil(total / params.limit) if total > 0 else 0
+class PaginatedResponse(BaseModel, Generic[T]):
+    total_count: int
+    total_pages: int
+    current_page: int
+    limit: int
+    items: List[T]
+
+def paginate(items: List[T], total_count: int, page: int, limit: int) -> dict:
+    total_pages = (total_count + limit - 1) // limit
     return {
-        "items": items,
-        "page": params.page,
-        "total": total,
+        "total_count": total_count,
         "total_pages": total_pages,
-        "has_next": params.page < total_pages,
-        "has_prev": params.page > 1,
+        "current_page": page,
+        "limit": limit,
+        "items": items
     }

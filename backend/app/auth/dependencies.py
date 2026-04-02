@@ -1,94 +1,45 @@
-﻿from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthenticationCredentials
+"""
+app/auth/dependencies.py
+Validates the JWT token on every protected endpoint and extracts the current user.
+"""
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from app.db.database import get_db
-from app.core.security import JWTManager
+
+from app.core.config import settings
+from app.core.database import get_db
 from app.models.user import User
-from app.schemas.token import TokenPayload
-from jose import JWTError
 
-security = HTTPBearer()
+# This tells FastAPI where the login endpoint is for Swagger UI documentation
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
-async def get_current_user(
-    credentials: HTTPAuthenticationCredentials = Depends(security),
-    db: Session = Depends(get_db)
-) -> User:
-    """
-    Dependency to get current authenticated user from JWT token.
-    
-    Usage in endpoints:
-        @app.get("/profile")
-        def get_profile(current_user: User = Depends(get_current_user)):
-            return current_user
-    """
-    token = credentials.credentials
-    
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials or session expired.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
-        # Verify and decode token
-        payload = JWTManager.verify_token(token)
-        user_id = payload.get("user_id")
-        
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token"
-            )
+        # Decode the token securely
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
     except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token"
-        )
-    
-    # Get user from database
-    user = db.query(User).filter(User.id == user_id).first()
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found"
-        )
-    
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive"
-        )
-    
+        raise credentials_exception
+
+    # Find the user in the DB
+    user = db.query(User).filter(User.email == email).first()
+    if user is None:
+        raise credentials_exception
+        
     return user
 
-
-async def get_user_roles(
-    current_user: User = Depends(get_current_user)
-) -> list[str]:
-    """
-    Get list of role names for current user.
-    """
-    return [role.role_name for role in current_user.roles]
-
-
-def require_role(*allowed_roles: str):
-    """
-    Dependency factory for role-based access control.
-    
-    Usage in endpoints:
-        @app.delete("/users/{user_id}")
-        def delete_user(
-            user_id: int,
-            current_user: User = Depends(require_role("admin"))
-        ):
-            # Only admins can access this
-    """
-    async def check_role(
-        current_user: User = Depends(get_current_user)
-    ) -> User:
-        user_roles = [role.role_name for role in current_user.roles]
-        
-        if not any(role in user_roles for role in allowed_roles):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"You need one of these roles: {', '.join(allowed_roles)}"
-            )
-        
+def require_role(required_role: str):
+    """Dependency generator to restrict endpoints to specific roles."""
+    def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role != required_role and current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Insufficient permissions to access this feature.")
         return current_user
-    
-    return check_role
+    return role_checker

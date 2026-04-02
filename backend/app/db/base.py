@@ -1,4 +1,2 @@
-﻿from app.db.base_class import Base
-from app.models.user import User
-from app.models.property import Property
-from app.models.review import Review
+# This file now just points to the core database Base to prevent circular imports
+from app.core.database import Base

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,110 +6,229 @@
     <title>Contact Landlord - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
+
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="browse.html" class="text-2xl font-black text-[#ea580c]">FindMyNyumba</a>
-            <a href="browse.html" class="text-gray-600 font-bold hover:text-[#ea580c]">Back to Browse</a>
+            <a href="browse.html" class="text-xl font-black text-[#ea580c]">FindMyNyumba</a>
+            <a href="browse.html" class="text-gray-600 font-bold hover:text-[#ea580c] transition-colors text-sm flex items-center gap-2">
+                <i class="fas fa-arrow-left text-xs"></i> Back to Browse
+            </a>
         </div>
     </nav>
 
-    <main class="flex-grow flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 max-w-2xl w-full">
-            <h2 class="text-3xl font-black text-gray-900 mb-2">Contact Landlord</h2>
-            <p class="text-gray-500 mb-8">Send a secure message directly to the property manager.</p>
+    <div id="toast"
+         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm
+                shadow-2xl flex items-center gap-2 min-w-[260px] justify-center transition-all duration-300
+                opacity-0 translate-y-4 pointer-events-none">
+    </div>
 
-            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8 flex flex-col md:flex-row gap-6">
-                <img id="prop-image" src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300" class="w-full md:w-32 h-32 object-cover rounded-xl shadow-sm">
-                <div class="flex-1 space-y-2">
-                    <h3 class="font-bold text-gray-700 uppercase text-xs">Property Information</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-xs text-gray-400">Property:</p>
-                            <p id="prop-title" class="font-bold text-gray-900 truncate" title="Loading...">Loading Property...</p>
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 py-8">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-gray-100 max-w-2xl w-full">
+
+            <h2 class="text-2xl sm:text-3xl font-black text-gray-900 mb-1">Contact Landlord</h2>
+            <p class="text-gray-500 text-sm mb-6 sm:mb-8">Send a secure message directly to the property manager.</p>
+
+            <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 mb-6 sm:mb-8 flex flex-col sm:flex-row gap-4 sm:gap-6">
+                <img id="prop-image"
+                     src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300"
+                     class="w-full sm:w-28 h-40 sm:h-28 object-cover rounded-xl shadow-sm flex-shrink-0"
+                     alt="Property image"
+                     onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300'">
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-gray-500 uppercase text-[10px] tracking-widest mb-3">Property Information</p>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Property</p>
+                            <p id="prop-title" class="font-bold text-gray-900 text-sm truncate" title="">Loading...</p>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Location</p>
+                            <p id="prop-location" class="font-bold text-gray-900 text-sm truncate" title="">Loading...</p>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-400">Location:</p>
-                            <p id="prop-location" class="font-bold text-gray-900 truncate" title="Loading...">Loading Location...</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Price</p>
+                            <p id="prop-price" class="font-black text-[#ea580c] text-sm">Loading...</p>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-400">Price:</p>
-                            <p id="prop-price" class="font-black text-[#ea580c]">Loading Price...</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400">Available:</p>
-                            <p class="font-bold text-green-600">Immediately</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Available</p>
+                            <p class="font-bold text-green-600 text-sm">Immediately</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <form id="contactForm" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="form-error"
+                 class="hidden mb-5 p-3 bg-red-50 text-red-600 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2">
+                <i class="fas fa-exclamation-circle flex-shrink-0"></i>
+                <span id="form-error-text"></span>
+            </div>
+
+            <form id="contactForm" class="space-y-5" novalidate>
+                <input type="hidden" id="prop-id">
+                <input type="hidden" id="landlord-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Full Name</label>
-                        <input type="text" required class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c]">
+                        <input type="text" id="sender-name" required
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email / Phone</label>
-                        <input type="text" required class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c]">
+                        <input type="text" id="sender-contact" required
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm">
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Message</label>
-                    <textarea rows="4" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c]" required>Hi, I am interested in this property and would like to ask a few questions.</textarea>
+                    <textarea id="message-body" rows="4" required
+                              class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow resize-none text-sm"
+                              >Hi, I am interested in this property and would like to ask a few questions.</textarea>
                 </div>
-                <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-orange-600 transition-all">
-                    <i class="fas fa-paper-plane mr-2"></i> Send Message
+
+                <button type="submit" id="send-btn"
+                        class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-base sm:text-lg
+                               shadow-lg hover:bg-orange-700 transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i> Send Message
                 </button>
             </form>
         </div>
     </main>
 
     <script>
-        async function loadPropertyInfo() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const propId = urlParams.get('id');
-            if(!propId) {
-                document.getElementById('prop-title').innerText = "Property Not Found";
-                return;
-            }
+    'use strict';
+    const API_BASE = 'http://127.0.0.1:8000/api/v1';
 
-            try {
-                // Fetch property from the API using the ID in the URL
-                const res = await fetch(`http://127.0.0.1:8000/api/v1/landlord/properties/${propId}`);
-                if(!res.ok) throw new Error("Failed to load");
-                const data = await res.json();
-                
-                // Populate the UI
-                document.getElementById('prop-title').innerText = data.title;
-                document.getElementById('prop-title').title = data.title;
-                document.getElementById('prop-location').innerText = data.location;
-                document.getElementById('prop-location').title = data.location;
-                document.getElementById('prop-price').innerText = "ZMW " + parseFloat(data.price).toLocaleString();
-                if(data.image_url) document.getElementById('prop-image').src = data.image_url;
-            } catch(e) {
-                console.error(e);
-                document.getElementById('prop-title').innerText = "Error loading property details.";
-                document.getElementById('prop-location').innerText = "--";
-                document.getElementById('prop-price').innerText = "--";
-            }
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
+
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm
+                       shadow-2xl flex items-center gap-2 min-w-[260px] justify-center transition-all duration-300
+                       ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        t.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+        t.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        setTimeout(() => {
+            t.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        }, 3500);
+    }
+
+    function showFormError(msg) {
+        document.getElementById('form-error-text').textContent = msg;
+        document.getElementById('form-error').classList.remove('hidden');
+    }
+    function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
+
+    // ── Load property info from API ───────────────────────────────────────────
+    // FIX: was hitting /landlord/properties/:id which requires landlord auth.
+    //      Changed to the public /properties/:id endpoint so any visitor can load it.
+    async function loadPropertyInfo() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const propId = urlParams.get('id');
+
+        if (!propId) {
+            document.getElementById('prop-title').textContent = 'Property not specified.';
+            document.getElementById('prop-location').textContent = '--';
+            document.getElementById('prop-price').textContent = '--';
+            return;
         }
 
-        document.getElementById('contactForm').onsubmit = function(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
-            btn.disabled = true;
+        document.getElementById('prop-id').value = propId;
 
-            setTimeout(() => {
-                alert("✅ Message sent successfully! The landlord will be notified on their dashboard.");
-                window.location.href = 'browse.html';
-            }, 1000);
-        };
+        try {
+            const res = await fetch(`${API_BASE}/properties/${propId}`);
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const data = await res.json();
 
-        document.addEventListener("DOMContentLoaded", loadPropertyInfo);
+            const titleEl    = document.getElementById('prop-title');
+            const locationEl = document.getElementById('prop-location');
+
+            titleEl.textContent    = data.title    || 'Unnamed Property';
+            titleEl.title          = data.title    || '';
+            locationEl.textContent = data.location || 'Unknown';
+            locationEl.title       = data.location || '';
+            document.getElementById('prop-price').textContent = 'ZMW ' + parseFloat(data.price).toLocaleString();
+            if (data.image_url) document.getElementById('prop-image').src = data.image_url;
+
+            // Store the property owner id for the message send call
+            if (data.owner_id) document.getElementById('landlord-id').value = data.owner_id;
+
+        } catch (e) {
+            console.error('[contact-landlord] loadPropertyInfo:', e);
+            document.getElementById('prop-title').textContent    = 'Could not load property.';
+            document.getElementById('prop-location').textContent = '--';
+            document.getElementById('prop-price').textContent    = '--';
+        }
+    }
+
+    // ── Form submit: calls real messages API ──────────────────────────────────
+    // FIX: previously used a fake setTimeout+alert and never called the backend.
+    //      Now posts to POST /api/v1/messages/send with proper auth header.
+    //      Falls back gracefully with an error message if the user is not logged in.
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        hideFormError();
+
+        const name       = document.getElementById('sender-name').value.trim();
+        const contact    = document.getElementById('sender-contact').value.trim();
+        const body       = document.getElementById('message-body').value.trim();
+        const propId     = document.getElementById('prop-id').value;
+        const landlordId = document.getElementById('landlord-id').value;
+        const token      = getToken();
+
+        if (!name || !contact)  return showFormError('Please fill in your name and contact details.');
+        if (!body)              return showFormError('Please write a message before sending.');
+        if (!landlordId)        return showFormError('Could not identify the property owner. Please go back and try again.');
+
+        if (!token) {
+            showFormError('You must be logged in to send a message.');
+            setTimeout(() => { window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`; }, 1500);
+            return;
+        }
+
+        const btn = document.getElementById('send-btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        btn.disabled  = true;
+
+        try {
+            const res = await fetch(`${API_BASE}/messages/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type':  'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    receiver_id: parseInt(landlordId, 10),
+                    property_id: propId ? parseInt(propId, 10) : null,
+                    // Prepend contact info into the message body so the landlord has it
+                    content: `[From: ${name} | Contact: ${contact}]\n\n${body}`
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Failed to send message.');
+
+            showToast('Message sent! The landlord will be notified on their dashboard.', 'success');
+            btn.innerHTML = '<i class="fas fa-check"></i> Message Sent';
+
+            // Redirect back to browse after short delay
+            setTimeout(() => { window.location.href = 'browse.html'; }, 2000);
+
+        } catch (err) {
+            console.error('[contact-landlord] send:', err);
+            showFormError(err.message || 'Something went wrong. Please try again.');
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+            btn.disabled  = false;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadPropertyInfo);
     </script>
 </body>
 </html>
+

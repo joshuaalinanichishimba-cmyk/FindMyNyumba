@@ -1,237 +1,431 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyNyumba - Property Details</title>
+    <title>Property Details - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>#map { height: 350px; border-radius: 1.5rem; z-index: 1; border: 1px solid #e5e7eb; }</style>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
+        #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        #toast.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="browse.html" class="flex items-center gap-2"><img src="logo.png" alt="Logo" class="h-10 w-auto object-contain" onerror="this.style.display='none'"><span class="text-2xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></span></a>
-            <div class="space-x-6 font-bold text-gray-600">
-                <a href="browse.html" class="hover:text-[#ea580c]">Browse</a>
-                <a href="dashboard-student.html" class="hover:text-[#ea580c]">Dashboard</a>
-            </div>
+<body class="bg-gray-50 pb-20">
+
+    <!-- Toast -->
+    <div id="toast" class="hide fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm shadow-2xl flex items-center gap-2 min-w-[260px] max-w-[90vw] justify-center"></div>
+
+    <!-- Nav -->
+    <nav class="bg-white shadow-sm px-4 py-3 flex justify-between items-center sticky top-0 z-40">
+        <a href="browse" class="flex items-center gap-2">
+            <img src="logo.png" alt="FindMyNyumba"
+                 class="h-8 w-auto object-contain mix-blend-multiply brightness-125"
+                 onerror="this.style.display='none'">
+            <span class="text-xl font-black text-[#ea580c]">FindMyNyumba</span>
+        </a>
+        <div class="flex gap-4 items-center">
+            <a href="browse" class="text-sm font-semibold text-gray-700 hover:text-[#ea580c] transition-colors">Browse</a>
+            <a id="nav-dashboard" href="login" class="text-sm font-semibold text-gray-700 hover:text-[#ea580c] transition-colors hidden">Dashboard</a>
+            <a id="nav-login" href="login" class="text-sm font-semibold text-gray-700 hover:text-[#ea580c] transition-colors">Login</a>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-6">
-                <div class="relative bg-gray-200 aspect-video rounded-3xl overflow-hidden shadow-inner flex items-center justify-center">
-                    <img id="main-img" src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200" class="w-full h-full object-cover">
-<button onclick="toggleSave()" id="save-btn" class="absolute top-6 right-6 bg-white/95 backdrop-blur-sm w-12 h-12 rounded-full shadow-md flex items-center justify-center hover:shadow-lg transition-all duration-300 z-10 transform hover:scale-110 group border border-gray-100" title="Save to Shortlist">
-    <i id="save-icon" class="far fa-heart text-2xl text-gray-400 group-hover:text-red-500 transition-colors"></i>
-</button>
-                </div>
-                
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <h1 id="prop-title" class="text-4xl font-black text-gray-900 mb-2">Loading Property...</h1>
-                    <p id="prop-location" class="text-gray-500 font-medium flex items-center mb-6">
-                        <i class="fas fa-map-marker-alt mr-2 text-[#ea580c]"></i> --
-                    </p>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-gray-100 mb-6 font-bold">
-                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Type</p><p id="prop-type">--</p></div>
-                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Gender</p><p id="prop-gender">Mixed</p></div>
-                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Status</p><p class="text-green-600">Verified</p></div>
-                        <div class="text-center"><p class="text-xs text-gray-400 uppercase">Distance</p><p>~850m</p></div>
-                    </div>
-                    <h2 class="text-xl font-black mb-4">About this Nyumba</h2>
-                    <p id="prop-description" class="text-gray-600 leading-relaxed italic">No description available.</p>
-                </div>
+    <!-- Breadcrumb -->
+    <div class="max-w-6xl mx-auto px-4 pt-4 pb-1">
+        <a href="browse" class="text-sm text-slate-500 hover:text-[#ea580c] transition-colors font-medium">
+            <i class="fas fa-arrow-left mr-1 text-xs"></i> Back to Browse
+        </a>
+    </div>
 
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-black">Student Reviews</h2>
-                        <button onclick="document.getElementById('review-form-container').classList.toggle('hidden')" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold">Write a Review</button>
-                    </div>
+    <!-- Main grid -->
+    <div class="max-w-6xl mx-auto px-4 pt-4 pb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                    <div id="review-form-container" class="hidden mt-6 p-6 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner mb-8">
-                        <h3 class="font-black text-gray-900 mb-4">Submit Your Review</h3>
-                        <div class="flex gap-2 text-2xl text-yellow-400 mb-4" id="star-input">
-                            <i class="fas fa-star cursor-pointer" onclick="setRating(1)"></i>
-                            <i class="fas fa-star cursor-pointer" onclick="setRating(2)"></i>
-                            <i class="fas fa-star cursor-pointer" onclick="setRating(3)"></i>
-                            <i class="fas fa-star cursor-pointer" onclick="setRating(4)"></i>
-                            <i class="fas fa-star cursor-pointer" onclick="setRating(5)"></i>
-                        </div>
-                        <input type="hidden" id="rev-rating-val" value="5">
-                        <input type="text" id="rev-name" placeholder="Your Name" class="w-full p-3 mb-3 rounded-xl border border-gray-200 outline-none">
-                        <textarea id="rev-comment" placeholder="How was your stay?" class="w-full p-3 mb-3 rounded-xl border border-gray-200 outline-none" rows="3"></textarea>
-                        <button onclick="handleReviewSubmit()" class="w-full md:w-auto bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-orange-600 transition-all">Post Review</button>
-                    </div>
+        <!-- Left: main content -->
+        <div class="lg:col-span-2 space-y-5">
 
-                    <div id="reviews-container" class="space-y-4">
-                        <p class="text-gray-400 italic">Loading reviews...</p>
-                    </div>
+            <!-- Property image -->
+            <div class="relative w-full h-64 sm:h-80 md:h-[420px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm">
+                <img id="main-image"
+                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%239ca3af'%3ELoading image...%3C/text%3E%3C/svg%3E"
+                     alt="Property"
+                     class="w-full h-full object-cover">
+                <div id="boosted-badge" class="hidden absolute top-3 right-3 bg-[#ea580c] text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse">
+                    ⚡ Featured
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 sticky top-28">
-                    <div class="mb-6">
-                        <p class="text-xs font-black text-gray-400 uppercase">Monthly Price</p>
-                        <div class="flex items-baseline">
-                            <span class="text-4xl font-black text-[#ea580c]">ZMW</span>
-                            <span id="prop-price" class="text-4xl font-black text-[#ea580c] ml-2">--</span>
-                        </div>
-                                        </div>
-                    
-                    <div class="flex items-center gap-4 mb-6 p-4 bg-orange-50/50 rounded-2xl border border-orange-100/50">
-                        <img src="https://ui-avatars.com/api/?name=Verified+Host&background=ea580c&color=fff&rounded=true&bold=true" alt="Landlord Avatar" class="w-12 h-12 rounded-full shadow-sm ring-2 ring-white">
-                        <div>
-                            <p class="font-black text-gray-900 text-sm flex items-center">
-                                Verified Host <i class="fas fa-check-circle text-blue-500 ml-1.5 text-xs" title="Identity Verified"></i>
-                            </p>
-                            <p class="text-xs text-gray-500 mt-1 font-bold">
-                                <i class="fas fa-bolt text-yellow-500 mr-1"></i> Responds in ~1 hr
-                            </p>
-                        </div>
+            <!-- Details card -->
+            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <h2 id="prop-title" class="text-2xl md:text-3xl font-black text-gray-800 leading-tight">Loading...</h2>
+                        <p class="text-gray-500 mt-2 text-sm flex items-center gap-1.5">
+                            <i class="fas fa-map-marker-alt text-[#ea580c] flex-shrink-0"></i>
+                            <span id="prop-location-text">Loading location...</span>
+                        </p>
                     </div>
-                    
-                    <button id="msg-landlord-btn" class="w-full bg-[#ea580c] text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-orange-600 transition-all mb-6">
-                        <i class="fas fa-paper-plane mr-2"></i> Message Landlord
+                    <div class="flex-shrink-0 text-right">
+                        <span id="prop-price" class="text-2xl font-black text-[#ea580c]">ZMW ...</span>
+                        <div class="text-xs text-gray-400 font-medium mt-0.5">per month</div>
+                    </div>
+                </div>
+                <div class="mt-5 pt-5 border-t border-gray-100">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">Description</h4>
+                    <p id="prop-description" class="text-gray-600 leading-relaxed whitespace-pre-line text-sm">Loading details...</p>
+                </div>
+                <div class="mt-5 pt-4 border-t border-gray-100">
+                    <button onclick="openReportModal()"
+                        class="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5">
+                        <i class="fas fa-flag"></i> Report this listing
                     </button>
-                    <div id="map"></div>
+                </div>
+            </div>
+
+            <!-- Review card -->
+            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm">
+                <h4 class="text-xl font-bold text-gray-800 mb-5">Leave a Review</h4>
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100">
+                    <div class="flex gap-2 text-3xl mb-4" id="star-container">
+                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
+                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
+                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
+                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
+                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
+                    </div>
+                    <textarea id="review-comment" placeholder="How was your experience with this property?" rows="3"
+                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none resize-none mb-3 text-sm"></textarea>
+                    <button id="post-review-btn"
+                        class="px-6 py-2.5 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] transition-all text-sm">
+                        Post Review
+                    </button>
                 </div>
             </div>
         </div>
-    </main>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        let listingMap = null;
-        let currentRatingValue = 5;
+        <!-- Right: sidebar -->
+        <div class="space-y-5">
 
-                function toggleSave() {
-            const propId = new URLSearchParams(window.location.search).get('id');
-            if (!propId) return;
-            
-            let saved = JSON.parse(localStorage.getItem('saved_nyumbas') || '[]');
-            const icon = document.getElementById('save-icon');
-            
-            if (saved.includes(propId)) {
-                // Remove from saved
-                saved = saved.filter(id => id !== propId);
-                icon.className = 'far fa-heart text-2xl text-gray-400 group-hover:text-red-500 transition-colors';
-            } else {
-                // Add to saved
-                saved.push(propId);
-                icon.className = 'fas fa-heart text-2xl text-red-500 transition-colors transform scale-110';
-            }
-            
-            localStorage.setItem('saved_nyumbas', JSON.stringify(saved));
+            <!-- Host card -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
+                <div id="host-avatar"
+                    class="w-16 h-16 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-xl mx-auto mb-3 font-black border-4 border-white shadow-md">?</div>
+                <h3 id="host-name" class="text-lg font-bold text-gray-800 mb-1">Loading...</h3>
+                <div id="host-badge" class="text-xs text-gray-400 mb-4"></div>
+                <button id="msg-landlord-btn"
+                    class="w-full py-3 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] shadow-md shadow-orange-200 transition-all flex items-center justify-center gap-2 text-sm">
+                    <i class="fas fa-paper-plane"></i> Message Host
+                </button>
+            </div>
+
+            <!-- Map -->
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 h-[280px] md:h-[320px]">
+                <div id="property-map" class="w-full h-full rounded-xl z-0"></div>
+            </div>
+
+            <!-- Quick facts -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Quick Info</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between text-gray-600">
+                        <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500 w-4"></i> Listed on Platform</span>
+                        <span class="font-semibold text-green-600">Active</span>
+                    </div>
+                    <div class="flex items-center justify-between text-gray-600">
+                        <span class="flex items-center gap-2"><i class="fas fa-calendar-alt text-[#ea580c] w-4"></i> Available</span>
+                        <span class="font-semibold">Now</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="message-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800">Inquiry for <span id="modal-prop-title" class="text-[#ea580c]">Property</span></h3>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Your Message</label>
+                <textarea id="modal-message-body" rows="5"
+                    placeholder="Hi, I'm interested in this property. Is it still available?"
+                    class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none resize-none text-sm text-gray-700"></textarea>
+            </div>
+            <div class="p-5 bg-gray-50 flex gap-3 border-t border-gray-100">
+                <button id="modal-cancel-btn" class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition text-sm">Cancel</button>
+                <button id="modal-send-btn" class="flex-1 px-4 py-2.5 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] shadow-md transition text-sm">Send Inquiry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800">Report Listing</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Reason</label>
+                    <select id="report-reason"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none bg-white text-sm text-gray-700">
+                        <option value="">Select a reason...</option>
+                        <option value="Scam or Fraud">Scam or Fraud</option>
+                        <option value="Misleading Photos">Misleading Photos</option>
+                        <option value="Wrong Price">Wrong Price</option>
+                        <option value="Already Taken">Already Taken</option>
+                        <option value="Inappropriate Content">Inappropriate Content</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Details (optional)</label>
+                    <textarea id="report-description" rows="3" placeholder="Provide any additional details..."
+                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none resize-none text-sm text-gray-700"></textarea>
+                </div>
+            </div>
+            <div class="p-5 bg-gray-50 flex gap-3 border-t border-gray-100">
+                <button onclick="closeReportModal()" class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition text-sm">Cancel</button>
+                <button id="report-submit-btn" class="flex-1 px-4 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition text-sm">Submit Report</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+'use strict';
+const API_BASE      = 'http://127.0.0.1:8000/api/v1';
+let currentProperty = null;
+let selectedRating  = 5;
+let leafletMap      = null;
+let toastTimer;
+
+const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+const getRole  = () => localStorage.getItem('role')  || sessionStorage.getItem('role');
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-gray-800' };
+    const icons  = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+    t.className = `show fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm shadow-2xl flex items-center gap-2 min-w-[260px] max-w-[90vw] justify-center ${colors[type] || colors.info}`;
+    t.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.classList.replace('show', 'hide'); }, 3500);
+}
+
+// ── Auth-aware nav ────────────────────────────────────────────────────────────
+(function initNav() {
+    const token = getToken();
+    const role  = getRole();
+    if (!token || !role) return;
+    const routes = { student: 'dashboard-student', student_host: 'dashboard-student-host', landlord: 'dashboard-landlord', admin: 'admin' };
+    const dash = document.getElementById('nav-dashboard');
+    if (dash) { dash.href = routes[role] || 'browse'; dash.classList.remove('hidden'); }
+    document.getElementById('nav-login')?.classList.add('hidden');
+})();
+
+// ── Image URL resolver ────────────────────────────────────────────────────────
+/**
+ * THE FIX for the 404 image bug seen in logs:
+ *
+ * The DB stores image_url as a complete URL:
+ *   "http://127.0.0.1:8000/static/uploads/properties/filename.jpg"
+ *
+ * The old code did:
+ *   path = url.replace(/^\/+/, '')          → "http://127.0.0.1:8000/static/..."  (unchanged, no leading slash)
+ *   src  = `http://127.0.0.1:8000/${path}` → "http://127.0.0.1:8000/http://127.0.0.1:8000/static/..."  ← BROKEN
+ *
+ * The browser then requests:
+ *   GET /http%3A//127.0.0.1%3A8000/static/... → 404
+ *
+ * This function checks: if it already starts with "http", use it as-is.
+ * Only prepend the host for bare paths like "/static/uploads/...".
+ */
+function resolveImageUrl(raw) {
+    if (!raw) return null;
+    const url = String(raw).trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url; // ← Already a full absolute URL. Use directly. No prepending.
+    }
+    // Bare path — make it absolute
+    return 'http://127.0.0.1:8000' + (url.startsWith('/') ? url : '/' + url);
+}
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function openModal(id)  { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
+function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+function openReportModal() {
+    if (!getToken()) { showToast('Please log in to report a listing.', 'info'); setTimeout(() => window.location.href = 'login', 1800); return; }
+    openModal('report-modal');
+}
+function closeReportModal() { closeModal('report-modal'); }
+
+// ── Map ───────────────────────────────────────────────────────────────────────
+function initMap(lat, lng, label) {
+    if (leafletMap) { leafletMap.remove(); leafletMap = null; }
+    leafletMap = L.map('property-map').setView([lat, lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(leafletMap);
+    L.marker([lat, lng]).addTo(leafletMap).bindPopup(label).openPopup();
+    setTimeout(() => leafletMap.invalidateSize(), 400);
+}
+
+// ── Load listing ──────────────────────────────────────────────────────────────
+async function loadData() {
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (!id) { showToast('No listing ID in URL.', 'error'); return; }
+
+    try {
+        const res = await fetch(`${API_BASE}/properties/${id}`);
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data = await res.json();
+        currentProperty = data;
+
+        // Text — innerText is XSS-safe
+        document.getElementById('prop-title').innerText         = data.title       || '—';
+        document.getElementById('prop-location-text').innerText = data.location    || '—';
+        document.getElementById('prop-description').innerText   = data.description || 'No description provided.';
+        document.getElementById('prop-price').innerText         = `ZMW ${Number(data.price).toLocaleString()}`;
+        document.title = `${data.title || 'Property'} - FindMyNyumba`;
+
+        if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
+
+        // Image — THE FIX
+        const imgEl  = document.getElementById('main-image');
+        const rawUrl = data.image_url || (Array.isArray(data.images) && data.images[0]) || null;
+        const imgSrc = resolveImageUrl(rawUrl);
+        if (imgSrc) {
+            imgEl.src = imgSrc;
+            imgEl.onerror = () => { imgEl.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80'; };
+        } else {
+            imgEl.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80';
         }
 
-        async function initPage() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const propId = urlParams.get('id');
-            if (!propId) return;
-
-            try {
-                // 1. Fetch Backend Data
-                const [pRes, rRes] = await Promise.all([
-                    fetch(`http://127.0.0.1:8000/api/v1/landlord/properties/${propId}`),
-                    Promise.resolve(new Response(JSON.stringify([])))
-                ]);
-
-                const p = await pRes.json();
-                const reviews = await rRes.json();
-
-                // 2. Populate UI
-                document.getElementById('prop-title').innerText = p.title || "Premium Student Room";
-                document.getElementById('prop-price').innerText = parseFloat(p.price || 0).toLocaleString();
-                document.getElementById('prop-location').innerText = p.location || "Lusaka, Zambia";
-                document.getElementById('prop-description').innerText = p.description || "Beautiful verified student accommodation close to campus. Highly secure with great amenities. Contact the landlord for viewing arrangements.";
-                document.getElementById('prop-type').innerText = p.title ? p.title.split(' ')[0] : "Room";
-                
-                // 2.5 Inject the actual database image!
-                const mainImg = document.getElementById('main-img');
-                if (mainImg) {
-                    mainImg.src = p.image_url || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200";
-                    mainImg.alt = p.title || "Property Image";
-                }
-
-                // 3. Render Reviews
-                const revCont = document.getElementById('reviews-container');
-                revCont.innerHTML = reviews.length > 0 
-                    ? reviews.map(r => `<div class="p-4 bg-gray-50 rounded-2xl"><p class="font-bold text-gray-900">${r.student_name}</p><p class="text-gray-600 text-sm">${r.comment}</p></div>`).join('')
-                    : '<p class="text-gray-400 italic">No reviews yet. Be the first!</p>';
-
-                // 4. Map Logic
-                if (!listingMap) {
-                    listingMap = L.map('map').setView([-15.3875, 28.3228], 15);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(listingMap);
-                    L.marker([-15.3875, 28.3228]).addTo(listingMap).bindPopup(p.title);
-                }
-
-                // 5. Message Landlord Logic
-                document.getElementById('msg-landlord-btn').onclick = () => {
-                    window.location.href = `contact-landlord.html?id=${propId}`;
-                };
-
-            } catch (err) {
-                console.error("Failed to load page:", err);
-            }
+        // Host card
+        const owner = data.owner;
+        if (owner) {
+            const name     = owner.full_name || 'Host';
+            const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+            document.getElementById('host-avatar').innerText = initials;
+            document.getElementById('host-name').innerText   = name;
+            const roleLabel = (owner.role || '').replace(/_/g, ' ').toUpperCase();
+            const verBadge  = owner.verification_status === 'verified'
+                ? `<span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full"><i class="fas fa-check-circle text-xs"></i> Verified</span>`
+                : `<span class="text-gray-400 text-xs">${roleLabel}</span>`;
+            document.getElementById('host-badge').innerHTML = verBadge;
         }
 
-        function setRating(v) {
-            currentRatingValue = v;
-            document.getElementById('rev-rating-val').value = v;
-            const stars = document.querySelectorAll('#star-input i');
-            stars.forEach((s, i) => {
-                s.style.color = (i < v) ? '#facc15' : '#d1d5db';
+        // Map — default to Lusaka centre; swap coords when geocoding is added
+        initMap(-15.4167, 28.2833, data.title || 'Property');
+
+    } catch (err) {
+        showToast('Could not load property details. Please try again.', 'error');
+        console.error('loadData error:', err);
+    }
+}
+
+// ── Stars ─────────────────────────────────────────────────────────────────────
+function initStars() {
+    const stars = Array.from(document.querySelectorAll('#star-container .fa-star'));
+    stars.forEach((s, i) => {
+        s.addEventListener('mouseover', () => stars.forEach((x, j) => x.style.color = j <= i ? '#ea580c' : '#d1d5db'));
+        s.addEventListener('mouseout',  () => stars.forEach((x, j) => x.style.color = j < selectedRating ? '#ea580c' : '#d1d5db'));
+        s.addEventListener('click',     () => { selectedRating = i + 1; stars.forEach((x, j) => x.style.color = j < selectedRating ? '#ea580c' : '#d1d5db'); });
+    });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    initStars();
+
+    // Message modal
+    document.getElementById('msg-landlord-btn').addEventListener('click', () => {
+        if (!getToken()) { showToast('Please log in to send a message.', 'info'); setTimeout(() => window.location.href = 'login', 1800); return; }
+        if (!currentProperty) { showToast('Still loading...', 'info'); return; }
+        document.getElementById('modal-prop-title').innerText = currentProperty.title || 'Property';
+        document.getElementById('modal-message-body').value = '';
+        openModal('message-modal');
+    });
+    document.getElementById('modal-close-btn').addEventListener('click',  () => closeModal('message-modal'));
+    document.getElementById('modal-cancel-btn').addEventListener('click', () => closeModal('message-modal'));
+    document.getElementById('message-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('message-modal'); });
+    document.getElementById('report-modal').addEventListener('click',  e => { if (e.target === e.currentTarget) closeReportModal(); });
+
+    // Send message
+    document.getElementById('modal-send-btn').addEventListener('click', async () => {
+        const token   = getToken();
+        const content = document.getElementById('modal-message-body').value.trim();
+        if (!token)   { showToast('Session expired. Please log in again.', 'error'); return; }
+        if (!content) { showToast('Please type a message before sending.', 'info');  return; }
+        const btn = document.getElementById('modal-send-btn');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Sending...';
+        try {
+            const res = await fetch(`${API_BASE}/messages/send`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ receiver_id: currentProperty.owner_id, property_id: currentProperty.id, content }),
             });
-        }
+            if (res.ok) { showToast('Message sent! The host will reply soon.', 'success'); closeModal('message-modal'); }
+            else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to send.', 'error'); }
+        } catch { showToast('Network error.', 'error'); }
+        finally { btn.disabled = false; btn.innerHTML = 'Send Inquiry'; }
+    });
 
-        async function handleReviewSubmit() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const propId = urlParams.get('id');
-            const name = document.getElementById('rev-name').value;
-            const comment = document.getElementById('rev-comment').value;
-            const rating = document.getElementById('rev-rating-val').value;
-            
-            if(!name || !comment) return alert("Please fill in all fields!");
+    // Post review
+    document.getElementById('post-review-btn').addEventListener('click', async () => {
+        const token   = getToken();
+        const comment = document.getElementById('review-comment').value.trim();
+        if (!token)           { showToast('Please log in to post a review.', 'info'); return; }
+        if (!currentProperty) return;
+        if (!comment)         { showToast('Please write your review first.', 'info'); return; }
+        const btn = document.getElementById('post-review-btn');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Posting...';
+        try {
+            const res = await fetch(`${API_BASE}/properties/${currentProperty.id}/reviews`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ rating: selectedRating, comment }),
+            });
+            if (res.ok) { showToast('Review posted!', 'success'); document.getElementById('review-comment').value = ''; }
+            else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to post review.', 'error'); }
+        } catch { showToast('Network error.', 'error'); }
+        finally { btn.disabled = false; btn.innerHTML = 'Post Review'; }
+    });
 
-            try {
-                const res = await fetch(`http://127.0.0.1:8000/api/v1/reviews`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ property_id: parseInt(propId), student_name: name, rating: parseInt(rating), comment: comment })
-                });
-                if (res.ok) { alert("Review posted!"); location.reload(); }
-            } catch (err) { console.error("Review failed:", err); }
-        }
-
-        document.addEventListener('DOMContentLoaded', initPage);
-    </script>
-    <script>
-        // This function extends your existing property fetch logic
-        function populateSharedDetails(p) {
-            const container = document.getElementById('shared-housing-info');
-            const sharedTypes = ['shared_room', 'bedspace', 'squatting_space'];
-            
-            // Only show the card if it's a shared housing type
-            if (sharedTypes.includes(p.property_type?.toLowerCase()) || p.rent_split_amount > 0) {
-                container.classList.remove('hidden');
-                
-                document.getElementById('display-gender').textContent = p.gender_preference || "Unisex";
-                document.getElementById('display-occupancy').textContent = `${p.number_of_current_occupants || 0} / ${p.total_capacity || 0} Students`;
-                document.getElementById('display-split').textContent = `ZMW ${p.rent_split_amount || 0}/mo`;
-                
-                if (p.quiet_study_environment) document.getElementById('badge-study').classList.remove('hidden');
-                if (p.furnished) document.getElementById('badge-furnished').classList.remove('hidden');
-            }
-        }
-    </script>
+    // Report submit
+    document.getElementById('report-submit-btn').addEventListener('click', async () => {
+        const token  = getToken();
+        const reason = document.getElementById('report-reason').value;
+        const desc   = document.getElementById('report-description').value.trim();
+        if (!token)           { showToast('Please log in to report.', 'info'); return; }
+        if (!reason)          { showToast('Please select a reason.', 'info');  return; }
+        if (!currentProperty) return;
+        const btn = document.getElementById('report-submit-btn');
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Submitting...';
+        try {
+            const res = await fetch(`${API_BASE}/properties/${currentProperty.id}/report`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ reason, description: desc || null }),
+            });
+            if (res.ok) {
+                showToast('Report submitted. Thank you.', 'success');
+                closeReportModal();
+                document.getElementById('report-reason').value = '';
+                document.getElementById('report-description').value = '';
+            } else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed.', 'error'); }
+        } catch { showToast('Network error.', 'error'); }
+        finally { btn.disabled = false; btn.innerHTML = 'Submit Report'; }
+    });
+});
+</script>
 </body>
 </html>
-
-
-
-

@@ -1,121 +1,81 @@
-import shutil
+﻿"""
+main.py
+FindMyNyumba FastAPI application entry point.
+
+IMPORTANT:
+- landlords.py and student_hosts.py routers have prefix="/landlord" and
+  "/student-host" respectively (NOT "/api/v1/..."). The "/api/v1" prefix
+  is added here via api_router mounted at prefix="/api/v1".
+- CORS is restricted to known origins. Do NOT use allow_origins=["*"] with
+  allow_credentials=True — that violates the CORS spec and is a security risk.
+"""
 import os
-from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from app.core.database import engine, Base, get_db
-from app.models import models
-from app.schemas import schemas
-import bcrypt
-import jwt
-import os
-from datetime import datetime, timedelta
+from fastapi.staticfiles import StaticFiles
 
-# JWT configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-jwt-key")
-ALGORITHM = "HS256"
+from app.api.v1.api import api_router
+from app.core.config import settings
+from app.core.database import Base, engine
 
-# Create tables
-models.Base.metadata.create_all(bind=engine)
+# ── Create DB tables on startup (idempotent) ──────────────────────────────────
+# In production you would use Alembic migrations instead.
+Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="FindMyNyumba API")
+# ── Ensure static upload directory exists ────────────────────────────────────
+os.makedirs("static/uploads/properties",    exist_ok=True)
+os.makedirs("static/uploads/verification",  exist_ok=True)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+# ── App ───────────────────────────────────────────────────────────────────────
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version="1.0.0",
+    # Hide /docs and /redoc in production — set to None when deploying
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "FindMyNyumba API is running"}
+# ── CORS ──────────────────────────────────────────────────────────────────────
+# allow_credentials=True requires explicit origins — never use ["*"] with it.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins_list,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
+)
 
-@app.post("/api/auth/register")
-def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    if db.query(models.User).filter(models.User.email == user.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), salt).decode('utf-8')
-    
-    db_user = models.User(email=user.email, hashed_password=hashed_password, role=user.role)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return {"message": "User created successfully", "user_id": db_user.id}
+# ── Static files (uploaded property images, verification docs) ───────────────
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-class LoginRequest(schemas.BaseModel):
-    email: schemas.EmailStr
-    password: str
-
-@app.post("/api/auth/login")
-def login(user_credentials: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == user_credentials.email).first()
-    if not user or not bcrypt.checkpw(user_credentials.password.encode('utf-8'), user.hashed_password.encode('utf-8')):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    
-    expire = datetime.utcnow() + timedelta(minutes=60)
-    to_encode = {"sub": user.email, "role": user.role, "exp": expire}
-    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": token, "token_type": "bearer", "role": user.role}
-
-@app.get("/api/properties", response_model=list[schemas.PropertyResponse])
-def get_properties(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return db.query(models.Property).offset(skip).limit(limit).all()
-
-@app.post("/api/properties", response_model=schemas.PropertyResponse)
-def create_property(property: schemas.PropertyCreate, db: Session = Depends(get_db)):
-    db_property = models.Property(**property.model_dump())
-    db.add(db_property)
-    db.commit()
-    db.refresh(db_property)
-    return db_property
+# ── API routes ────────────────────────────────────────────────────────────────
+# All sub-routers are registered inside api_router (see app/api/v1/api.py).
+# The "/api/v1" prefix is added once here.
+app.include_router(api_router, prefix="/api/v1")
 
 
-
-@app.delete("/api/properties/{property_id}")
-async def delete_property(property_id: int, db: Session = Depends(get_db)):
-    db_property = db.query(models.Property).filter(models.Property.id == property_id).first()
-    if not db_property:
-        raise HTTPException(status_code=404, detail="Property not found")
-    
-    db.delete(db_property)
-    db.commit()
-    return {"message": "Property deleted successfully"}
+@app.get("/", tags=["Health"])
+def root():
+    return {
+        "status": "online",
+        "project": settings.PROJECT_NAME,
+        "api": "/api/v1",
+        "docs": "/docs",
+    }
 
 
+@app.get("/health", tags=["Health"])
+def health():
+    return {"status": "ok"}
 
-# --- DEDICATED IMAGE UPLOAD ROUTE ---
-from fastapi import File, UploadFile, Form
-import shutil
-import uuid
+from fastapi.responses import FileResponse
+import pathlib
 
-@app.post("/api/properties_with_image")
-async def create_property_with_image(
-    title: str = Form(...),
-    description: str = Form("No description provided"),
-    price: float = Form(0.0),
-    location: str = Form("Unknown Location"),
-    landlord_id: int = Form(1),
-    file: UploadFile = File(None),
-    db = Depends(get_db)
-):
-    file_path = None
-    if file and hasattr(file, 'filename') and file.filename:
-        file_ext = file.filename.split('.')[-1]
-        unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = f"static/uploads/{unique_filename}"
-        os.makedirs("static/uploads", exist_ok=True)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    
-    db_property = models.Property(
-        title=title, description=description, price=price, 
-        location=location, landlord_id=landlord_id, photo_url=file_path
-    )
-    db.add(db_property)
-    db.commit()
-    db.refresh(db_property)
-    return db_property
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    # Serve favicon from the static folder if it exists, otherwise return 204 No Content
+    favicon_path = pathlib.Path("static/favicon.ico")
+    if favicon_path.exists():
+        return FileResponse(str(favicon_path))
+    from fastapi.responses import Response
+    return Response(status_code=204)
