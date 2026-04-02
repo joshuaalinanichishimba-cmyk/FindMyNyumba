@@ -45,8 +45,8 @@ app.add_middleware(
         "https://findmynyumba-web.vercel.app"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ── Static files (uploaded property images, verification docs) ───────────────
