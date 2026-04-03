@@ -12,10 +12,48 @@
         .badge-boosted { background: linear-gradient(45deg, #FFD700, #FFA500); color: #fff; text-shadow: 1px 1px 0px rgba(0,0,0,0.2); }
         .chat-bubble-me { background-color: #ea580c; color: white; border-bottom-right-radius: 0; }
         .chat-bubble-them { background-color: #f3f4f6; color: #1f2937; border-bottom-left-radius: 0; }
+
+        /* ── Mobile sidebar ── */
+        #mob-topbar { display: none; }
+        #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 30; }
+        @media (max-width: 767px) {
+            #mob-topbar { display: flex; }
+            aside {
+                position: fixed; top: 0; left: 0; height: 100%;
+                transform: translateX(-100%);
+                transition: transform .25s ease;
+                z-index: 40;
+            }
+            aside.sidebar-open { transform: translateX(0); }
+            #sidebar-backdrop.sidebar-open { display: block; }
+            .layout-shell { padding-top: 3.5rem; }
+            /* Chat panel: stack on mobile */
+            #chat-panel { flex-direction: column !important; height: auto !important; }
+            #conv-panel  { width: 100% !important; border-right: none !important; border-bottom: 1px solid #e5e7eb; max-height: 260px; }
+            #msg-panel   { min-height: 380px; }
+        }
+        /* ── Responsive table scroll ── */
+        .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tbl-wrap table { min-width: 540px; }
     </style>
     <link rel="icon" type="image/png" href="logo.png">
 </head>
-<body class="bg-gray-50 flex h-screen overflow-hidden font-sans">
+<body class="bg-gray-50 font-sans">
+
+    <!-- Mobile top bar -->
+    <header id="mob-topbar" class="fixed top-0 inset-x-0 h-14 bg-white border-b shadow-sm z-50 items-center px-4 gap-3">
+        <button onclick="openSidebar()" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-700">
+            <i class="fas fa-bars text-lg"></i>
+        </button>
+        <span class="text-xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></span>
+    </header>
+
+    <!-- Backdrop -->
+    <div id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+    <!-- Layout shell -->
+    <div class="layout-shell flex h-screen overflow-hidden">
+
     <aside class="w-64 bg-white border-r shadow-lg flex flex-col h-full z-20">
         <div class="p-6 border-b text-center">
             <h1 class="text-2xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></h1>
@@ -40,7 +78,7 @@
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-8 bg-gray-50">
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
         <div id="view-overview" class="dashboard-view">
             <h2 class="text-3xl font-bold mb-8 text-gray-800">Dashboard Overview</h2>
             <div id="verification-alert" class="hidden mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-sm">
@@ -59,11 +97,11 @@
         </div>
 
         <div id="view-listings" class="dashboard-view hidden-view">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">🏠 My Listings</h2>
-                <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition">+ Add New Listing</button>
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">🏠 My Listings</h2>
+                <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition text-sm">+ Add New Listing</button>
             </div>
-            <div class="bg-white rounded-xl shadow overflow-hidden border">
+            <div class="tbl-wrap bg-white rounded-xl shadow overflow-hidden border">
                 <table class="w-full text-left">
                     <thead class="bg-gray-100 border-b">
                         <tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Property Info</th><th class="p-4">Price</th><th class="p-4">Status / Visibility</th><th class="p-4">Actions</th></tr>
@@ -77,13 +115,13 @@
 
         <div id="view-upload" class="dashboard-view hidden-view">
             <h2 class="text-3xl font-bold mb-8 text-gray-800">🚀 Publish New Accommodation</h2>
-            <div class="bg-white p-8 rounded-xl shadow border max-w-4xl">
+            <div class="bg-white p-4 sm:p-8 rounded-xl shadow border max-w-4xl">
                 <form id="uploadForm" class="space-y-6">
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Property Title</label><input type="text" id="prop-title" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
                         <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Price per Term/Month (ZMW)</label><input type="number" id="prop-price" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nearest Institution</label>
                             <select id="prop-university" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none">
@@ -101,14 +139,14 @@
 
         <div id="view-inquiries" class="dashboard-view hidden-view">
             <h2 class="text-3xl font-bold mb-8">💬 Inbox & Inquiries</h2>
-            <div class="bg-white rounded-xl shadow border flex h-[600px] overflow-hidden">
-                <div class="w-1/3 border-r flex flex-col bg-gray-50">
+            <div id="chat-panel" class="bg-white rounded-xl shadow border flex h-[600px] overflow-hidden">
+                <div id="conv-panel" class="w-1/3 border-r flex flex-col bg-gray-50">
                     <div class="p-4 border-b bg-white font-black text-gray-800 shadow-sm z-10">Conversations</div>
                     <div id="conv-list" class="flex-1 overflow-y-auto divide-y divide-gray-100">
                         <div class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                     </div>
                 </div>
-                <div class="flex-1 flex flex-col bg-white relative">
+                <div id="msg-panel" class="flex-1 flex flex-col bg-white relative">
                     <div id="chat-header" class="p-4 border-b bg-white flex justify-between items-center hidden shadow-sm z-10">
                         <div>
                             <h3 id="chat-user-name" class="font-bold text-gray-800 text-lg">Select a conversation</h3>
@@ -199,7 +237,7 @@
 
     <script>
         'use strict';
-        const API_BASE = "http://127.0.0.1:8000/api/v1";
+        const API_BASE = "https://findmynyumba.onrender.com/api/v1";
 
         let currentChatOtherId = null;
         let currentChatPropId  = null;
@@ -642,7 +680,16 @@
 
         initDashboard();
     </script>
+
+    </div><!-- end layout-shell -->
+
+    <script>
+        function openSidebar()  { document.querySelector('aside').classList.add('sidebar-open');    document.getElementById('sidebar-backdrop').classList.add('sidebar-open'); }
+        function closeSidebar() { document.querySelector('aside').classList.remove('sidebar-open'); document.getElementById('sidebar-backdrop').classList.remove('sidebar-open'); }
+        document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => { if (window.innerWidth < 768) closeSidebar(); }));
+    </script>
 </body>
 </html>
+
 
 

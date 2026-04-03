@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', async () => {
+﻿document.addEventListener('DOMContentLoaded', async () => {
     const propertyGrid = document.getElementById('propertyGrid');
     
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/v1/properties');
+        const response = await fetch('https://findmynyumba.onrender.com/api/v1/properties');
         const properties = await response.json();
 
         if (propertyGrid) {
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             properties.forEach(prop => {
                 // Ensure we point to the backend's static folder for images
                 const imageUrl = prop.photo_url 
-                    ? http://127.0.0.1:8000/ 
+                    ? https://findmynyumba.onrender.com/ 
                     : 'https://via.placeholder.com/300x200?text=No+Image';
 
                 propertyGrid.innerHTML += 
@@ -34,3 +34,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (propertyGrid) propertyGrid.innerHTML = '<p class="text-red-500">Could not load properties. Is the backend running?</p>';
     }
 });
+

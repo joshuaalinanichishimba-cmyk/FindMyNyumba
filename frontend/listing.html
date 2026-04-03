@@ -204,7 +204,7 @@
 
 <script>
 'use strict';
-const API_BASE      = 'http://127.0.0.1:8000/api/v1';
+const API_BASE      = 'https://findmynyumba.onrender.com/api/v1';
 let currentProperty = null;
 let selectedRating  = 5;
 let leafletMap      = null;
@@ -240,11 +240,11 @@ function showToast(msg, type = 'success') {
  * THE FIX for the 404 image bug seen in logs:
  *
  * The DB stores image_url as a complete URL:
- *   "http://127.0.0.1:8000/static/uploads/properties/filename.jpg"
+ *   "https://findmynyumba.onrender.com/static/uploads/properties/filename.jpg"
  *
  * The old code did:
- *   path = url.replace(/^\/+/, '')          → "http://127.0.0.1:8000/static/..."  (unchanged, no leading slash)
- *   src  = `http://127.0.0.1:8000/${path}` → "http://127.0.0.1:8000/http://127.0.0.1:8000/static/..."  ← BROKEN
+ *   path = url.replace(/^\/+/, '')          → "https://findmynyumba.onrender.com/static/..."  (unchanged, no leading slash)
+ *   src  = `https://findmynyumba.onrender.com/${path}` → "https://findmynyumba.onrender.com/https://findmynyumba.onrender.com/static/..."  ← BROKEN
  *
  * The browser then requests:
  *   GET /http%3A//127.0.0.1%3A8000/static/... → 404
@@ -259,7 +259,7 @@ function resolveImageUrl(raw) {
         return url; // ← Already a full absolute URL. Use directly. No prepending.
     }
     // Bare path — make it absolute
-    return 'http://127.0.0.1:8000' + (url.startsWith('/') ? url : '/' + url);
+    return 'https://findmynyumba.onrender.com' + (url.startsWith('/') ? url : '/' + url);
 }
 
 // ── Modal helpers ─────────────────────────────────────────────────────────────
@@ -429,3 +429,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+

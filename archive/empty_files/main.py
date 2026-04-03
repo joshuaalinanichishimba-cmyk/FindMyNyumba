@@ -1,0 +1,1 @@
+$apiFile = Get-ChildItem -Path . -Recurse -Filter "main.py" | Select-Object -First 1; notepad $apiFile.FullName
