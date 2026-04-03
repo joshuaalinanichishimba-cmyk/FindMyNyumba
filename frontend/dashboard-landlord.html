@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Landlord Dashboard - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,51 +12,35 @@
         .badge-boosted { background: linear-gradient(45deg, #FFD700, #FFA500); color: #fff; text-shadow: 1px 1px 0px rgba(0,0,0,0.2); }
         .stat-spinner { display: inline-block; width: 1.5rem; height: 1.5rem; border: 3px solid #e5e7eb; border-top-color: #ea580c; border-radius: 50%; animation: spin 0.7s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Mobile sidebar ── */
-        #mob-topbar { display: none; }
-        #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 30; }
-        @media (max-width: 767px) {
-            #mob-topbar { display: flex; }
-            aside {
-                position: fixed; top: 0; left: 0; height: 100%;
-                transform: translateX(-100%);
-                transition: transform .25s ease;
-                z-index: 40;
-            }
-            aside.sidebar-open { transform: translateX(0); }
-            #sidebar-backdrop.sidebar-open { display: block; }
-            body > .layout-shell { padding-top: 3.5rem; }
-            .layout-shell { padding-top: 3.5rem; }
-        }
-        /* ── Responsive table scroll ── */
-        .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tbl-wrap table { min-width: 540px; }
+        #sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tbl-scroll table { min-width: 560px; }
     </style>
     <link rel="icon" type="image/png" href="logo.png">
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-50 flex flex-col lg:flex-row h-screen overflow-hidden font-sans relative">
 
     <!-- Mobile top bar -->
-    <header id="mob-topbar" class="fixed top-0 inset-x-0 h-14 bg-white border-b shadow-sm z-50 items-center px-4 gap-3">
-        <button onclick="openSidebar()" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-700">
-            <i class="fas fa-bars text-lg"></i>
+    <div class="lg:hidden bg-white border-b shadow-sm flex justify-between items-center p-4 z-50 shrink-0">
+        <h1 class="text-xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></h1>
+        <button id="mobile-menu-btn" class="text-gray-600 focus:outline-none hover:text-[#ea580c] p-2">
+            <i class="fas fa-bars text-2xl"></i>
         </button>
-        <span class="text-xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></span>
-    </header>
+    </div>
 
-    <!-- Backdrop -->
-    <div id="sidebar-backdrop" onclick="closeSidebar()"></div>
+    <!-- Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden backdrop-blur-sm"></div>
 
-    <!-- Layout shell -->
-    <div class="layout-shell flex h-screen overflow-hidden">
-
-    <aside class="w-64 bg-white border-r shadow-lg flex flex-col h-full z-20">
-        <div class="p-6 border-b text-center">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed lg:relative w-72 bg-white border-r shadow-2xl lg:shadow-none flex flex-col h-full z-50 transform -translate-x-full lg:translate-x-0 shrink-0 left-0 top-0">
+        <div class="p-6 border-b text-center relative">
             <h1 class="text-2xl font-black text-[#ea580c]">FindMy<span class="text-blue-900">Nyumba</span></h1>
             <div class="mt-2 inline-block px-3 py-1 bg-gray-100 rounded-full shadow-inner">
                 <p id="role-badge" class="text-[10px] font-bold text-[#ea580c] uppercase tracking-wider">Loading Role...</p>
             </div>
+            <button id="mobile-close-btn" class="lg:hidden absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-2">
+                <i class="fas fa-times text-xl"></i>
+            </button>
         </div>
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
             <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn nav-active w-full text-left p-3 text-gray-700 rounded-md text-sm font-bold transition flex items-center"><i class="fas fa-chart-pie w-6"></i> Overview</button>
@@ -72,34 +56,38 @@
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
-        
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 bg-gray-50 relative z-0">
+
+        <!-- Overview -->
         <div id="view-overview" class="dashboard-view">
-            <h2 class="text-3xl font-bold mb-2 text-gray-800">Dashboard Overview</h2>
+            <h2 class="text-2xl lg:text-3xl font-bold mb-4 text-gray-800">Dashboard Overview</h2>
             <div id="verification-alert" class="hidden mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg shadow-sm">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-3 text-xl"></i>
-                    <div><h3 class="font-bold text-yellow-800">Action Required: Account Not Verified</h3></div>
-                    <button onclick="switchTab('verification')" class="ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-600">Verify Now</button>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+                        <h3 class="font-bold text-yellow-800">Action Required: Account Not Verified</h3>
+                    </div>
+                    <button onclick="switchTab('verification')" class="sm:ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-600 transition shrink-0">Verify Now</button>
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-[#ea580c]"><h3 class="text-gray-400 text-xs font-bold uppercase">Active Listings</h3><div id="stat-active" class="text-3xl font-black mt-2">...</div></div>
-                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-blue-600"><h3 class="text-gray-400 text-xs font-bold uppercase">Pending Listings</h3><div id="stat-pending" class="text-3xl font-black mt-2">...</div></div>
-                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-500"><h3 class="text-gray-400 text-xs font-bold uppercase">Total Views</h3><div id="stat-views" class="text-3xl font-black mt-2 text-green-600">...</div></div>
-                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-purple-500"><h3 class="text-gray-400 text-xs font-bold uppercase">New Inquiries</h3><div id="stat-inquiries" class="text-3xl font-black mt-2 text-purple-600">...</div></div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-4 lg:p-6 rounded-xl shadow border-t-4 border-[#ea580c]"><h3 class="text-gray-400 text-xs font-bold uppercase">Active</h3><div id="stat-active" class="text-3xl font-black mt-2">...</div></div>
+                <div class="bg-white p-4 lg:p-6 rounded-xl shadow border-t-4 border-blue-600"><h3 class="text-gray-400 text-xs font-bold uppercase">Pending</h3><div id="stat-pending" class="text-3xl font-black mt-2">...</div></div>
+                <div class="bg-white p-4 lg:p-6 rounded-xl shadow border-t-4 border-green-500"><h3 class="text-gray-400 text-xs font-bold uppercase">Views</h3><div id="stat-views" class="text-3xl font-black mt-2 text-green-600">...</div></div>
+                <div class="bg-white p-4 lg:p-6 rounded-xl shadow border-t-4 border-purple-500"><h3 class="text-gray-400 text-xs font-bold uppercase">Inquiries</h3><div id="stat-inquiries" class="text-3xl font-black mt-2 text-purple-600">...</div></div>
             </div>
         </div>
 
+        <!-- My Listings -->
         <div id="view-listings" class="dashboard-view hidden-view">
             <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">🏠 My Properties</h2>
                 <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition text-sm">+ Add New Listing</button>
             </div>
-            <div class="tbl-wrap bg-white rounded-xl shadow overflow-hidden border">
+            <div class="tbl-scroll bg-white rounded-xl shadow overflow-hidden border">
                 <table class="w-full text-left">
                     <thead class="bg-gray-100 border-b">
-                        <tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Property Info</th><th class="p-4">Price</th><th class="p-4">Status / Visibility</th><th class="p-4">Actions</th></tr>
+                        <tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Property Info</th><th class="p-4">Price</th><th class="p-4">Status</th><th class="p-4">Actions</th></tr>
                     </thead>
                     <tbody id="my-listings-body" class="text-sm divide-y">
                         <tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Loading your listings...</td></tr>
@@ -108,9 +96,10 @@
             </div>
         </div>
 
+        <!-- Add Listing -->
         <div id="view-upload" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800">🚀 Publish New Accommodation</h2>
-            <div class="bg-white p-4 sm:p-8 rounded-xl shadow border max-w-4xl">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">🚀 Publish New Accommodation</h2>
+            <div class="bg-white p-4 lg:p-8 rounded-xl shadow border max-w-4xl">
                 <form id="uploadForm" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Property Title</label><input type="text" id="prop-title" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
@@ -118,28 +107,28 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nearest Institution</label>
-    <select id="prop-university" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none">
-        <option value="" disabled selected>Select an institution...</option>
-        <option value="UNZA">University of Zambia (UNZA)</option>
-        <option value="CBU">Copperbelt University (CBU)</option>
-        <option value="MU">Mulungushi University (MU)</option>
-        <option value="KNU">Kwame Nkrumah University (KNU)</option>
-        <option value="LMMU">Levy Mwanawasa Medical University (LMMU)</option>
-        <option value="MUKUBA">Mukuba University</option>
-        <option value="CHALU">Chalimbana University</option>
-        <option value="ZAOU">Zambian Open University (ZAOU)</option>
-        <option value="EDEN">Eden University</option>
-        <option value="LAMU">Lusaka Apex Medical University (LAMU)</option>
-        <option value="CAVENDISH">Cavendish University</option>
-        <option value="TAU">Texila American University (TAU)</option>
-        <option value="DMI">DMI St. Eugene University</option>
-        <option value="EHC">Evelyn Hone College</option>
-        <option value="NIPA">National Institute of Public Administration (NIPA)</option>
-        <option value="RUSANGU">Rusangu University</option>
-        <option value="Other">Other</option>
-    </select>
-</div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nearest Institution</label>
+                            <select id="prop-university" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none">
+                                <option value="" disabled selected>Select an institution...</option>
+                                <option value="UNZA">University of Zambia (UNZA)</option>
+                                <option value="CBU">Copperbelt University (CBU)</option>
+                                <option value="MU">Mulungushi University (MU)</option>
+                                <option value="KNU">Kwame Nkrumah University (KNU)</option>
+                                <option value="LMMU">Levy Mwanawasa Medical University (LMMU)</option>
+                                <option value="MUKUBA">Mukuba University</option>
+                                <option value="CHALU">Chalimbana University</option>
+                                <option value="ZAOU">Zambian Open University (ZAOU)</option>
+                                <option value="EDEN">Eden University</option>
+                                <option value="LAMU">Lusaka Apex Medical University (LAMU)</option>
+                                <option value="CAVENDISH">Cavendish University</option>
+                                <option value="TAU">Texila American University (TAU)</option>
+                                <option value="DMI">DMI St. Eugene University</option>
+                                <option value="EHC">Evelyn Hone College</option>
+                                <option value="NIPA">National Institute of Public Administration (NIPA)</option>
+                                <option value="RUSANGU">Rusangu University</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
                         <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Location/Area</label><input type="text" id="prop-location" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
                     </div>
                     <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Detailed Description</label><textarea id="prop-desc" rows="4" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></textarea></div>
@@ -149,10 +138,11 @@
             </div>
         </div>
 
+        <!-- Verification -->
         <div id="view-verification" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-2 text-gray-800">🛡️ Verification Center</h2>
-            <p class="text-gray-500 mb-8">Build trust with students by verifying your identity and property ownership.</p>
-            <div class="bg-white p-8 rounded-xl shadow border max-w-2xl">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">🛡️ Verification Center</h2>
+            <p class="text-gray-500 mb-6">Build trust with students by verifying your identity and property ownership.</p>
+            <div class="bg-white p-4 lg:p-8 rounded-xl shadow border max-w-2xl">
                 <div id="verification-content">
                     <div class="text-center py-8 text-gray-400">
                         <i class="fas fa-circle-notch fa-spin text-2xl text-[#ea580c] mb-3 block"></i>
@@ -162,9 +152,10 @@
             </div>
         </div>
 
+        <!-- Inquiries -->
         <div id="view-inquiries" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">💬 Student Inquiries</h2>
-            <div class="tbl-wrap bg-white rounded-xl shadow border overflow-hidden">
+            <h2 class="text-2xl font-bold mb-6">💬 Student Inquiries</h2>
+            <div class="tbl-scroll bg-white rounded-xl shadow border overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-gray-100 border-b"><tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Student</th><th class="p-4">Interested In</th><th class="p-4">Message</th><th class="p-4">Action</th></tr></thead>
                     <tbody id="inquiries-body" class="text-sm divide-y">
@@ -174,21 +165,22 @@
             </div>
         </div>
 
+        <!-- Payments -->
         <div id="view-payments" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">💳 Revenue & Boosts</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-xl shadow border border-orange-100">
+            <h2 class="text-2xl font-bold mb-6">💳 Revenue & Boosts</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 lg:p-8 rounded-xl shadow border border-orange-100">
                     <div class="text-center mb-6">
                         <i class="fas fa-rocket text-4xl text-yellow-500 mb-4"></i>
                         <h3 class="text-2xl font-black text-gray-800">Boost Your Listing</h3>
-                        <p class="text-gray-500 mt-2">Get up to 5x more student views by pinning your property to the top of the search results.</p>
+                        <p class="text-gray-500 mt-2">Get up to 5x more student views by pinning your property to the top of search results.</p>
                     </div>
                     <div class="bg-orange-50 rounded-lg p-4 mb-6 border border-orange-200">
                         <div class="flex justify-between items-center font-bold text-orange-800"><span>7-Day Boost</span><span>ZMW 150</span></div>
                     </div>
                     <button onclick="switchTab('listings')" class="w-full bg-yellow-500 text-white py-3 rounded-lg font-black hover:bg-yellow-600 transition shadow">Boost a Property Now</button>
                 </div>
-                <div class="bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-800 relative overflow-hidden">
+                <div class="bg-gray-900 p-6 lg:p-8 rounded-xl shadow-2xl border border-gray-800 relative overflow-hidden">
                     <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">Most Popular</div>
                     <div class="text-center mb-6 text-white">
                         <i class="fas fa-crown text-4xl text-orange-400 mb-4"></i>
@@ -206,14 +198,14 @@
             </div>
         </div>
 
+        <!-- Profile -->
         <div id="view-profile" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-6">⚙️ Profile &amp; Settings</h2>
+            <h2 class="text-2xl font-bold mb-6">⚙️ Profile &amp; Settings</h2>
             <div class="max-w-2xl space-y-6">
-
-                <div class="bg-white p-8 rounded-xl shadow border">
+                <div class="bg-white p-4 lg:p-8 rounded-xl shadow border">
                     <h3 class="font-black text-gray-800 mb-5 border-b pb-2"><i class="fas fa-user-cog text-[#ea580c] mr-2"></i>Account Details</h3>
                     <form id="profileForm" class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
                                 <input type="text" id="prof-name" required class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[#ea580c] font-bold">
@@ -233,466 +225,24 @@
                             <input type="email" id="prof-email" disabled class="w-full p-3 border rounded-lg bg-gray-50 text-gray-400 outline-none cursor-not-allowed">
                             <p class="text-[10px] text-gray-400 mt-1">Email cannot be changed here.</p>
                         </div>
-                        <button type="submit" class="bg-[#ea580c] text-white px-8 py-3 rounded-lg font-black hover:bg-[#c2410c] shadow transition">Save Changes</button>
+                        <button type="submit" class="w-full sm:w-auto bg-[#ea580c] text-white px-8 py-3 rounded-lg font-black hover:bg-[#c2410c] shadow transition">Save Changes</button>
                     </form>
                 </div>
-
-                <div class="bg-white p-8 rounded-xl shadow border">
+                <div class="bg-white p-4 lg:p-8 rounded-xl shadow border">
                     <h3 class="font-black text-gray-800 mb-5 border-b pb-2"><i class="fas fa-lock text-[#ea580c] mr-2"></i>Change Password</h3>
                     <form id="passwordForm" class="space-y-3">
                         <input type="password" id="pwd-current" required placeholder="Current password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none">
                         <input type="password" id="pwd-new" required placeholder="New password (8-12 chars, mixed case, number, symbol)" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none">
-                        <button type="submit" class="bg-black text-white px-8 py-3 rounded-lg font-black hover:bg-gray-800 transition">Update Password</button>
+                        <button type="submit" class="w-full sm:w-auto bg-black text-white px-8 py-3 rounded-lg font-black hover:bg-gray-800 transition">Update Password</button>
                     </form>
                 </div>
-
             </div>
         </div>
+
     </main>
 
-    <script>
-        'use strict';
-        const API_BASE = 'https://findmynyumba.onrender.com/api/v1';
-
-        let currentUser  = null;
-        const _loadedTabs = new Set();
-
-        // ── Auth helpers ──────────────────────────────────────────────────────
-        function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
-        function authHeaders()     { return { 'Authorization': `Bearer ${getToken()}` }; }
-        function authJsonHeaders() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
-
-        // ── Immediate guard ───────────────────────────────────────────────────
-        (function() { if (!getToken()) window.location.replace('login.html'); })();
-
-        function clearSession() {
-            ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
-            window.location.replace('login.html');
-        }
-
-        // ── Toast ─────────────────────────────────────────────────────────────
-        function showToast(msg, type = 'success') {
-            const old = document.getElementById('fmn-toast');
-            if (old) old.remove();
-            const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-            const icon  = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            const t = document.createElement('div');
-            t.id = 'fmn-toast';
-            t.className = `fixed bottom-6 right-6 z-[9999] flex items-center gap-2 px-5 py-4 rounded-xl shadow-2xl font-bold text-sm text-white ${color} transition-all duration-300 opacity-0 translate-y-2`;
-            t.innerHTML = `<i class="fas ${icon}"></i>${msg}`;
-            document.body.appendChild(t);
-            requestAnimationFrame(() => t.classList.remove('opacity-0','translate-y-2'));
-            setTimeout(() => { t.classList.add('opacity-0','translate-y-2'); setTimeout(() => t.remove(), 300); }, 3500);
-        }
-
-        // ── Boot ──────────────────────────────────────────────────────────────
-        async function initDashboard() {
-            try {
-                const res = await fetch(`${API_BASE}/auth/me`, { headers: authHeaders() });
-                if (res.status === 401) { clearSession(); return; }
-                if (!res.ok) throw new Error('Profile fetch failed');
-                const user = await res.json();
-
-                if (user.role !== 'landlord') {
-                    const dest = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html' };
-                    window.location.replace(dest[user.role] || 'login.html');
-                    return;
-                }
-                currentUser = user;
-                document.getElementById('role-badge').innerText = 'LANDLORD';
-            } catch (e) {
-                console.warn('initDashboard:', e.message);
-                document.getElementById('role-badge').innerText = 'LANDLORD';
-            }
-            switchTab('overview');
-        }
-
-        // ── Tab switching ─────────────────────────────────────────────────────
-        function switchTab(tabId) {
-            document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden-view'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('view-' + tabId)?.classList.remove('hidden-view');
-            document.getElementById('nav-'  + tabId)?.classList.add('nav-active');
-
-            if (!_loadedTabs.has(tabId)) {
-                _loadedTabs.add(tabId);
-                if (tabId === 'overview')     loadOverview();
-                if (tabId === 'listings')     loadListings();
-                if (tabId === 'inquiries')    loadInquiries();
-                if (tabId === 'verification') loadVerification();
-                if (tabId === 'profile')      loadProfile();
-            } else {
-                if (tabId === 'overview')  loadOverview();
-                if (tabId === 'inquiries') loadInquiries();
-            }
-        }
-
-        // ── Overview ──────────────────────────────────────────────────────────
-        async function loadOverview() {
-            const spinner = '<span class="stat-spinner"></span>';
-            const ids = ['stat-active','stat-pending','stat-views','stat-inquiries'];
-            ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = spinner; });
-            const alertEl = document.getElementById('verification-alert');
-            alertEl.classList.add('hidden');
-
-            try {
-                const res = await fetch(`${API_BASE}/landlord/dashboard/stats`, { headers: authHeaders() });
-                if (res.status === 401) { clearSession(); return; }
-                if (!res.ok) throw new Error(`Server error ${res.status}`);
-                const data = await res.json();
-
-                document.getElementById('stat-active').innerText    = data.active_listings   ?? '0';
-                document.getElementById('stat-pending').innerText   = data.pending_listings  ?? '0';
-                document.getElementById('stat-views').innerText     = data.total_views       ?? '0';
-                document.getElementById('stat-inquiries').innerText = data.unread_inquiries  ?? '0';
-
-                const vs = data.verification_status || 'unverified';
-                if (vs === 'unverified') {
-                    alertEl.className = 'mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg shadow-sm';
-                    alertEl.innerHTML = `<div class="flex items-center flex-wrap gap-3"><i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i><div><h3 class="font-bold text-yellow-800">Action Required: Account Not Verified</h3><p class="text-xs text-yellow-700 mt-1">Upload your ID and property documents to verify your account.</p></div><button onclick="switchTab('verification')" class="ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-600 transition shadow whitespace-nowrap">Verify Now</button></div>`;
-                    alertEl.classList.remove('hidden');
-                } else if (vs === 'pending') {
-                    alertEl.className = 'mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm';
-                    alertEl.innerHTML = `<div class="flex items-center gap-3"><i class="fas fa-hourglass-half text-blue-500 text-xl"></i><div><h3 class="font-bold text-blue-800">Verification Under Review</h3><p class="text-xs text-blue-700 mt-1">Documents submitted. We'll update you within 24–48 hours.</p></div></div>`;
-                    alertEl.classList.remove('hidden');
-                } else if (vs === 'rejected') {
-                    alertEl.className = 'mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm';
-                    alertEl.innerHTML = `<div class="flex items-center flex-wrap gap-3"><i class="fas fa-times-circle text-red-500 text-xl"></i><div><h3 class="font-bold text-red-800">Verification Rejected</h3><p class="text-xs text-red-700 mt-1">${data.rejection_reason || 'Documents were not accepted. Please re-submit.'}</p></div><button onclick="switchTab('verification')" class="ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition shadow whitespace-nowrap">Re-submit</button></div>`;
-                    alertEl.classList.remove('hidden');
-                } else if (vs === 'verified') {
-                    alertEl.className = 'mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg shadow-sm';
-                    alertEl.innerHTML = `<div class="flex items-center gap-3"><i class="fas fa-check-circle text-green-500 text-xl"></i><div><h3 class="font-bold text-green-800"><i class="fas fa-shield-alt mr-1"></i> Verified Landlord</h3><p class="text-xs text-green-700 mt-1">Your account is verified. Listings display the Verified badge to students.</p></div></div>`;
-                    alertEl.classList.remove('hidden');
-                    setTimeout(() => alertEl.classList.add('hidden'), 6000);
-                }
-
-            } catch (e) {
-                ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = '<span class="text-red-400 text-sm">—</span>'; });
-                alertEl.className = 'mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-sm';
-                alertEl.innerHTML = `<div class="flex items-center flex-wrap gap-3"><i class="fas fa-server text-red-400 text-xl"></i><div><h3 class="font-bold text-red-700">Could Not Load Dashboard</h3><p class="text-xs text-red-600 mt-1">Check your connection or try again.</p></div><button onclick="loadOverview()" class="ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition shadow whitespace-nowrap"><i class="fas fa-redo mr-1"></i> Retry</button></div>`;
-                alertEl.classList.remove('hidden');
-            }
-        }
-
-        // ── My Listings ───────────────────────────────────────────────────────
-        async function loadListings() {
-            const tbody = document.getElementById('my-listings-body');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center"><span class="stat-spinner"></span></td></tr>';
-            try {
-                const res = await fetch(`${API_BASE}/landlord/properties`, { headers: authHeaders() });
-                if (res.status === 401) { clearSession(); return; }
-                if (!res.ok) throw new Error('Fetch failed');
-                const props = Array.isArray(await res.clone().json()) ? await res.json() : [];
-
-                if (!props.length) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-12 text-center">
-                        <i class="fas fa-building text-5xl text-gray-200 mb-4 block"></i>
-                        <p class="text-gray-400 font-bold mb-3">No properties listed yet.</p>
-                        <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#c2410c] transition">+ Add Your First Property</button>
-                    </td></tr>`;
-                    return;
-                }
-
-                const statusStyles = { active:'bg-green-100 text-green-700', pending:'bg-blue-100 text-blue-700', rejected:'bg-red-100 text-red-600' };
-                tbody.innerHTML = props.map(p => {
-                    const badge = statusStyles[p.status] || 'bg-gray-100 text-gray-600';
-                    const img = p.image_url
-                        ? `<img src="${p.image_url}" class="w-12 h-12 rounded-lg object-cover mr-3 shrink-0" onerror="this.style.display='none'">`
-                        : `<div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mr-3 shrink-0"><i class="fas fa-building text-gray-300"></i></div>`;
-                    const boostBadge = p.is_boosted ? '<span class="badge-boosted px-2 py-1 text-[10px] font-black rounded-md uppercase ml-1"><i class="fas fa-rocket mr-1"></i>Boosted</span>' : '';
-                    return `<tr class="hover:bg-gray-50 transition border-b">
-                        <td class="p-4"><div class="flex items-center">${img}<div>
-                            <p class="font-bold text-gray-800">${p.title}</p>
-                            <p class="text-xs text-gray-500 mt-0.5"><i class="fas fa-map-marker-alt mr-1"></i>${p.location}</p>
-                        </div></div></td>
-                        <td class="p-4 font-mono text-sm font-bold text-gray-700">ZMW ${Number(p.price).toLocaleString()}</td>
-                        <td class="p-4 flex gap-1 items-center flex-wrap">
-                            <span class="px-2 py-1 ${badge} text-[10px] font-black rounded-md uppercase">${p.status || 'pending'}</span>
-                            ${boostBadge}
-                        </td>
-                        <td class="p-4 flex gap-3">
-                            <button onclick="boostProperty(${p.id}, '${p.title.replace(/'/g,"\\'")}', this)" class="text-yellow-500 hover:text-yellow-700 transition" title="Boost listing"><i class="fas fa-rocket"></i></button>
-                            <button onclick="deleteProperty(${p.id}, '${p.title.replace(/'/g,"\\'")}', this)" class="text-red-500 hover:text-red-700 transition" title="Delete listing"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-                }).join('');
-            } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold">
-                    Could not load listings.
-                    <button onclick="_loadedTabs.delete('listings'); loadListings()" class="underline ml-2">Retry</button>
-                </td></tr>`;
-            }
-        }
-
-        async function deleteProperty(id, title, btn) {
-            if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try {
-                const res = await fetch(`${API_BASE}/landlord/properties/${id}`, { method: 'DELETE', headers: authHeaders() });
-                if (!res.ok) { const e = await res.json(); throw new Error(typeof e.detail === 'string' ? e.detail : 'Delete failed.'); }
-                showToast('Property deleted.');
-                _loadedTabs.delete('listings');
-                loadListings(); loadOverview();
-            } catch (e) {
-                showToast(e.message || 'Could not delete.', 'error');
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i>';
-            }
-        }
-
-        async function boostProperty(id, title, btn) {
-            if (!confirm(`Boost "${title}" for ZMW 150/week? It will appear at the top of search results.`)) return;
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try {
-                const res = await fetch(`${API_BASE}/landlord/properties/${id}/boost`, { method: 'POST', headers: authHeaders() });
-                const data = await res.json();
-                if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Boost failed.');
-                showToast('Listing boosted successfully!');
-                _loadedTabs.delete('listings');
-                loadListings();
-            } catch (e) {
-                showToast(e.message || 'Could not boost listing.', 'error');
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-rocket"></i>';
-            }
-        }
-
-        // ── Inquiries ─────────────────────────────────────────────────────────
-        async function loadInquiries() {
-            const tbody = document.getElementById('inquiries-body');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center"><span class="stat-spinner"></span></td></tr>';
-            try {
-                const res = await fetch(`${API_BASE}/landlord/inquiries`, { headers: authHeaders() });
-                if (res.status === 401) { clearSession(); return; }
-                if (!res.ok) throw new Error('Fetch failed');
-                const messages = await res.json();
-
-                if (!messages.length) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-gray-400">
-                        <i class="fas fa-inbox text-4xl text-gray-200 mb-4 block"></i>
-                        <p class="font-bold">No inquiries yet.</p>
-                        <p class="text-sm mt-1">When students message you, they will appear here.</p>
-                    </td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = messages.map(m => {
-                    const unreadDot = !m.is_read ? '<span class="inline-block w-2 h-2 rounded-full bg-[#ea580c] mr-1"></span>' : '';
-                    return `<tr class="border-b hover:bg-orange-50 transition ${!m.is_read ? 'bg-orange-50/30' : ''}">
-                        <td class="p-4 font-bold text-gray-800">${unreadDot}${m.student_name || 'Student'}</td>
-                        <td class="p-4 text-xs font-bold text-orange-600">${m.property || '—'}</td>
-                        <td class="p-4 text-sm text-gray-600 max-w-xs">
-                            <p class="truncate">"${m.message}"</p>
-                            <span class="text-[10px] text-gray-400 mt-1 block">${m.date || ''}</span>
-                        </td>
-                        <td class="p-4">
-                            <button onclick="replyToStudent(${m.student_id}, ${m.property_id || 0}, '${(m.student_name||'').replace(/'/g,"\\'")}', '${(m.property||'').replace(/'/g,"\\'")}', this)"
-                                    class="text-xs bg-[#ea580c] text-white px-3 py-1.5 rounded-lg font-bold hover:bg-[#c2410c] transition">
-                                Reply
-                            </button>
-                        </td>
-                    </tr>`;
-                }).join('');
-            } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold">
-                    Could not load inquiries.
-                    <button onclick="_loadedTabs.delete('inquiries'); loadInquiries()" class="underline ml-2">Retry</button>
-                </td></tr>`;
-            }
-        }
-
-        let _replyTarget = null;
-        function replyToStudent(studentId, propId, studentName, propTitle, btn) {
-            _replyTarget = { studentId, propId, studentName, propTitle };
-            const modal = document.getElementById('reply-modal');
-            document.getElementById('reply-modal-title').innerText = `Reply to ${studentName}`;
-            document.getElementById('reply-modal-sub').innerText   = propTitle || 'General Inquiry';
-            document.getElementById('reply-input').value = '';
-            modal.classList.remove('hidden');
-            document.getElementById('reply-input').focus();
-        }
-
-        // ── Verification ──────────────────────────────────────────────────────
-        async function loadVerification() {
-            const container = document.getElementById('verification-content');
-            if (!container) return;
-            try {
-                const res = await fetch(`${API_BASE}/landlord/verification`, { headers: authHeaders() });
-                if (!res.ok) throw new Error();
-                const { verification_status, rejection_reason } = await res.json();
-
-                const statusHTML = {
-                    verified:   `<div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl mb-6"><i class="fas fa-check-circle text-green-500 text-2xl"></i><div><p class="font-black text-green-800">Account Verified!</p><p class="text-sm text-green-600">Your listings display the Verified Landlord badge to students.</p></div></div>`,
-                    pending:    `<div class="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6"><i class="fas fa-clock text-blue-500 text-2xl"></i><div><p class="font-black text-blue-800">Verification Under Review</p><p class="text-sm text-blue-600">Documents submitted. We'll notify you within 24–48 hours.</p></div></div>`,
-                    rejected:   `<div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6"><i class="fas fa-times-circle text-red-500 text-2xl"></i><div><p class="font-black text-red-800">Verification Rejected</p>${rejection_reason ? `<p class="text-sm text-red-600">${rejection_reason}</p>` : ''}<p class="text-sm text-red-600 mt-1">Please re-submit corrected documents below.</p></div></div>`,
-                    unverified: `<div class="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-6"><i class="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i><div><p class="font-black text-yellow-800">Not Yet Verified</p><p class="text-sm text-yellow-700">Upload your documents to get verified and build trust with students.</p></div></div>`,
-                };
-
-                const showForm = verification_status !== 'verified' && verification_status !== 'pending';
-                container.innerHTML = (statusHTML[verification_status] || statusHTML['unverified']) + (showForm ? `
-                    <div class="mb-4 p-4 bg-orange-50 rounded-lg text-sm text-orange-800 border border-orange-100">
-                        <b>Required Documents:</b> Government-issued ID and at least one property ownership document.
-                    </div>
-                    <form id="verificationForm" class="space-y-5">
-                        <div>
-                            <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">1. National ID / NRC / Passport <span class="text-red-500">*</span></label>
-                            <input type="file" name="doc1" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]">
-                            <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">2. Title Deed / Council Rates / Ownership Document <span class="text-red-500">*</span></label>
-                            <input type="file" name="doc2" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]">
-                            <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p>
-                        </div>
-                        <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-black hover:bg-blue-700 transition shadow w-full">Securely Upload Documents</button>
-                    </form>` : '');
-
-                document.getElementById('verificationForm')?.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const btn  = e.target.querySelector('button[type="submit"]');
-                    const orig = btn.innerText;
-                    const doc1 = document.getElementById('verify-doc1')?.files[0];
-                    const doc2 = document.getElementById('verify-doc2')?.files[0];
-                    if (!doc1 || !doc2) { showToast('Both documents are required.', 'error'); return; }
-                    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
-                    const fd = new FormData(); fd.append('doc1', doc1); fd.append('doc2', doc2);
-                    try {
-                        const res = await fetch(`${API_BASE}/landlord/verify`, { method: 'POST', headers: authHeaders(), body: fd });
-                        const data = await res.json();
-                        if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Upload failed.');
-                        showToast('Documents submitted! You will be notified once reviewed.');
-                        _loadedTabs.delete('verification');
-                        loadVerification();
-                    } catch (err) { showToast(err.message || 'Could not submit.', 'error'); }
-                    finally { btn.disabled = false; btn.innerText = orig; }
-                });
-
-            } catch (e) {
-                container.innerHTML = '<p class="text-red-500 text-sm">Could not load verification status. <button onclick="_loadedTabs.delete(\'verification\'); loadVerification()" class="underline ml-1">Retry</button></p>';
-            }
-        }
-
-        // ── Profile ───────────────────────────────────────────────────────────
-        function loadProfile() {
-            if (!currentUser) return;
-            const el = id => document.getElementById(id);
-            if (el('prof-name'))     el('prof-name').value     = currentUser.full_name    || '';
-            if (el('prof-phone'))    el('prof-phone').value    = currentUser.phone        || '';
-            if (el('prof-email'))    el('prof-email').value    = currentUser.email        || '';
-            if (el('prof-business')) el('prof-business').value = currentUser.business_name || '';
-        }
-
-        // ── Logout ────────────────────────────────────────────────────────────
-        function logout() {
-            if (!confirm('Are you sure you want to log out?')) return;
-            clearSession();
-        }
-
-        // ── DOMContentLoaded form bindings ────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
-
-            document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const btn  = this.querySelector('button[type="submit"]');
-                const orig = btn.innerText;
-                const title    = document.getElementById('prop-title').value.trim();
-                const price    = document.getElementById('prop-price').value;
-                const location = document.getElementById('prop-location').value.trim();
-                const uni      = document.getElementById('prop-university').value;
-                const desc     = document.getElementById('prop-desc').value.trim();
-
-                if (!title || !price || !location || !desc) { showToast('Please fill in all required fields.', 'error'); return; }
-
-                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
-                const fd = new FormData();
-                fd.append('title',       title);
-                fd.append('price',       price);
-                fd.append('location',    `${location} (${uni})`);
-                fd.append('description', desc);
-                for (const f of document.getElementById('prop-images').files) fd.append('images', f);
-
-                try {
-                    const res  = await fetch(`${API_BASE}/landlord/properties`, { method: 'POST', headers: authHeaders(), body: fd });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Upload failed.');
-                    showToast('Property submitted! It will go live once reviewed.');
-                    this.reset();
-                    _loadedTabs.delete('listings');
-                    switchTab('listings');
-                } catch (err) { showToast(err.message || 'Server error.', 'error'); }
-                finally { btn.disabled = false; btn.innerText = orig; }
-            });
-
-            document.getElementById('profileForm')?.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const btn  = this.querySelector('button[type="submit"]');
-                const orig = btn.innerText;
-                const full_name     = document.getElementById('prof-name')?.value.trim();
-                const phone         = document.getElementById('prof-phone')?.value.trim();
-                const business_name = document.getElementById('prof-business')?.value.trim();
-                if (!full_name) { showToast('Full name cannot be empty.', 'error'); return; }
-                btn.disabled = true; btn.innerText = 'Saving...';
-                try {
-                    const res  = await fetch(`${API_BASE}/landlord/profile`, { method: 'PUT', headers: authJsonHeaders(), body: JSON.stringify({ full_name, phone, business_name }) });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Update failed.');
-                    if (currentUser) { currentUser.full_name = full_name; currentUser.phone = phone; currentUser.business_name = business_name; }
-                    showToast('Profile updated!');
-                } catch (err) { showToast(err.message || 'Could not save profile.', 'error'); }
-                finally { btn.disabled = false; btn.innerText = orig; }
-            });
-
-            document.getElementById('passwordForm')?.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const btn  = this.querySelector('button[type="submit"]');
-                const orig = btn.innerText;
-                const currentPwd = document.getElementById('pwd-current')?.value;
-                const newPwd     = document.getElementById('pwd-new')?.value;
-                const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d\D]{8,12}$/;
-                if (!re.test(newPwd)) { showToast('Password must be 8-12 chars with uppercase, lowercase, number, and special character.', 'error'); return; }
-                btn.disabled = true; btn.innerText = 'Updating...';
-                try {
-                    const res  = await fetch(`${API_BASE}/landlord/settings/password`, { method: 'POST', headers: authJsonHeaders(), body: JSON.stringify({ current_password: currentPwd, new_password: newPwd }) });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Update failed.');
-                    document.getElementById('pwd-current').value = '';
-                    document.getElementById('pwd-new').value     = '';
-                    showToast('Password updated!');
-                } catch (err) { showToast(err.message || 'Could not update password.', 'error'); }
-                finally { btn.disabled = false; btn.innerText = orig; }
-            });
-
-            document.getElementById('reply-modal-close')?.addEventListener('click', () => {
-                document.getElementById('reply-modal').classList.add('hidden');
-                _replyTarget = null;
-            });
-
-            document.getElementById('reply-send-btn')?.addEventListener('click', async () => {
-                if (!_replyTarget) return;
-                const input = document.getElementById('reply-input');
-                const content = input.value.trim();
-                if (!content) return;
-                const btn = document.getElementById('reply-send-btn');
-                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                const fd = new FormData();
-                fd.append('receiver_id', _replyTarget.studentId);
-                fd.append('content', content);
-                if (_replyTarget.propId) fd.append('property_id', _replyTarget.propId);
-                try {
-                    const res = await fetch(`${API_BASE}/messages/send`, { method: 'POST', headers: authHeaders(), body: fd });
-                    if (!res.ok) { const e = await res.json(); throw new Error(typeof e.detail === 'string' ? e.detail : 'Send failed.'); }
-                    showToast(`Reply sent to ${_replyTarget.studentName}!`);
-                    document.getElementById('reply-modal').classList.add('hidden');
-                    _replyTarget = null;
-                    _loadedTabs.delete('inquiries');
-                    loadInquiries();
-                } catch (err) { showToast(err.message || 'Failed to send reply.', 'error'); }
-                finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Reply'; }
-            });
-        });
-
-        initDashboard();
-    </script>
-
-    <div id="reply-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <!-- Reply Modal -->
+    <div id="reply-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div class="flex justify-between items-start mb-4">
                 <div>
@@ -708,15 +258,362 @@
         </div>
     </div>
 
-    </div><!-- end layout-shell -->
-
     <script>
-        function openSidebar()  { document.querySelector('aside').classList.add('sidebar-open');    document.getElementById('sidebar-backdrop').classList.add('sidebar-open'); }
-        function closeSidebar() { document.querySelector('aside').classList.remove('sidebar-open'); document.getElementById('sidebar-backdrop').classList.remove('sidebar-open'); }
-        // Auto-close sidebar when a nav item is tapped on mobile
-        document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => { if (window.innerWidth < 768) closeSidebar(); }));
+        'use strict';
+        const API_BASE = 'https://findmynyumba.onrender.com/api/v1';
+        let currentUser  = null;
+        const _loadedTabs = new Set();
+
+        function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
+        function authHeaders()     { return { 'Authorization': `Bearer ${getToken()}` }; }
+        function authJsonHeaders() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
+        (function() { if (!getToken()) window.location.replace('login.html'); })();
+
+        function clearSession() {
+            ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+            window.location.replace('login.html');
+        }
+
+        function showToast(msg, type = 'success') {
+            const old = document.getElementById('fmn-toast'); if (old) old.remove();
+            const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            const icon  = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const t = document.createElement('div');
+            t.id = 'fmn-toast';
+            t.className = `fixed bottom-6 right-6 z-[9999] flex items-center gap-2 px-5 py-4 rounded-xl shadow-2xl font-bold text-sm text-white ${color} transition-all duration-300 opacity-0 translate-y-2`;
+            t.innerHTML = `<i class="fas ${icon}"></i>${msg}`;
+            document.body.appendChild(t);
+            requestAnimationFrame(() => t.classList.remove('opacity-0','translate-y-2'));
+            setTimeout(() => { t.classList.add('opacity-0','translate-y-2'); setTimeout(() => t.remove(), 300); }, 3500);
+        }
+
+        async function initDashboard() {
+            try {
+                const res = await fetch(`${API_BASE}/auth/me`, { headers: authHeaders() });
+                if (res.status === 401) { clearSession(); return; }
+                if (!res.ok) throw new Error('Profile fetch failed');
+                const user = await res.json();
+                if (user.role !== 'landlord') {
+                    const dest = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html' };
+                    window.location.replace(dest[user.role] || 'login.html'); return;
+                }
+                currentUser = user;
+                document.getElementById('role-badge').innerText = 'LANDLORD';
+            } catch (e) {
+                console.warn('initDashboard:', e.message);
+                document.getElementById('role-badge').innerText = 'LANDLORD';
+            }
+            switchTab('overview');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden-view'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('view-' + tabId)?.classList.remove('hidden-view');
+            document.getElementById('nav-'  + tabId)?.classList.add('nav-active');
+            if (!_loadedTabs.has(tabId)) {
+                _loadedTabs.add(tabId);
+                if (tabId === 'overview')     loadOverview();
+                if (tabId === 'listings')     loadListings();
+                if (tabId === 'inquiries')    loadInquiries();
+                if (tabId === 'verification') loadVerification();
+                if (tabId === 'profile')      loadProfile();
+            } else {
+                if (tabId === 'overview')  loadOverview();
+                if (tabId === 'inquiries') loadInquiries();
+            }
+        }
+
+        async function loadOverview() {
+            const spinner = '<span class="stat-spinner"></span>';
+            const ids = ['stat-active','stat-pending','stat-views','stat-inquiries'];
+            ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = spinner; });
+            const alertEl = document.getElementById('verification-alert');
+            alertEl.classList.add('hidden');
+            try {
+                const res = await fetch(`${API_BASE}/landlord/dashboard/stats`, { headers: authHeaders() });
+                if (res.status === 401) { clearSession(); return; }
+                if (!res.ok) throw new Error(`Server error ${res.status}`);
+                const data = await res.json();
+                document.getElementById('stat-active').innerText    = data.active_listings   ?? '0';
+                document.getElementById('stat-pending').innerText   = data.pending_listings  ?? '0';
+                document.getElementById('stat-views').innerText     = data.total_views       ?? '0';
+                document.getElementById('stat-inquiries').innerText = data.unread_inquiries  ?? '0';
+                const vs = data.verification_status || 'unverified';
+                if (vs === 'unverified') {
+                    alertEl.className = 'mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg shadow-sm';
+                    alertEl.innerHTML = `<div class="flex flex-col sm:flex-row sm:items-center gap-3"><div class="flex items-center gap-2"><i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i><div><h3 class="font-bold text-yellow-800">Action Required: Account Not Verified</h3><p class="text-xs text-yellow-700 mt-1">Upload your ID and property documents.</p></div></div><button onclick="switchTab('verification')" class="sm:ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-600 transition shadow shrink-0">Verify Now</button></div>`;
+                    alertEl.classList.remove('hidden');
+                } else if (vs === 'pending') {
+                    alertEl.className = 'mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm';
+                    alertEl.innerHTML = `<div class="flex items-center gap-3"><i class="fas fa-hourglass-half text-blue-500 text-xl"></i><div><h3 class="font-bold text-blue-800">Verification Under Review</h3><p class="text-xs text-blue-700 mt-1">We'll update you within 24–48 hours.</p></div></div>`;
+                    alertEl.classList.remove('hidden');
+                } else if (vs === 'rejected') {
+                    alertEl.className = 'mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm';
+                    alertEl.innerHTML = `<div class="flex flex-col sm:flex-row sm:items-center gap-3"><div class="flex items-center gap-2"><i class="fas fa-times-circle text-red-500 text-xl"></i><div><h3 class="font-bold text-red-800">Verification Rejected</h3><p class="text-xs text-red-700 mt-1">${data.rejection_reason || 'Please re-submit.'}</p></div></div><button onclick="switchTab('verification')" class="sm:ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-600 transition shadow shrink-0">Re-submit</button></div>`;
+                    alertEl.classList.remove('hidden');
+                } else if (vs === 'verified') {
+                    alertEl.className = 'mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg shadow-sm';
+                    alertEl.innerHTML = `<div class="flex items-center gap-3"><i class="fas fa-check-circle text-green-500 text-xl"></i><div><h3 class="font-bold text-green-800">Verified Landlord</h3><p class="text-xs text-green-700 mt-1">Your listings show the Verified badge.</p></div></div>`;
+                    alertEl.classList.remove('hidden');
+                    setTimeout(() => alertEl.classList.add('hidden'), 6000);
+                }
+            } catch (e) {
+                ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = '<span class="text-red-400 text-sm">—</span>'; });
+                alertEl.className = 'mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-sm';
+                alertEl.innerHTML = `<div class="flex flex-col sm:flex-row sm:items-center gap-3"><div class="flex items-center gap-2"><i class="fas fa-server text-red-400 text-xl"></i><div><h3 class="font-bold text-red-700">Could Not Load Dashboard</h3></div></div><button onclick="loadOverview()" class="sm:ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm shrink-0"><i class="fas fa-redo mr-1"></i>Retry</button></div>`;
+                alertEl.classList.remove('hidden');
+            }
+        }
+
+        async function loadListings() {
+            const tbody = document.getElementById('my-listings-body');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center"><span class="stat-spinner"></span></td></tr>';
+            try {
+                const res = await fetch(`${API_BASE}/landlord/properties`, { headers: authHeaders() });
+                if (res.status === 401) { clearSession(); return; }
+                if (!res.ok) throw new Error('Fetch failed');
+                const props = await res.json();
+                if (!props.length) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-12 text-center"><i class="fas fa-building text-5xl text-gray-200 mb-4 block"></i><p class="text-gray-400 font-bold mb-3">No properties listed yet.</p><button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#c2410c] transition">+ Add Your First Property</button></td></tr>`;
+                    return;
+                }
+                const statusStyles = { active:'bg-green-100 text-green-700', pending:'bg-blue-100 text-blue-700', rejected:'bg-red-100 text-red-600' };
+                tbody.innerHTML = props.map(p => {
+                    const badge = statusStyles[p.status] || 'bg-gray-100 text-gray-600';
+                    const img = p.image_url ? `<img src="${p.image_url}" class="w-12 h-12 rounded-lg object-cover mr-3 shrink-0" onerror="this.style.display='none'">` : `<div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mr-3 shrink-0"><i class="fas fa-building text-gray-300"></i></div>`;
+                    const boostBadge = p.is_boosted ? '<span class="badge-boosted px-2 py-1 text-[10px] font-black rounded-md uppercase ml-1"><i class="fas fa-rocket mr-1"></i>Boosted</span>' : '';
+                    return `<tr class="hover:bg-gray-50 transition border-b">
+                        <td class="p-4"><div class="flex items-center">${img}<div><p class="font-bold text-gray-800">${p.title}</p><p class="text-xs text-gray-500 mt-0.5"><i class="fas fa-map-marker-alt mr-1"></i>${p.location}</p></div></div></td>
+                        <td class="p-4 font-mono text-sm font-bold text-gray-700">ZMW ${Number(p.price).toLocaleString()}</td>
+                        <td class="p-4"><div class="flex gap-1 items-center flex-wrap"><span class="px-2 py-1 ${badge} text-[10px] font-black rounded-md uppercase">${p.status || 'pending'}</span>${boostBadge}</div></td>
+                        <td class="p-4"><div class="flex gap-3">
+                            <button onclick="boostProperty(${p.id}, '${p.title.replace(/'/g,"\\'")}', this)" class="text-yellow-500 hover:text-yellow-700 transition" title="Boost"><i class="fas fa-rocket"></i></button>
+                            <button onclick="deleteProperty(${p.id}, '${p.title.replace(/'/g,"\\'")}', this)" class="text-red-500 hover:text-red-700 transition" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div></td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold">Could not load listings. <button onclick="_loadedTabs.delete('listings'); loadListings()" class="underline ml-2">Retry</button></td></tr>`;
+            }
+        }
+
+        async function deleteProperty(id, title, btn) {
+            if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                const res = await fetch(`${API_BASE}/landlord/properties/${id}`, { method: 'DELETE', headers: authHeaders() });
+                if (!res.ok) { const e = await res.json(); throw new Error(typeof e.detail === 'string' ? e.detail : 'Delete failed.'); }
+                showToast('Property deleted.'); _loadedTabs.delete('listings'); loadListings(); loadOverview();
+            } catch (e) { showToast(e.message || 'Could not delete.', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i>'; }
+        }
+
+        async function boostProperty(id, title, btn) {
+            if (!confirm(`Boost "${title}" for ZMW 150/week?`)) return;
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                const res = await fetch(`${API_BASE}/landlord/properties/${id}/boost`, { method: 'POST', headers: authHeaders() });
+                const data = await res.json();
+                if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Boost failed.');
+                showToast('Listing boosted!'); _loadedTabs.delete('listings'); loadListings();
+            } catch (e) { showToast(e.message || 'Could not boost.', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-rocket"></i>'; }
+        }
+
+        async function loadInquiries() {
+            const tbody = document.getElementById('inquiries-body');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center"><span class="stat-spinner"></span></td></tr>';
+            try {
+                const res = await fetch(`${API_BASE}/landlord/inquiries`, { headers: authHeaders() });
+                if (res.status === 401) { clearSession(); return; }
+                if (!res.ok) throw new Error('Fetch failed');
+                const messages = await res.json();
+                if (!messages.length) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-gray-400"><i class="fas fa-inbox text-4xl text-gray-200 mb-4 block"></i><p class="font-bold">No inquiries yet.</p><p class="text-sm mt-1">When students message you, they appear here.</p></td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = messages.map(m => {
+                    const unreadDot = !m.is_read ? '<span class="inline-block w-2 h-2 rounded-full bg-[#ea580c] mr-1"></span>' : '';
+                    return `<tr class="border-b hover:bg-orange-50 transition ${!m.is_read ? 'bg-orange-50/30' : ''}">
+                        <td class="p-4 font-bold text-gray-800">${unreadDot}${m.student_name || 'Student'}</td>
+                        <td class="p-4 text-xs font-bold text-orange-600">${m.property || '—'}</td>
+                        <td class="p-4 text-sm text-gray-600 max-w-xs"><p class="truncate">"${m.message}"</p><span class="text-[10px] text-gray-400 mt-1 block">${m.date || ''}</span></td>
+                        <td class="p-4"><button onclick="replyToStudent(${m.student_id}, ${m.property_id || 0}, '${(m.student_name||'').replace(/'/g,"\\'")}', '${(m.property||'').replace(/'/g,"\\'")}', this)" class="text-xs bg-[#ea580c] text-white px-3 py-1.5 rounded-lg font-bold hover:bg-[#c2410c] transition">Reply</button></td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold">Could not load inquiries. <button onclick="_loadedTabs.delete('inquiries'); loadInquiries()" class="underline ml-2">Retry</button></td></tr>`;
+            }
+        }
+
+        let _replyTarget = null;
+        function replyToStudent(studentId, propId, studentName, propTitle) {
+            _replyTarget = { studentId, propId, studentName, propTitle };
+            document.getElementById('reply-modal-title').innerText = `Reply to ${studentName}`;
+            document.getElementById('reply-modal-sub').innerText   = propTitle || 'General Inquiry';
+            document.getElementById('reply-input').value = '';
+            document.getElementById('reply-modal').classList.remove('hidden');
+            document.getElementById('reply-input').focus();
+        }
+
+        async function loadVerification() {
+            const container = document.getElementById('verification-content');
+            if (!container) return;
+            try {
+                const res = await fetch(`${API_BASE}/landlord/verification`, { headers: authHeaders() });
+                if (!res.ok) throw new Error();
+                const { verification_status, rejection_reason } = await res.json();
+                const statusHTML = {
+                    verified:   `<div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl mb-6"><i class="fas fa-check-circle text-green-500 text-2xl"></i><div><p class="font-black text-green-800">Account Verified!</p><p class="text-sm text-green-600">Your listings show the Verified Landlord badge.</p></div></div>`,
+                    pending:    `<div class="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6"><i class="fas fa-clock text-blue-500 text-2xl"></i><div><p class="font-black text-blue-800">Verification Under Review</p><p class="text-sm text-blue-600">We'll notify you within 24–48 hours.</p></div></div>`,
+                    rejected:   `<div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6"><i class="fas fa-times-circle text-red-500 text-2xl"></i><div><p class="font-black text-red-800">Verification Rejected</p>${rejection_reason ? `<p class="text-sm text-red-600">${rejection_reason}</p>` : ''}<p class="text-sm text-red-600 mt-1">Please re-submit corrected documents below.</p></div></div>`,
+                    unverified: `<div class="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-6"><i class="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i><div><p class="font-black text-yellow-800">Not Yet Verified</p><p class="text-sm text-yellow-700">Upload your documents to get verified.</p></div></div>`,
+                };
+                const showForm = verification_status !== 'verified' && verification_status !== 'pending';
+                container.innerHTML = (statusHTML[verification_status] || statusHTML['unverified']) + (showForm ? `
+                    <div class="mb-4 p-4 bg-orange-50 rounded-lg text-sm text-orange-800 border border-orange-100"><b>Required:</b> Government-issued ID + property ownership document.</div>
+                    <form id="verificationForm" class="space-y-5">
+                        <div><label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">1. National ID / NRC / Passport <span class="text-red-500">*</span></label><input type="file" name="doc1" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]"><p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p></div>
+                        <div><label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">2. Title Deed / Council Rates / Ownership Document <span class="text-red-500">*</span></label><input type="file" name="doc2" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]"><p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p></div>
+                        <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-black hover:bg-blue-700 transition shadow w-full">Securely Upload Documents</button>
+                    </form>` : '');
+                document.getElementById('verificationForm')?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = e.target.querySelector('button[type="submit"]'); const orig = btn.innerText;
+                    const doc1 = document.getElementById('verify-doc1')?.files[0];
+                    const doc2 = document.getElementById('verify-doc2')?.files[0];
+                    if (!doc1 || !doc2) { showToast('Both documents are required.', 'error'); return; }
+                    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+                    const fd = new FormData(); fd.append('doc1', doc1); fd.append('doc2', doc2);
+                    try {
+                        const res = await fetch(`${API_BASE}/landlord/verify`, { method: 'POST', headers: authHeaders(), body: fd });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Upload failed.');
+                        showToast('Documents submitted!'); _loadedTabs.delete('verification'); loadVerification();
+                    } catch (err) { showToast(err.message || 'Could not submit.', 'error'); }
+                    finally { btn.disabled = false; btn.innerText = orig; }
+                });
+            } catch (e) {
+                container.innerHTML = '<p class="text-red-500 text-sm">Could not load verification status. <button onclick="_loadedTabs.delete(\'verification\'); loadVerification()" class="underline ml-1">Retry</button></p>';
+            }
+        }
+
+        function loadProfile() {
+            if (!currentUser) return;
+            const el = id => document.getElementById(id);
+            if (el('prof-name'))     el('prof-name').value     = currentUser.full_name     || '';
+            if (el('prof-phone'))    el('prof-phone').value    = currentUser.phone         || '';
+            if (el('prof-email'))    el('prof-email').value    = currentUser.email         || '';
+            if (el('prof-business')) el('prof-business').value = currentUser.business_name || '';
+        }
+
+        function logout() {
+            if (!confirm('Are you sure you want to log out?')) return;
+            clearSession();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar  = document.getElementById('sidebar');
+            const overlay  = document.getElementById('mobile-overlay');
+            const openBtn  = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('mobile-close-btn');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+                document.body.classList.toggle('overflow-hidden');
+            }
+            openBtn?.addEventListener('click', toggleSidebar);
+            closeBtn?.addEventListener('click', toggleSidebar);
+            overlay?.addEventListener('click', toggleSidebar);
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => { if (window.innerWidth < 1024) toggleSidebar(); });
+            });
+
+            document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]'); const orig = btn.innerText;
+                const title = document.getElementById('prop-title').value.trim();
+                const price = document.getElementById('prop-price').value;
+                const location = document.getElementById('prop-location').value.trim();
+                const uni = document.getElementById('prop-university').value;
+                const desc = document.getElementById('prop-desc').value.trim();
+                if (!title || !price || !location || !desc) { showToast('Please fill in all required fields.', 'error'); return; }
+                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+                const fd = new FormData();
+                fd.append('title', title); fd.append('price', price);
+                fd.append('location', `${location} (${uni})`); fd.append('description', desc);
+                for (const f of document.getElementById('prop-images').files) fd.append('images', f);
+                try {
+                    const res = await fetch(`${API_BASE}/landlord/properties`, { method: 'POST', headers: authHeaders(), body: fd });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Upload failed.');
+                    showToast('Property submitted! It will go live once reviewed.');
+                    this.reset(); _loadedTabs.delete('listings'); switchTab('listings');
+                } catch (err) { showToast(err.message || 'Server error.', 'error'); }
+                finally { btn.disabled = false; btn.innerText = orig; }
+            });
+
+            document.getElementById('profileForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]'); const orig = btn.innerText;
+                const full_name = document.getElementById('prof-name')?.value.trim();
+                const phone = document.getElementById('prof-phone')?.value.trim();
+                const business_name = document.getElementById('prof-business')?.value.trim();
+                if (!full_name) { showToast('Full name cannot be empty.', 'error'); return; }
+                btn.disabled = true; btn.innerText = 'Saving...';
+                try {
+                    const res = await fetch(`${API_BASE}/landlord/profile`, { method: 'PUT', headers: authJsonHeaders(), body: JSON.stringify({ full_name, phone, business_name }) });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Update failed.');
+                    if (currentUser) { currentUser.full_name = full_name; currentUser.phone = phone; currentUser.business_name = business_name; }
+                    showToast('Profile updated!');
+                } catch (err) { showToast(err.message || 'Could not save profile.', 'error'); }
+                finally { btn.disabled = false; btn.innerText = orig; }
+            });
+
+            document.getElementById('passwordForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]'); const orig = btn.innerText;
+                const currentPwd = document.getElementById('pwd-current')?.value;
+                const newPwd = document.getElementById('pwd-new')?.value;
+                const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d\D]{8,12}$/;
+                if (!re.test(newPwd)) { showToast('Password must be 8-12 chars with uppercase, lowercase, number, and special character.', 'error'); return; }
+                btn.disabled = true; btn.innerText = 'Updating...';
+                try {
+                    const res = await fetch(`${API_BASE}/landlord/settings/password`, { method: 'POST', headers: authJsonHeaders(), body: JSON.stringify({ current_password: currentPwd, new_password: newPwd }) });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Update failed.');
+                    document.getElementById('pwd-current').value = ''; document.getElementById('pwd-new').value = '';
+                    showToast('Password updated!');
+                } catch (err) { showToast(err.message || 'Could not update password.', 'error'); }
+                finally { btn.disabled = false; btn.innerText = orig; }
+            });
+
+            document.getElementById('reply-modal-close')?.addEventListener('click', () => {
+                document.getElementById('reply-modal').classList.add('hidden'); _replyTarget = null;
+            });
+
+            document.getElementById('reply-send-btn')?.addEventListener('click', async () => {
+                if (!_replyTarget) return;
+                const input = document.getElementById('reply-input');
+                const content = input.value.trim(); if (!content) return;
+                const btn = document.getElementById('reply-send-btn');
+                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                const fd = new FormData();
+                fd.append('receiver_id', _replyTarget.studentId); fd.append('content', content);
+                if (_replyTarget.propId) fd.append('property_id', _replyTarget.propId);
+                try {
+                    const res = await fetch(`${API_BASE}/messages/send`, { method: 'POST', headers: authHeaders(), body: fd });
+                    if (!res.ok) { const e = await res.json(); throw new Error(typeof e.detail === 'string' ? e.detail : 'Send failed.'); }
+                    showToast(`Reply sent to ${_replyTarget.studentName}!`);
+                    document.getElementById('reply-modal').classList.add('hidden'); _replyTarget = null;
+                    _loadedTabs.delete('inquiries'); loadInquiries();
+                } catch (err) { showToast(err.message || 'Failed to send reply.', 'error'); }
+                finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Reply'; }
+            });
+        });
+
+        initDashboard();
     </script>
 </body>
 </html>
-
-
