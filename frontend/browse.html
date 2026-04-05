@@ -7,6 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        /* Prevent iOS zoom on inputs */
+        input, select, textarea { font-size: 16px !important; }
+        body { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
         #filters-sidebar { transition: transform 0.3s ease, opacity 0.3s ease; }
         #filters-sidebar.sidebar-open  { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
         #filters-sidebar.sidebar-closed { transform: translateX(-100%); opacity: 0; visibility: hidden; pointer-events: none; }
@@ -14,10 +19,31 @@
             #filters-sidebar { transform: translateX(0) !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; position: relative !important; }
             #sidebar-overlay, #filter-toggle-btn { display: none !important; }
         }
-        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu { transition: max-height 0.35s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
         #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
         .listing-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .listing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12); }
+
+        /* Mobile: full-height sidebar with safe area */
+        @media (max-width: 767px) {
+            #filters-sidebar {
+                height: 100dvh !important;
+                padding-top: max(24px, env(safe-area-inset-top)) !important;
+                padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+            }
+        }
+
+        /* Bigger tap targets on mobile */
+        @media (max-width: 767px) {
+            nav a { min-height: 44px; display: flex; align-items: center; }
+            #mobile-nav-toggle { min-width: 44px; min-height: 44px; }
+            select, input[type="number"], input[type="text"] { padding: 12px 14px !important; }
+        }
+
+        /* Testimonials: no scale transform on mobile (causes overflow) */
+        @media (max-width: 767px) {
+            .md\\:scale-105 { transform: none !important; }
+        }
     </style>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 </head>
@@ -28,11 +54,11 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
-                <a href="browse.html" class="flex-shrink-0 flex items-center w-44 md:w-56 h-16 relative overflow-visible">
+                <a href="browse.html" class="flex-shrink-0 flex items-center h-16 overflow-hidden" style="width:160px;">
                     <img src="logo.png" alt="FindMyNyumba"
-                         class="absolute left-[-12px] top-1/2 -translate-y-1/2 h-20 md:h-24 w-auto object-contain mix-blend-multiply brightness-[1.4] contrast-[1.6] saturate-125"
+                         class="w-full h-full object-contain transform scale-[2.2] mix-blend-multiply brightness-[1.4] contrast-[1.6] saturate-125"
                          onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden')">
-                    <span id="logo-fallback" class="hidden pl-1 text-xl font-black text-[#ea580c]">FindMyNyumba</span>
+                    <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
                 </a>
 
                 <!-- Desktop nav -->
@@ -75,8 +101,10 @@
             <div class="flex-1 relative">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                 <input type="text" id="keyword-search"
-                       placeholder="Search by area, property name, university..."
-                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm text-sm">
+                       placeholder="Search area, property, university..."
+                       inputmode="search"
+                       autocomplete="off"
+                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm" style="font-size:16px">
             </div>
 
             <button id="filter-toggle-btn" onclick="toggleSidebar()"
