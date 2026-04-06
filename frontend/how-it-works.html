@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
+        .step-line::after { content: ''; position: absolute; top: 2rem; left: 50%; width: 100%; height: 2px; background: linear-gradient(90deg, #ea580c, transparent); }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- NAV -->
+    <nav class="bg-white shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center gap-2 w-44 h-16 relative overflow-visible">
+                    <div class="bg-white rounded-lg p-1">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-12 w-auto object-contain mix-blend-multiply brightness-[1.1] contrast-[1.4]" onerror="this.style.display='none'">
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Home</a>
+                    <a href="browse.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Browse</a>
+                    <a href="how-it-works.html" class="text-[#ea580c] font-semibold text-sm">How It Works</a>
+                    <a href="login.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Login</a>
+                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm">Post Property</a>
+                </div>
+                <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100">
+                    <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
+            <div class="flex flex-col space-y-1 pt-3">
+                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
+                <a href="browse.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Browse</a>
+                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-[#ea580c] font-bold bg-orange-50 text-sm">How It Works</a>
+                <a href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
+                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold text-sm">Post Property</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="pt-16 bg-gradient-to-br from-slate-900 to-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-4">How It Works</h1>
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto font-medium">Simple steps to find your perfect student home — or fill yours.</p>
+        </div>
+    </div>
+
+    <!-- FOR STUDENTS -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <span class="bg-orange-100 text-[#ea580c] text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider">For Students</span>
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mt-4 mb-2">Find Your Nyumba</h2>
+                <p class="text-slate-500 font-medium">Follow these simple steps to find your perfect student home.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center relative">
+                    <div class="w-16 h-16 bg-[#ea580c] rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg shadow-orange-200">1</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Create Account</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Register for free as a student. Provide your university and student ID for verification.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#ea580c] rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg shadow-orange-200">2</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Search & Filter</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Browse properties near your university. Filter by price, type, and location.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#ea580c] rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg shadow-orange-200">3</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Message the Host</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Send a direct inquiry to the landlord or student host through our secure messaging system.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#ea580c] rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg shadow-orange-200">4</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Move In!</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Schedule a viewing, agree on rent, and move into your perfect Nyumba.</p>
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <a href="register.html" class="inline-flex items-center gap-2 bg-[#ea580c] hover:bg-orange-700 text-white font-bold px-8 py-4 rounded-2xl text-sm transition-colors shadow-lg shadow-orange-200">
+                    <i class="fas fa-user-graduate"></i> Register as a Student
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOR LANDLORDS -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <span class="bg-slate-900 text-white text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider">For Landlords</span>
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mt-4 mb-2">List Your Property</h2>
+                <p class="text-slate-500 font-medium">Reach thousands of verified students looking for housing.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg">1</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Register as Landlord</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Create a landlord account with your contact details and ID verification.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg">2</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Post Your Property</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Add photos, price, location, and description. Go live in minutes.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg">3</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Receive Inquiries</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Students will message you directly through the platform. Respond at your convenience.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg">4</div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Fill Your Rooms</h3>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Choose your tenants and fill your vacant rooms quickly and easily.</p>
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <a href="landlord-register.html" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-black text-white font-bold px-8 py-4 rounded-2xl text-sm transition-colors shadow-lg">
+                    <i class="fas fa-building"></i> Register as a Landlord
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 bg-white">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">Frequently Asked Questions</h2>
+            </div>
+            <div class="space-y-4">
+                <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                        Is FindMyNyumba free to use for students?
+                        <i class="fas fa-plus text-[#ea580c] group-open:rotate-45 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                        Yes! Creating an account and browsing properties is completely free for students. There are no hidden fees.
+                    </div>
+                </details>
+                <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                        How are landlords verified?
+                        <i class="fas fa-plus text-[#ea580c] group-open:rotate-45 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                        Landlords must provide a valid National ID or Passport and property information during registration. Our team reviews each submission before approval.
+                    </div>
+                </details>
+                <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                        What is a Student Host?
+                        <i class="fas fa-plus text-[#ea580c] group-open:rotate-45 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                        A Student Host is a fellow student who has extra room or bedspace to offer. It's a more affordable and community-driven housing option popular near campuses.
+                    </div>
+                </details>
+                <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                        What if I encounter a scam?
+                        <i class="fas fa-plus text-[#ea580c] group-open:rotate-45 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                        Use the "Report this listing" button on any property page. Our team will investigate immediately. Never send money before viewing a property in person.
+                    </div>
+                </details>
+                <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                        Can I list a property as a student?
+                        <i class="fas fa-plus text-[#ea580c] group-open:rotate-45 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                        Yes! When registering as a student, choose the "Student Host" option. This allows you to list available bedspaces and connect with fellow students needing housing.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-14">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <div class="bg-white rounded-xl p-2 inline-block mb-4">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-10 w-auto object-contain mix-blend-multiply" onerror="this.style.display='none'">
+                    </div>
+                    <p class="text-sm font-medium leading-relaxed text-slate-400 max-w-xs">Zambia's trusted student housing platform.</p>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="index.html" class="hover:text-[#ea580c] transition-colors font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors font-medium">Browse Properties</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] transition-colors font-medium">Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] transition-colors font-medium">Terms of Service</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] transition-colors font-medium">Privacy Policy</a></li>
+                        <li><a href="about.html" class="hover:text-[#ea580c] transition-colors font-medium">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Get Started</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors font-medium">Student Registration</a></li>
+                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] transition-colors font-medium">Landlord Registration</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
+                    <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
+                    <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        mobileNavToggle.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.contains('menu-open');
+            mobileMenu.classList.toggle('menu-open', !isOpen);
+            hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+        });
+    </script>
+</body>
+</html>

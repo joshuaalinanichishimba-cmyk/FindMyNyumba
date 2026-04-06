@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- NAV -->
+    <nav class="bg-white shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center h-16 overflow-visible">
+                    <div class="bg-white rounded-lg p-1">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-12 w-auto object-contain mix-blend-multiply brightness-[1.1] contrast-[1.4]" onerror="this.style.display='none'">
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Home</a>
+                    <a href="browse.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Browse</a>
+                    <a href="how-it-works.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">How It Works</a>
+                    <a href="login.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Login</a>
+                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm">Post Property</a>
+                </div>
+                <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100">
+                    <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
+            <div class="flex flex-col space-y-1 pt-3">
+                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
+                <a href="browse.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Browse</a>
+                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
+                <a href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
+                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] text-white px-4 py-3 rounded-xl font-bold text-sm">Post Property</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="pt-16 bg-gradient-to-br from-slate-900 to-slate-800 overflow-hidden relative">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-[#ea580c] rounded-full filter blur-3xl"></div>
+            <div class="absolute bottom-0 right-20 w-80 h-80 bg-orange-400 rounded-full filter blur-3xl"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center relative z-10">
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-6">Built for Zambian Students</h1>
+            <p class="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed">
+                We started FindMyNyumba because finding affordable, safe student housing in Zambia was too hard. We're changing that.
+            </p>
+        </div>
+    </div>
+
+    <!-- MISSION -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <span class="bg-orange-100 text-[#ea580c] text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider">Our Mission</span>
+                    <h2 class="text-3xl md:text-4xl font-black text-slate-900 mt-4 mb-6">Making Student Housing Accessible</h2>
+                    <p class="text-slate-500 font-medium leading-relaxed mb-4">Every Zambian student deserves a safe, clean, and affordable place to call home while they pursue their education. Too many students spend weeks searching for accommodation, fall victim to scams, or end up in unsuitable housing.</p>
+                    <p class="text-slate-500 font-medium leading-relaxed mb-4">FindMyNyumba was built to solve this problem — a trusted, transparent platform that connects verified students with verified landlords, making the process simple, fast, and safe.</p>
+                    <p class="text-slate-500 font-medium leading-relaxed">We also empower student hosts — fellow students who want to help by offering affordable bedspaces — creating a community-first approach to student housing.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
+                        <div class="text-3xl font-black text-[#ea580c] mb-1">500+</div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Listings</div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
+                        <div class="text-3xl font-black text-[#ea580c] mb-1">2,000+</div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Students</div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
+                        <div class="text-3xl font-black text-[#ea580c] mb-1">200+</div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Landlords</div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
+                        <div class="text-3xl font-black text-[#ea580c] mb-1">6+</div>
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Universities</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VALUES -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">Our Values</h2>
+                <p class="text-slate-500 font-medium max-w-xl mx-auto">The principles that guide everything we build and every decision we make.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
+                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Trust & Safety</h3>
+                    <p class="text-slate-500 text-sm font-medium">We verify every landlord and listing to protect our users from scams and fraud.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
+                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Community First</h3>
+                    <p class="text-slate-500 text-sm font-medium">We build features that serve our community of students and landlords, not just ourselves.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
+                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Transparency</h3>
+                    <p class="text-slate-500 text-sm font-medium">No hidden fees. No surprises. Clear pricing, clear policies, clear communication.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
+                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Speed & Simplicity</h3>
+                    <p class="text-slate-500 text-sm font-medium">Finding a home should be fast and simple. We eliminate unnecessary complexity.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 bg-[#ea580c]">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-5xl font-black text-white mb-4">Join Our Community</h2>
+            <p class="text-orange-100 text-lg font-medium mb-10">Be part of Zambia's fastest-growing student housing platform.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="browse.html" class="bg-white text-[#ea580c] font-black px-8 py-4 rounded-2xl hover:bg-orange-50 transition-colors text-sm shadow-lg">
+                    <i class="fas fa-search mr-2"></i>Browse Properties
+                </a>
+                <a href="register.html" class="bg-slate-900 text-white font-black px-8 py-4 rounded-2xl hover:bg-slate-800 transition-colors text-sm shadow-lg">
+                    <i class="fas fa-user-plus mr-2"></i>Create Free Account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="bg-white rounded-xl p-2 inline-block mb-4">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-10 w-auto object-contain mix-blend-multiply" onerror="this.style.display='none'">
+                    </div>
+                    <p class="text-sm font-medium text-slate-400">Zambia's trusted student housing platform.</p>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="index.html" class="hover:text-[#ea580c] font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] font-medium">Browse</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] font-medium">Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="help.html" class="hover:text-[#ea580c] font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] font-medium">Terms</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] font-medium">Privacy</a></li>
+                        <li><a href="about.html" class="hover:text-[#ea580c] font-medium">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
+                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
+                    <a href="terms.html" class="hover:text-white">Terms</a>
+                    <a href="privacy.html" class="hover:text-white">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        mobileNavToggle.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.contains('menu-open');
+            mobileMenu.classList.toggle('menu-open', !isOpen);
+            hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+        });
+    </script>
+</body>
+</html>

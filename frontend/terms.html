@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
+        .prose-section h3 { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; margin-top: 2rem; }
+        .prose-section p, .prose-section li { color: #64748b; font-size: 0.9rem; font-weight: 500; line-height: 1.75; }
+        .prose-section ul { list-style: disc; padding-left: 1.25rem; margin-top: 0.5rem; }
+        .prose-section li { margin-bottom: 0.25rem; }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- NAV -->
+    <nav class="bg-white shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center h-16 overflow-visible">
+                    <div class="bg-white rounded-lg p-1">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-12 w-auto object-contain mix-blend-multiply brightness-[1.1] contrast-[1.4]" onerror="this.style.display='none'">
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Home</a>
+                    <a href="browse.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Browse</a>
+                    <a href="login.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Login</a>
+                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm">Post Property</a>
+                </div>
+                <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100">
+                    <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
+            <div class="flex flex-col space-y-1 pt-3">
+                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
+                <a href="browse.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Browse</a>
+                <a href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
+                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] text-white px-4 py-3 rounded-xl font-bold text-sm">Post Property</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HEADER -->
+    <div class="pt-16 bg-gradient-to-br from-slate-900 to-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="max-w-3xl">
+                <h1 class="text-4xl md:text-5xl font-black text-white mb-3">Terms of Service</h1>
+                <p class="text-slate-400 font-medium">Last updated: January 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 prose-section">
+        <div class="bg-orange-50 border border-orange-100 rounded-2xl p-6 mb-10">
+            <p class="text-slate-700 font-semibold text-sm">By using FindMyNyumba, you agree to these Terms of Service. Please read them carefully. If you do not agree, you should not use our platform.</p>
+        </div>
+
+        <h3>1. About FindMyNyumba</h3>
+        <p>FindMyNyumba is an online platform that connects students looking for housing with landlords and student hosts offering accommodation in Zambia. We act as an intermediary and are not party to any rental agreements between users.</p>
+
+        <h3>2. Eligibility</h3>
+        <p>To use FindMyNyumba, you must:</p>
+        <ul>
+            <li>Be at least 16 years of age</li>
+            <li>Provide accurate and truthful information when registering</li>
+            <li>Be a student, landlord, or property manager in Zambia</li>
+            <li>Comply with all applicable laws and regulations</li>
+        </ul>
+
+        <h3>3. User Accounts</h3>
+        <p>You are responsible for maintaining the confidentiality of your account credentials. You must not share your account with others or allow others to use your account. Notify us immediately if you suspect unauthorized access to your account.</p>
+
+        <h3>4. Listing Rules for Landlords</h3>
+        <p>Landlords who post properties on FindMyNyumba agree to:</p>
+        <ul>
+            <li>Only list properties they own or have legal authority to rent</li>
+            <li>Provide accurate descriptions, photos, and pricing</li>
+            <li>Not post duplicate or misleading listings</li>
+            <li>Respond to student inquiries in a timely manner</li>
+            <li>Not charge students for inquiries or viewings</li>
+        </ul>
+
+        <h3>5. Prohibited Activities</h3>
+        <p>You may not use FindMyNyumba to:</p>
+        <ul>
+            <li>Post false, misleading, or fraudulent listings</li>
+            <li>Harass, threaten, or harm other users</li>
+            <li>Collect personal data from other users without consent</li>
+            <li>Use the platform for any illegal activity</li>
+            <li>Spam or send unsolicited commercial messages</li>
+            <li>Impersonate other individuals or organizations</li>
+        </ul>
+
+        <h3>6. Payments & Transactions</h3>
+        <p>FindMyNyumba does not process rental payments. All financial transactions are between students and landlords directly. We strongly advise users to never pay rent or deposits before viewing a property in person and verifying ownership.</p>
+
+        <h3>7. Disclaimer of Liability</h3>
+        <p>FindMyNyumba provides a platform for connecting users but does not guarantee the accuracy of listings, the conduct of users, or the outcome of any rental agreement. We are not liable for any disputes, damages, or losses arising from interactions between users on the platform.</p>
+
+        <h3>8. Intellectual Property</h3>
+        <p>All content on FindMyNyumba, including the logo, design, and text, is owned by FindMyNyumba and protected by copyright. You may not copy, reproduce, or distribute any content without written permission.</p>
+
+        <h3>9. Termination</h3>
+        <p>We reserve the right to suspend or terminate your account at any time if you violate these terms or engage in behaviour that harms other users or the platform. You may also delete your account at any time by contacting us.</p>
+
+        <h3>10. Changes to These Terms</h3>
+        <p>We may update these Terms from time to time. Continued use of FindMyNyumba after changes are posted constitutes your acceptance of the new terms. We will notify registered users of significant changes via email.</p>
+
+        <h3>11. Contact</h3>
+        <p>If you have questions about these Terms, contact us at <a href="mailto:support@findmynyumba.com" class="text-[#ea580c] font-bold hover:underline">support@findmynyumba.com</a>.</p>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col sm:flex-row gap-4">
+            <a href="privacy.html" class="inline-flex items-center gap-2 text-[#ea580c] font-bold text-sm hover:underline">
+                <i class="fas fa-lock"></i> Read our Privacy Policy
+            </a>
+            <a href="help.html" class="inline-flex items-center gap-2 text-slate-600 font-bold text-sm hover:text-[#ea580c]">
+                <i class="fas fa-question-circle"></i> Help Center
+            </a>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="bg-white rounded-xl p-2 inline-block mb-4">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-10 w-auto object-contain mix-blend-multiply" onerror="this.style.display='none'">
+                    </div>
+                    <p class="text-sm font-medium text-slate-400">Zambia's trusted student housing platform.</p>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="index.html" class="hover:text-[#ea580c] font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] font-medium">Browse</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] font-medium">Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="help.html" class="hover:text-[#ea580c] font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] font-medium">Terms</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] font-medium">Privacy</a></li>
+                        <li><a href="about.html" class="hover:text-[#ea580c] font-medium">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
+                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
+                    <a href="terms.html" class="hover:text-white">Terms</a>
+                    <a href="privacy.html" class="hover:text-white">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        mobileNavToggle.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.contains('menu-open');
+            mobileMenu.classList.toggle('menu-open', !isOpen);
+            hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+        });
+    </script>
+</body>
+</html>

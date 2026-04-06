@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- NAV -->
+    <nav class="bg-white shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center gap-2 h-16 relative overflow-visible">
+                    <div class="bg-white rounded-lg p-1">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-12 w-auto object-contain mix-blend-multiply brightness-[1.1] contrast-[1.4]" onerror="this.style.display='none'">
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Home</a>
+                    <a href="browse.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Browse</a>
+                    <a href="how-it-works.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">How It Works</a>
+                    <a href="login.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Login</a>
+                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm">Post Property</a>
+                </div>
+                <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100">
+                    <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
+            <div class="flex flex-col space-y-1 pt-3">
+                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
+                <a href="browse.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Browse</a>
+                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
+                <a href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
+                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] text-white px-4 py-3 rounded-xl font-bold text-sm">Post Property</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="pt-16 bg-gradient-to-br from-slate-900 to-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+            <h1 class="text-4xl md:text-5xl font-black text-white mb-4">Help Center</h1>
+            <p class="text-slate-400 text-lg font-medium mb-8">Find answers to common questions and get support.</p>
+            <div class="max-w-xl mx-auto relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="help-search" placeholder="Search for help..." class="w-full pl-10 pr-4 py-4 rounded-2xl text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#ea580c]">
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP CATEGORIES -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:border-[#ea580c] transition-colors group cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mb-4 group-hover:bg-[#ea580c] group-hover:text-white transition-colors">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">For Students</h3>
+                    <p class="text-slate-500 text-sm font-medium">Account setup, searching, messaging landlords, and more.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:border-[#ea580c] transition-colors group cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mb-4 group-hover:bg-[#ea580c] group-hover:text-white transition-colors">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">For Landlords</h3>
+                    <p class="text-slate-500 text-sm font-medium">Listing properties, managing inquiries, and verification.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:border-[#ea580c] transition-colors group cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mb-4 group-hover:bg-[#ea580c] group-hover:text-white transition-colors">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Safety & Trust</h3>
+                    <p class="text-slate-500 text-sm font-medium">Reporting listings, staying safe, and verification processes.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:border-[#ea580c] transition-colors group cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mb-4 group-hover:bg-[#ea580c] group-hover:text-white transition-colors">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Account & Login</h3>
+                    <p class="text-slate-500 text-sm font-medium">Password resets, login issues, and account management.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:border-[#ea580c] transition-colors group cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mb-4 group-hover:bg-[#ea580c] group-hover:text-white transition-colors">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Messaging</h3>
+                    <p class="text-slate-500 text-sm font-medium">How to contact hosts and manage your conversations.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:border-[#ea580c] transition-colors group cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mb-4 group-hover:bg-[#ea580c] group-hover:text-white transition-colors">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-2">Reviews & Ratings</h3>
+                    <p class="text-slate-500 text-sm font-medium">How to leave reviews and understand rating scores.</p>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900 mb-8 text-center">Common Questions</h2>
+                <div class="space-y-4">
+                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                        <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                            How do I create an account?
+                            <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                            Click on "Register" in the navigation menu. Choose whether you're a student or landlord and fill in your details. Students need a valid email, university name, and student ID.
+                        </div>
+                    </details>
+                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                        <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                            I forgot my password. How do I reset it?
+                            <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                            On the login page, click "Forgot password?" and enter your registered email address. We'll send you a password reset link immediately.
+                        </div>
+                    </details>
+                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                        <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                            How do I contact a landlord?
+                            <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                            Open any property listing and click "Message Host". You must be logged in to send messages. Type your inquiry and hit send — the host will be notified.
+                        </div>
+                    </details>
+                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                        <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                            How do I report a suspicious listing?
+                            <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                            On the property details page, scroll down and click "Report this listing". Select the reason and add any details. Our team reviews all reports within 24 hours.
+                        </div>
+                    </details>
+                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                        <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                            How do I post a property as a landlord?
+                            <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                            First, register as a landlord. Once your account is approved, log in to your dashboard and click "Post Property". Fill in your property details, upload photos, and publish.
+                        </div>
+                    </details>
+                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                        <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
+                            Is my personal information safe?
+                            <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-slate-500 text-sm font-medium leading-relaxed">
+                            Yes. We take data privacy seriously. Your personal details are never shared publicly and we follow industry-standard security practices. Read our <a href="privacy.html" class="text-[#ea580c] font-bold hover:underline">Privacy Policy</a> for full details.
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="py-16 bg-slate-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-2xl md:text-3xl font-black text-slate-900 mb-4">Still Need Help?</h2>
+            <p class="text-slate-500 font-medium mb-8">Our support team is ready to assist you.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mx-auto mb-4">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-1 text-sm">WhatsApp</h3>
+                    <p class="text-slate-500 text-xs font-medium">Chat with us on WhatsApp for quick support.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mx-auto mb-4">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-1 text-sm">Email Support</h3>
+                    <p class="text-slate-500 text-xs font-medium">support@findmynyumba.com</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#ea580c] text-xl mx-auto mb-4">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="font-black text-slate-900 mb-1 text-sm">Response Time</h3>
+                    <p class="text-slate-500 text-xs font-medium">We reply within 24 hours on business days.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-14">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="bg-white rounded-xl p-2 inline-block mb-4">
+                        <img src="logo.png" alt="FindMyNyumba" class="h-10 w-auto object-contain mix-blend-multiply" onerror="this.style.display='none'">
+                    </div>
+                    <p class="text-sm font-medium text-slate-400">Zambia's trusted student housing platform.</p>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="index.html" class="hover:text-[#ea580c] font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] font-medium">Browse</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] font-medium">Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="help.html" class="hover:text-[#ea580c] font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] font-medium">Terms</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] font-medium">Privacy</a></li>
+                        <li><a href="about.html" class="hover:text-[#ea580c] font-medium">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
+                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
+                    <a href="terms.html" class="hover:text-white">Terms</a>
+                    <a href="privacy.html" class="hover:text-white">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        mobileNavToggle.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.contains('menu-open');
+            mobileMenu.classList.toggle('menu-open', !isOpen);
+            hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+        });
+    </script>
+</body>
+</html>

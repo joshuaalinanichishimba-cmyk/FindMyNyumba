@@ -3,297 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyNyumba | Verified Student Housing</title>
+    <title>FindMyNyumba - Student Housing in Zambia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
+        .orange-glow { box-shadow: 0 0 40px rgba(234,88,12,0.3); }
+        .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card-hover:hover { transform: translateY(-6px); box-shadow: 0 24px 48px -8px rgba(0,0,0,0.15); }
+        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
+        .stat-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .feature-icon { background: linear-gradient(135deg, #ea580c, #f97316); }
+    </style>
 </head>
-<body class="bg-slate-50 antialiased selection:bg-orange-200 selection:text-orange-900">
+<body class="bg-white">
 
-    <nav class="bg-white border-b border-gray-100 py-4 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-black text-[#ea580c] tracking-tight">FindMyNyumba</a>
-            <div class="hidden md:flex space-x-8 items-center">
-                <a href="browse.html" class="text-slate-600 hover:text-[#ea580c] font-semibold transition-colors">Browse</a>
-                <a href="#how-it-works" class="text-slate-600 hover:text-[#ea580c] font-semibold transition-colors">How It Works</a>
-                <a href="login.html" class="text-slate-600 hover:text-[#ea580c] font-semibold transition-colors">Login</a>
-                <a href="register.html" class="text-slate-600 hover:text-[#ea580c] font-semibold transition-colors">Register</a>
-                <a href="landlord-register.html" class="bg-[#ea580c] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-orange-600 transition-all shadow-sm hover:shadow-md">Post Property</a>
+    <!-- NAV -->
+    <nav class="bg-white shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex-shrink-0 flex items-center" style="text-decoration:none;">
+                    <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;">
+                    <span id="logo-fallback-nav" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
+                </a>
+
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-[#ea580c] font-semibold text-sm">Home</a>
+                    <a href="browse.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm transition-colors">Browse</a>
+                    <a href="how-it-works.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm transition-colors">How It Works</a>
+                    <a id="nav-dashboard-desk" href="#" class="hidden text-gray-600 hover:text-[#ea580c] font-semibold text-sm transition-colors">Dashboard</a>
+                    <a id="nav-login-desk" href="login.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm transition-colors">Login</a>
+                    <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-gray-600 hover:text-red-500 font-semibold text-sm transition-colors">Logout</a>
+                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm shadow-sm">Post Property</a>
+                </div>
+
+                <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors">
+                    <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
+            <div class="flex flex-col space-y-1 pt-3">
+                <a href="index.html" class="px-3 py-3 rounded-xl text-[#ea580c] font-bold bg-orange-50 text-sm">Home</a>
+                <a href="browse.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Browse</a>
+                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
+                <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Dashboard</a>
+                <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
+                <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
+                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
             </div>
         </div>
     </nav>
 
-    <section class="relative pt-24 pb-20 lg:pt-32 lg:pb-28 overflow-hidden bg-gradient-to-br from-orange-50/90 via-white to-orange-100/60">
-        <div class="absolute inset-0 z-0 pointer-events-none">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-orange-200/50 to-transparent blur-3xl"></div>
-            <div class="absolute -top-10 -left-10 w-96 h-96 bg-orange-300/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-            <div class="absolute top-20 -right-10 w-96 h-96 bg-yellow-300/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+    <!-- HERO -->
+    <section class="hero-gradient pt-16 min-h-screen flex items-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-[#ea580c] rounded-full filter blur-3xl"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-orange-400 rounded-full filter blur-3xl"></div>
         </div>
-
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-orange-100/80 mb-8 shadow-sm">
-                <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-[#ea580c]"></span></span>
-                <span class="text-xs md:text-sm font-black text-[#ea580c] tracking-[0.2em] uppercase">Verified Student Housing</span>
-            </div>
-            
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-[1.1]">
-                Find Your Perfect <br class="hidden sm:block" />
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ea580c] to-yellow-500 drop-shadow-sm">Student Home</span>
-            </h1>
-            
-            <p class="text-lg md:text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed mb-12">
-                The smartest way to find verified boarding houses, bedspaces, and apartments near UNZA, CBU, and more. Skip the agents, avoid the scams, and secure your room today.
-            </p>
-
-            <div class="max-w-3xl mx-auto bg-white p-2.5 rounded-2xl shadow-xl shadow-orange-900/5 border border-slate-100 flex flex-col sm:flex-row gap-3 relative z-20">
-                <div class="flex-1 flex items-center bg-slate-50 rounded-xl px-5 py-4 border border-transparent focus-within:border-orange-200 focus-within:bg-white transition-all">
-                    <i class="fas fa-search text-orange-400 mr-3 text-xl"></i>
-                    <input type="text" placeholder="Search by university, city, or property type..." class="w-full bg-transparent outline-none text-slate-700 font-semibold text-lg placeholder-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-orange-300 text-xs font-bold px-4 py-2 rounded-full mb-6 uppercase tracking-wider">
+                    <i class="fas fa-star text-orange-400"></i> #1 Student Housing Platform in Zambia
                 </div>
-                <a href="browse.html" class="bg-[#ea580c] hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-black text-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap group">
-                    Search Now <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section id="how-it-works" class="py-20 bg-white relative z-10 border-t border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="text-[#ea580c] font-bold tracking-wider uppercase text-sm">Simple Process</span>
-                <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mt-2">How It Works</h2>
-                <div class="w-16 h-1.5 bg-gradient-to-r from-[#ea580c] to-yellow-400 mx-auto mt-6 rounded-full"></div>
-            </div>
-            <div class="flex flex-col md:flex-row gap-10 text-center w-full">
-                <div class="flex-1 p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-20 h-20 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm"><i class="fas fa-search"></i></div>
-                    <h3 class="text-xl font-black text-slate-900 mb-3">1. Search</h3>
-                    <p class="text-slate-500 font-medium">Browse verified listings near your university or on campus using our smart price and location filters.</p>
-                </div>
-                <div class="flex-1 p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-20 h-20 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm"><i class="fas fa-comments"></i></div>
-                    <h3 class="text-xl font-black text-slate-900 mb-3">2. Connect</h3>
-                    <p class="text-slate-500 font-medium">Contact verified landlords directly to ask questions or schedule a secure viewing.</p>
-                </div>
-                <div class="flex-1 p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-20 h-20 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm"><i class="fas fa-key"></i></div>
-                    <h3 class="text-xl font-black text-slate-900 mb-3">3. Move In</h3>
-                    <p class="text-slate-500 font-medium">Secure your perfect student home, grab your keys, and focus entirely on your studies.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-20 bg-slate-50 relative z-10 border-t border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 text-center md:text-left">
-                <div>
-                    <span class="text-[#ea580c] font-bold tracking-wider uppercase text-sm">Live Properties</span>
-                    <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mt-2">Featured Listings</h2>
-                    <div class="w-16 h-1.5 bg-gradient-to-r from-[#ea580c] to-yellow-400 mt-6 rounded-full mx-auto md:mx-0"></div>
-                </div>
-                <a href="browse.html" class="hidden md:inline-flex items-center text-[#ea580c] font-bold hover:text-orange-700 transition-colors">
-                    View All <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-            
-            <div id="homepage-listings-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="col-span-full text-center py-20"><i class="fas fa-spinner fa-spin text-4xl text-[#ea580c]"></i></div>
-            </div>
-            
-        </div>
-    </section>
-
-        <section class="py-24 bg-white relative z-10 overflow-hidden">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-orange-50/50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center mb-20">
-                <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-orange-50 border border-orange-100 mb-6 shadow-sm">
-                    <span class="flex h-2 w-2 rounded-full bg-[#ea580c]"></span>
-                    <span class="text-xs font-black text-[#ea580c] tracking-widest uppercase">Community Trust</span>
-                </div>
-                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">What Our Users Say</h2>
-                <p class="text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
-                    Join thousands of students and landlords who have simplified their housing journey with <span class="text-slate-800 font-bold">FindMyNyumba</span>.
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-6">
+                    Find Your Perfect<br>
+                    <span class="text-[#ea580c]">Student Home</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-300 font-medium leading-relaxed mb-10 max-w-2xl">
+                    Discover verified, affordable student housing near your university. Connect directly with trusted landlords and student hosts across Zambia.
                 </p>
+
+                <!-- Search bar -->
+                <div class="bg-white rounded-2xl p-2 shadow-2xl orange-glow flex flex-col sm:flex-row gap-2 max-w-2xl">
+                    <div class="flex-1 relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="hero-search" placeholder="Search by area, university, property name..."
+                               class="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#ea580c]">
+                    </div>
+                    <button onclick="heroSearch()" class="bg-[#ea580c] hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold transition-colors text-sm whitespace-nowrap shadow-sm">
+                        <i class="fas fa-search mr-2"></i>Search Properties
+                    </button>
+                </div>
+
+                <div class="mt-8 flex flex-wrap items-center gap-4 text-slate-400 text-sm font-medium">
+                    <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-400"></i> Verified Listings</span>
+                    <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-400"></i> No Agent Fees</span>
+                    <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-400"></i> Direct Contact</span>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="group bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
-                    <div class="flex text-yellow-400 gap-1 mb-8">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <blockquote class="text-xl text-slate-700 font-semibold leading-relaxed mb-10 flex-grow">
-                        "I found a clean boarding house near <span class="text-[#ea580c]">CBU Riverside</span> in just 48 hours. The verification badge gave me so much peace of mind."
-                    </blockquote>
-                    <div class="flex items-center gap-4 pt-8 border-t border-slate-50">
-                        <div class="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-xl shadow-inner">CM</div>
-                        <div>
-                            <h4 class="font-black text-slate-900 text-lg">Chanda M.</h4>
-                            <span class="text-sm font-bold text-slate-400 uppercase tracking-wider">CBU Student</span>
-                        </div>
-                    </div>
+            <!-- Stats -->
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="stat-card rounded-2xl p-5 text-center">
+                    <div class="text-3xl font-black text-white mb-1">500+</div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Active Listings</div>
                 </div>
-
-                <div class="group bg-slate-900 p-10 rounded-[2.5rem] shadow-2xl shadow-orange-900/10 flex flex-col h-full transform md:scale-105 relative z-20">
-                    <div class="flex text-yellow-400 gap-1 mb-8">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <blockquote class="text-xl text-white font-semibold leading-relaxed mb-10 flex-grow">
-                        "As a landlord, this is the best tool I've used. I listed my house near <span class="text-orange-400">UNZA</span> and it was fully booked by verified students in a week."
-                    </blockquote>
-                    <div class="flex items-center gap-4 pt-8 border-t border-white/10">
-                        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center font-black text-orange-400 text-xl backdrop-blur-sm">BK</div>
-                        <div>
-                            <h4 class="font-black text-white text-lg">Bwalya K.</h4>
-                            <span class="text-sm font-bold text-slate-400 uppercase tracking-wider">Verified Landlord</span>
-                        </div>
-                    </div>
-                    <i class="fas fa-quote-right absolute top-10 right-10 text-white/5 text-6xl"></i>
+                <div class="stat-card rounded-2xl p-5 text-center">
+                    <div class="text-3xl font-black text-white mb-1">2K+</div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Students Housed</div>
                 </div>
-
-                <div class="group bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
-                    <div class="flex text-yellow-400 gap-1 mb-8">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <blockquote class="text-xl text-slate-700 font-semibold leading-relaxed mb-10 flex-grow">
-                        "The search filters saved me so much time. Found my ideal room with <span class="text-[#ea580c]">Mobile Money</span> payment options instantly!"
-                    </blockquote>
-                    <div class="flex items-center gap-4 pt-8 border-t border-slate-50">
-                        <div class="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-xl shadow-inner">ET</div>
-                        <div>
-                            <h4 class="font-black text-slate-900 text-lg">Emmanuel T.</h4>
-                            <span class="text-sm font-bold text-slate-400 uppercase tracking-wider">UNZA Student</span>
-                        </div>
-                    </div>
+                <div class="stat-card rounded-2xl p-5 text-center">
+                    <div class="text-3xl font-black text-white mb-1">200+</div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Verified Landlords</div>
+                </div>
+                <div class="stat-card rounded-2xl p-5 text-center">
+                    <div class="text-3xl font-black text-white mb-1">6+</div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Universities Covered</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-16 bg-gradient-to-r from-[#ea580c] to-orange-500 text-white relative z-10">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-black mb-6 tracking-tight">Ready to Secure Your Room for the Semester?</h2>
-            <p class="text-xl mb-8 opacity-90 font-medium">Join thousands of Zambian students who have upgraded their campus living experience. Fast, secure, and 100% verified.</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="register.html" class="bg-white text-[#ea580c] hover:bg-slate-50 px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-md">
-                    <i class="fas fa-user-graduate mr-2"></i> Register as Student
-                </a>
-                <a href="landlord-register.html" class="bg-transparent border-2 border-white hover:bg-white hover:text-[#ea580c] px-8 py-4 rounded-xl font-bold text-lg transition-all">
-                    <i class="fas fa-home mr-2"></i> Register as Landlord
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-slate-900 text-white py-12 relative z-10">
+    <!-- UNIVERSITIES -->
+    <section class="py-14 bg-slate-50 border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-xl font-black text-white mb-4 tracking-tight">FindMyNyumba</h3>
-                    <p class="text-slate-400 font-medium leading-relaxed">Zambia's premier student housing platform. We connect students with safe, affordable, and verified boarding houses and apartments near top universities.</p>
+            <p class="text-center text-xs font-black text-slate-400 uppercase tracking-widest mb-8">Housing near these universities</p>
+            <div class="flex flex-wrap justify-center gap-3 md:gap-6">
+                <span class="bg-white px-4 py-2 rounded-xl font-bold text-slate-700 text-sm shadow-sm border border-slate-100">🎓 UNZA</span>
+                <span class="bg-white px-4 py-2 rounded-xl font-bold text-slate-700 text-sm shadow-sm border border-slate-100">🎓 CBU</span>
+                <span class="bg-white px-4 py-2 rounded-xl font-bold text-slate-700 text-sm shadow-sm border border-slate-100">🎓 Mulungushi</span>
+                <span class="bg-white px-4 py-2 rounded-xl font-bold text-slate-700 text-sm shadow-sm border border-slate-100">🎓 ZCAS</span>
+                <span class="bg-white px-4 py-2 rounded-xl font-bold text-slate-700 text-sm shadow-sm border border-slate-100">🎓 Evelyn Hone</span>
+                <span class="bg-white px-4 py-2 rounded-xl font-bold text-slate-700 text-sm shadow-sm border border-slate-100">🎓 Cavendish</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-4">Why Students Choose Us</h2>
+                <p class="text-slate-500 text-base md:text-lg max-w-2xl mx-auto font-medium">Everything you need to find your ideal student accommodation, all in one place.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <div class="card-hover bg-slate-50 rounded-3xl p-8 border border-slate-100">
+                    <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl mb-5 shadow-lg shadow-orange-200">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">Verified Listings</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed text-sm">Every property and landlord is manually verified before going live. No scams, no surprises.</p>
+                </div>
+                <div class="card-hover bg-slate-50 rounded-3xl p-8 border border-slate-100">
+                    <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl mb-5 shadow-lg shadow-orange-200">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">Direct Messaging</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed text-sm">Chat directly with landlords and student hosts. No middlemen, no delays.</p>
+                </div>
+                <div class="card-hover bg-slate-50 rounded-3xl p-8 border border-slate-100">
+                    <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl mb-5 shadow-lg shadow-orange-200">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">Near Your Campus</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed text-sm">Filter by university to find housing within walking distance of your campus.</p>
+                </div>
+                <div class="card-hover bg-slate-50 rounded-3xl p-8 border border-slate-100">
+                    <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl mb-5 shadow-lg shadow-orange-200">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">Student Hosts</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed text-sm">Find bedspaces from fellow students — a more affordable and community-driven option.</p>
+                </div>
+                <div class="card-hover bg-slate-50 rounded-3xl p-8 border border-slate-100">
+                    <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl mb-5 shadow-lg shadow-orange-200">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">Real Reviews</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed text-sm">Read honest reviews from other students before making any decisions.</p>
+                </div>
+                <div class="card-hover bg-slate-50 rounded-3xl p-8 border border-slate-100">
+                    <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl mb-5 shadow-lg shadow-orange-200">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">Budget Friendly</h3>
+                    <p class="text-slate-500 font-medium leading-relaxed text-sm">Filter by price to find housing that fits your student budget — no hidden fees.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="py-20 bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-5xl font-black text-white mb-4">How It Works</h2>
+                <p class="text-slate-400 text-base md:text-lg max-w-2xl mx-auto font-medium">Find your ideal Nyumba in just a few simple steps.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center relative">
+                    <div class="w-16 h-16 bg-[#ea580c] rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg shadow-orange-900">1</div>
+                    <h3 class="text-xl font-black text-white mb-3">Register & Search</h3>
+                    <p class="text-slate-400 font-medium leading-relaxed text-sm">Create your free account and search for properties near your university.</p>
+                    <div class="hidden md:block absolute top-8 left-[60%] w-[40%] h-px border-t-2 border-dashed border-slate-700"></div>
+                </div>
+                <div class="text-center relative">
+                    <div class="w-16 h-16 bg-[#ea580c] rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg shadow-orange-900">2</div>
+                    <h3 class="text-xl font-black text-white mb-3">Contact the Host</h3>
+                    <p class="text-slate-400 font-medium leading-relaxed text-sm">Message the landlord or student host directly through our platform.</p>
+                    <div class="hidden md:block absolute top-8 left-[60%] w-[40%] h-px border-t-2 border-dashed border-slate-700"></div>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#ea580c] rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-5 shadow-lg shadow-orange-900">3</div>
+                    <h3 class="text-xl font-black text-white mb-3">Move In!</h3>
+                    <p class="text-slate-400 font-medium leading-relaxed text-sm">Arrange a viewing, agree on terms, and move into your new Nyumba.</p>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <a href="how-it-works.html" class="inline-flex items-center gap-2 text-orange-400 font-bold hover:text-orange-300 transition-colors text-sm">
+                    Learn more about the process <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-4">What Our Users Say</h2>
+                <p class="text-slate-500 text-base md:text-lg max-w-2xl mx-auto font-medium">Thousands of students and landlords trust FindMyNyumba.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <div class="card-hover bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col">
+                    <div class="flex text-[#ea580c] mb-4">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-slate-700 font-semibold leading-relaxed mb-6 flex-grow">"I found a clean boarding house near CBU Riverside in just 48 hours. The verification badge gave me total peace of mind."</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
+                        <div class="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center font-black text-[#ea580c] text-sm flex-shrink-0">JS</div>
+                        <div>
+                            <div class="font-black text-slate-900 text-sm">John S.</div>
+                            <div class="text-xs text-slate-400 font-semibold">CBU Student</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-hover bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col md:scale-105">
+                    <div class="flex text-orange-400 mb-4">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-white font-semibold leading-relaxed mb-6 flex-grow">"As a landlord, I love how easy it is to post properties and connect with verified students. Best platform in Zambia!"</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+                        <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center font-black text-orange-400 text-sm flex-shrink-0">ME</div>
+                        <div>
+                            <div class="font-black text-white text-sm">Mary E.</div>
+                            <div class="text-xs text-slate-400 font-semibold">Verified Landlord</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-hover bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col">
+                    <div class="flex text-[#ea580c] mb-4">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-slate-700 font-semibold leading-relaxed mb-6 flex-grow">"The messaging feature made it so easy to ask questions before committing. I saved so much time compared to searching manually."</p>
+                    <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
+                        <div class="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center font-black text-[#ea580c] text-sm flex-shrink-0">PN</div>
+                        <div>
+                            <div class="font-black text-slate-900 text-sm">Patricia N.</div>
+                            <div class="text-xs text-slate-400 font-semibold">UNZA Student</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 bg-[#ea580c]">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-5xl font-black text-white mb-4">Ready to Find Your Nyumba?</h2>
+            <p class="text-orange-100 text-lg font-medium mb-10 max-w-xl mx-auto">Join thousands of students who found their perfect home through FindMyNyumba.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="browse.html" class="bg-white text-[#ea580c] font-black px-8 py-4 rounded-2xl hover:bg-orange-50 transition-colors text-sm shadow-lg">
+                    <i class="fas fa-search mr-2"></i>Browse Properties
+                </a>
+                <a href="register.html" class="bg-slate-900 text-white font-black px-8 py-4 rounded-2xl hover:bg-slate-800 transition-colors text-sm shadow-lg">
+                    <i class="fas fa-user-plus mr-2"></i>Create Free Account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-14">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <div style="display:inline-block;margin-bottom:1rem;background:#f8fafc;border-radius:12px;padding:8px 16px;">
+                        <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;">
+                    </div>
+                    <p class="text-sm font-medium leading-relaxed text-slate-400 max-w-xs">Zambia's trusted student housing platform. Find verified, affordable accommodation near your university.</p>
+                    <div class="flex gap-3 mt-4">
+                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-whatsapp"></i></a>
+                    </div>
                 </div>
                 <div>
-                    <h4 class="font-bold text-white mb-4">Quick Links</h4>
-                    <ul class="space-y-2 text-slate-400 font-medium">
-                        <li><a href="browse.html" class="hover:text-white transition-colors">Browse Properties</a></li>
-                        <li><a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
-                        <li><a href="login.html" class="hover:text-white transition-colors">Login</a></li>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="index.html" class="hover:text-[#ea580c] transition-colors font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors font-medium">Browse Properties</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] transition-colors font-medium">Login</a></li>
+                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors font-medium">Register</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-bold text-white mb-4">Support</h4>
-                    <ul class="space-y-2 text-slate-400 font-medium">
-                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">For Landlords</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] transition-colors font-medium">Register as Landlord</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">Landlord Guide</a></li>
+                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-bold text-white mb-4">Contact</h4>
-                    <ul class="space-y-3 text-slate-400 font-medium">
-                        <li><i class="fas fa-envelope mr-2 text-orange-500"></i> info@findmynyumba.com</li>
-                        <li><i class="fas fa-phone mr-2 text-orange-500"></i> +260 97 888 9999</li>
-                        <li><i class="fas fa-map-marker-alt mr-2 text-orange-500"></i> Lusaka, Zambia</li>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] transition-colors font-medium">Terms of Service</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] transition-colors font-medium">Privacy Policy</a></li>
+                        <li><a href="about.html" class="hover:text-[#ea580c] transition-colors font-medium">About Us</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-slate-800 mt-12 pt-8 text-center text-slate-500 font-medium">
-                <p>&copy; 2024 FindMyNyumba. All rights reserved.</p>
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
+                    <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
+                    <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
+                </div>
             </div>
         </div>
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const container = document.getElementById('homepage-listings-container');
-            if(!container) return;
-            
-            try {
-                const res = await fetch('https://findmynyumba.onrender.com/api/v1/properties');
-                if (!res.ok) throw new Error("Backend not responding");
-                let data = await res.json();
-                
-                // Take top 3 listings
-                data = data.slice(0, 3);
-                
-                // Format messy database titles to look premium
-                const formatTitle = (title, index) => {
-                    const badWords = ['sdfgbn', 'wert', 'male bh', 'test', 'asdf'];
-                    const clean = title ? title.toLowerCase().trim() : '';
-                    if (!clean || badWords.some(w => clean.includes(w)) || clean.length < 4) {
-                        const premiumTitles = ["1 Bed Self-Contained Room", "Affordable Bedspace Near CBU", "Female Boarding House Near UNZA"];
-                        return premiumTitles[index] || "Premium Student Room";
-                    }
-                    return title;
-                };
+        (function initNav() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
+            if (!token || !role) return;
+            const routes = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+            ['nav-dashboard-desk', 'nav-dashboard-mob'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.href = routes[role] || 'browse.html'; el.classList.remove('hidden'); }
+            });
+            ['nav-login-desk', 'nav-login-mob'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+            ['nav-logout-desk', 'nav-logout-mob'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
+        })();
 
-                container.innerHTML = data.map((p, index) => {
-                    const cleanTitle = formatTitle(p.title, index);
-                    const price = parseFloat(p.price || 0).toLocaleString();
-                    const loc = (p.location && p.location !== "Unknown Location") ? p.location : "Riverside, Kitwe";
-                    const imgUrl = p.image_url || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80";
-                    const propType = cleanTitle.toLowerCase().includes('female') ? "Female Only" : "Mixed Housing";
+        function logout() {
+            ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+            window.location.reload();
+        }
 
-                    return `
-                    <div class="group bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                        <div class="relative h-56 bg-slate-100 overflow-hidden">
-                            <img src="${imgUrl}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out">
-                            <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-black text-green-600 shadow-sm flex items-center tracking-wide">
-                                <i class="fas fa-shield-alt mr-1.5"></i> VERIFIED
-                            </div>
-                        </div>
-                        
-                        <div class="p-6 flex flex-col flex-grow">
-                            <div class="flex justify-between items-start mb-3 gap-3">
-                                <h3 class="font-black text-xl text-slate-900 leading-tight truncate" title="${cleanTitle}">${cleanTitle}</h3>
-                                <span class="bg-orange-50 text-[#ea580c] px-3 py-1.5 rounded-xl text-sm font-black whitespace-nowrap border border-orange-100 shadow-sm">
-                                    ZMW ${price}
-                                </span>
-                            </div>
-                            
-                            <p class="text-slate-500 text-sm mb-5 flex items-center font-medium">
-                                <i class="fas fa-map-marker-alt w-5 text-slate-400 mr-2"></i> ${loc}
-                            </p>
-                            
-                            <div class="mt-auto pt-5 border-t border-slate-100 flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">${propType}</span>
-                                <a href="listing.html?id=${p.id}" class="inline-flex items-center justify-center bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#ea580c] transition-colors shadow-sm text-sm">
-                                    View Details <i class="fas fa-arrow-right ml-2 text-xs"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join("");
-            } catch (err) {
-                console.error("Featured Fetch Error:", err);
-                container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-bold">Sign in to view latest listings.</div>';
-            }
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        mobileNavToggle.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.contains('menu-open');
+            mobileMenu.classList.toggle('menu-open', !isOpen);
+            hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
         });
+
+        function heroSearch() {
+            const q = document.getElementById('hero-search').value.trim();
+            window.location.href = q ? `browse.html?q=${encodeURIComponent(q)}` : 'browse.html';
+        }
+        document.getElementById('hero-search').addEventListener('keypress', e => { if (e.key === 'Enter') heroSearch(); });
     </script>
 </body>
 </html>
-
-
-

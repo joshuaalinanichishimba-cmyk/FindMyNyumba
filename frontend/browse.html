@@ -7,11 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { -webkit-tap-highlight-color: transparent; }
-        /* Prevent iOS zoom on inputs */
-        input, select, textarea { font-size: 16px !important; }
-        body { padding-bottom: env(safe-area-inset-bottom, 0px); }
-
         #filters-sidebar { transition: transform 0.3s ease, opacity 0.3s ease; }
         #filters-sidebar.sidebar-open  { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
         #filters-sidebar.sidebar-closed { transform: translateX(-100%); opacity: 0; visibility: hidden; pointer-events: none; }
@@ -19,31 +14,10 @@
             #filters-sidebar { transform: translateX(0) !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; position: relative !important; }
             #sidebar-overlay, #filter-toggle-btn { display: none !important; }
         }
-        #mobile-menu { transition: max-height 0.35s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
         #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
         .listing-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .listing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12); }
-
-        /* Mobile: full-height sidebar with safe area */
-        @media (max-width: 767px) {
-            #filters-sidebar {
-                height: 100dvh !important;
-                padding-top: max(24px, env(safe-area-inset-top)) !important;
-                padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
-            }
-        }
-
-        /* Bigger tap targets on mobile */
-        @media (max-width: 767px) {
-            nav a { min-height: 44px; display: flex; align-items: center; }
-            #mobile-nav-toggle { min-width: 44px; min-height: 44px; }
-            select, input[type="number"], input[type="text"] { padding: 12px 14px !important; }
-        }
-
-        /* Testimonials: no scale transform on mobile (causes overflow) */
-        @media (max-width: 767px) {
-            .md\\:scale-105 { transform: none !important; }
-        }
     </style>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 </head>
@@ -54,21 +28,20 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
-                <a href="browse.html" class="flex-shrink-0 flex items-center h-16 overflow-hidden" style="width:160px;">
-                    <img src="logo.png" alt="FindMyNyumba"
-                         class="w-full h-full object-contain transform scale-[2.2] mix-blend-multiply brightness-[1.4] contrast-[1.6] saturate-125"
-                         onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden')">
+                <a href="index.html" class="flex-shrink-0 flex items-center" style="text-decoration:none;">
+                    <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;">
                     <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
                 </a>
 
-                <!-- Desktop nav -->
                 <div class="hidden md:flex items-center space-x-6">
-                    <a href="browse.html" class="text-[#ea580c] font-semibold">Browse</a>
-                    <a id="nav-dashboard-desk" href="#" class="hidden text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Dashboard</a>
-                    <a id="nav-login-desk" href="login.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Login</a>
-                    <a id="nav-register-desk" href="register.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Register</a>
-                    <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors">Logout</a>
-                    <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm">Post Property</a>
+                    <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold transition-colors text-sm">Home</a>
+                    <a href="browse.html" class="text-[#ea580c] font-semibold text-sm">Browse</a>
+                    <a href="how-it-works.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">How It Works</a>
+                    <a id="nav-dashboard-desk" href="#" class="hidden text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Dashboard</a>
+                    <a id="nav-login-desk" href="login.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Login</a>
+                    <a id="nav-register-desk" href="register.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Register</a>
+                    <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors text-sm">Logout</a>
+                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition-colors text-sm">Post Property</a>
                 </div>
 
                 <button id="mobile-nav-toggle" aria-label="Toggle navigation"
@@ -78,15 +51,16 @@
             </div>
         </div>
 
-        <!-- Mobile menu -->
         <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
             <div class="flex flex-col space-y-1 pt-3">
-                <a href="browse.html" class="px-3 py-3 rounded-lg text-[#ea580c] font-bold bg-orange-50">Browse</a>
-                <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50">Dashboard</a>
-                <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50">Login</a>
-                <a id="nav-register-mob" href="register.html" class="px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50">Register</a>
-                <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-lg text-red-600 font-semibold hover:bg-red-50">Logout</a>
-                <a href="register-landlord.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-bold transition-colors">Post Property</a>
+                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
+                <a href="browse.html" class="px-3 py-3 rounded-xl text-[#ea580c] font-bold bg-orange-50 text-sm">Browse</a>
+                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
+                <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Dashboard</a>
+                <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
+                <a id="nav-register-mob" href="register.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Register</a>
+                <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
+                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
             </div>
         </div>
     </nav>
@@ -101,10 +75,8 @@
             <div class="flex-1 relative">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                 <input type="text" id="keyword-search"
-                       placeholder="Search area, property, university..."
-                       inputmode="search"
-                       autocomplete="off"
-                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm" style="font-size:16px">
+                       placeholder="Search by area, property name, university..."
+                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm text-sm">
             </div>
 
             <button id="filter-toggle-btn" onclick="toggleSidebar()"
@@ -242,49 +214,53 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 pt-14 pb-8 border-t border-slate-800">
+    <footer class="bg-slate-900 text-slate-400 py-14 mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-                <div class="col-span-2 md:col-span-1">
-                    <h3 class="text-xl font-black text-white mb-3">FindMy<span class="text-[#ea580c]">Nyumba</span></h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">Simplifying student housing in Zambia. Verified listings, secure connections, peace of mind.</p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Platform</h4>
-                    <ul class="space-y-2 text-slate-400 text-sm font-medium">
-                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors">Browse Accommodations</a></li>
-                        <li><a href="dashboard-landlord.html" class="hover:text-[#ea580c] transition-colors">Post a Property</a></li>
-                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors">Student Registration</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Support</h4>
-                    <ul class="space-y-2 text-slate-400 text-sm font-medium">
-                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Trust & Verification</a></li>
-                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Landlord Resources</a></li>
-                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Contact Us</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Connect</h4>
-                    <div class="flex space-x-3">
-                        <a href="#" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
-                            <i class="fab fa-facebook-f text-sm"></i>
-                        </a>
-                        <a href="#" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
-                            <i class="fab fa-twitter text-sm"></i>
-                        </a>
-                        <a href="#" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
-                            <i class="fab fa-instagram text-sm"></i>
-                        </a>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <div style="display:inline-block;margin-bottom:1rem;background:#f8fafc;border-radius:12px;padding:8px 16px;">
+                        <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;">
+                    </div>
+                    <p class="text-sm font-medium leading-relaxed text-slate-400 max-w-xs">Zambia's trusted student housing platform. Find verified, affordable accommodation near your university.</p>
+                    <div class="flex gap-3 mt-4">
+                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
+                <div>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="index.html" class="hover:text-[#ea580c] transition-colors font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors font-medium">Browse Properties</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] transition-colors font-medium">Login</a></li>
+                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors font-medium">Register</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">For Landlords</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] transition-colors font-medium">Register as Landlord</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">Landlord Guide</a></li>
+                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] transition-colors font-medium">Terms of Service</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] transition-colors font-medium">Privacy Policy</a></li>
+                        <li><a href="about.html" class="hover:text-[#ea580c] transition-colors font-medium">About Us</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="pt-6 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-3">
-                <p class="text-slate-500 text-sm font-medium">&copy; 2026 FindMyNyumba Zambia. All rights reserved.</p>
-                <div class="flex gap-4 text-sm text-slate-500 font-medium">
-                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
-                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
+                    <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
+                    <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
                 </div>
             </div>
         </div>
