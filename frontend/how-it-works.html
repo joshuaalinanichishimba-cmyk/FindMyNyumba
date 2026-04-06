@@ -225,9 +225,9 @@
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
-                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
-                <div class="flex gap-4">
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+    <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
+    <div class="flex gap-4">
                     <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
                     <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
                 </div>
@@ -245,5 +245,8 @@
             hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
         });
     </script>
+    <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>

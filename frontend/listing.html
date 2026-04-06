@@ -238,9 +238,9 @@
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
-                <p class="font-medium">© 2025 FindMyNyumba. All rights reserved.</p>
-                <div class="flex gap-4">
+            <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+</script>
                     <a href="terms.html" class="hover:text-white">Terms</a>
                     <a href="privacy.html" class="hover:text-white">Privacy</a>
                 </div>
@@ -472,6 +472,9 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.innerHTML = 'Submit Report'; }
     });
 });
+</script>
+<script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
