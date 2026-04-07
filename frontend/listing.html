@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -56,7 +56,7 @@
                      alt="Property"
                      class="w-full h-full object-cover">
                 <div id="boosted-badge" class="hidden absolute top-3 right-3 bg-[#ea580c] text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse">
-                    ⚡ Featured
+                    ? Featured
                 </div>
             </div>
 
@@ -234,7 +234,7 @@
                     <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
                     <ul class="space-y-1.5 text-xs">
                         <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
-                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
+                        <li><a href="register-landlord.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
                     </ul>
                 </div>
             </div>
@@ -259,7 +259,7 @@ let toastTimer;
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 const getRole  = () => localStorage.getItem('role')  || sessionStorage.getItem('role');
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// -- Toast ---------------------------------------------------------------------
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-gray-800' };
@@ -270,7 +270,7 @@ function showToast(msg, type = 'success') {
     toastTimer = setTimeout(() => { t.classList.replace('show', 'hide'); }, 3500);
 }
 
-// ── Auth-aware nav ────────────────────────────────────────────────────────────
+// -- Auth-aware nav ------------------------------------------------------------
 (function initNav() {
     const token = getToken();
     const role  = getRole();
@@ -281,7 +281,7 @@ function showToast(msg, type = 'success') {
     document.getElementById('nav-login')?.classList.add('hidden');
 })();
 
-// ── Image URL resolver ────────────────────────────────────────────────────────
+// -- Image URL resolver --------------------------------------------------------
 /**
  * THE FIX for the 404 image bug seen in logs:
  *
@@ -289,11 +289,11 @@ function showToast(msg, type = 'success') {
  *   "https://findmynyumba.onrender.com/static/uploads/properties/filename.jpg"
  *
  * The old code did:
- *   path = url.replace(/^\/+/, '')          → "https://findmynyumba.onrender.com/static/..."  (unchanged, no leading slash)
- *   src  = `https://findmynyumba.onrender.com/${path}` → "https://findmynyumba.onrender.com/https://findmynyumba.onrender.com/static/..."  ← BROKEN
+ *   path = url.replace(/^\/+/, '')          ? "https://findmynyumba.onrender.com/static/..."  (unchanged, no leading slash)
+ *   src  = `https://findmynyumba.onrender.com/${path}` ? "https://findmynyumba.onrender.com/https://findmynyumba.onrender.com/static/..."  ? BROKEN
  *
  * The browser then requests:
- *   GET /http%3A//127.0.0.1%3A8000/static/... → 404
+ *   GET /http%3A//127.0.0.1%3A8000/static/... ? 404
  *
  * This function checks: if it already starts with "http", use it as-is.
  * Only prepend the host for bare paths like "/static/uploads/...".
@@ -302,13 +302,13 @@ function resolveImageUrl(raw) {
     if (!raw) return null;
     const url = String(raw).trim();
     if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url; // ← Already a full absolute URL. Use directly. No prepending.
+        return url; // ? Already a full absolute URL. Use directly. No prepending.
     }
-    // Bare path — make it absolute
+    // Bare path � make it absolute
     return 'https://findmynyumba.onrender.com' + (url.startsWith('/') ? url : '/' + url);
 }
 
-// ── Modal helpers ─────────────────────────────────────────────────────────────
+// -- Modal helpers -------------------------------------------------------------
 function openModal(id)  { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
 function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
 function openReportModal() {
@@ -317,16 +317,16 @@ function openReportModal() {
 }
 function closeReportModal() { closeModal('report-modal'); }
 
-// ── Map ───────────────────────────────────────────────────────────────────────
+// -- Map -----------------------------------------------------------------------
 function initMap(lat, lng, label) {
     if (leafletMap) { leafletMap.remove(); leafletMap = null; }
     leafletMap = L.map('property-map').setView([lat, lng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(leafletMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '� OpenStreetMap' }).addTo(leafletMap);
     L.marker([lat, lng]).addTo(leafletMap).bindPopup(label).openPopup();
     setTimeout(() => leafletMap.invalidateSize(), 400);
 }
 
-// ── Load listing ──────────────────────────────────────────────────────────────
+// -- Load listing --------------------------------------------------------------
 async function loadData() {
     const id = new URLSearchParams(window.location.search).get('id');
     if (!id) { showToast('No listing ID in URL.', 'error'); return; }
@@ -337,16 +337,16 @@ async function loadData() {
         const data = await res.json();
         currentProperty = data;
 
-        // Text — innerText is XSS-safe
-        document.getElementById('prop-title').innerText         = data.title       || '—';
-        document.getElementById('prop-location-text').innerText = data.location    || '—';
+        // Text � innerText is XSS-safe
+        document.getElementById('prop-title').innerText         = data.title       || '�';
+        document.getElementById('prop-location-text').innerText = data.location    || '�';
         document.getElementById('prop-description').innerText   = data.description || 'No description provided.';
         document.getElementById('prop-price').innerText         = `ZMW ${Number(data.price).toLocaleString()}`;
         document.title = `${data.title || 'Property'} - FindMyNyumba`;
 
         if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
 
-        // Image — THE FIX
+        // Image � THE FIX
         const imgEl  = document.getElementById('main-image');
         const rawUrl = data.image_url || (Array.isArray(data.images) && data.images[0]) || null;
         const imgSrc = resolveImageUrl(rawUrl);
@@ -371,7 +371,7 @@ async function loadData() {
             document.getElementById('host-badge').innerHTML = verBadge;
         }
 
-        // Map — default to Lusaka centre; swap coords when geocoding is added
+        // Map � default to Lusaka centre; swap coords when geocoding is added
         initMap(-15.4167, 28.2833, data.title || 'Property');
 
     } catch (err) {
@@ -380,7 +380,7 @@ async function loadData() {
     }
 }
 
-// ── Stars ─────────────────────────────────────────────────────────────────────
+// -- Stars ---------------------------------------------------------------------
 function initStars() {
     const stars = Array.from(document.querySelectorAll('#star-container .fa-star'));
     stars.forEach((s, i) => {
@@ -390,7 +390,7 @@ function initStars() {
     });
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
+// -- Boot ----------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initStars();

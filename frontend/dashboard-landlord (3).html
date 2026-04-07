@@ -294,7 +294,7 @@
         window.location.replace('login.html');
     }
 
-    // ── Toast ─────────────────────────────────────────────────────────────────
+    // -- Toast -----------------------------------------------------------------
     function showToast(msg, type = 'success') {
         const t = document.getElementById('fmn-toast');
         t.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white
@@ -304,7 +304,7 @@
         setTimeout(() => t.classList.add('hidden'), 3500);
     }
 
-    // ── Sidebar ───────────────────────────────────────────────────────────────
+    // -- Sidebar ---------------------------------------------------------------
     function openSidebar() {
         document.getElementById('sidebar').classList.remove('-translate-x-full');
         document.getElementById('sidebar-overlay').classList.remove('hidden');
@@ -316,7 +316,7 @@
         document.body.style.overflow = '';
     }
 
-    // ── Tab switcher ──────────────────────────────────────────────────────────
+    // -- Tab switcher ----------------------------------------------------------
     function switchTab(tabId) {
         document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden-view'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
@@ -342,7 +342,7 @@
         clearSession();
     }
 
-    // ── Boot ──────────────────────────────────────────────────────────────────
+    // -- Boot ------------------------------------------------------------------
     async function initDashboard() {
         try {
             const res = await fetch(`${API_BASE}/auth/me`, { headers: authHeaders() });
@@ -364,7 +364,7 @@
         switchTab('overview');
     }
 
-    // ── Overview ──────────────────────────────────────────────────────────────
+    // -- Overview --------------------------------------------------------------
     async function loadOverview() {
         const spinner = '<span class="stat-spinner"></span>';
         ['stat-active','stat-pending','stat-views','stat-inquiries'].forEach(id => {
@@ -379,10 +379,10 @@
             if (!res.ok) throw new Error(`Server error ${res.status}`);
             const data = await res.json();
 
-            document.getElementById('stat-active').textContent    = data.active_listings  ?? '0';
-            document.getElementById('stat-pending').textContent   = data.pending_listings ?? '0';
-            document.getElementById('stat-views').textContent     = data.total_views      ?? '0';
-            document.getElementById('stat-inquiries').textContent = data.unread_inquiries ?? '0';
+            document.getElementById('stat-active').textContent    = data.active_listings  '0';
+            document.getElementById('stat-pending').textContent   = data.pending_listings '0';
+            document.getElementById('stat-views').textContent     = data.total_views      '0';
+            document.getElementById('stat-inquiries').textContent = data.unread_inquiries '0';
 
             const vs = data.verification_status || 'unverified';
             const alertMap = {
@@ -407,7 +407,7 @@
         }
     }
 
-    // ── My Listings ───────────────────────────────────────────────────────────
+    // -- My Listings -----------------------------------------------------------
     async function loadListings() {
         const tbody = document.getElementById('my-listings-body');
         tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center"><span class="stat-spinner"></span></td></tr>';
@@ -485,7 +485,7 @@
         }
     }
 
-    // ── Inquiries ─────────────────────────────────────────────────────────────
+    // -- Inquiries -------------------------------------------------------------
     async function loadInquiries() {
         const tbody = document.getElementById('inquiries-body');
         tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center"><span class="stat-spinner"></span></td></tr>';
@@ -536,7 +536,7 @@
         document.getElementById('reply-input').focus();
     }
 
-    // ── Verification ──────────────────────────────────────────────────────────
+    // -- Verification ----------------------------------------------------------
     async function loadVerification() {
         const container = document.getElementById('verification-content');
         if (!container) return;
@@ -593,7 +593,7 @@
         }
     }
 
-    // ── Profile ───────────────────────────────────────────────────────────────
+    // -- Profile ---------------------------------------------------------------
     function loadProfile() {
         if (!currentUser) return;
         const el = id => document.getElementById(id);
@@ -603,7 +603,7 @@
         if (el('prof-business')) el('prof-business').value = currentUser.business_name || '';
     }
 
-    // ── Form bindings ─────────────────────────────────────────────────────────
+    // -- Form bindings ---------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
@@ -712,5 +712,6 @@
     </script>
 </body>
 </html>
+
 
 

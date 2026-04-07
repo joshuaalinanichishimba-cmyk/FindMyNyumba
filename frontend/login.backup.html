@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -125,7 +125,7 @@
             window.location.href = routes[role] || 'browse.html';
         }
 
-        // â”€â”€â”€ Standard Email / Password Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─── Standard Email / Password Login ─────────────────────────────────
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             hideError();
@@ -159,7 +159,7 @@
             }
         });
 
-        // â”€â”€â”€ Google Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ─── Google Login ─────────────────────────────────────────────────────
         async function handleCredentialResponse(response) {
             hideError();
             

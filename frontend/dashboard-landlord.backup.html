@@ -313,10 +313,10 @@
                 const data = await res.json();
 
                 // Populate stat cards with real data
-                els.active.innerText    = data.active_listings   ?? '0';
-                els.pending.innerText   = data.pending_listings  ?? '0';
-                els.views.innerText     = data.total_views       ?? '0';
-                els.inquiries.innerText = data.unread_inquiries  ?? '0';
+                els.active.innerText    = data.active_listings   '0';
+                els.pending.innerText   = data.pending_listings  '0';
+                els.views.innerText     = data.total_views       '0';
+                els.inquiries.innerText = data.unread_inquiries  '0';
 
                 // â”€â”€ Verification alert â€” all 4 states handled â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 const vs = data.verification_status || 'unverified';
@@ -705,5 +705,6 @@
     </script>
 </body>
 </html>
+
 
 

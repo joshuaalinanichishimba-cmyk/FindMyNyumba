@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -23,7 +23,7 @@
 </head>
 <body class="bg-gray-50">
 
-    <!-- ── NAV ─────────────────────────────────────────────────────────── -->
+    <!-- -- NAV ----------------------------------------------------------- -->
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -41,7 +41,7 @@
                     <a id="nav-login-desk" href="login.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Login</a>
                     <a id="nav-register-desk" href="register.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Register</a>
                     <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors text-sm">Logout</a>
-                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition-colors text-sm">Post Property</a>
+                    <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition-colors text-sm">Post Property</a>
                 </div>
 
                 <button id="mobile-nav-toggle" aria-label="Toggle navigation"
@@ -60,7 +60,7 @@
                 <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
                 <a id="nav-register-mob" href="register.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Register</a>
                 <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
-                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
+                <a href="register-landlord.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
             </div>
         </div>
     </nav>
@@ -241,7 +241,7 @@
                 <div>
                     <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">For Landlords</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="landlord-register.html" class="hover:text-[#ea580c] transition-colors font-medium">Register as Landlord</a></li>
+                        <li><a href="register-landlord.html" class="hover:text-[#ea580c] transition-colors font-medium">Register as Landlord</a></li>
                         <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">Landlord Guide</a></li>
                         <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
                     </ul>
@@ -270,7 +270,7 @@
     'use strict';
     const API_BASE = 'https://findmynyumba.onrender.com/api/v1';
 
-    // ── Auth-aware nav ──────────────────────────────────────────────────────
+    // -- Auth-aware nav ------------------------------------------------------
     (function initNav() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
@@ -297,7 +297,7 @@
         window.location.reload();
     }
 
-    // ── Mobile nav toggle ───────────────────────────────────────────────────
+    // -- Mobile nav toggle ---------------------------------------------------
     const mobileNavToggle = document.getElementById('mobile-nav-toggle');
     const mobileMenu      = document.getElementById('mobile-menu');
     const hamburgerIcon   = document.getElementById('hamburger-icon');
@@ -313,7 +313,7 @@
         hamburgerIcon.className = 'fas fa-bars text-xl';
     }));
 
-    // ── Filter sidebar (mobile) ─────────────────────────────────────────────
+    // -- Filter sidebar (mobile) ---------------------------------------------
     function toggleSidebar() {
         const sidebar = document.getElementById('filters-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -333,7 +333,7 @@
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
-    // ── Fetch listings ──────────────────────────────────────────────────────
+    // -- Fetch listings ------------------------------------------------------
     async function fetchListings(queryString = '') {
         const container = document.getElementById('listings-container');
         container.innerHTML = `
@@ -405,7 +405,7 @@
                     </div>
                     ${p.is_boosted ? `
                     <div class="absolute top-3 right-3 bg-[#ea580c] text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-md uppercase tracking-wide animate-pulse">
-                        ⚡ Featured
+                        ? Featured
                     </div>` : ''}
                 </div>
                 <div class="p-4 md:p-5 flex flex-col flex-grow">
@@ -424,7 +424,7 @@
         }).join('');
     }
 
-    // ── Filters ─────────────────────────────────────────────────────────────
+    // -- Filters -------------------------------------------------------------
     function applyFilters() {
         const uni     = document.getElementById('university-filter').value;
         const min     = document.getElementById('min-price').value.trim();

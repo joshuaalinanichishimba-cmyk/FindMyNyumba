@@ -284,7 +284,7 @@
         window.location.replace('login.html');
     }
 
-    // ── Toast ─────────────────────────────────────────────────────────────────
+    // -- Toast -----------------------------------------------------------------
     function showToast(msg, type = 'success') {
         const t = document.getElementById('fmn-toast');
         t.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white
@@ -294,7 +294,7 @@
         setTimeout(() => t.classList.add('hidden'), 3500);
     }
 
-    // ── Sidebar (mobile) ──────────────────────────────────────────────────────
+    // -- Sidebar (mobile) ------------------------------------------------------
     function openSidebar() {
         document.getElementById('sidebar').classList.remove('-translate-x-full');
         document.getElementById('sidebar-overlay').classList.remove('hidden');
@@ -306,7 +306,7 @@
         document.body.style.overflow = '';
     }
 
-    // ── Mobile inquiry chat ───────────────────────────────────────────────────
+    // -- Mobile inquiry chat ---------------------------------------------------
     function openMobileInquiryChat() {
         if (window.innerWidth < 768) {
             document.getElementById('inquiries-conv-pane').classList.add('mobile-chat-open');
@@ -322,7 +322,7 @@
         }
     }
 
-    // ── Tab switcher ──────────────────────────────────────────────────────────
+    // -- Tab switcher ----------------------------------------------------------
     function switchTab(tabId) {
         document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden-view'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
@@ -349,7 +349,7 @@
         clearSession();
     }
 
-    // ── Unread badge ──────────────────────────────────────────────────────────
+    // -- Unread badge ----------------------------------------------------------
     async function updateUnreadBadge() {
         try {
             const res = await fetch(`${API_BASE}/messages/unread-count`, { headers: authHeaders(false) });
@@ -360,7 +360,7 @@
         } catch (_) {}
     }
 
-    // ── Init ──────────────────────────────────────────────────────────────────
+    // -- Init ------------------------------------------------------------------
     async function initDashboard() {
         if (!getToken()) { window.location.replace('login.html'); return; }
         try {
@@ -383,7 +383,7 @@
         switchTab('overview');
     }
 
-    // ── Overview stats ────────────────────────────────────────────────────────
+    // -- Overview stats --------------------------------------------------------
     async function loadOverview() {
         const ids = ['stat-active','stat-pending','stat-views','stat-inquiries'];
         ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = '<i class="fas fa-spinner fa-spin text-gray-300"></i>'; });
@@ -392,10 +392,10 @@
             if (res.status === 401) { clearSession(); return; }
             if (!res.ok) throw new Error();
             const d = await res.json();
-            document.getElementById('stat-active').textContent    = d.active_listings  ?? '0';
-            document.getElementById('stat-pending').textContent   = d.pending_listings ?? '0';
-            document.getElementById('stat-views').textContent     = d.total_views      ?? '0';
-            document.getElementById('stat-inquiries').textContent = d.unread_inquiries ?? '0';
+            document.getElementById('stat-active').textContent    = d.active_listings  '0';
+            document.getElementById('stat-pending').textContent   = d.pending_listings '0';
+            document.getElementById('stat-views').textContent     = d.total_views      '0';
+            document.getElementById('stat-inquiries').textContent = d.unread_inquiries '0';
             const alertEl = document.getElementById('verification-alert');
             if (alertEl) {
                 if (d.verification_status === 'unverified' || d.verification_status === 'rejected') {
@@ -409,7 +409,7 @@
         } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; }); }
     }
 
-    // ── Listings table ────────────────────────────────────────────────────────
+    // -- Listings table --------------------------------------------------------
     async function loadListings() {
         const tbody = document.getElementById('my-listings-body');
         tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</td></tr>';
@@ -439,7 +439,7 @@
                     <td class="p-4 font-mono text-sm font-bold text-gray-700 whitespace-nowrap">ZMW ${Number(p.price).toLocaleString()}</td>
                     <td class="p-4 whitespace-nowrap">
                         <span class="px-2 py-1 ${badge} text-[10px] font-black rounded-md uppercase">${p.status || 'pending'}</span>
-                        ${p.is_boosted ? '<span class="ml-1 badge-boosted px-2 py-1 text-[10px] font-black rounded-md uppercase">⚡ Boosted</span>' : ''}
+                        ${p.is_boosted ? '<span class="ml-1 badge-boosted px-2 py-1 text-[10px] font-black rounded-md uppercase">? Boosted</span>' : ''}
                     </td>
                     <td class="p-4">
                         <button onclick="deleteProperty(${p.id}, '${String(p.title).replace(/'/g,"\\'")}', this)"
@@ -472,7 +472,7 @@
         }
     }
 
-    // ── Conversations ─────────────────────────────────────────────────────────
+    // -- Conversations ---------------------------------------------------------
     async function loadConversations() {
         const listDiv = document.getElementById('conv-list');
         listDiv.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</div>';
@@ -489,7 +489,7 @@
             }
             listDiv.innerHTML = convos.map(c => {
                 const isUnread  = c.unread_count > 0;
-                const propId    = c.property_id ?? 0;
+                const propId    = c.property_id 0;
                 const preview   = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'…' : (c.last_message || '');
                 const safeName  = String(c.other_user_name  || '').replace(/'/g,"\\'");
                 const safeTitle = String(c.property_title   || '').replace(/'/g,"\\'");
@@ -561,7 +561,7 @@
         }
     }
 
-    // ── Verification ──────────────────────────────────────────────────────────
+    // -- Verification ----------------------------------------------------------
     async function loadVerification() {
         const container = document.getElementById('verification-content');
         if (!container) return;
@@ -615,7 +615,7 @@
         }
     }
 
-    // ── Profile ───────────────────────────────────────────────────────────────
+    // -- Profile ---------------------------------------------------------------
     function loadProfile() {
         if (!_currentUser) return;
         const el = id => document.getElementById(id);
@@ -624,7 +624,7 @@
         if (el('prof-email')) el('prof-email').value = _currentUser.email     || '';
     }
 
-    // ── Form handlers ─────────────────────────────────────────────────────────
+    // -- Form handlers ---------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
@@ -723,6 +723,7 @@
     </script>
 </body>
 </html>
+
 
 
 

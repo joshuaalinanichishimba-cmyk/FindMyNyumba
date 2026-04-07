@@ -343,13 +343,13 @@
     'use strict';
     const API = 'https://findmynyumba.onrender.com/api/v1';
 
-    // ── Auth guard ────────────────────────────────────────────────────────────
+    // -- Auth guard ------------------------------------------------------------
     (function guardAccess() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) window.location.replace('login.html');
     })();
 
-    // ── Sidebar helpers (mobile) ──────────────────────────────────────────────
+    // -- Sidebar helpers (mobile) ----------------------------------------------
     function openSidebar() {
         document.getElementById('sidebar').classList.remove('-translate-x-full');
         document.getElementById('sidebar-overlay').classList.remove('hidden');
@@ -361,7 +361,7 @@
         document.body.style.overflow = '';
     }
 
-    // ── Mobile chat pane open/close ───────────────────────────────────────────
+    // -- Mobile chat pane open/close -------------------------------------------
     function openMobileChat() {
         if (window.innerWidth < 768) {
             document.getElementById('conv-pane').classList.add('mobile-chat-open');
@@ -380,7 +380,7 @@
     window.openMobileChat  = openMobileChat;
     window.closeMobileChat = closeMobileChat;
 
-    // ── Tab switcher ──────────────────────────────────────────────────────────
+    // -- Tab switcher ----------------------------------------------------------
     function switchTab(tab) {
         // Hide all sections
         document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden'));
@@ -413,7 +413,7 @@
     }
     window.switchTab = switchTab;
 
-    // ── Toast ─────────────────────────────────────────────────────────────────
+    // -- Toast -----------------------------------------------------------------
     function showToast(msg, type = 'success') {
         const el = document.getElementById('fmn-toast');
         el.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white
@@ -424,14 +424,14 @@
     }
     window.showToast = showToast;
 
-    // ── Logout ────────────────────────────────────────────────────────────────
+    // -- Logout ----------------------------------------------------------------
     function logout() {
         ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
         window.location.replace('login.html');
     }
     window.logout = logout;
 
-    // ── Boot ──────────────────────────────────────────────────────────────────
+    // -- Boot ------------------------------------------------------------------
     async function initDashboard() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
@@ -475,7 +475,7 @@
         loadOverviewStats();
     }
 
-    // ── Overview stats + recent listings ─────────────────────────────────────
+    // -- Overview stats + recent listings -------------------------------------
     async function loadOverviewStats() {
         const token      = localStorage.getItem('token') || sessionStorage.getItem('token');
         const statSaved  = document.getElementById('stat-saved');
@@ -504,8 +504,8 @@
 
             const data = await res.json();
 
-            if (statSaved) statSaved.textContent = data.stats?.saved_count           ?? '0';
-            if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count ?? '0';
+            if (statSaved) statSaved.textContent = data.stats?.saved_count           '0';
+            if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count '0';
 
             const props = data.recent_properties || [];
             if (!props.length) {
@@ -555,5 +555,6 @@
     </script>
 </body>
 </html>
+
 
 

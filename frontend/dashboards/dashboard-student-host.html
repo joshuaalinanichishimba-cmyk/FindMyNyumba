@@ -265,10 +265,10 @@
                 if (!res.ok) throw new Error(`Server responded ${res.status}`);
                 const data = await res.json();
 
-                activeEl.innerText    = data.active_listings   ?? '0';
-                pendingEl.innerText   = data.pending_listings  ?? '0';
-                viewsEl.innerText     = data.total_views       ?? '0';
-                inquiriesEl.innerText = data.unread_inquiries  ?? '0';
+                activeEl.innerText    = data.active_listings   '0';
+                pendingEl.innerText   = data.pending_listings  '0';
+                viewsEl.innerText     = data.total_views       '0';
+                inquiriesEl.innerText = data.unread_inquiries  '0';
 
                 const vStatus = data.verification_status || 'unverified';
                 if (vStatus === 'unverified') {
@@ -407,4 +407,5 @@
     </script>
 </body>
 </html>
+
 

@@ -308,10 +308,10 @@
                 const data = await res.json();
 
                 // Populate the four stat cards with real backend values
-                activeEl.innerText    = data.active_listings   ?? '0';
-                pendingEl.innerText   = data.pending_listings  ?? '0';
-                viewsEl.innerText     = data.total_views       ?? '0';
-                inquiriesEl.innerText = data.unread_inquiries  ?? '0';
+                activeEl.innerText    = data.active_listings   '0';
+                pendingEl.innerText   = data.pending_listings  '0';
+                viewsEl.innerText     = data.total_views       '0';
+                inquiriesEl.innerText = data.unread_inquiries  '0';
 
                 // â”€â”€ Verification alert banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 // All four statuses are handled. The old code only handled 'unverified'.
@@ -532,6 +532,7 @@
     </script>
 </body>
 </html>
+
 
 
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -103,7 +103,7 @@
     'use strict';
     const API_BASE = 'https://findmynyumba.onrender.com/api/v1';
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // -- Helpers ---------------------------------------------------------------
     function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
 
     function showToast(msg, type = 'success') {
@@ -124,7 +124,7 @@
     }
     function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
 
-    // ── Load property info from API ───────────────────────────────────────────
+    // -- Load property info from API -------------------------------------------
     // FIX: was hitting /landlord/properties/:id which requires landlord auth.
     //      Changed to the public /properties/:id endpoint so any visitor can load it.
     async function loadPropertyInfo() {
@@ -166,7 +166,7 @@
         }
     }
 
-    // ── Form submit: calls real messages API ──────────────────────────────────
+    // -- Form submit: calls real messages API ----------------------------------
     // FIX: previously used a fake setTimeout+alert and never called the backend.
     //      Now posts to POST /api/v1/messages/send with proper auth header.
     //      Falls back gracefully with an error message if the user is not logged in.

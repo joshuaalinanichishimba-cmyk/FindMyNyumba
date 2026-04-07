@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyNyumba — Admin Portal</title>
+    <title>FindMyNyumba � Admin Portal</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -142,7 +142,7 @@
             box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 24px 48px rgba(0,0,0,0.4);
         }
 
-        /* ── Alert ── */
+        /* -- Alert -- */
         .alert {
             display: none;
             align-items: flex-start;
@@ -166,7 +166,7 @@
         .alert.warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fcd34d; display: flex; }
         .alert svg { flex-shrink: 0; margin-top: 1px; }
 
-        /* ── Fields ── */
+        /* -- Fields -- */
         .field { margin-bottom: 1rem; }
 
         .field label {
@@ -230,7 +230,7 @@
         }
         .pwd-toggle:hover { color: var(--text); }
 
-        /* ── Submit button ── */
+        /* -- Submit button -- */
         .btn-submit {
             width: 100%;
             padding: 12px;
@@ -262,7 +262,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Attempt counter ── */
+        /* -- Attempt counter -- */
         .attempt-bar {
             display: none;
             margin-top: 0.75rem;
@@ -273,7 +273,7 @@
             letter-spacing: 0.04em;
         }
 
-        /* ── Divider / footer ── */
+        /* -- Divider / footer -- */
         .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
 
         .security-note {
@@ -359,7 +359,7 @@
             <div class="field">
                 <label for="admin-password">Master Password</label>
                 <div class="input-wrap">
-                    <input id="admin-password" type="password" placeholder="••••••••"
+                    <input id="admin-password" type="password" placeholder="��������"
                            autocomplete="current-password" required>
                     <svg class="input-icon" width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
@@ -395,11 +395,11 @@
     </div>
 
     <div class="links-row">
-        <a href="login.html" class="back-link">← Regular login</a>
+        <a href="login.html" class="back-link">? Regular login</a>
         <a href="admin-forgot-password.html" class="forgot-link">Forgot password?</a>
     </div>
 
-    <p class="footnote">FindMyNyumba © 2026 · Admin access is logged and monitored</p>
+    <p class="footnote">FindMyNyumba � 2026 � Admin access is logged and monitored</p>
 
 </div>
 
@@ -407,14 +407,14 @@
 'use strict';
 const API = 'https://findmynyumba.onrender.com/api/v1';
 
-// ── Redirect if already authenticated ────────────────────────────────────────
+// -- Redirect if already authenticated ----------------------------------------
 (function () {
     const token = sessionStorage.getItem('adminToken');
     const role  = sessionStorage.getItem('adminRole');
     if (token && role === 'admin') window.location.replace('admin.html');
 })();
 
-// ── Password visibility toggle ────────────────────────────────────────────────
+// -- Password visibility toggle ------------------------------------------------
 const pwdInput = document.getElementById('admin-password');
 const eyeIcon  = document.getElementById('eye-icon');
 
@@ -430,12 +430,12 @@ document.getElementById('pwd-toggle').addEventListener('click', () => {
     eyeIcon.innerHTML = show ? EYE_SHUT : EYE_OPEN;
 });
 
-// Tab: email → password
+// Tab: email ? password
 document.getElementById('admin-email').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); pwdInput.focus(); }
 });
 
-// ── Alert helpers ─────────────────────────────────────────────────────────────
+// -- Alert helpers -------------------------------------------------------------
 const ICONS = {
     error: `<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>`,
     success: `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>`,
@@ -456,7 +456,7 @@ function hideAlert() {
     el.className = 'alert';
 }
 
-// ── Form submit ───────────────────────────────────────────────────────────────
+// -- Form submit ---------------------------------------------------------------
 document.getElementById('admin-form').addEventListener('submit', async e => {
     e.preventDefault();
     hideAlert();
@@ -475,7 +475,7 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
     const attemptBar = document.getElementById('attempt-bar');
 
     btn.disabled          = true;
-    btnText.textContent   = 'Verifying…';
+    btnText.textContent   = 'Verifying�';
     spinner.style.display = 'block';
 
     try {
@@ -500,13 +500,13 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
             throw new Error(data.detail || 'Authentication failed. Access denied.');
         }
 
-        // Success — store in sessionStorage only (clears on tab close)
+        // Success � store in sessionStorage only (clears on tab close)
         sessionStorage.setItem('adminToken', data.access_token);
         sessionStorage.setItem('adminRole',  'admin');
         sessionStorage.setItem('adminName',  data.user?.name || 'Admin');
 
         attemptBar.style.display = 'none';
-        showAlert('Access granted. Redirecting…', 'success');
+        showAlert('Access granted. Redirecting�', 'success');
         setTimeout(() => window.location.replace('admin.html'), 900);
 
     } catch (err) {
@@ -516,7 +516,7 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
         const match = msg.match(/(\d+) attempt/);
         if (match) {
             attemptBar.style.display = 'block';
-            attemptBar.textContent   = `⚠ ${match[1]} attempt(s) remaining before lockout`;
+            attemptBar.textContent   = `? ${match[1]} attempt(s) remaining before lockout`;
         }
 
         showAlert(msg, 'error');
