@@ -259,7 +259,7 @@ def forgot_password(
     user.reset_token_used = False
     db.commit()
 
-            # ── Resend Email API Integration (HTTP - Render Safe) ──
+                # ── Resend Email API (Final Production Fix) ──
     import os
     import resend
     import logging
@@ -268,27 +268,18 @@ def forgot_password(
 
     if resend.api_key:
         reset_link = f"https://findmynyumba-web.vercel.app/reset-password.html?token={plain_token}"
-        
-        html_content = f"""
-        <p>Hi {user.full_name},</p>
-        <p>Click the link below to reset your password. It expires in 15 minutes and can only be used once.</p>
-        <p><a href="{reset_link}">{reset_link}</a></p>
-        <p>If you didn't request this, ignore this email.</p>
-        """
-        
         try:
-            # Using Resend's testing domain so it works instantly without DNS setup
-            r = resend.Emails.send({
-                "from": os.environ.get("RESEND_FROM_EMAIL", "FindMyNyumba <onboarding@resend.dev>"),
+            resend.Emails.send({
+                "from": "FindMyNyumba <onboarding@resend.dev>",
                 "to": user.email,
                 "subject": "FindMyNyumba — Reset Your Password",
-                "html": html_content
+                "html": f"<p>Hi {user.full_name},</p><p>Click <a href='{reset_link}'>here</a> to reset your password.</p>"
             })
-            logging.info(f"Email sent successfully via Resend: {r}")
+            logging.info(f"SUCCESS: Email sent to {user.email}")
         except Exception as e:
-            logging.error(f"Resend Email send error: {e}")
+            logging.error(f"Resend Error: {e}")
     else:
-        logging.warning("[WARNING] RESEND_API_KEY missing in env variables.")
+        logging.warning("CRITICAL: RESEND_API_KEY is missing from Render environment.")
     # ── End Resend Integration ──
 
     # Logging removed for production security
@@ -348,6 +339,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     db.commit()
     return {"message": "Password updated successfully. You can now log in."}
+
 
 
 
