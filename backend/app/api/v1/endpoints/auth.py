@@ -259,7 +259,7 @@ def forgot_password(
     user.reset_token_used = False
     db.commit()
 
-                # ── Resend Email API (Final Production Fix) ──
+                    # ── Universal Email Logic ──
     import os
     import resend
     import logging
@@ -267,20 +267,27 @@ def forgot_password(
     resend.api_key = os.environ.get("RESEND_API_KEY")
 
     if resend.api_key:
+        from_addr = os.environ.get("RESEND_FROM_EMAIL", "FindMyNyumba <onboarding@resend.dev>")
         reset_link = f"https://findmynyumba-web.vercel.app/reset-password.html?token={plain_token}"
+        
         try:
             resend.Emails.send({
-                "from": "FindMyNyumba <onboarding@resend.dev>",
+                "from": from_addr,
                 "to": user.email,
-                "subject": "FindMyNyumba — Reset Your Password",
-                "html": f"<p>Hi {user.full_name},</p><p>Click <a href='{reset_link}'>here</a> to reset your password.</p>"
+                "subject": "FindMyNyumba — Password Reset",
+                "html": f"""
+                    <h3>FindMyNyumba Password Reset</h3>
+                    <p>Hello {user.full_name},</p>
+                    <p>Click the link below to reset your password:</p>
+                    <a href='{reset_link}' style='background-color: #f04e23; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Reset Password</a>
+                """
             })
-            logging.info(f"SUCCESS: Email sent to {user.email}")
+            logging.info(f"Email sent to {user.email}")
         except Exception as e:
-            logging.error(f"Resend Error: {e}")
+            logging.error(f"Resend error: {e}")
     else:
-        logging.warning("CRITICAL: RESEND_API_KEY is missing from Render environment.")
-    # ── End Resend Integration ──
+        logging.error("RESEND_API_KEY is missing.")
+    # ── End Universal Logic ──
 
     # Logging removed for production security
 
@@ -339,6 +346,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     db.commit()
     return {"message": "Password updated successfully. You can now log in."}
+
 
 
 
