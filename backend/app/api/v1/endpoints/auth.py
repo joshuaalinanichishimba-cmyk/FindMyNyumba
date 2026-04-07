@@ -259,46 +259,37 @@ def forgot_password(
     user.reset_token_used = False
     db.commit()
 
-        # ── Gmail SMTP Integration ──
+            # ── Resend Email API Integration (HTTP - Render Safe) ──
     import os
-    import smtplib
-    import ssl
-    from email.mime.text import MIMEText
-    from email.mime.multipart import MIMEMultipart
+    import resend
+    import logging
 
-    sender_email = os.environ.get("GMAIL_EMAIL")
-    sender_password = os.environ.get("GMAIL_APP_PASSWORD")
+    resend.api_key = os.environ.get("RESEND_API_KEY")
 
-    if sender_email and sender_password:
+    if resend.api_key:
         reset_link = f"https://findmynyumba-web.vercel.app/reset-password.html?token={plain_token}"
         
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = "FindMyNyumba — Reset Your Password"
-        msg["From"] = f"FindMyNyumba <{sender_email}>"
-        msg["To"] = user.email
-        
-        html = f"""
+        html_content = f"""
         <p>Hi {user.full_name},</p>
         <p>Click the link below to reset your password. It expires in 15 minutes and can only be used once.</p>
         <p><a href="{reset_link}">{reset_link}</a></p>
         <p>If you didn't request this, ignore this email.</p>
         """
         
-        msg.attach(MIMEText(html, "html"))
-        
         try:
-            context = ssl.create_default_context()
-            with smtplib.SMTP('smtp.gmail.com', 587) as server:
-                server.starttls(context=context)
-                server.login(sender_email, sender_password)
-                server.sendmail(sender_email, user.email, msg.as_string())
+            # Using Resend's testing domain so it works instantly without DNS setup
+            r = resend.Emails.send({
+                "from": "FindMyNyumba <onboarding@resend.dev>",
+                "to": user.email,
+                "subject": "FindMyNyumba — Reset Your Password",
+                "html": html_content
+            })
+            logging.info(f"Email sent successfully via Resend: {r}")
         except Exception as e:
-            import logging
-            logging.error(f"Email send error: {e}")
+            logging.error(f"Resend Email send error: {e}")
     else:
-        import logging
-        logging.warning("[WARNING] GMAIL_EMAIL or GMAIL_APP_PASSWORD missing in env variables.")
-    # ── End Gmail SMTP ──
+        logging.warning("[WARNING] RESEND_API_KEY missing in env variables.")
+    # ── End Resend Integration ──
 
     # DEVELOPMENT ONLY — log token to server console, never to HTTP response
     import logging
@@ -362,5 +353,6 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     db.commit()
     return {"message": "Password updated successfully. You can now log in."}
+
 
 
