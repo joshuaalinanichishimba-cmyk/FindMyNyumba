@@ -47,3 +47,26 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return payload.get("sub")
     except Exception:
         return None
+
+# --- ADDED FOR PASSWORD RESET FLOW ---
+from jose import jwt, JWTError
+import os
+
+# Fallback key if not in .env
+RESET_SECRET_KEY = os.getenv("SECRET_KEY", "your-fallback-secret-key")
+RESET_ALGORITHM = "HS256"
+
+def create_password_reset_token(email: str) -> str:
+    from datetime import datetime, timedelta, timezone
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode = {"exp": expire, "sub": email, "type": "reset"}
+    return jwt.encode(to_encode, RESET_SECRET_KEY, algorithm=RESET_ALGORITHM)
+
+def verify_password_reset_token(token: str) -> str | None:
+    try:
+        decoded = jwt.decode(token, RESET_SECRET_KEY, algorithms=[RESET_ALGORITHM])
+        if decoded.get("type") != "reset":
+            return None
+        return decoded.get("sub")
+    except JWTError:
+        return None
