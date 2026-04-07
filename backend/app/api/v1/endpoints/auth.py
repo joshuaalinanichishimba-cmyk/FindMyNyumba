@@ -279,7 +279,7 @@ def forgot_password(
         try:
             # Using Resend's testing domain so it works instantly without DNS setup
             r = resend.Emails.send({
-                "from": "FindMyNyumba <onboarding@resend.dev>",
+                "from": os.environ.get("RESEND_FROM_EMAIL", "FindMyNyumba <onboarding@resend.dev>"),
                 "to": user.email,
                 "subject": "FindMyNyumba — Reset Your Password",
                 "html": html_content
@@ -348,6 +348,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     db.commit()
     return {"message": "Password updated successfully. You can now log in."}
+
 
 
 
