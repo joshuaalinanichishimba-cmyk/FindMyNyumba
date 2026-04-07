@@ -288,7 +288,8 @@ def forgot_password(
         
         try:
             context = ssl.create_default_context()
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            with smtplib.SMTP('smtp.gmail.com', 587) as server:
+                server.starttls(context=context)
                 server.login(sender_email, sender_password)
                 server.sendmail(sender_email, user.email, msg.as_string())
         except Exception as e:
@@ -361,4 +362,5 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     db.commit()
     return {"message": "Password updated successfully. You can now log in."}
+
 
