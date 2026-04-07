@@ -1,17 +1,19 @@
 ﻿"""
 app/models/user.py
 
-ADDED FIELDS for security hardening:
-  - last_login             : timestamp of last successful login
-  - failed_login_attempts  : counter for rate limiting
-  - lockout_until          : datetime until account is locked (NULL = not locked)
+ADDED FIELDS:
+  - reset_token_hash  : SHA-256 hash of the most recently issued reset token.
+                        Storing the hash (not the plain token) means a DB breach
+                        cannot be used to reset passwords.
+  - reset_token_used  : Boolean flag — True after the token has been consumed.
+                        Enforces one-time-use regardless of JWT expiry.
 
 After adding these columns run:
-    alembic revision --autogenerate -m "add login tracking fields"
+    alembic revision --autogenerate -m "add password reset token fields"
     alembic upgrade head
 
-Or, for a quick dev reset:
-    DROP TABLE users; then restart uvicorn (SQLAlchemy recreates the table).
+Or for a quick dev cycle:
+    DROP TABLE users; restart uvicorn (SQLAlchemy recreates the table).
 """
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
@@ -21,7 +23,7 @@ from sqlalchemy.orm import relationship
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__  = "users"
     __table_args__ = {"extend_existing": True}
 
     id              = Column(Integer, primary_key=True, index=True)
@@ -52,10 +54,16 @@ class User(Base):
     verification_status           = Column(String, default="unverified")
     verification_rejection_reason = Column(String, nullable=True)
 
-    # ── Login tracking (NEW) ──────────────────────────────────────────────────
+    # ── Login tracking ────────────────────────────────────────────────────────
     last_login            = Column(DateTime(timezone=True), nullable=True)
     failed_login_attempts = Column(Integer, default=0, nullable=False)
     lockout_until         = Column(DateTime(timezone=True), nullable=True)
+
+    # ── Password reset (one-time-use, hash-only storage) ──────────────────────
+    # Plain token is NEVER stored — only its SHA-256 hash.
+    # reset_token_used is set to True the moment the token is consumed.
+    reset_token_hash = Column(String,  nullable=True)
+    reset_token_used = Column(Boolean, default=False, nullable=False)
 
     # Relationships
     listings = relationship("Listing", back_populates="owner")
