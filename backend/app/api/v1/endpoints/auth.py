@@ -291,12 +291,7 @@ def forgot_password(
         logging.warning("[WARNING] RESEND_API_KEY missing in env variables.")
     # ── End Resend Integration ──
 
-    # DEVELOPMENT ONLY — log token to server console, never to HTTP response
-    import logging
-    logging.getLogger(__name__).warning(
-        "[DEV] Password reset token for %s: %s  ← REMOVE logging in production",
-        user.email, plain_token,
-    )
+    # Logging removed for production security
 
     return SAFE_RESPONSE
 
@@ -353,6 +348,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     db.commit()
     return {"message": "Password updated successfully. You can now log in."}
+
 
 
 
