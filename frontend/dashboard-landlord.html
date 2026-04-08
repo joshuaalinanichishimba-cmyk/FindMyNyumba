@@ -81,7 +81,7 @@
         <!-- My Listings -->
         <div id="view-listings" class="dashboard-view hidden-view">
             <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">My Properties</h2>
+                <h2 class="text-2xl font-bold text-gray-800">🏠 My Properties</h2>
                 <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition text-sm">+ Add New Listing</button>
             </div>
             <div class="tbl-scroll bg-white rounded-xl shadow overflow-hidden border">
@@ -98,7 +98,7 @@
 
         <!-- Add Listing -->
         <div id="view-upload" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">Publish New Accommodation</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">🚀 Publish New Accommodation</h2>
             <div class="bg-white p-4 lg:p-8 rounded-xl shadow border max-w-4xl">
                 <form id="uploadForm" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -140,7 +140,7 @@
 
         <!-- Verification -->
         <div id="view-verification" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-2 text-gray-800">? Verification Center</h2>
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">🛡️ Verification Center</h2>
             <p class="text-gray-500 mb-6">Build trust with students by verifying your identity and property ownership.</p>
             <div class="bg-white p-4 lg:p-8 rounded-xl shadow border max-w-2xl">
                 <div id="verification-content">
@@ -154,7 +154,7 @@
 
         <!-- Inquiries -->
         <div id="view-inquiries" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6">Student Inquiries</h2>
+            <h2 class="text-2xl font-bold mb-6">💬 Student Inquiries</h2>
             <div class="tbl-scroll bg-white rounded-xl shadow border overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-gray-100 border-b"><tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Student</th><th class="p-4">Interested In</th><th class="p-4">Message</th><th class="p-4">Action</th></tr></thead>
@@ -167,7 +167,7 @@
 
         <!-- Payments -->
         <div id="view-payments" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6">Revenue & Boosts</h2>
+            <h2 class="text-2xl font-bold mb-6">💳 Revenue & Boosts</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 lg:p-8 rounded-xl shadow border border-orange-100">
                     <div class="text-center mb-6">
@@ -200,7 +200,7 @@
 
         <!-- Profile -->
         <div id="view-profile" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6">Profile &amp; Settings</h2>
+            <h2 class="text-2xl font-bold mb-6">⚙️ Profile &amp; Settings</h2>
             <div class="max-w-2xl space-y-6">
                 <div class="bg-white p-4 lg:p-8 rounded-xl shadow border">
                     <h3 class="font-black text-gray-800 mb-5 border-b pb-2"><i class="fas fa-user-cog text-[#ea580c] mr-2"></i>Account Details</h3>
@@ -335,10 +335,10 @@
                 if (res.status === 401) { clearSession(); return; }
                 if (!res.ok) throw new Error(`Server error ${res.status}`);
                 const data = await res.json();
-                document.getElementById('stat-active').innerText    = data.active_listings   '0';
-                document.getElementById('stat-pending').innerText   = data.pending_listings  '0';
-                document.getElementById('stat-views').innerText     = data.total_views       '0';
-                document.getElementById('stat-inquiries').innerText = data.unread_inquiries  '0';
+                document.getElementById('stat-active').innerText    = data.active_listings   ?? '0';
+                document.getElementById('stat-pending').innerText   = data.pending_listings  ?? '0';
+                document.getElementById('stat-views').innerText     = data.total_views       ?? '0';
+                document.getElementById('stat-inquiries').innerText = data.unread_inquiries  ?? '0';
                 const vs = data.verification_status || 'unverified';
                 if (vs === 'unverified') {
                     alertEl.className = 'mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg shadow-sm';
@@ -617,4 +617,3 @@
     </script>
 </body>
 </html>
-

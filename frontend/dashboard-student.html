@@ -99,7 +99,7 @@
 
             <div class="flex-1 overflow-y-auto p-4 md:p-8">
 
-                <!-- -- OVERVIEW ------------------------------------ -->
+                <!-- ── OVERVIEW ──────────────────────────────────── -->
                 <div id="overview-section" class="dashboard-section">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
@@ -142,7 +142,7 @@
                     <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
-                <!-- -- SAVED ROOMS ---------------------------------- -->
+                <!-- ── SAVED ROOMS ────────────────────────────────── -->
                 <div id="saved-section" class="dashboard-section hidden">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8">
                         <h2 class="text-lg font-black mb-6 text-black">Saved Properties</h2>
@@ -155,7 +155,7 @@
                     </div>
                 </div>
 
-                <!-- -- MESSAGES ------------------------------------- -->
+                <!-- ── MESSAGES ───────────────────────────────────── -->
                 <div id="messages-section" class="dashboard-section hidden">
                     <div id="messages-panel" class="flex bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
 
@@ -204,7 +204,7 @@
                     </div>
                 </div>
 
-                <!-- -- PROFILE -------------------------------------- -->
+                <!-- ── PROFILE ────────────────────────────────────── -->
                 <div id="profile-section" class="dashboard-section hidden">
                     <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 max-w-2xl shadow-sm">
                         <h3 class="text-lg font-black text-black mb-6">Profile Details</h3>
@@ -239,7 +239,7 @@
                     </div>
                 </div>
 
-                <!-- -- SETTINGS ------------------------------------- -->
+                <!-- ── SETTINGS ───────────────────────────────────── -->
                 <div id="settings-section" class="dashboard-section hidden">
                     <div class="max-w-2xl space-y-5">
 
@@ -272,15 +272,15 @@
 
 <script>
 'use strict';
-const API = 'https://findmynyumba.onrender.com/api/v1';
+const API = 'http://127.0.0.1:8000/api/v1';
 
-// -- XSS helper ----------------------------------------------------------------
+// ── XSS helper ────────────────────────────────────────────────────────────────
 function esc(str) {
     if (str === null || str === undefined) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// -- Auth guard ----------------------------------------------------------------
+// ── Auth guard ────────────────────────────────────────────────────────────────
 (function() {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) window.location.replace('login.html');
@@ -288,7 +288,7 @@ function esc(str) {
 
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
-// -- Sidebar -------------------------------------------------------------------
+// ── Sidebar ───────────────────────────────────────────────────────────────────
 function openSidebar() {
     document.getElementById('sidebar').classList.remove('-translate-x-full');
     document.getElementById('sidebar-overlay').classList.remove('hidden');
@@ -298,7 +298,7 @@ function closeSidebar() {
     document.getElementById('sidebar-overlay').classList.add('hidden');
 }
 
-// -- Mobile chat ---------------------------------------------------------------
+// ── Mobile chat ───────────────────────────────────────────────────────────────
 function openMobileChat() {
     if (window.innerWidth < 768) {
         document.getElementById('conv-pane').classList.add('mobile-chat-open');
@@ -312,7 +312,7 @@ function closeMobileChat() {
     if (window.innerWidth < 768) document.getElementById('chat-pane').style.display = 'none';
 }
 
-// -- Tab switcher --------------------------------------------------------------
+// ── Tab switcher ──────────────────────────────────────────────────────────────
 function switchTab(tab) {
     document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-link').forEach(b => {
@@ -335,7 +335,7 @@ function switchTab(tab) {
     if (tab === 'profile')  loadProfileData();
 }
 
-// -- Toast ---------------------------------------------------------------------
+// ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(msg, type = 'success') {
     const el = document.getElementById('fmn-toast');
     el.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-gray-800'}`;
@@ -344,13 +344,13 @@ function showToast(msg, type = 'success') {
     setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
-// -- Logout --------------------------------------------------------------------
+// ── Logout ────────────────────────────────────────────────────────────────────
 function logout() {
     ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     window.location.replace('login.html');
 }
 
-// -- Boot ----------------------------------------------------------------------
+// ── Boot ──────────────────────────────────────────────────────────────────────
 async function initDashboard() {
     const token = getToken();
     try {
@@ -383,7 +383,7 @@ async function initDashboard() {
     loadOverviewStats();
 }
 
-// -- Overview stats — uses the real /students/dashboard/overview endpoint ------
+// ── Overview stats — uses the real /students/dashboard/overview endpoint ──────
 async function loadOverviewStats() {
     const token      = getToken();
     const statSaved  = document.getElementById('stat-saved');
@@ -400,8 +400,8 @@ async function loadOverviewStats() {
 
         const data = await res.json();
 
-        if (statSaved) statSaved.textContent = data.stats?.saved_count           '0';
-        if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count '0';
+        if (statSaved) statSaved.textContent = data.stats?.saved_count           ?? '0';
+        if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count ?? '0';
 
         const props = data.recent_properties || [];
         if (!props.length) {
@@ -445,7 +445,7 @@ async function loadOverviewStats() {
     }
 }
 
-// -- Search --------------------------------------------------------------------
+// ── Search ────────────────────────────────────────────────────────────────────
 async function searchProperties() {
     const q    = (document.getElementById('search-input')?.value || '').trim();
     const grid = document.getElementById('search-results-grid');
@@ -488,7 +488,7 @@ document.getElementById('search-input')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') searchProperties();
 });
 
-// -- Conversations -------------------------------------------------------------
+// ── Conversations ─────────────────────────────────────────────────────────────
 let _activePropId = null;
 let _activeOtherId = null;
 
@@ -602,7 +602,7 @@ async function sendStudentMessage(e) {
 }
 window.sendStudentMessage = sendStudentMessage;
 
-// -- Profile -------------------------------------------------------------------
+// ── Profile ───────────────────────────────────────────────────────────────────
 function loadProfileData() {
     const user = window._currentUser;
     if (!user) return;
@@ -649,7 +649,7 @@ async function saveProfile(e) {
     }
 }
 
-// -- Password ------------------------------------------------------------------
+// ── Password ──────────────────────────────────────────────────────────────────
 async function updatePassword(e) {
     e.preventDefault();
     const token   = getToken();
@@ -687,27 +687,5 @@ async function updatePassword(e) {
 
 document.addEventListener('DOMContentLoaded', initDashboard);
 </script>
-
-<script>
-    // Standard Sidebar Logic for FindMyNyumba
-    function openSidebar() {
-        const sidebar = document.querySelector('aside'); // Finds your sidebar
-        if (sidebar) {
-            sidebar.classList.remove('-translate-x-full');
-            sidebar.classList.add('translate-x-0');
-        }
-    }
-
-    function closeSidebar() {
-        const sidebar = document.querySelector('aside');
-        if (sidebar) {
-            sidebar.classList.remove('translate-x-0');
-            sidebar.classList.add('-translate-x-full');
-        }
-    }
-</script>
 </body>
 </html>
-
-
-
