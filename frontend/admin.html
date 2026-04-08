@@ -111,7 +111,7 @@
 
         <div class="p-4 md:p-8 flex-1">
 
-            <!-- -- DASHBOARD TAB --------------------------- -->
+            <!-- ── DASHBOARD TAB ─────────────────────────── -->
             <div id="tab-dashboard" class="tab-section active">
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
@@ -142,7 +142,7 @@
                 </div>
             </div>
 
-            <!-- -- USERS TAB ------------------------------- -->
+            <!-- ── USERS TAB ─────────────────────────────── -->
             <div id="tab-users" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -168,7 +168,7 @@
                 </div>
             </div>
 
-            <!-- -- LISTINGS TAB ---------------------------- -->
+            <!-- ── LISTINGS TAB ──────────────────────────── -->
             <div id="tab-listings" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100">
@@ -192,7 +192,7 @@
                 </div>
             </div>
 
-            <!-- -- VERIFICATIONS TAB ----------------------- -->
+            <!-- ── VERIFICATIONS TAB ─────────────────────── -->
             <div id="tab-verifications" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100">
@@ -218,7 +218,7 @@
                 </div>
             </div>
 
-            <!-- -- REPORTS TAB ----------------------------- -->
+            <!-- ── REPORTS TAB ───────────────────────────── -->
             <div id="tab-reports" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100">
@@ -230,7 +230,7 @@
                 </div>
             </div>
 
-            <!-- -- ANALYTICS TAB --------------------------- -->
+            <!-- ── ANALYTICS TAB ─────────────────────────── -->
             <div id="tab-analytics" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
                     <h3 class="font-black text-slate-900 mb-1">Growth Analytics</h3>
@@ -243,7 +243,7 @@
                 </div>
             </div>
 
-            <!-- -- ANNOUNCEMENTS TAB ------------------------ -->
+            <!-- ── ANNOUNCEMENTS TAB ──────────────────────── -->
             <div id="tab-announcements" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-2xl">
                     <h3 class="font-black text-slate-900 mb-5">Broadcast Announcement</h3>
@@ -278,7 +278,7 @@
                 </div>
             </div>
 
-            <!-- -- SETTINGS TAB ---------------------------- -->
+            <!-- ── SETTINGS TAB ──────────────────────────── -->
             <div id="tab-settings" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-2xl">
                     <h3 class="font-black text-slate-900 mb-5">Platform Settings</h3>
@@ -374,10 +374,10 @@
 
 <script>
 'use strict';
-const API = 'https://findmynyumba.onrender.com/api/v1';
+const API = 'http://127.0.0.1:8000/api/v1';
 let modalCallback = null;
 
-// -- XSS helper ----------------------------------------------------------------
+// ── XSS helper ────────────────────────────────────────────────────────────────
 function esc(str) {
     if (str === null || str === undefined) return '—';
     return String(str)
@@ -388,7 +388,7 @@ function esc(str) {
         .replace(/'/g, '&#39;');
 }
 
-// -- Auth guard ----------------------------------------------------------------
+// ── Auth guard ────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     const token = sessionStorage.getItem('adminToken');
     const role  = sessionStorage.getItem('adminRole');
@@ -420,7 +420,7 @@ function logout() {
     window.location.replace('admin-login.html');
 }
 
-// -- Change Password -----------------------------------------------------------
+// ── Change Password ───────────────────────────────────────────────────────────
 function showChangePassword() {
     document.getElementById('cpwd-old').value     = '';
     document.getElementById('cpwd-new').value     = '';
@@ -498,7 +498,7 @@ async function submitChangePassword() {
 
 
 
-// -- Navigation (dashboard functions continue below) --------------------------
+// ── Navigation (dashboard functions continue below) ──────────────────────────
 function showTab(name) {
     document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
@@ -534,16 +534,16 @@ function closeSidebar() {
     document.getElementById('overlay').classList.add('hidden');
 }
 
-// -- Dashboard -----------------------------------------------------------------
+// ── Dashboard ─────────────────────────────────────────────────────────────────
 async function loadDashboard() {
     try {
         const res  = await fetch(`${API}/admin/stats`);
         if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('stat-users').textContent    = data.total_users    '—';
-        document.getElementById('stat-listings').textContent = data.total_listings '—';
-        document.getElementById('stat-messages').textContent = data.total_messages '—';
-        document.getElementById('stat-reports').textContent  = data.pending_reports '—';
+        document.getElementById('stat-users').textContent    = data.total_users    ?? '—';
+        document.getElementById('stat-listings').textContent = data.total_listings ?? '—';
+        document.getElementById('stat-messages').textContent = data.total_messages ?? '—';
+        document.getElementById('stat-reports').textContent  = data.pending_reports ?? '—';
     } catch { /* stats fail silently */ }
 
     try {
@@ -572,7 +572,7 @@ function renderGrowthChart(data, containerId) {
     }).join('');
 }
 
-// -- Users ---------------------------------------------------------------------
+// ── Users ─────────────────────────────────────────────────────────────────────
 async function loadUsers() {
     const tbody = document.getElementById('users-table');
     tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</td></tr>';
@@ -626,7 +626,7 @@ function toggleSuspend(userId, email, isActive) {
     );
 }
 
-// -- Listings ------------------------------------------------------------------
+// ── Listings ──────────────────────────────────────────────────────────────────
 async function loadListings() {
     const tbody = document.getElementById('listings-table');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</td></tr>';
@@ -680,7 +680,7 @@ function deleteListing(id, title) {
     });
 }
 
-// -- Verifications -------------------------------------------------------------
+// ── Verifications ─────────────────────────────────────────────────────────────
 async function loadVerifications() {
     const tbody = document.getElementById('verify-table-body');
     if (!tbody) return;
@@ -692,7 +692,7 @@ async function loadVerifications() {
         const data = await res.json();
 
         if (!data || !data.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 italic">No pending verifications. ?</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 italic">No pending verifications. ✅</td></tr>';
             return;
         }
 
@@ -738,7 +738,7 @@ async function rejectVerification(userId) {
     });
 }
 
-// -- Analytics -----------------------------------------------------------------
+// ── Analytics ─────────────────────────────────────────────────────────────────
 async function loadAnalytics() {
     try {
         const res  = await fetch(`${API}/admin/analytics/growth`);
@@ -748,7 +748,7 @@ async function loadAnalytics() {
     } catch { /* fail silently */ }
 }
 
-// -- Reports -------------------------------------------------------------------
+// ── Reports ───────────────────────────────────────────────────────────────────
 async function loadReports() {
     const el = document.getElementById('reports-list');
     el.innerHTML = '<div class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</div>';
@@ -787,7 +787,7 @@ async function dismissReport(reportId) {
     if (res.ok) loadReports();
 }
 
-// -- Announcements -------------------------------------------------------------
+// ── Announcements ─────────────────────────────────────────────────────────────
 async function sendAnnouncement() {
     const title  = document.getElementById('announce-title').value.trim();
     const body   = document.getElementById('announce-body').value.trim();
@@ -820,7 +820,7 @@ async function sendAnnouncement() {
     }
 }
 
-// -- Settings ------------------------------------------------------------------
+// ── Settings ──────────────────────────────────────────────────────────────────
 async function saveSettings() {
     try {
         const res = await fetch(`${API}/admin/settings/update`, {
@@ -840,7 +840,7 @@ async function saveSettings() {
     } catch { /* fail silently */ }
 }
 
-// -- Modal ---------------------------------------------------------------------
+// ── Modal ─────────────────────────────────────────────────────────────────────
 function showModal(title, body, cb) {
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal-body').textContent  = body;
@@ -859,5 +859,3 @@ function closeModal() {
 </script>
 </body>
 </html>
-
-
