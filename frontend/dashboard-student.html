@@ -687,7 +687,27 @@ async function updatePassword(e) {
 
 document.addEventListener('DOMContentLoaded', initDashboard);
 </script>
+
+<script>
+    // Standard Sidebar Logic for FindMyNyumba
+    function openSidebar() {
+        const sidebar = document.querySelector('aside'); // Finds your sidebar
+        if (sidebar) {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+        }
+    }
+
+    function closeSidebar() {
+        const sidebar = document.querySelector('aside');
+        if (sidebar) {
+            sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add('-translate-x-full');
+        }
+    }
+</script>
 </body>
 </html>
+
 
 
