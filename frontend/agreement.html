@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Agreement - FindMyNyumba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            #agreement-doc { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 32px !important; max-width: 100% !important; }
+            .page-break { page-break-before: always; }
+        }
+        body { font-family: Georgia, 'Times New Roman', serif; }
+        .sans { font-family: ui-sans-serif, system-ui, sans-serif; }
+        .form-input {
+            @apply w-full p-3 border border-gray-200 rounded-xl outline-none text-sm font-sans transition-shadow;
+        }
+        .form-input:focus { box-shadow: 0 0 0 3px rgba(234,88,12,0.15); border-color: #ea580c; }
+        .agreement-line { border-bottom: 1px solid #333; display: inline-block; min-width: 120px; }
+        .clause { margin-bottom: 1em; line-height: 1.8; }
+        .clause-num { font-weight: bold; margin-right: 6px; }
+
+        /* ── Mobile safety ───────────────────────────── */
+        * { box-sizing: border-box; }
+        img { max-width: 100%; height: auto; }
+        input, textarea, select { max-width: 100%; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @media (max-width: 640px) {
+            .sm\:hidden-mobile { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- NAV -->
+    <nav class="sans bg-white shadow-sm sticky top-0 z-50 no-print">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <a href="browse.html" class="flex items-center gap-2">
+                <img src="logo.png" alt="FindMyNyumba" style="height:36px;width:auto;object-fit:contain;"
+                     onerror="this.style.display='none';document.getElementById('logo-txt').style.display='block'">
+                <span id="logo-txt" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
+            </a>
+            <div class="flex items-center gap-3">
+                <button onclick="window.print()"
+                        class="sans flex items-center gap-2 bg-[#ea580c] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-orange-700 transition shadow">
+                    <i class="fas fa-print"></i> Print / Save PDF
+                </button>
+                <a href="javascript:history.back()"
+                   class="sans text-gray-500 hover:text-gray-700 font-semibold text-sm flex items-center gap-1">
+                    <i class="fas fa-arrow-left text-xs"></i> Back
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 py-6 gap-6 flex flex-col lg:flex-row">
+
+        <!-- FORM PANEL -->
+        <aside class="sans no-print lg:w-80 flex-shrink-0">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-24">
+                <h2 class="text-base font-black text-gray-900 mb-5 flex items-center gap-2">
+                    <i class="fas fa-pen-fancy text-[#ea580c]"></i> Fill Agreement Details
+                </h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Agreement Type</label>
+                        <select id="f-type" onchange="updateDoc()"
+                                class="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold outline-none focus:border-[#ea580c]">
+                            <option value="landlord">Student ↔ Landlord</option>
+                            <option value="student_host">Student ↔ Student Host</option>
+                        </select>
+                    </div>
+
+                    <hr class="border-gray-100">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tenant Details</p>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Full Name</label>
+                        <input type="text" id="f-tenant-name" oninput="updateDoc()" placeholder="e.g. John Banda"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">NRC / Student ID</label>
+                        <input type="text" id="f-tenant-id" oninput="updateDoc()" placeholder="e.g. 123456/78/1"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Phone / Email</label>
+                        <input type="text" id="f-tenant-contact" oninput="updateDoc()" placeholder="e.g. +260 97 1234567"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+
+                    <hr class="border-gray-100">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest" id="landlord-label">Landlord Details</p>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Full Name</label>
+                        <input type="text" id="f-landlord-name" oninput="updateDoc()" placeholder="e.g. Mary Phiri"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">NRC / ID Number</label>
+                        <input type="text" id="f-landlord-id" oninput="updateDoc()" placeholder="e.g. 654321/78/2"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Phone / Email</label>
+                        <input type="text" id="f-landlord-contact" oninput="updateDoc()" placeholder="e.g. +260 96 7654321"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+
+                    <hr class="border-gray-100">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Property Details</p>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Property Address</label>
+                        <input type="text" id="f-address" oninput="updateDoc()" placeholder="e.g. Plot 45, Northmead, Lusaka"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Rent (ZMW/mo)</label>
+                            <input type="number" id="f-rent" oninput="updateDoc()" placeholder="e.g. 2500"
+                                   class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Deposit (ZMW)</label>
+                            <input type="number" id="f-deposit" oninput="updateDoc()" placeholder="e.g. 5000"
+                                   class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Start Date</label>
+                            <input type="date" id="f-start" oninput="updateDoc()"
+                                   class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">End Date</label>
+                            <input type="date" id="f-end" oninput="updateDoc()"
+                                   class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Rent Due Day</label>
+                        <input type="number" id="f-due-day" oninput="updateDoc()" min="1" max="28" placeholder="e.g. 1"
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm focus:border-[#ea580c] transition-shadow">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Special Conditions (optional)</label>
+                        <textarea id="f-special" oninput="updateDoc()" rows="2" placeholder="e.g. No pets. Generator available."
+                                  class="w-full p-3 border border-gray-200 rounded-xl outline-none text-sm resize-none focus:border-[#ea580c] transition-shadow"></textarea>
+                    </div>
+
+                    <button onclick="window.print()"
+                            class="w-full bg-[#ea580c] text-white py-3 rounded-xl font-black text-sm hover:bg-orange-700 transition shadow mt-2">
+                        <i class="fas fa-file-pdf mr-2"></i>Download / Print PDF
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- AGREEMENT DOCUMENT -->
+        <main class="flex-1">
+            <div id="agreement-doc"
+                 class="bg-white shadow-lg rounded-2xl p-8 sm:p-12 max-w-3xl mx-auto border border-gray-100"
+                 style="font-family: Georgia, 'Times New Roman', serif; font-size: 13px; color: #1a1a1a; line-height: 1.75;">
+
+                <!-- Header -->
+                <div style="text-align:center; margin-bottom: 32px;">
+                    <div style="font-family: ui-sans-serif, sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: #ea580c; margin-bottom: 4px;">FindMyNyumba</div>
+                    <h1 style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;" id="doc-title">RESIDENTIAL TENANCY AGREEMENT</h1>
+                    <div style="width: 60px; height: 3px; background: #ea580c; margin: 8px auto;"></div>
+                    <p style="font-size: 11px; color: #666;" id="doc-subtitle">Student–Landlord Rental Agreement</p>
+                </div>
+
+                <!-- Preamble -->
+                <p class="clause">
+                    This Residential Tenancy Agreement ("<strong>Agreement</strong>") is entered into on
+                    <span id="d-date" class="agreement-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>,
+                    by and between the parties identified below.
+                </p>
+
+                <!-- Parties -->
+                <div style="background:#f9f9f9; border:1px solid #e5e5e5; border-radius:8px; padding:16px 20px; margin-bottom:20px; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+                    <table style="width:100%; min-width:320px; border-collapse:collapse;">
+                        <tr>
+                            <td style="width:50%; padding:6px 12px 6px 0; vertical-align:top; border-right:1px solid #e5e5e5;">
+                                <div style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#ea580c; margin-bottom:6px; font-family:sans-serif;">TENANT</div>
+                                <div><strong>Name:</strong> <span id="d-tenant-name">___________________________</span></div>
+                                <div style="margin-top:4px;"><strong>ID / NRC:</strong> <span id="d-tenant-id">___________________________</span></div>
+                                <div style="margin-top:4px;"><strong>Contact:</strong> <span id="d-tenant-contact">___________________________</span></div>
+                            </td>
+                            <td style="width:50%; padding:6px 0 6px 12px; vertical-align:top;">
+                                <div style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:#ea580c; margin-bottom:6px; font-family:sans-serif;" id="d-party2-label">LANDLORD</div>
+                                <div><strong>Name:</strong> <span id="d-landlord-name">___________________________</span></div>
+                                <div style="margin-top:4px;"><strong>ID / NRC:</strong> <span id="d-landlord-id">___________________________</span></div>
+                                <div style="margin-top:4px;"><strong>Contact:</strong> <span id="d-landlord-contact">___________________________</span></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Property -->
+                <p class="clause"><strong>PROPERTY ADDRESS:</strong><br>
+                    <span id="d-address">_______________________________________________</span>
+                </p>
+
+                <!-- Term & Rent -->
+                <div style="background:#f9f9f9; border:1px solid #e5e5e5; border-radius:8px; padding:16px 20px; margin-bottom:20px; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+                    <table style="width:100%; min-width:320px; border-collapse:collapse; font-size:13px;">
+                        <tr>
+                            <td style="padding:4px 8px 4px 0;"><strong>Tenancy Start:</strong></td>
+                            <td style="padding:4px 0;"><span id="d-start">_______________</span></td>
+                            <td style="padding:4px 8px; border-left:1px solid #e5e5e5;"><strong>Tenancy End:</strong></td>
+                            <td style="padding:4px 0;"><span id="d-end">_______________</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 8px 4px 0;"><strong>Monthly Rent:</strong></td>
+                            <td style="padding:4px 0; color:#ea580c; font-weight:900;">ZMW <span id="d-rent">__________</span></td>
+                            <td style="padding:4px 8px; border-left:1px solid #e5e5e5;"><strong>Security Deposit:</strong></td>
+                            <td style="padding:4px 0; font-weight:bold;">ZMW <span id="d-deposit">__________</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 8px 4px 0;"><strong>Rent Due:</strong></td>
+                            <td colspan="3" style="padding:4px 0;">Day <span id="d-due-day">___</span> of each calendar month</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2 style="font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid #ea580c; padding-bottom:6px; margin-bottom:16px;">Terms and Conditions</h2>
+
+                <p class="clause"><span class="clause-num">1.</span><strong>RENT PAYMENT.</strong> The Tenant agrees to pay the monthly rent of ZMW <span id="d-rent2">_______</span> on or before the <span id="d-due-day2">___</span><sup>th</sup> day of each month. Late payments may attract a penalty of 10% of the monthly rent after a 5-day grace period. Payment shall be made by mobile money, bank transfer, or cash as agreed between the parties.</p>
+
+                <p class="clause"><span class="clause-num">2.</span><strong>SECURITY DEPOSIT.</strong> A refundable security deposit of ZMW <span id="d-deposit2">_______</span> shall be paid prior to occupation. The deposit shall be returned within 14 days of vacating, less any deductions for unpaid rent, damages beyond fair wear and tear, or outstanding utility bills.</p>
+
+                <p class="clause"><span class="clause-num">3.</span><strong>UTILITIES.</strong> Unless otherwise agreed in writing, the Tenant shall be responsible for electricity, water, and any other utility charges consumed during the tenancy period.</p>
+
+                <p class="clause"><span class="clause-num">4.</span><strong>MAINTENANCE AND REPAIRS.</strong> The Tenant shall maintain the premises in good, clean condition. The Tenant shall promptly report any damage or required repairs to the <span id="d-party2-type">Landlord</span>. The Tenant shall not make structural alterations without written consent.</p>
+
+                <p class="clause"><span class="clause-num">5.</span><strong>OCCUPANCY.</strong> The premises shall be occupied solely by the Tenant named in this Agreement and approved occupants only. Sub-letting or assignment of the tenancy is strictly prohibited without written consent from the <span id="d-party2-type2">Landlord</span>.</p>
+
+                <p class="clause"><span class="clause-num">6.</span><strong>PROHIBITED ACTIVITIES.</strong> The Tenant shall not use the premises for any unlawful activity, cause excessive noise, or disturb the peace of other tenants or neighbours. No illegal substances shall be kept on the premises.</p>
+
+                <p class="clause"><span class="clause-num">7.</span><strong>TERMINATION.</strong> Either party may terminate this Agreement by providing a minimum of <strong>30 days' written notice</strong>. Breach of any material term of this Agreement may result in immediate termination. Upon termination, the Tenant shall vacate and return the premises in the condition received, subject to fair wear and tear.</p>
+
+                <p class="clause"><span class="clause-num">8.</span><strong>ACCESS.</strong> The <span id="d-party2-type3">Landlord</span> reserves the right to access the premises for inspection, repairs, or emergency purposes with reasonable notice (minimum 24 hours), except in emergencies.</p>
+
+                <p class="clause"><span class="clause-num">9.</span><strong>GOVERNING LAW.</strong> This Agreement shall be governed by the laws of the Republic of Zambia. Any dispute arising hereunder shall first be resolved through good-faith negotiation, and thereafter through the relevant Zambian courts or Local Tenancy Tribunal.</p>
+
+                <div id="d-special-section" style="display:none;">
+                    <p class="clause"><span class="clause-num">10.</span><strong>SPECIAL CONDITIONS.</strong></p>
+                    <p id="d-special" style="margin-left:24px; font-style:italic; border-left:3px solid #ea580c; padding-left:12px;"></p>
+                </div>
+
+                <!-- Signatures -->
+                <div style="margin-top:40px; border-top:1px solid #e5e5e5; padding-top:32px;">
+                    <p style="margin-bottom:24px; font-size:12px; color:#555;">
+                        <strong>IN WITNESS WHEREOF</strong>, the parties hereto have executed this Agreement as of the date first written above. By signing below, both parties confirm they have read, understood, and agree to all terms contained herein.
+                    </p>
+                    <table style="width:100%; min-width:280px; border-collapse:collapse;">
+                        <tr>
+                            <td style="width:48%; padding-right:16px; vertical-align:bottom;">
+                                <div style="border-bottom:1px solid #333; height:48px; margin-bottom:6px;"></div>
+                                <div style="font-size:11px;"><strong>TENANT Signature</strong></div>
+                                <div style="font-size:11px; color:#555; margin-top:2px;"><span id="sig-tenant-name">_______________________</span></div>
+                                <div style="font-size:11px; color:#555; margin-top:6px;">Date: ___________________</div>
+                            </td>
+                            <td style="width:4%;"></td>
+                            <td style="width:48%; padding-left:16px; vertical-align:bottom; border-left:1px solid #f0f0f0;">
+                                <div style="border-bottom:1px solid #333; height:48px; margin-bottom:6px;"></div>
+                                <div style="font-size:11px;"><strong id="sig-party2-label">LANDLORD Signature</strong></div>
+                                <div style="font-size:11px; color:#555; margin-top:2px;"><span id="sig-landlord-name">_______________________</span></div>
+                                <div style="font-size:11px; color:#555; margin-top:6px;">Date: ___________________</div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="margin-top:32px; padding:12px 16px; background:#f9f9f9; border-radius:8px; font-size:10px; color:#888; border:1px solid #eee; font-family:sans-serif;">
+                        <i class="fas fa-info-circle" style="color:#ea580c; margin-right:4px;"></i>
+                        This agreement was generated via <strong>FindMyNyumba</strong> (findmynyumba.com). It is a standard template provided for convenience. Both parties are encouraged to seek independent legal advice before signing. FindMyNyumba is not a party to this agreement and accepts no liability for disputes arising hereunder.
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+    'use strict';
+
+    function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+    function s(id, val) { const el = document.getElementById(id); if (el) el.textContent = val || ''; }
+    function fmtDate(d) {
+        if (!d) return '';
+        try {
+            return new Date(d + 'T00:00:00').toLocaleDateString('en-ZM', { day:'numeric', month:'long', year:'numeric' });
+        } catch { return d; }
+    }
+    function fmtMoney(n) {
+        const num = parseFloat(n);
+        return isNaN(num) ? '' : num.toLocaleString('en-ZM');
+    }
+
+    function updateDoc() {
+        const type        = v('f-type');
+        const isHost      = type === 'student_host';
+        const party2Label = isHost ? 'STUDENT HOST' : 'LANDLORD';
+        const party2Type  = isHost ? 'Student Host' : 'Landlord';
+        const titleText   = isHost ? 'STUDENT HOST BEDSPACE AGREEMENT' : 'RESIDENTIAL TENANCY AGREEMENT';
+        const subtitleTxt = isHost ? 'Student–Student Host Accommodation Agreement' : 'Student–Landlord Rental Agreement';
+
+        // Doc header
+        s('doc-title', titleText);
+        s('doc-subtitle', subtitleTxt);
+        s('landlord-label', party2Label + ' DETAILS');
+        s('d-party2-label', party2Label);
+        ['d-party2-type','d-party2-type2','d-party2-type3'].forEach(id => s(id, party2Type));
+        s('sig-party2-label', party2Type.toUpperCase() + ' Signature');
+
+        // Date
+        const today = new Date().toLocaleDateString('en-ZM', { day:'numeric', month:'long', year:'numeric' });
+        s('d-date', today);
+
+        // Tenant
+        s('d-tenant-name',    v('f-tenant-name')    || '___________________________');
+        s('d-tenant-id',      v('f-tenant-id')      || '___________________________');
+        s('d-tenant-contact', v('f-tenant-contact') || '___________________________');
+        s('sig-tenant-name',  v('f-tenant-name')    || '_______________________');
+
+        // Landlord / Host
+        s('d-landlord-name',    v('f-landlord-name')    || '___________________________');
+        s('d-landlord-id',      v('f-landlord-id')      || '___________________________');
+        s('d-landlord-contact', v('f-landlord-contact') || '___________________________');
+        s('sig-landlord-name',  v('f-landlord-name')    || '_______________________');
+
+        // Property
+        s('d-address', v('f-address') || '_______________________________________________');
+
+        // Financial
+        const rent    = fmtMoney(v('f-rent'));
+        const deposit = fmtMoney(v('f-deposit'));
+        s('d-rent',    rent    || '__________');
+        s('d-rent2',   rent    || '_______');
+        s('d-deposit', deposit || '__________');
+        s('d-deposit2', deposit || '_______');
+
+        // Dates
+        s('d-start', fmtDate(v('f-start')) || '_______________');
+        s('d-end',   fmtDate(v('f-end'))   || '_______________');
+
+        // Due day
+        const day = v('f-due-day');
+        s('d-due-day',  day || '___');
+        s('d-due-day2', day || '___');
+
+        // Special
+        const special = v('f-special');
+        const specialSec = document.getElementById('d-special-section');
+        if (special) {
+            s('d-special', special);
+            if (specialSec) specialSec.style.display = '';
+        } else {
+            if (specialSec) specialSec.style.display = 'none';
+        }
+    }
+
+    // Pre-fill from URL params (when coming from a listing page)
+    function prefillFromUrl() {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get('address'))    document.getElementById('f-address').value    = p.get('address');
+        if (p.get('rent'))       document.getElementById('f-rent').value       = p.get('rent');
+        if (p.get('landlord'))   document.getElementById('f-landlord-name').value = p.get('landlord');
+        if (p.get('type'))       document.getElementById('f-type').value       = p.get('type');
+        if (p.get('tenant'))     document.getElementById('f-tenant-name').value = p.get('tenant');
+        updateDoc();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        prefillFromUrl();
+        // Also pre-fill from logged-in user if available
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+            fetch('https://findmynyumba.onrender.com/api/v1/auth/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(r => r.ok ? r.json() : null)
+            .then(user => {
+                if (!user) return;
+                const nameEl = document.getElementById('f-tenant-name');
+                const contactEl = document.getElementById('f-tenant-contact');
+                if (nameEl && !nameEl.value) nameEl.value = user.full_name || '';
+                if (contactEl && !contactEl.value) contactEl.value = user.phone || user.email || '';
+                updateDoc();
+            })
+            .catch(() => {});
+        }
+    });
+    </script>
+</body>
+</html>

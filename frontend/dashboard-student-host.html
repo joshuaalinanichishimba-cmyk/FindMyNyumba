@@ -15,6 +15,15 @@
         #sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tbl-scroll table { min-width: 560px; }
+
+        /* ── Mobile safety ───────────────────────────── */
+        * { box-sizing: border-box; }
+        img { max-width: 100%; height: auto; }
+        input, textarea, select { max-width: 100%; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @media (max-width: 640px) {
+            .sm\:hidden-mobile { display: none !important; }
+        }
     </style>
     <link rel="icon" type="image/png" href="logo.png">
 </head>
@@ -134,7 +143,7 @@
                         <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Location/Area</label><input type="text" id="prop-location" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
                     </div>
                     <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Detailed Description</label><textarea id="prop-desc" rows="4" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></textarea></div>
-                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Upload Images</label><input type="file" id="prop-images" accept="image/*" multiple class="w-full p-3 border rounded-lg"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Upload Images</label><input type="file" id="prop-images" accept="image/jpeg,image/png,image/webp" multiple onchange="previewHostImages(this)" class="w-full p-3 border rounded-lg"></div>
                     <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-lg hover:bg-[#c2410c] transition shadow-lg">Submit Property</button>
                 </form>
             </div>
@@ -621,6 +630,28 @@
                 finally { btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; btn.disabled = false; }
             });
         });
+
+        function previewHostImages(input) {
+            let prev = document.getElementById('host-img-preview');
+            if (!prev) {
+                prev = document.createElement('div');
+                prev.id = 'host-img-preview';
+                prev.className = 'mt-3 flex flex-wrap gap-2';
+                input.parentNode.appendChild(prev);
+            }
+            prev.innerHTML = '';
+            Array.from(input.files).forEach(f => {
+                if (f.size > 10 * 1024 * 1024) { showToast(f.name + ' exceeds 10MB.','error'); return; }
+                const r = new FileReader();
+                r.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'w-16 h-16 object-cover rounded-lg border border-gray-200';
+                    prev.appendChild(img);
+                };
+                r.readAsDataURL(f);
+            });
+        }
 
         initDashboard();
     </script>

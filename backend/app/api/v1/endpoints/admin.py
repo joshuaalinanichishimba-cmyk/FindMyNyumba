@@ -29,6 +29,8 @@ from app.core.security import (
     verify_password_reset_token,
 )
 from app.api.deps import get_current_user
+from app.models.listing import Listing
+from app.models.message import Message
 from app.models.user import User
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -269,12 +271,19 @@ def get_admin_stats(
     _: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    total_users = db.query(User).count()
+    from sqlalchemy import func
+    total_users    = db.query(User).count()
+    total_listings = db.query(Listing).count()
+    total_messages = db.query(Message).count()
+    pending_verifs = db.query(User).filter(User.verification_status == "pending").count()
+    pending_listings = db.query(Listing).filter(Listing.status == "pending").count()
     return {
-        "total_users": total_users,
-        "total_listings": 0,    # wire to Listing model
-        "total_messages": 0,    # wire to Message model
-        "pending_reports": 0,   # wire to Report model
+        "total_users":       total_users,
+        "total_listings":    total_listings,
+        "total_messages":    total_messages,
+        "pending_reports":   0,
+        "pending_listings":  pending_listings,
+        "pending_verifs":    pending_verifs,
     }
 
 
@@ -325,31 +334,91 @@ def toggle_suspend(
 
 @router.get("/all-listings")
 def get_all_listings(_: User = Depends(require_admin), db: Session = Depends(get_db)):
-    return []   # wire to Listing model
+    listings = db.query(Listing).order_by(Listing.created_at.desc()).all()
+    result = []
+    for l in listings:
+        owner = db.query(User).filter(User.id == l.owner_id).first()
+        result.append({
+            "id":         l.id,
+            "title":      l.title,
+            "description": l.description,
+            "price":      l.price,
+            "location":   l.location,
+            "status":     l.status,
+            "is_boosted": l.is_boosted,
+            "image_url":  f"/static/uploads/properties/{l.image_url}" if l.image_url else None,
+            "created_at": l.created_at.isoformat() if l.created_at else None,
+            "owner_name": owner.full_name if owner else "Unknown",
+            "owner_email": owner.email if owner else "",
+            "owner_role": owner.role if owner else "",
+        })
+    return result
 
 
 @router.patch("/listings/{listing_id}/approve")
 def approve_listing(listing_id: int, _: User = Depends(require_admin), db: Session = Depends(get_db)):
-    return {"message": f"Listing {listing_id} approved."}
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    listing.status = "active"
+    db.commit()
+    return {"message": f"Listing '{listing.title}' approved and is now live."}
 
 
 @router.patch("/listings/{listing_id}/reject")
 def reject_listing(listing_id: int, _: User = Depends(require_admin), db: Session = Depends(get_db)):
-    return {"message": f"Listing {listing_id} rejected."}
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    listing.status = "rejected"
+    db.commit()
+    return {"message": f"Listing '{listing.title}' has been rejected."}
 
 
 @router.delete("/listings/{listing_id}")
 def delete_listing(listing_id: int, _: User = Depends(require_admin), db: Session = Depends(get_db)):
-    return {"message": f"Listing {listing_id} deleted."}
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    db.delete(listing)
+    db.commit()
+    return {"message": f"Listing deleted successfully."}
 
 
 @router.get("/verifications")
 def get_verification_queue(_: User = Depends(require_admin), db: Session = Depends(get_db)):
     pending = db.query(User).filter(User.verification_status == "pending").all()
-    return [
-        {"id": u.id, "full_name": u.full_name, "email": u.email, "role": u.role}
-        for u in pending
-    ]
+    result = []
+    for u in pending:
+        # Build doc URLs from known naming convention: {user_id}_doc1_*, {user_id}_doc2_*
+        import os, glob
+        verify_dir = "static/uploads/verification"
+        docs = []
+        for label in ["doc1", "doc2"]:
+            pattern = os.path.join(verify_dir, f"{u.id}_{label}_*")
+            matches = glob.glob(pattern)
+            if matches:
+                fname = os.path.basename(matches[0])
+                docs.append({
+                    "label": label.upper(),
+                    "url":   f"/static/uploads/verification/{fname}",
+                    "name":  fname,
+                })
+        result.append({
+            "id":            u.id,
+            "full_name":     u.full_name,
+            "email":         u.email,
+            "role":          u.role,
+            "phone":         u.phone_number or "",
+            "created_at":    u.created_at.isoformat() if u.created_at else None,
+            "documents":     docs,
+            "doc_count":     len(docs),
+        })
+    return result
+
+
+class RejectionPayload(BaseModel):
+    reason: Optional[str] = None
 
 
 @router.post("/verifications/{user_id}/approve")
@@ -357,18 +426,25 @@ def approve_verification(user_id: int, _: User = Depends(require_admin), db: Ses
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
-    user.verification_status = "verified"
-    user.is_verified = True
+    user.verification_status           = "verified"
+    user.is_verified                   = True
+    user.verification_rejection_reason = None
     db.commit()
     return {"message": "User verified successfully."}
 
 
 @router.post("/verifications/{user_id}/reject")
-def reject_verification(user_id: int, _: User = Depends(require_admin), db: Session = Depends(get_db)):
+def reject_verification(
+    user_id: int,
+    payload: RejectionPayload = RejectionPayload(),
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
-    user.verification_status = "rejected"
+    user.verification_status           = "rejected"
+    user.verification_rejection_reason = payload.reason or "Documents did not meet our requirements."
     db.commit()
     return {"message": "Verification rejected."}
 

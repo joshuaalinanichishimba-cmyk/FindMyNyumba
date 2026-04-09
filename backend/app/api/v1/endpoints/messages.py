@@ -129,23 +129,29 @@ def get_thread(
     result = []
     for msg in msgs:
         is_me = msg.sender_id == current_user.id
+        other_user = None if is_me else db.query(User).filter(User.id == msg.sender_id).first()
         result.append({
             "id":              msg.id,
             "content":         msg.content,
-            "sender_name":     "Me" if is_me else (
-                db.query(User).filter(User.id == msg.sender_id).first().full_name
-                if db.query(User).filter(User.id == msg.sender_id).first() else "Unknown"
-            ),
+            "is_mine":         is_me,
+            "sender_name":     "Me" if is_me else (other_user.full_name if other_user else "Unknown"),
             "created_at":      msg.created_at.isoformat() if msg.created_at else None,
-            "attachment_url":  None,   
-            "attachment_name": None,
-            "attachment_type": None,
+            "attachment_url":  msg.attachment_url,
+            "attachment_name": msg.attachment_name,
+            "attachment_type": msg.attachment_type,
         })
 
     return result
 
 
 # ── Send message (Smart JSON/Form Handler) ────────────────────────────────────
+ALLOWED_ATTACH_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp",
+                        "application/pdf", "text/plain",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+MAX_ATTACH_MB = 10
+
+
 @router.post("/send")
 async def send_message(
     request: Request,
@@ -153,23 +159,53 @@ async def send_message(
     db: Session        = Depends(get_db),
 ):
     """
-    Smart endpoint that checks the Content-Type. 
+    Smart endpoint that checks the Content-Type.
     Accepts both application/json (property pages) and multipart/form-data (messages dashboard).
+    Supports optional file/image attachments when sending via form-data.
     """
     content_type = request.headers.get("content-type", "")
-    
+
+    attachment_url  = None
+    attachment_name = None
+    attachment_type = None
+
     if "application/json" in content_type:
-        data = await request.json()
+        data        = await request.json()
         receiver_id = data.get("receiver_id")
         content     = data.get("content", "")
         prop_val    = data.get("property_id")
         property_id = int(prop_val) if prop_val else None
     else:
-        form = await request.form()
+        form        = await request.form()
         receiver_id = form.get("receiver_id")
         content     = form.get("content", "")
         prop_val    = form.get("property_id")
         property_id = int(prop_val) if prop_val and prop_val != "null" else None
+
+        # Handle optional attachment
+        attachment_file = form.get("attachment")
+        if attachment_file and hasattr(attachment_file, "filename") and attachment_file.filename:
+            mime = attachment_file.content_type or "application/octet-stream"
+            if mime not in ALLOWED_ATTACH_TYPES:
+                raise HTTPException(status_code=400,
+                    detail="Unsupported file type. Allowed: images, PDF, Word docs, text files.")
+
+            ATTACH_DIR.mkdir(parents=True, exist_ok=True)
+            safe_name = f"{current_user.id}_{attachment_file.filename.replace(' ', '_')}"
+            dest = ATTACH_DIR / safe_name
+            file_bytes = await attachment_file.read()
+            if len(file_bytes) > MAX_ATTACH_MB * 1024 * 1024:
+                raise HTTPException(status_code=400, detail=f"Attachment exceeds {MAX_ATTACH_MB}MB limit.")
+            with open(dest, "wb") as f:
+                f.write(file_bytes)
+
+            attachment_url  = f"/static/uploads/attachments/{safe_name}"
+            attachment_name = attachment_file.filename
+            attachment_type = "image" if mime.startswith("image/") else "file"
+
+            # Allow empty content if attachment present
+            if not str(content).strip():
+                content = f"[Attachment: {attachment_file.filename}]"
 
     if not receiver_id:
         raise HTTPException(status_code=422, detail="receiver_id is required")
@@ -184,18 +220,24 @@ async def send_message(
         raise HTTPException(status_code=404, detail="Recipient not found.")
 
     msg = Message(
-        sender_id   = current_user.id,
-        receiver_id = receiver_id,
-        property_id = property_id,
-        content     = str(content).strip(),
-        is_read     = False,
+        sender_id       = current_user.id,
+        receiver_id     = receiver_id,
+        property_id     = property_id,
+        content         = str(content).strip(),
+        is_read         = False,
+        attachment_url  = attachment_url,
+        attachment_name = attachment_name,
+        attachment_type = attachment_type,
     )
     db.add(msg)
     db.commit()
     db.refresh(msg)
-    
+
     return {
-        "status": "success", 
-        "detail": "Message sent! The host will reply soon.", 
-        "id": msg.id
+        "status":          "success",
+        "detail":          "Message sent!",
+        "id":              msg.id,
+        "attachment_url":  attachment_url,
+        "attachment_name": attachment_name,
+        "attachment_type": attachment_type,
     }

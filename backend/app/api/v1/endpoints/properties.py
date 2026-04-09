@@ -1,62 +1,101 @@
-﻿from fastapi import APIRouter, Depends, HTTPException, Query
+﻿"""
+app/api/v1/endpoints/properties.py
+
+Public-facing property endpoints — no auth required.
+Used by:
+  - browse.html  → GET /properties?q=&min_price=&max_price=&sort=
+  - listing.html → GET /properties/{id}
+
+Only "active" listings are returned to the public.
+Boosted listings are sorted to the top.
+"""
+
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.models.listing import Listing
-from app.models.report import Report
 from app.models.user import User
-from app.api.deps import get_current_user
-from pydantic import BaseModel
-from typing import Optional, List
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
 
-class ReportCreate(BaseModel):
-    reason: str
-    description: Optional[str] = None
 
-class ReviewCreate(BaseModel):
-    rating: int
-    comment: str
+def _fmt(listing: Listing, owner: Optional[User] = None) -> dict:
+    return {
+        "id":          listing.id,
+        "title":       listing.title,
+        "description": listing.description,
+        "price":       listing.price,
+        "location":    listing.location,
+        "image_url":   f"/static/uploads/properties/{listing.image_url}" if listing.image_url else None,
+        "is_boosted":  listing.is_boosted,
+        "status":      listing.status,
+        "created_at":  listing.created_at.isoformat() if listing.created_at else None,
+        "owner_id":    listing.owner_id,
+        "owner_name":  owner.full_name if owner else None,
+        "owner_role":  owner.role if owner else None,
+        "is_verified": owner.is_verified if owner else False,
+    }
+
 
 @router.get("")
-def get_properties(q: Optional[str] = None, university: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None, db: Session = Depends(get_db)):
+def browse_properties(
+    q:         Optional[str]   = Query(None, description="Search keyword"),
+    min_price: Optional[float] = Query(None),
+    max_price: Optional[float] = Query(None),
+    sort:      Optional[str]   = Query("newest", enum=["newest", "price_asc", "price_desc"]),
+    db: Session = Depends(get_db),
+):
+    """
+    Public browse endpoint. Returns only active listings.
+    Boosted listings are always first.
+    Supports keyword search across title, description, and location.
+    """
     query = db.query(Listing).filter(Listing.status == "active")
-    if q: query = query.filter(Listing.title.ilike(f"%{q}%"))
-    if min_price: query = query.filter(Listing.price >= min_price)
-    if max_price: query = query.filter(Listing.price <= max_price)
-    # university filtering can be added here
-    return query.order_by(Listing.id.desc()).all()
 
-@router.get("/{prop_id}")
-def get_property(prop_id: int, db: Session = Depends(get_db)):
-    prop = db.query(Listing).filter(Listing.id == prop_id).first()
-    if not prop: raise HTTPException(status_code=404, detail="Property not found")
-    
-    # Fetch owner details
-    owner = db.query(User).filter(User.id == prop.owner_id).first()
-    prop_dict = prop.__dict__.copy()
-    if owner:
-        prop_dict["owner"] = {
-            "id": owner.id,
-            "full_name": getattr(owner, "business_name", None) or owner.full_name,
-            "verification_status": "verified" if owner.is_active else "unverified"
-        }
-    return prop_dict
+    if q:
+        term = f"%{q.strip()}%"
+        query = query.filter(
+            Listing.title.ilike(term)
+            | Listing.description.ilike(term)
+            | Listing.location.ilike(term)
+        )
 
-@router.post("/{prop_id}/report")
-def report_property(prop_id: int, payload: ReportCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    report = Report(
-        listing_id=prop_id,
-        reporter_id=current_user.id,
-        reason=payload.reason,
-        description=payload.description,
-        status="pending"
-    )
-    db.add(report)
-    db.commit()
-    return {"message": "Report submitted successfully"}
+    if min_price is not None:
+        query = query.filter(Listing.price >= min_price)
+    if max_price is not None:
+        query = query.filter(Listing.price <= max_price)
 
-@router.post("/{prop_id}/reviews")
-def add_review(prop_id: int, payload: ReviewCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Mocking review success since Review model might not exist yet
-    return {"message": "Review added successfully"}
+    if sort == "price_asc":
+        query = query.order_by(Listing.is_boosted.desc(), Listing.price.asc())
+    elif sort == "price_desc":
+        query = query.order_by(Listing.is_boosted.desc(), Listing.price.desc())
+    else:
+        query = query.order_by(Listing.is_boosted.desc(), Listing.created_at.desc())
+
+    listings = query.limit(100).all()
+
+    result = []
+    for l in listings:
+        owner = db.query(User).filter(User.id == l.owner_id).first()
+        result.append(_fmt(l, owner))
+
+    return result
+
+
+@router.get("/{listing_id}")
+def get_listing(listing_id: int, db: Session = Depends(get_db)):
+    """
+    Returns a single listing by ID.
+    Returns active listings publicly; used by listing.html and contact-landlord.html.
+    """
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    if listing.status != "active":
+        raise HTTPException(status_code=404, detail="This listing is not currently available.")
+
+    owner = db.query(User).filter(User.id == listing.owner_id).first()
+    return _fmt(listing, owner)

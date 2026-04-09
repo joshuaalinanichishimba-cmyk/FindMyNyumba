@@ -15,6 +15,15 @@
         #sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tbl-scroll table { min-width: 560px; }
+
+        /* ── Mobile safety ───────────────────────────── */
+        * { box-sizing: border-box; }
+        img { max-width: 100%; height: auto; }
+        input, textarea, select { max-width: 100%; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @media (max-width: 640px) {
+            .sm\:hidden-mobile { display: none !important; }
+        }
     </style>
     <link rel="icon" type="image/png" href="logo.png">
 </head>
@@ -132,7 +141,12 @@
                         <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Location/Area</label><input type="text" id="prop-location" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></div>
                     </div>
                     <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Detailed Description</label><textarea id="prop-desc" rows="4" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#ea580c] outline-none"></textarea></div>
-                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-2">Upload Images</label><input type="file" id="prop-images" accept="image/*" multiple class="w-full p-3 border rounded-lg"></div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Upload Images <span class="text-gray-400 font-normal normal-case">(JPEG/PNG/WebP · max 10MB each)</span></label>
+                        <input type="file" id="prop-images" accept="image/jpeg,image/png,image/webp" multiple
+                               class="w-full p-3 border rounded-lg text-sm max-w-full" onchange="previewImages(this)">
+                        <div id="img-preview" class="mt-3 flex flex-wrap gap-2 hidden"></div>
+                    </div>
                     <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-lg hover:bg-[#c2410c] transition shadow-lg">Submit Property</button>
                 </form>
             </div>
@@ -168,7 +182,7 @@
         <!-- Payments -->
         <div id="view-payments" class="dashboard-view hidden-view">
             <h2 class="text-2xl font-bold mb-6">💳 Revenue & Boosts</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-white p-6 lg:p-8 rounded-xl shadow border border-orange-100">
                     <div class="text-center mb-6">
                         <i class="fas fa-rocket text-4xl text-yellow-500 mb-4"></i>
@@ -205,7 +219,7 @@
                 <div class="bg-white p-4 lg:p-8 rounded-xl shadow border">
                     <h3 class="font-black text-gray-800 mb-5 border-b pb-2"><i class="fas fa-user-cog text-[#ea580c] mr-2"></i>Account Details</h3>
                     <form id="profileForm" class="space-y-5">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
                                 <input type="text" id="prof-name" required class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[#ea580c] font-bold">
@@ -242,7 +256,7 @@
     </main>
 
     <!-- Reply Modal -->
-    <div id="reply-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+    <div id="reply-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div class="flex justify-between items-start mb-4">
                 <div>
@@ -432,12 +446,20 @@
                     return;
                 }
                 tbody.innerHTML = messages.map(m => {
+                    // Backend returns: sender_name, property_title, sender_id, message, created_at, is_read
+                    const name  = m.sender_name    || m.student_name || 'Student';
+                    const prop  = m.property_title || m.property     || '—';
+                    const sid   = m.sender_id      || m.student_id   || 0;
+                    const msg   = m.message        || m.content      || '';
+                    const date  = m.created_at ? new Date(m.created_at).toLocaleDateString('en-ZM',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
                     const unreadDot = !m.is_read ? '<span class="inline-block w-2 h-2 rounded-full bg-[#ea580c] mr-1"></span>' : '';
+                    const safeName = name.replace(/'/g,"\\'").replace(/`/g,'\\`');
+                    const safeProp = prop.replace(/'/g,"\\'").replace(/`/g,'\\`');
                     return `<tr class="border-b hover:bg-orange-50 transition ${!m.is_read ? 'bg-orange-50/30' : ''}">
-                        <td class="p-4 font-bold text-gray-800">${unreadDot}${m.student_name || 'Student'}</td>
-                        <td class="p-4 text-xs font-bold text-orange-600">${m.property || '—'}</td>
-                        <td class="p-4 text-sm text-gray-600 max-w-xs"><p class="truncate">"${m.message}"</p><span class="text-[10px] text-gray-400 mt-1 block">${m.date || ''}</span></td>
-                        <td class="p-4"><button onclick="replyToStudent(${m.student_id}, ${m.property_id || 0}, '${(m.student_name||'').replace(/'/g,"\\'")}', '${(m.property||'').replace(/'/g,"\\'")}', this)" class="text-xs bg-[#ea580c] text-white px-3 py-1.5 rounded-lg font-bold hover:bg-[#c2410c] transition">Reply</button></td>
+                        <td class="p-4 font-bold text-gray-800">${unreadDot}${name}</td>
+                        <td class="p-4 text-xs font-bold text-orange-600">${prop}</td>
+                        <td class="p-4 text-sm text-gray-600 max-w-xs"><p class="truncate">"${msg}"</p><span class="text-[10px] text-gray-400 mt-1 block">${date}</span></td>
+                        <td class="p-4"><button onclick="replyToStudent(${sid}, ${m.property_id || 0}, '${safeName}', '${safeProp}', this)" class="text-xs bg-[#ea580c] text-white px-3 py-1.5 rounded-lg font-bold hover:bg-[#c2410c] transition">Reply</button></td>
                     </tr>`;
                 }).join('');
             } catch (e) {
@@ -612,6 +634,36 @@
                 finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Reply'; }
             });
         });
+
+        function previewImages(input) {
+            const preview = document.getElementById('img-preview');
+            if (!preview) return;
+            preview.innerHTML = '';
+            preview.classList.add('hidden');
+            const files = Array.from(input.files);
+            if (!files.length) return;
+            const MAX_MB = 10;
+            let valid = true;
+            files.forEach(f => {
+                if (f.size > MAX_MB * 1024 * 1024) {
+                    showToast(f.name + ' exceeds 10MB limit.', 'error');
+                    valid = false;
+                }
+            });
+            if (!valid) { input.value = ''; return; }
+            preview.classList.remove('hidden');
+            files.forEach(f => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'w-20 h-20 object-cover rounded-lg border border-gray-200 shadow-sm';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(f);
+            });
+        }
+        window.previewImages = previewImages;
 
         initDashboard();
     </script>

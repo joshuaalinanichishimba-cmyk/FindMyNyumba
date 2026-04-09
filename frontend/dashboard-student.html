@@ -23,6 +23,15 @@
             #chat-pane.mobile-chat-open  { display: flex; }
             #conv-pane.mobile-chat-open  { display: none; }
         }
+
+        /* ── Mobile safety ───────────────────────────── */
+        * { box-sizing: border-box; }
+        img { max-width: 100%; height: auto; }
+        input, textarea, select { max-width: 100%; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @media (max-width: 640px) {
+            .sm\:hidden-mobile { display: none !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
@@ -136,7 +145,7 @@
                         </button>
                     </div>
 
-                    <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 hidden"></div>
+                    <div id="search-results-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 hidden"></div>
 
                     <h3 class="text-sm font-black mb-3 text-black uppercase tracking-wide">Recent Listings</h3>
                     <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -191,8 +200,18 @@
                             </div>
                             <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 hidden"></div>
                             <div id="chat-input-area" class="p-3 bg-white border-t border-gray-100 hidden">
+                                <div id="attach-preview" class="hidden mb-2 flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2 text-xs font-semibold text-orange-700 max-w-full overflow-hidden">
+                                    <i class="fas fa-paperclip"></i>
+                                    <span id="attach-preview-name" class="flex-1 truncate"></span>
+                                    <button type="button" onclick="clearAttachment()" class="text-red-400 hover:text-red-600 ml-1"><i class="fas fa-times"></i></button>
+                                </div>
                                 <form id="chat-form" class="flex items-center gap-2" onsubmit="sendStudentMessage(event)">
-                                    <input type="text" id="chat-input" required autocomplete="off"
+                                    <input type="file" id="chat-attachment" class="hidden" accept="image/*,.pdf,.doc,.docx,.txt" onchange="previewAttachment(this)">
+                                    <button type="button" onclick="document.getElementById('chat-attachment').click()"
+                                            class="w-11 h-11 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#ea580c] hover:border-[#ea580c] transition flex-shrink-0" title="Attach file or photo">
+                                        <i class="fas fa-paperclip text-sm"></i>
+                                    </button>
+                                    <input type="text" id="chat-input" autocomplete="off"
                                            class="flex-1 bg-gray-50 px-4 py-3 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-medium text-sm"
                                            placeholder="Type a message...">
                                     <button type="submit" class="bg-[#ea580c] text-white w-11 h-11 rounded-xl flex items-center justify-center hover:bg-black transition flex-shrink-0">
@@ -272,7 +291,7 @@
 
 <script>
 'use strict';
-const API = 'http://127.0.0.1:8000/api/v1';
+const API = 'https://findmynyumba.onrender.com/api/v1';
 
 // ── XSS helper ────────────────────────────────────────────────────────────────
 function esc(str) {
@@ -565,39 +584,100 @@ async function openThread(otherId, propId, otherName, propTitle) {
             return;
         }
 
-        messages.innerHTML = msgs.map(m => `
-            <div class="flex ${m.is_mine ? 'justify-end' : 'justify-start'}">
-                <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm font-medium ${m.is_mine ? 'bubble-me' : 'bubble-them'}">
-                    ${esc(m.content)}
+        messages.innerHTML = msgs.map(m => {
+            const mine = m.is_mine;
+            let attachHtml = '';
+            if (m.attachment_url) {
+                if (m.attachment_type === 'image') {
+                    attachHtml = `<div class="mt-1"><img src="${esc(m.attachment_url)}" class="max-w-[200px] rounded-xl border border-white/20 cursor-pointer" onclick="window.open('${esc(m.attachment_url)}','_blank')" alt="${esc(m.attachment_name)}"></div>`;
+                } else {
+                    attachHtml = `<div class="mt-1"><a href="${esc(m.attachment_url)}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold underline opacity-80 hover:opacity-100"><i class="fas fa-file"></i>${esc(m.attachment_name)}</a></div>`;
+                }
+            }
+            const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+            return `<div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm font-medium ${mine ? 'bubble-me' : 'bubble-them'}">
+                    ${esc(m.content)}${attachHtml}
+                    <div class="text-[10px] opacity-60 mt-1 ${mine ? 'text-right' : 'text-left'}">${time}</div>
                 </div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
         messages.scrollTop = messages.scrollHeight;
     } catch {
         messages.innerHTML = '<div class="text-center text-red-400 text-sm py-4">Failed to load messages.</div>';
     }
 }
 
+// ── Attachment helpers ────────────────────────────────────────────────────────
+function previewAttachment(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const MAX_MB = 10;
+    if (file.size > MAX_MB * 1024 * 1024) {
+        showToast(`File too large. Max ${MAX_MB}MB.`, 'error');
+        input.value = '';
+        return;
+    }
+    document.getElementById('attach-preview-name').textContent = file.name;
+    document.getElementById('attach-preview').classList.remove('hidden');
+}
+function clearAttachment() {
+    document.getElementById('chat-attachment').value = '';
+    document.getElementById('attach-preview').classList.add('hidden');
+    document.getElementById('attach-preview-name').textContent = '';
+}
+window.previewAttachment = previewAttachment;
+window.clearAttachment   = clearAttachment;
+
 async function sendStudentMessage(e) {
     e.preventDefault();
-    const input   = document.getElementById('chat-input');
-    const content = input.value.trim();
-    if (!content || !_activeOtherId) return;
+    const input      = document.getElementById('chat-input');
+    const fileInput  = document.getElementById('chat-attachment');
+    const content    = input.value.trim();
+    const file       = fileInput?.files[0];
+
+    if (!content && !file) return;
+    if (!_activeOtherId) return;
 
     const token = getToken();
-    input.value = '';
+    const submitBtn = document.querySelector('#chat-form button[type="submit"]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-sm"></i>'; }
 
     try {
-        const res = await fetch(`${API}/messages/send`, {
-            method:  'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content }),
-        });
+        let res;
+        if (file) {
+            const fd = new FormData();
+            fd.append('receiver_id', _activeOtherId);
+            if (_activePropId) fd.append('property_id', _activePropId);
+            fd.append('content', content || `[Attachment: ${file.name}]`);
+            fd.append('attachment', file);
+            res = await fetch(`${API}/messages/send`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: fd,
+            });
+        } else {
+            res = await fetch(`${API}/messages/send`, {
+                method:  'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content }),
+            });
+        }
+
         if (res.ok) {
-            // Reload thread to show the new message
-            await openThread(_activeOtherId, _activePropId, document.getElementById('chat-landlord-name').textContent, document.getElementById('chat-property-ref').textContent);
+            input.value = '';
+            clearAttachment();
+            await openThread(_activeOtherId, _activePropId,
+                document.getElementById('chat-landlord-name').textContent,
+                document.getElementById('chat-property-ref').textContent);
+        } else {
+            const err = await res.json().catch(() => ({}));
+            showToast(err.detail || 'Failed to send message.', 'error');
         }
     } catch {
         showToast('Failed to send message.', 'error');
+    } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-paper-plane text-sm"></i>'; }
     }
 }
 window.sendStudentMessage = sendStudentMessage;
