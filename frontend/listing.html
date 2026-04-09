@@ -14,7 +14,7 @@
         #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
         #toast.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
 
-        /* ── Mobile safety ───────────────────────────── */
+        /* â”€â”€ Mobile safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
@@ -261,7 +261,7 @@
 
 <script>
 'use strict';
-const API_BASE      = 'https://findmynyumba.onrender.com/api/v1';
+const API_BASE      = 'https://findmynyumba-backend.onrender.com/api/v1';
 let currentProperty = null;
 let selectedRating  = 5;
 let leafletMap      = null;
@@ -297,11 +297,11 @@ function showToast(msg, type = 'success') {
  * THE FIX for the 404 image bug seen in logs:
  *
  * The DB stores image_url as a complete URL:
- *   "https://findmynyumba.onrender.com/static/uploads/properties/filename.jpg"
+ *   "https://findmynyumba-backend.onrender.com/static/uploads/properties/filename.jpg"
  *
  * The old code did:
- *   path = url.replace(/^\/+/, '')          ? "https://findmynyumba.onrender.com/static/..."  (unchanged, no leading slash)
- *   src  = `https://findmynyumba.onrender.com/${path}` ? "https://findmynyumba.onrender.com/https://findmynyumba.onrender.com/static/..."  ? BROKEN
+ *   path = url.replace(/^\/+/, '')          ? "https://findmynyumba-backend.onrender.com/static/..."  (unchanged, no leading slash)
+ *   src  = `https://findmynyumba-backend.onrender.com/${path}` ? "https://findmynyumba-backend.onrender.com/https://findmynyumba-backend.onrender.com/static/..."  ? BROKEN
  *
  * The browser then requests:
  *   GET /http%3A//127.0.0.1%3A8000/static/... ? 404
@@ -315,8 +315,8 @@ function resolveImageUrl(raw) {
     if (url.startsWith('http://') || url.startsWith('https://')) {
         return url; // ? Already a full absolute URL. Use directly. No prepending.
     }
-    // Bare path � make it absolute
-    return 'https://findmynyumba.onrender.com' + (url.startsWith('/') ? url : '/' + url);
+    // Bare path ï¿½ make it absolute
+    return 'https://findmynyumba-backend.onrender.com' + (url.startsWith('/') ? url : '/' + url);
 }
 
 // -- Modal helpers -------------------------------------------------------------
@@ -332,7 +332,7 @@ function closeReportModal() { closeModal('report-modal'); }
 function initMap(lat, lng, label) {
     if (leafletMap) { leafletMap.remove(); leafletMap = null; }
     leafletMap = L.map('property-map').setView([lat, lng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '� OpenStreetMap' }).addTo(leafletMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'ï¿½ OpenStreetMap' }).addTo(leafletMap);
     L.marker([lat, lng]).addTo(leafletMap).bindPopup(label).openPopup();
     setTimeout(() => leafletMap.invalidateSize(), 400);
 }
@@ -348,16 +348,16 @@ async function loadData() {
         const data = await res.json();
         currentProperty = data;
 
-        // Text � innerText is XSS-safe
-        document.getElementById('prop-title').innerText         = data.title       || '�';
-        document.getElementById('prop-location-text').innerText = data.location    || '�';
+        // Text ï¿½ innerText is XSS-safe
+        document.getElementById('prop-title').innerText         = data.title       || 'ï¿½';
+        document.getElementById('prop-location-text').innerText = data.location    || 'ï¿½';
         document.getElementById('prop-description').innerText   = data.description || 'No description provided.';
         document.getElementById('prop-price').innerText         = `ZMW ${Number(data.price).toLocaleString()}`;
         document.title = `${data.title || 'Property'} - FindMyNyumba`;
 
         if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
 
-        // Image � THE FIX
+        // Image ï¿½ THE FIX
         const imgEl  = document.getElementById('main-image');
         const rawUrl = data.image_url || (Array.isArray(data.images) && data.images[0]) || null;
         const imgSrc = resolveImageUrl(rawUrl);
@@ -382,7 +382,7 @@ async function loadData() {
             document.getElementById('host-badge').innerHTML = verBadge;
         }
 
-        // Map � default to Lusaka centre; swap coords when geocoding is added
+        // Map ï¿½ default to Lusaka centre; swap coords when geocoding is added
         initMap(-15.4167, 28.2833, data.title || 'Property');
 
     } catch (err) {

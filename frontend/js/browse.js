@@ -1,8 +1,8 @@
-﻿document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const propertyGrid = document.getElementById('propertyGrid');
     
     try {
-        const response = await fetch('https://findmynyumba.onrender.com/api/v1/properties');
+        const response = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties');
         const properties = await response.json();
 
         if (propertyGrid) {
@@ -11,7 +11,7 @@
             properties.forEach(prop => {
                 // Ensure we point to the backend's static folder for images
                 const imageUrl = prop.photo_url 
-                    ? https://findmynyumba.onrender.com/ 
+                    ? https://findmynyumba-backend.onrender.com/ 
                     : 'https://via.placeholder.com/300x200?text=No+Image';
 
                 propertyGrid.innerHTML += 

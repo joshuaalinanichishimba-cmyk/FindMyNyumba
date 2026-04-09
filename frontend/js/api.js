@@ -1,2 +1,2 @@
-﻿const BASE_URL = 'https://findmynyumba.onrender.com/api/v1';
+const BASE_URL = 'https://findmynyumba-backend.onrender.com/api/v1';
 

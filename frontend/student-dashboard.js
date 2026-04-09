@@ -1,4 +1,4 @@
-﻿const API_URL = "https://findmynyumba.onrender.com/api/v1";
+const API_URL = "https://findmynyumba-backend.onrender.com/api/v1";
 
 function getAuthHeaders() {
     return {

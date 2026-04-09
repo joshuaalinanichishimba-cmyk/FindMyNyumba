@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const propertyGrid = document.getElementById('propertyGrid');
     if (!propertyGrid) return;
 
@@ -14,7 +14,7 @@
     const query  = params.get('q') || '';
 
     try {
-        const response = await fetch('https://findmynyumba.onrender.com/api/v1/properties');
+        const response = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties');
         if (!response.ok) throw new Error(`Server error ${response.status}`);
         let properties = await response.json();
 
