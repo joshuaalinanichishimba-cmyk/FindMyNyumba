@@ -266,7 +266,7 @@
 
     <script>
     'use strict';
-    const API_BASE = 'https://findmynyumba-backend.onrender.com/api/v1';
+    const API_BASE = 'http://127.0.0.1:8000/api/v1';
 
     let currentChatOtherId = null;
     let currentChatPropId  = null;
@@ -406,7 +406,7 @@
                     }
                 } else { alertEl.classList.add('hidden'); }
             }
-        } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; }); }
+        } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = 'â€”'; }); }
     }
 
     // -- Listings table --------------------------------------------------------
@@ -490,7 +490,7 @@
             listDiv.innerHTML = convos.map(c => {
                 const isUnread  = c.unread_count > 0;
                 const propId    = c.property_id 0;
-                const preview   = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'…' : (c.last_message || '');
+                const preview   = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'â€¦' : (c.last_message || '');
                 const safeName  = String(c.other_user_name  || '').replace(/'/g,"\\'");
                 const safeTitle = String(c.property_title   || '').replace(/'/g,"\\'");
                 return `<div onclick="openThread(${propId},${c.other_user_id},'${safeName}','${safeTitle}')"
@@ -581,12 +581,12 @@
                     <div>
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Student ID Card <span class="text-red-500">*</span></label>
                         <input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]">
-                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p>
+                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF Â· Max 10MB</p>
                     </div>
                     <div>
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Proof of Residence <span class="text-red-500">*</span></label>
                         <input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]">
-                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p>
+                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF Â· Max 10MB</p>
                     </div>
                     <button type="submit" class="w-full bg-[#ea580c] text-white py-3 rounded-xl font-black hover:bg-[#c2410c] transition shadow text-sm">Submit Verification Documents</button>
                 </form>` : '');

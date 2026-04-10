@@ -37,7 +37,7 @@
         .dropdown-hidden  { opacity: 0; pointer-events: none; transform: translateY(-8px); transition: all 0.15s ease; }
         .dropdown-visible { opacity: 1; pointer-events: auto; transform: translateY(0);     transition: all 0.15s ease; }
 
-        /* Message panel — full height on desktop, collapsible on mobile */
+        /* Message panel â€” full height on desktop, collapsible on mobile */
         #messages-panel {
             height: calc(100vh - 8rem);
         }
@@ -341,7 +341,7 @@
     <script src="student-dashboard.js"></script>
     <script>
     'use strict';
-    const API = 'https://findmynyumba-backend.onrender.com/api/v1';
+    const API = 'http://127.0.0.1:8000/api/v1';
 
     // -- Auth guard ------------------------------------------------------------
     (function guardAccess() {
@@ -536,8 +536,8 @@
                 </div>`).join('');
 
         } catch (e) {
-            if (statSaved) statSaved.innerHTML = '<span class="text-red-400 text-sm font-bold">—</span>';
-            if (statMsgs)  statMsgs.innerHTML  = '<span class="text-red-400 text-sm font-bold">—</span>';
+            if (statSaved) statSaved.innerHTML = '<span class="text-red-400 text-sm font-bold">â€”</span>';
+            if (statMsgs)  statMsgs.innerHTML  = '<span class="text-red-400 text-sm font-bold">â€”</span>';
             if (recentGrid) recentGrid.innerHTML = `
                 <div class="col-span-full py-10 text-center bg-red-50 rounded-2xl border border-red-100">
                     <i class="fas fa-wifi text-4xl text-red-300 mb-3 block"></i>

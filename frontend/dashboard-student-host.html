@@ -16,7 +16,7 @@
         .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tbl-scroll table { min-width: 560px; }
 
-        /* ── Mobile safety ───────────────────────────── */
+        /* â”€â”€ Mobile safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
@@ -93,7 +93,7 @@
         <!-- My Listings -->
         <div id="view-listings" class="dashboard-view hidden-view">
             <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">🏠 My Listings</h2>
+                <h2 class="text-2xl font-bold text-gray-800">ðŸ  My Listings</h2>
                 <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition text-sm">+ Add New Listing</button>
             </div>
             <div class="tbl-scroll bg-white rounded-xl shadow overflow-hidden border">
@@ -110,7 +110,7 @@
 
         <!-- Add Listing -->
         <div id="view-upload" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">🚀 Publish New Accommodation</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">ðŸš€ Publish New Accommodation</h2>
             <div class="bg-white p-4 lg:p-8 rounded-xl shadow border max-w-4xl">
                 <form id="uploadForm" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -151,7 +151,7 @@
 
         <!-- Inquiries / Chat -->
         <div id="view-inquiries" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6">💬 Inbox & Inquiries</h2>
+            <h2 class="text-2xl font-bold mb-6">ðŸ’¬ Inbox & Inquiries</h2>
             <!-- Mobile: stacked. Desktop: side by side -->
             <div class="bg-white rounded-xl shadow border overflow-hidden flex flex-col lg:flex-row" style="min-height:500px; max-height:calc(100vh - 200px)">
                 <!-- Conversation list -->
@@ -191,7 +191,7 @@
 
         <!-- Verification -->
         <div id="view-verification" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6">🛡️ Verification Center</h2>
+            <h2 class="text-2xl font-bold mb-6">ðŸ›¡ï¸ Verification Center</h2>
             <div class="bg-white p-4 lg:p-8 rounded-xl shadow border max-w-xl">
                 <div id="verification-content">
                     <div class="text-center py-8 text-gray-400">
@@ -204,7 +204,7 @@
 
         <!-- Payments -->
         <div id="view-payments" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">💳 Monetization &amp; Boosts</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">ðŸ’³ Monetization &amp; Boosts</h2>
             <div class="bg-white p-4 lg:p-8 rounded-xl shadow border text-center max-w-2xl">
                 <i class="fas fa-rocket text-5xl text-yellow-500 mb-5 block"></i>
                 <h3 class="text-xl font-black mb-2">Boost Your Listing</h3>
@@ -218,7 +218,7 @@
 
         <!-- Profile -->
         <div id="view-profile" class="dashboard-view hidden-view">
-            <h2 class="text-2xl font-bold mb-6">⚙️ Profile &amp; Settings</h2>
+            <h2 class="text-2xl font-bold mb-6">âš™ï¸ Profile &amp; Settings</h2>
             <div class="max-w-xl space-y-6">
                 <div class="bg-white p-4 lg:p-8 rounded-xl shadow border">
                     <h3 class="font-black text-gray-800 mb-5 border-b pb-2"><i class="fas fa-user-cog text-[#ea580c] mr-2"></i>Account Details</h3>
@@ -254,7 +254,7 @@
 
     <script>
         'use strict';
-        const API_BASE = "https://findmynyumba-backend.onrender.com/api/v1";
+        const API_BASE = "http://127.0.0.1:8000/api/v1";
 
         let currentChatOtherId = null;
         let currentChatPropId  = null;
@@ -367,7 +367,7 @@
                         alertEl.querySelector('h3').innerText = 'Verification Rejected' + (d.rejection_reason ? ': ' + d.rejection_reason : '');
                     } else { alertEl.classList.add('hidden'); }
                 }
-            } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = '—'; }); }
+            } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = 'â€”'; }); }
         }
 
         async function loadListings() {
@@ -388,7 +388,7 @@
                     return `<tr class="hover:bg-gray-50 transition">
                         <td class="p-4"><div class="flex items-center">${img}<div><p class="font-bold text-gray-800">${p.title}</p><p class="text-xs text-gray-500 mt-0.5"><i class="fas fa-map-marker-alt mr-1"></i>${p.location}</p></div></div></td>
                         <td class="p-4 font-mono text-sm font-bold text-gray-700">ZMW ${Number(p.price).toLocaleString()}</td>
-                        <td class="p-4"><span class="px-2 py-1 ${badge} text-[10px] font-black rounded-md uppercase">${p.status || 'pending'}</span>${p.is_boosted ? '<span class="ml-2 badge-boosted px-2 py-1 text-[10px] font-black rounded-md uppercase">⚡ Boosted</span>' : ''}</td>
+                        <td class="p-4"><span class="px-2 py-1 ${badge} text-[10px] font-black rounded-md uppercase">${p.status || 'pending'}</span>${p.is_boosted ? '<span class="ml-2 badge-boosted px-2 py-1 text-[10px] font-black rounded-md uppercase">âš¡ Boosted</span>' : ''}</td>
                         <td class="p-4"><button onclick="deleteProperty(${p.id}, '${p.title.replace(/'/g,"\\'")}', this)" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition" title="Delete"><i class="fas fa-trash"></i></button></td>
                     </tr>`;
                 }).join('');
@@ -421,7 +421,7 @@
                 listDiv.innerHTML = convos.map(c => {
                     const isUnread = c.unread_count > 0;
                     const propId = c.property_id ?? 0;
-                    const preview = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'…' : (c.last_message || '');
+                    const preview = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'â€¦' : (c.last_message || '');
                     const safeName  = (c.other_user_name  || '').replace(/'/g,"\\'");
                     const safeTitle = (c.property_title   || '').replace(/'/g,"\\'");
                     return `<div onclick="openThread(${propId},${c.other_user_id},'${safeName}','${safeTitle}')" class="p-4 cursor-pointer hover:bg-orange-50 transition border-b ${isUnread ? 'bg-orange-50/40' : 'bg-white'}">
@@ -492,8 +492,8 @@
                 const showForm = verification_status !== 'verified' && verification_status !== 'pending';
                 container.innerHTML = (statusHTML[verification_status] || statusHTML['unverified']) + (showForm ? `
                     <form id="verifyForm" class="space-y-5">
-                        <div><label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Student ID Card <span class="text-red-500">*</span></label><input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]"><p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p></div>
-                        <div><label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Hostel Allocation Slip or Proof of Residence <span class="text-red-500">*</span></label><input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]"><p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p></div>
+                        <div><label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Student ID Card <span class="text-red-500">*</span></label><input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]"><p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF Â· Max 10MB</p></div>
+                        <div><label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Hostel Allocation Slip or Proof of Residence <span class="text-red-500">*</span></label><input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]"><p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF Â· Max 10MB</p></div>
                         <button type="submit" class="w-full bg-[#ea580c] text-white py-3 rounded-xl font-black hover:bg-[#c2410c] transition shadow">Submit Verification Documents</button>
                     </form>` : '');
                 document.getElementById('verifyForm')?.addEventListener('submit', async (e) => {

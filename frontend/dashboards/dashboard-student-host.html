@@ -57,7 +57,7 @@
 
         <div id="view-listings" class="dashboard-view hidden-view">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">🏠 My Listings</h2>
+                <h2 class="text-3xl font-bold text-gray-800">ðŸ  My Listings</h2>
                 <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition">+ Add New Listing</button>
             </div>
             <div class="bg-white rounded-xl shadow overflow-hidden border">
@@ -73,7 +73,7 @@
         </div>
 
         <div id="view-upload" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800">🚀 Publish New Accommodation</h2>
+            <h2 class="text-3xl font-bold mb-8 text-gray-800">ðŸš€ Publish New Accommodation</h2>
             <div class="bg-white p-8 rounded-xl shadow border max-w-4xl">
                 <form id="uploadForm" class="space-y-6">
                     <div class="grid grid-cols-2 gap-6">
@@ -97,7 +97,7 @@
         </div>
 
         <div id="view-verification" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-2 text-gray-800">🛡️ Verification Center</h2>
+            <h2 class="text-3xl font-bold mb-2 text-gray-800">ðŸ›¡ï¸ Verification Center</h2>
             <p class="text-gray-500 mb-8">Build trust with students by verifying your identity and your right to offer this bedspace.</p>
             <div class="bg-white p-8 rounded-xl shadow border max-w-3xl">
                 <div id="verif-status-badge" class="mb-6 p-4 rounded-lg bg-yellow-50 text-yellow-800 font-bold border flex items-center"><i class="fas fa-clock mr-3 text-xl"></i> Status: Unverified - Action Required</div>
@@ -110,7 +110,7 @@
         </div>
         
         <div id="view-inquiries" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">💬 Student Inquiries</h2>
+            <h2 class="text-3xl font-bold mb-8">ðŸ’¬ Student Inquiries</h2>
             <div class="bg-white rounded-xl shadow border overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-gray-100 border-b"><tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Student</th><th class="p-4">Interested In</th><th class="p-4">Message</th><th class="p-4">Action</th></tr></thead>
@@ -122,7 +122,7 @@
         </div>
 
         <div id="view-payments" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">💳 Revenue & Boosts</h2>
+            <h2 class="text-3xl font-bold mb-8">ðŸ’³ Revenue & Boosts</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-white p-8 rounded-xl shadow border border-orange-100">
                     <div class="text-center mb-6">
@@ -154,7 +154,7 @@
         </div>
 
         <div id="view-profile" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">⚙️ Profile & Settings</h2>
+            <h2 class="text-3xl font-bold mb-8">âš™ï¸ Profile & Settings</h2>
             <div class="bg-white p-8 rounded-xl shadow border max-w-2xl">
                 <form id="profileForm" class="space-y-6">
                     <div class="grid grid-cols-2 gap-6">
@@ -184,7 +184,7 @@
     </main>
 
     <script>
-        const API_BASE = "https://findmynyumba-backend.onrender.com/api/v1";
+        const API_BASE = "http://127.0.0.1:8000/api/v1";
 
         function getToken() {
             return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -314,7 +314,7 @@
         }
 
         async function deleteProperty(id) {
-            if (!confirm('⚠️ Are you sure?')) return;
+            if (!confirm('âš ï¸ Are you sure?')) return;
             try {
                 const res = await fetch(`${API_BASE}/student-host/properties/${id}`, { method: 'DELETE', headers: authHeaders(false) });
                 if (res.ok) { loadListings(); loadOverview(); }
@@ -363,8 +363,8 @@
                         method: 'PUT', headers: authHeaders(true),
                         body: JSON.stringify({ full_name: document.getElementById('prof-name').value.trim(), phone: document.getElementById('prof-phone').value.trim() })
                     });
-                    if (res.ok) { alert('✅ Profile updated.'); } else { alert('❌ Could not save profile.'); }
-                } catch (err) { alert('❌ Server error.'); } 
+                    if (res.ok) { alert('âœ… Profile updated.'); } else { alert('âŒ Could not save profile.'); }
+                } catch (err) { alert('âŒ Server error.'); } 
                 finally { btn.innerText = 'Save Settings'; btn.disabled = false; }
             });
         });

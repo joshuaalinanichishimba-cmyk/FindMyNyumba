@@ -277,7 +277,7 @@
 
     <script>
     'use strict';
-    const API_BASE = 'https://findmynyumba-backend.onrender.com/api/v1';
+    const API_BASE = 'http://127.0.0.1:8000/api/v1';
 
     let currentUser  = null;
     let _replyTarget = null;
@@ -387,7 +387,7 @@
             const vs = data.verification_status || 'unverified';
             const alertMap = {
                 unverified: { cls: 'mb-5 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg shadow-sm', html: `<div class="flex flex-wrap items-center gap-3"><i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i><div><h3 class="font-bold text-yellow-800 text-sm">Action Required: Account Not Verified</h3><p class="text-xs text-yellow-700 mt-0.5">Upload your ID and property documents to verify your account.</p></div><button onclick="switchTab('verification')" class="ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-yellow-600 transition whitespace-nowrap">Verify Now</button></div>` },
-                pending:    { cls: 'mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm',   html: `<div class="flex items-center gap-3"><i class="fas fa-hourglass-half text-blue-500 text-xl"></i><div><h3 class="font-bold text-blue-800 text-sm">Verification Under Review</h3><p class="text-xs text-blue-700 mt-0.5">Documents submitted. We'll update you within 24–48 hours.</p></div></div>` },
+                pending:    { cls: 'mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm',   html: `<div class="flex items-center gap-3"><i class="fas fa-hourglass-half text-blue-500 text-xl"></i><div><h3 class="font-bold text-blue-800 text-sm">Verification Under Review</h3><p class="text-xs text-blue-700 mt-0.5">Documents submitted. We'll update you within 24â€“48 hours.</p></div></div>` },
                 rejected:   { cls: 'mb-5 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm',    html: `<div class="flex flex-wrap items-center gap-3"><i class="fas fa-times-circle text-red-500 text-xl"></i><div><h3 class="font-bold text-red-800 text-sm">Verification Rejected</h3><p class="text-xs text-red-700 mt-0.5">${data.rejection_reason || 'Documents were not accepted. Please re-submit.'}</p></div><button onclick="switchTab('verification')" class="ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-600 transition whitespace-nowrap">Re-submit</button></div>` },
                 verified:   { cls: 'mb-5 bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg shadow-sm', html: `<div class="flex items-center gap-3"><i class="fas fa-check-circle text-green-500 text-xl"></i><div><h3 class="font-bold text-green-800 text-sm">Verified Landlord</h3><p class="text-xs text-green-700 mt-0.5">Your account is verified. Listings display the Verified badge to students.</p></div></div>` },
             };
@@ -399,7 +399,7 @@
             }
         } catch (e) {
             ['stat-active','stat-pending','stat-views','stat-inquiries'].forEach(id => {
-                const el = document.getElementById(id); if (el) el.innerHTML = '<span class="text-red-400 text-sm">—</span>';
+                const el = document.getElementById(id); if (el) el.innerHTML = '<span class="text-red-400 text-sm">â€”</span>';
             });
             alertEl.className = 'mb-5 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg shadow-sm';
             alertEl.innerHTML = `<div class="flex flex-wrap items-center gap-3"><i class="fas fa-server text-red-400 text-xl"></i><div><h3 class="font-bold text-red-700 text-sm">Could Not Load Dashboard</h3><p class="text-xs text-red-600 mt-0.5">Check your connection or try again.</p></div><button onclick="loadOverview()" class="ml-auto bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-600 transition whitespace-nowrap"><i class="fas fa-redo mr-1"></i>Retry</button></div>`;
@@ -506,7 +506,7 @@
                 const unreadDot = !m.is_read ? '<span class="inline-block w-2 h-2 rounded-full bg-[#ea580c] mr-1 align-middle"></span>' : '';
                 return `<tr class="border-b hover:bg-orange-50 transition ${!m.is_read ? 'bg-orange-50/30' : ''}">
                     <td class="p-4 font-bold text-gray-800 text-sm whitespace-nowrap">${unreadDot}${m.student_name || 'Student'}</td>
-                    <td class="p-4 text-xs font-bold text-orange-600 whitespace-nowrap max-w-[120px] truncate">${m.property || '—'}</td>
+                    <td class="p-4 text-xs font-bold text-orange-600 whitespace-nowrap max-w-[120px] truncate">${m.property || 'â€”'}</td>
                     <td class="p-4 text-sm text-gray-600 max-w-xs">
                         <p class="truncate">"${m.message}"</p>
                         <span class="text-[10px] text-gray-400 mt-0.5 block">${m.date || ''}</span>
@@ -546,7 +546,7 @@
             const { verification_status, rejection_reason } = await res.json();
             const statusHTML = {
                 verified:   `<div class="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl mb-5"><i class="fas fa-check-circle text-green-500 text-xl mt-0.5"></i><div><p class="font-black text-green-800 text-sm">Account Verified!</p><p class="text-sm text-green-600">Your listings display the Verified Landlord badge to students.</p></div></div>`,
-                pending:    `<div class="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl mb-5"><i class="fas fa-clock text-blue-500 text-xl mt-0.5"></i><div><p class="font-black text-blue-800 text-sm">Verification Under Review</p><p class="text-sm text-blue-600">Documents submitted. We'll notify you within 24–48 hours.</p></div></div>`,
+                pending:    `<div class="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl mb-5"><i class="fas fa-clock text-blue-500 text-xl mt-0.5"></i><div><p class="font-black text-blue-800 text-sm">Verification Under Review</p><p class="text-sm text-blue-600">Documents submitted. We'll notify you within 24â€“48 hours.</p></div></div>`,
                 rejected:   `<div class="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-5"><i class="fas fa-times-circle text-red-500 text-xl mt-0.5"></i><div><p class="font-black text-red-800 text-sm">Verification Rejected</p>${rejection_reason ? `<p class="text-sm text-red-600">${rejection_reason}</p>` : ''}<p class="text-sm text-red-600 mt-1">Please re-submit corrected documents below.</p></div></div>`,
                 unverified: `<div class="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl mb-5"><i class="fas fa-exclamation-triangle text-yellow-500 text-xl mt-0.5"></i><div><p class="font-black text-yellow-800 text-sm">Not Yet Verified</p><p class="text-sm text-yellow-700">Upload your documents to get verified and build trust with students.</p></div></div>`,
             };
@@ -559,12 +559,12 @@
                     <div>
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">National ID / NRC / Passport <span class="text-red-500">*</span></label>
                         <input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]">
-                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p>
+                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF Â· Max 10MB</p>
                     </div>
                     <div>
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Title Deed / Ownership Document <span class="text-red-500">*</span></label>
                         <input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#ea580c]">
-                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p>
+                        <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG or PDF Â· Max 10MB</p>
                     </div>
                     <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black hover:bg-blue-700 transition shadow text-sm">Securely Upload Documents</button>
                 </form>` : '');

@@ -1,1 +1,1 @@
-const CONFIG = { API_BASE_URL: "https://findmynyumba-backend.onrender.com/api/v1" }; window.API_URL = CONFIG.API_BASE_URL;
+const CONFIG = { API_BASE_URL: "http://127.0.0.1:8000/api/v1" }; window.API_URL = CONFIG.API_BASE_URL;

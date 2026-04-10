@@ -24,7 +24,7 @@
         .clause { margin-bottom: 1em; line-height: 1.8; }
         .clause-num { font-weight: bold; margin-right: 6px; }
 
-        /* â”€â”€ Mobile safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Mobile safety Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
@@ -71,8 +71,8 @@
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Agreement Type</label>
                         <select id="f-type" onchange="updateDoc()"
                                 class="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold outline-none focus:border-[#ea580c]">
-                            <option value="landlord">Student â†” Landlord</option>
-                            <option value="student_host">Student â†” Student Host</option>
+                            <option value="landlord">Student Ã¢â€ â€ Landlord</option>
+                            <option value="student_host">Student Ã¢â€ â€ Student Host</option>
                         </select>
                     </div>
 
@@ -176,7 +176,7 @@
                     <div style="font-family: ui-sans-serif, sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: #ea580c; margin-bottom: 4px;">FindMyNyumba</div>
                     <h1 style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;" id="doc-title">RESIDENTIAL TENANCY AGREEMENT</h1>
                     <div style="width: 60px; height: 3px; background: #ea580c; margin: 8px auto;"></div>
-                    <p style="font-size: 11px; color: #666;" id="doc-subtitle">Studentâ€“Landlord Rental Agreement</p>
+                    <p style="font-size: 11px; color: #666;" id="doc-subtitle">StudentÃ¢â‚¬â€œLandlord Rental Agreement</p>
                 </div>
 
                 <!-- Preamble -->
@@ -313,7 +313,7 @@
         const party2Label = isHost ? 'STUDENT HOST' : 'LANDLORD';
         const party2Type  = isHost ? 'Student Host' : 'Landlord';
         const titleText   = isHost ? 'STUDENT HOST BEDSPACE AGREEMENT' : 'RESIDENTIAL TENANCY AGREEMENT';
-        const subtitleTxt = isHost ? 'Studentâ€“Student Host Accommodation Agreement' : 'Studentâ€“Landlord Rental Agreement';
+        const subtitleTxt = isHost ? 'StudentÃ¢â‚¬â€œStudent Host Accommodation Agreement' : 'StudentÃ¢â‚¬â€œLandlord Rental Agreement';
 
         // Doc header
         s('doc-title', titleText);
@@ -386,7 +386,7 @@
         // Also pre-fill from logged-in user if available
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token) {
-            fetch('https://findmynyumba-backend.onrender.com/api/v1/auth/me', {
+            fetch('http://127.0.0.1:8000/api/v1/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             .then(r => r.ok ? r.json() : null)

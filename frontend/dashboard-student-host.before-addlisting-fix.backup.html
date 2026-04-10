@@ -59,7 +59,7 @@
 
         <div id="view-listings" class="dashboard-view hidden-view">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">ðŸ  My Listings</h2>
+                <h2 class="text-3xl font-bold text-gray-800">Ã°Å¸ÂÂ  My Listings</h2>
                 <button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-[#c2410c] transition">+ Add New Listing</button>
             </div>
             <div class="bg-white rounded-xl shadow overflow-hidden border">
@@ -75,7 +75,7 @@
         </div>
 
         <div id="view-upload" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800">ðŸš€ Publish New Accommodation</h2>
+            <h2 class="text-3xl font-bold mb-8 text-gray-800">Ã°Å¸Å¡â‚¬ Publish New Accommodation</h2>
             <div class="bg-white p-8 rounded-xl shadow border max-w-4xl">
                 <form id="uploadForm" class="space-y-6">
                     <div class="grid grid-cols-2 gap-6">
@@ -99,7 +99,7 @@
         </div>
 
         <div id="view-verification" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-2 text-gray-800">ðŸ›¡ï¸ Verification Center</h2>
+            <h2 class="text-3xl font-bold mb-2 text-gray-800">Ã°Å¸â€ºÂ¡Ã¯Â¸Â Verification Center</h2>
             <p class="text-gray-500 mb-8">Build trust with students by verifying your identity and your right to offer this bedspace.</p>
             <div class="bg-white p-8 rounded-xl shadow border max-w-3xl">
                 <div id="verif-status-badge" class="mb-6 p-4 rounded-lg bg-yellow-50 text-yellow-800 font-bold border flex items-center"><i class="fas fa-clock mr-3 text-xl"></i> Status: Unverified - Action Required</div>
@@ -112,7 +112,7 @@
         </div>
         
         <div id="view-inquiries" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">ðŸ’¬ Student Inquiries</h2>
+            <h2 class="text-3xl font-bold mb-8">Ã°Å¸â€™Â¬ Student Inquiries</h2>
             <div class="bg-white rounded-xl shadow border overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-gray-100 border-b"><tr class="text-xs font-bold uppercase text-gray-500"><th class="p-4">Student</th><th class="p-4">Interested In</th><th class="p-4">Message</th><th class="p-4">Action</th></tr></thead>
@@ -124,7 +124,7 @@
         </div>
 
         <div id="view-payments" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">ðŸ’³ Revenue & Boosts</h2>
+            <h2 class="text-3xl font-bold mb-8">Ã°Å¸â€™Â³ Revenue & Boosts</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-white p-8 rounded-xl shadow border border-orange-100">
                     <div class="text-center mb-6">
@@ -156,7 +156,7 @@
         </div>
 
         <div id="view-profile" class="dashboard-view hidden-view">
-            <h2 class="text-3xl font-bold mb-8">âš™ï¸ Profile & Settings</h2>
+            <h2 class="text-3xl font-bold mb-8">Ã¢Å¡â„¢Ã¯Â¸Â Profile & Settings</h2>
             <div class="bg-white p-8 rounded-xl shadow border max-w-2xl">
                 <form id="profileForm" class="space-y-6">
                     <div class="grid grid-cols-2 gap-6">
@@ -186,9 +186,9 @@
     </main>
 
     <script>
-        const API_BASE = "https://findmynyumba-backend.onrender.com/api/v1";
+        const API_BASE = "http://127.0.0.1:8000/api/v1";
 
-        // â”€â”€â”€ Auth helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Auth helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         // Single source of truth for the token. Every fetch uses these.
         function getToken() {
             return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -200,11 +200,11 @@
             return h;
         }
 
-        // â”€â”€â”€ Current user (populated from backend on boot) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Current user (populated from backend on boot) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         // Role is NEVER hardcoded. It comes from /student-host/me.
         let currentUser = null;
 
-        // â”€â”€â”€ Boot sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Boot sequence Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         async function initDashboard() {
             if (!getToken()) {
                 showFatalError('No login session found. Please <a href="login.html" class="underline font-bold">log in</a>.');
@@ -221,7 +221,7 @@
                 if (!res.ok) throw new Error('Profile load failed');
 
                 currentUser = await res.json();
-                // Role badge comes from backend â€” never hardcoded
+                // Role badge comes from backend Ã¢â‚¬â€ never hardcoded
                 document.getElementById('role-badge').innerText =
                     (currentUser.role || 'student_host').replace(/_/g, ' ').toUpperCase();
 
@@ -246,7 +246,7 @@
                 </div>`;
         }
 
-        // â”€â”€â”€ Tab switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Tab switching Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         function switchTab(tabId) {
             document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden-view'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
@@ -261,12 +261,12 @@
                 // Pre-fill profile form with real data from backend
                 if (currentUser.full_name) document.getElementById('prof-name').value = currentUser.full_name;
                 if (currentUser.phone)     document.getElementById('prof-phone').value = currentUser.phone;
-                // Role is fixed on this dashboard â€” no dropdown change needed
+                // Role is fixed on this dashboard Ã¢â‚¬â€ no dropdown change needed
                 const profRoleEl = document.getElementById('prof-role'); if (profRoleEl) profRoleEl.value = currentUser.role || 'student_host';
             }
         }
 
-        // â”€â”€â”€ OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ OVERVIEW Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         async function loadOverview() {
             const activeEl    = document.getElementById('stat-active');
             const pendingEl   = document.getElementById('stat-pending');
@@ -313,7 +313,7 @@
                 viewsEl.innerText     = data.total_views       '0';
                 inquiriesEl.innerText = data.unread_inquiries  '0';
 
-                // â”€â”€ Verification alert banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Ã¢â€â‚¬Ã¢â€â‚¬ Verification alert banner Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
                 // All four statuses are handled. The old code only handled 'unverified'.
                 const vStatus = data.verification_status || 'unverified';
 
@@ -340,7 +340,7 @@
                             <i class="fas fa-hourglass-half text-blue-500 text-xl"></i>
                             <div>
                                 <h3 class="font-bold text-blue-800">Verification Under Review</h3>
-                                <p class="text-xs text-blue-700 mt-1">Your documents were submitted. We'll update you within 24â€“48 hours.</p>
+                                <p class="text-xs text-blue-700 mt-1">Your documents were submitted. We'll update you within 24Ã¢â‚¬â€œ48 hours.</p>
                             </div>
                         </div>`;
                     alertBox.classList.remove('hidden');
@@ -405,7 +405,7 @@
             }
         }
 
-        // â”€â”€â”€ MY LISTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ MY LISTINGS Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         async function loadListings() {
             const tbody = document.getElementById('my-listings-body');
 
@@ -462,7 +462,7 @@
         }
 
         async function deleteProperty(id) {
-            if (!confirm('âš ï¸ Are you sure? This will permanently remove this bedspace.')) return;
+            if (!confirm('Ã¢Å¡Â Ã¯Â¸Â Are you sure? This will permanently remove this bedspace.')) return;
             try {
                 const res = await fetch(`${API_BASE}/student-host/properties/${id}`, {
                     method: 'DELETE',
@@ -479,11 +479,11 @@
             }
         }
 
-        // â”€â”€â”€ Stubs for future steps (kept so no errors are thrown) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Stubs for future steps (kept so no errors are thrown) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         async function loadInquiries() {}
         function setupVerificationForm() {}
 
-        // â”€â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ PROFILE Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('profileForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -501,17 +501,17 @@
                         })
                     });
                     if (res.ok) {
-                        alert('âœ… Profile updated successfully.');
+                        alert('Ã¢Å“â€¦ Profile updated successfully.');
                         if (currentUser) {
                             currentUser.full_name = document.getElementById('prof-name').value.trim();
                             currentUser.phone     = document.getElementById('prof-phone').value.trim();
                         }
                     } else {
                         const data = await res.json();
-                        alert('âŒ ' + (data.detail || 'Could not save profile.'));
+                        alert('Ã¢ÂÅ’ ' + (data.detail || 'Could not save profile.'));
                     }
                 } catch (err) {
-                    alert('âŒ Server error. Make sure the backend is running.');
+                    alert('Ã¢ÂÅ’ Server error. Make sure the backend is running.');
                 } finally {
                     btn.innerText = 'Save Settings';
                     btn.disabled  = false;
@@ -519,7 +519,7 @@
             });
         });
 
-        // â”€â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Logout Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         function logout() {
             if (!confirm('Are you sure you want to log out?')) return;
             localStorage.removeItem('token');
@@ -527,7 +527,7 @@
             window.location.href = 'login.html';
         }
 
-        // â”€â”€â”€ Start the dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Start the dashboard Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         initDashboard();
     </script>
 </body>

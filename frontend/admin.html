@@ -28,7 +28,7 @@
             border-bottom-right-radius: 3px;
         }
 
-        /* ── Mobile safety ───────────────────────────── */
+        /* â”€â”€ Mobile safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
@@ -125,19 +125,19 @@
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Total Users</div>
-                        <div id="stat-users" class="text-3xl font-black text-slate-900">—</div>
+                        <div id="stat-users" class="text-3xl font-black text-slate-900">â€”</div>
                     </div>
                     <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Listings</div>
-                        <div id="stat-listings" class="text-3xl font-black text-slate-900">—</div>
+                        <div id="stat-listings" class="text-3xl font-black text-slate-900">â€”</div>
                     </div>
                     <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Messages</div>
-                        <div id="stat-messages" class="text-3xl font-black text-slate-900">—</div>
+                        <div id="stat-messages" class="text-3xl font-black text-slate-900">â€”</div>
                     </div>
                     <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Pending Reports</div>
-                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">—</div>
+                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">â€”</div>
                     </div>
                 </div>
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
@@ -359,17 +359,17 @@
         <div class="space-y-3 mb-5">
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Current Password</label>
-                <input id="cpwd-old" type="password" placeholder="••••••••"
+                <input id="cpwd-old" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">New Password</label>
-                <input id="cpwd-new" type="password" placeholder="••••••••"
+                <input id="cpwd-new" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Confirm New Password</label>
-                <input id="cpwd-confirm" type="password" placeholder="••••••••"
+                <input id="cpwd-confirm" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
             </div>
         </div>
@@ -383,12 +383,12 @@
 
 <script>
 'use strict';
-const API = 'https://findmynyumba-backend.onrender.com/api/v1';
+const API = 'http://127.0.0.1:8000/api/v1';
 let modalCallback = null;
 
 // -- XSS helper ----------------------------------------------------------------
 function esc(str) {
-    if (str === null || str === undefined) return '—';
+    if (str === null || str === undefined) return 'â€”';
     return String(str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -413,7 +413,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 logout();
             }
         })
-        .catch(() => { /* network error — allow offline use */ });
+        .catch(() => { /* network error â€” allow offline use */ });
 
     const name = sessionStorage.getItem('adminName') || 'Admin';
     const nameEl = document.querySelector('.text-sm.font-bold.text-slate-700');
@@ -474,7 +474,7 @@ async function submitChangePassword() {
     }
 
     btn.disabled = true;
-    btn.textContent = 'Updating…';
+    btn.textContent = 'Updatingâ€¦';
 
     try {
         const res  = await fetch(`${API}/admin/change-password`, {
@@ -549,9 +549,9 @@ async function loadDashboard() {
         const res  = await fetch(`${API}/admin/stats`);
         if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('stat-users').textContent    = data.total_users    ?? '—';
-        document.getElementById('stat-listings').textContent = data.total_listings ?? '—';
-        document.getElementById('stat-messages').textContent = data.total_messages ?? '—';
+        document.getElementById('stat-users').textContent    = data.total_users    ?? 'â€”';
+        document.getElementById('stat-listings').textContent = data.total_listings ?? 'â€”';
+        document.getElementById('stat-messages').textContent = data.total_messages ?? 'â€”';
         document.getElementById('stat-reports').textContent  = (data.pending_listings ?? 0) + (data.pending_verifs ?? 0);
     } catch { /* stats fail silently */ }
 
@@ -742,7 +742,7 @@ async function approveVerification(userId) {
 }
 
 async function rejectVerification(userId) {
-    const reason = window.prompt("Rejection reason (optional — shown to user):") ?? "";
+    const reason = window.prompt("Rejection reason (optional â€” shown to user):") ?? "";
     showModal("Reject Verification", "Reject this verification? The user will be notified.", async () => {
         const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
             method: "POST",

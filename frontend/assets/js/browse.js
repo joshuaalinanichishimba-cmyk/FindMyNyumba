@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const query  = params.get('q') || '';
 
     try {
-        const response = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties');
+        const response = await fetch('http://127.0.0.1:8000/api/v1/properties');
         if (!response.ok) throw new Error(`Server error ${response.status}`);
         let properties = await response.json();
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         propertyGrid.innerHTML = '';
         properties.forEach(prop => {
             // FIX: backend returns image_url, not photo_url
-            // FIX: was a syntax error — raw URL without quotes
+            // FIX: was a syntax error â€” raw URL without quotes
             const imageUrl = prop.image_url
                 || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
 

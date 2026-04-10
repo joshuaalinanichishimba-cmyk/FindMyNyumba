@@ -1,4 +1,4 @@
-const API_URL = "https://findmynyumba-backend.onrender.com/api/v1";
+const API_URL = "http://127.0.0.1:8000/api/v1";
 
 function getAuthHeaders() {
     return {
@@ -7,7 +7,7 @@ function getAuthHeaders() {
     };
 }
 
-// ── 1. Saved Properties ───────────────────────────────────────────────────
+// â”€â”€ 1. Saved Properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.loadSavedProperties = async function() {
     const grid = document.getElementById("saved-rooms-grid");
     const empty = document.getElementById("saved-empty");
@@ -46,7 +46,7 @@ window.loadSavedProperties = async function() {
     }
 };
 
-// ── 2. Conversations / Inbox ──────────────────────────────────────────────
+// â”€â”€ 2. Conversations / Inbox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let currentStudentChatId = null;
 let currentStudentPropId = null;
 
@@ -169,7 +169,7 @@ window.sendStudentMessage = async function(e) {
     }
 };
 
-// ── 3. Profile & Settings ─────────────────────────────────────────────────
+// â”€â”€ 3. Profile & Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.loadProfileData = function() {
     if (window._currentUser) {
         document.getElementById("profile-name").value = window._currentUser.full_name || "";

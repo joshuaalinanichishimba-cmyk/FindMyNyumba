@@ -79,19 +79,19 @@ if(addForm) {
         };
 
         try {
-            const response = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties', {
+            const response = await fetch('http://127.0.0.1:8000/api/v1/properties', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             if (response.ok) {
-                alert("✅ SUCCESS! Property Published to Database!");
+                alert("âœ… SUCCESS! Property Published to Database!");
                 e.target.reset();
                 showStep(1);
                 switchTab('listings');
             } else {
-                alert("❌ Failed to publish property.");
+                alert("âŒ Failed to publish property.");
             }
         } catch (error) {
             console.error("Database error:", error);
@@ -103,7 +103,7 @@ if(addForm) {
 // --- Fetch & Render Properties ---
 async function fetchDatabaseProperties() {
     try {
-        const res = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties');
+        const res = await fetch('http://127.0.0.1:8000/api/v1/properties');
         if(res.ok) {
             const properties = await res.json();
             
@@ -140,7 +140,7 @@ async function fetchDatabaseProperties() {
 async function deleteProperty(id) {
     if(!confirm("Delete this listing permanently?")) return;
     try {
-        const res = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties/' + id, { method: 'DELETE' });
+        const res = await fetch('http://127.0.0.1:8000/api/v1/properties/' + id, { method: 'DELETE' });
         if(res.ok) fetchDatabaseProperties();
     } catch(e) { console.error("Delete failed", e); }
 }
@@ -193,18 +193,18 @@ if(addForm) {
         };
 
         try {
-            const response = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties', {
+            const response = await fetch('http://127.0.0.1:8000/api/v1/properties', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             if (response.ok) {
-                alert("✅ SUCCESS! Real Property Published to Database!");
+                alert("âœ… SUCCESS! Real Property Published to Database!");
                 e.target.reset();
                 fetchDatabaseProperties(); // Reload the table
             } else {
-                alert("❌ Failed to publish property.");
+                alert("âŒ Failed to publish property.");
             }
         } catch (error) {
             console.error("Database error:", error);
@@ -216,7 +216,7 @@ if(addForm) {
 // === RESTORED: Fetch & Render Properties ===
 async function fetchDatabaseProperties() {
     try {
-        const res = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties');
+        const res = await fetch('http://127.0.0.1:8000/api/v1/properties');
         if(res.ok) {
             const properties = await res.json();
             const table = document.getElementById('real-listings-table');
@@ -241,7 +241,7 @@ async function fetchDatabaseProperties() {
 async function deleteProperty(id) {
     if(!confirm("Delete this listing permanently?")) return;
     try {
-        const res = await fetch('https://findmynyumba-backend.onrender.com/api/v1/properties/' + id, { method: 'DELETE' });
+        const res = await fetch('http://127.0.0.1:8000/api/v1/properties/' + id, { method: 'DELETE' });
         if(res.ok) fetchDatabaseProperties();
     } catch(e) { console.error("Delete failed", e); }
 }
