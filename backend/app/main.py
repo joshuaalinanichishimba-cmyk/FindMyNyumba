@@ -1,85 +1,31 @@
-"""
-main.py
-FindMyNyumba FastAPI application entry point.
-
-IMPORTANT:
-- landlords.py and student_hosts.py routers have prefix="/landlord" and
-  "/student-host" respectively (NOT "/api/v1/..."). The "/api/v1" prefix
-  is added here via api_router mounted at prefix="/api/v1".
-- CORS is restricted to known origins. Do NOT use allow_origins=["*"] with
-  allow_credentials=True — that violates the CORS spec and is a security risk.
-"""
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1.endpoints import auth, student, landlord, admin
 from fastapi.staticfiles import StaticFiles
 
-from app.api.v1.api import api_router
-from app.core.config import settings
-from app.core.database import Base, engine
+app = FastAPI(title="FindMyNyumba")
 
-# ── Create DB tables on startup (idempotent) ──────────────────────────────────
-# In production you would use Alembic migrations instead.
-Base.metadata.create_all(bind=engine)
+# CRITICAL: Allow your specific Vercel and Local URLs
+origins = [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "https://findmynyumba-web.vercel.app",
+    "https://nyumba-web.vercel.app"
+]
 
-# ── Ensure static upload directory exists ────────────────────────────────────
-os.makedirs("static/uploads/properties",    exist_ok=True)
-os.makedirs("static/uploads/verification",  exist_ok=True)
-
-# ── App ───────────────────────────────────────────────────────────────────────
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version="1.0.0",
-    # Hide /docs and /redoc in production — set to None when deploying
-    docs_url="/docs",
-    redoc_url="/redoc",
-)
-
-# ── CORS ──────────────────────────────────────────────────────────────────────
-# allow_credentials=True requires explicit origins — never use ["*"] with it.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "https://findmynyumba-web.vercel.app"
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ── Static files (uploaded property images, verification docs) ───────────────
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
+app.include_router(student.router, prefix="/api/v1/student", tags=["Student"])
+app.include_router(landlord.router, prefix="/api/v1/landlord", tags=["Landlord"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
 
-# ── API routes ────────────────────────────────────────────────────────────────
-# All sub-routers are registered inside api_router (see app/api/v1/api.py).
-# The "/api/v1" prefix is added once here.
-app.include_router(api_router, prefix="/api/v1")
-
-
-@app.get("/", tags=["Health"])
-def root():
-    return {
-        "status": "online",
-        "project": settings.PROJECT_NAME,
-        "api": "/api/v1",
-        "docs": "/docs",
-    }
-
-
-@app.get("/health", tags=["Health"])
-def health():
-    return {"status": "ok"}
-
-from fastapi.responses import FileResponse
-import pathlib
-
-@app.get('/favicon.ico', include_in_schema=False)
-async def favicon():
-    # Serve favicon from the static folder if it exists, otherwise return 204 No Content
-    favicon_path = pathlib.Path("static/favicon.ico")
-    if favicon_path.exists():
-        return FileResponse(str(favicon_path))
-    from fastapi.responses import Response
-    return Response(status_code=204)
+@app.get("/")
+def read_root():
+    return {"status": "online", "message": "FindMyNyumba API is running"}
