@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="icon" type="image/png" href="logo.png">
     <style>
-        #toast { transition: opacity 0.3s ease, transform 0.3s ease; }a
+        #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
         #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
         #toast.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
 
@@ -249,11 +249,11 @@
                     </ul>
                 </div>
             </div>
-            <script>
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-</script>
-                    <a href="terms.html" class="hover:text-white">Terms</a>
-                    <a href="privacy.html" class="hover:text-white">Privacy</a>
+            <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+                <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
+                    <a href="terms.html" class="hover:text-white transition">Terms</a>
+                    <a href="privacy.html" class="hover:text-white transition">Privacy</a>
                 </div>
             </div>
         </div>
@@ -499,4 +499,5 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
     document.getElementById('current-year').textContent = new Date().getFullYear();
 </script>
-</body
+</body>
+</html>

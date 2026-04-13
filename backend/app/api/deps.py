@@ -1,61 +1,65 @@
 ﻿"""
 app/api/deps.py
-Canonical get_current_user dependency — used by ALL routers.
-Decodes the JWT Bearer token and returns the authenticated User object.
-"""
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
-from jose import JWTError, jwt
 
-from app.core.database import get_db
+Shared FastAPI dependencies:
+  - get_current_user  : decode JWT, return User ORM object
+  - create_access_token : create signed JWT
+
+This was referenced in all endpoint files but never provided in the source files.
+"""
+
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
+from app.core.database import get_db
 from app.models.user import User
 
-# HTTPBearer extracts the token from "Authorization: Bearer <token>"
-bearer_scheme = HTTPBearer(auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+
+# ── Token creation ─────────────────────────────────────────────────────────────
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (
+        expires_delta if expires_delta
+        else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+# ── JWT → User dependency ──────────────────────────────────────────────────────
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    db: Session = Depends(get_db),
+    token: str     = Depends(oauth2_scheme),
+    db: Session    = Depends(get_db),
 ) -> User:
-    """
-    Decode the JWT, look up the user, and return it.
-    Raises HTTP 401 if the token is missing, expired, or invalid.
-    Raises HTTP 403 if the user account is suspended.
-    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Authentication required. Please log in.",
+        detail="Could not validate credentials.",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
-    if credentials is None:
-        raise credentials_exception
-
-    token = credentials.credentials
-
     try:
-        payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
-        )
-        email: str = payload.get("sub")
-        if not email:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.id == int(user_id)).first()
     if user is None:
         raise credentials_exception
-
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is suspended. Contact support.",
+            detail="Account suspended.",
         )
-
     return user

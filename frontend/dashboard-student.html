@@ -6,46 +6,78 @@
     <title>Student Dashboard - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
     <style>
-        :root { --orange: #ea580c; }
-        ::-webkit-scrollbar { width: 5px; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        :root { --orange: #ea580c; --orange-light: #fff7ed; --orange-hover: #c2410c; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        #sidebar { transition: transform 0.3s ease; }
-        .nav-link-active { background-color: #fff7ed; color: #ea580c; border-right: 3px solid #ea580c; }
-        .bubble-me   { background-color: #ea580c; color: white; border-bottom-right-radius: 0; }
-        .bubble-them { background-color: #f3f4f6; color: #1f2937; border-bottom-left-radius: 0; }
-        #messages-panel { height: calc(100vh - 8rem); }
+
+        /* Sidebar */
+        #sidebar { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Nav active state */
+        .nav-link-active {
+            background-color: #fff7ed !important;
+            color: #ea580c !important;
+            border-right: 3px solid #ea580c;
+        }
+
+        /* Chat bubbles */
+        .bubble-me   { background-color: #ea580c; color: white; border-bottom-right-radius: 4px; }
+        .bubble-them { background-color: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; }
+
+        /* Messages panel height */
+        #messages-panel { height: calc(100vh - 9rem); }
+
+        /* Mobile chat pane switching */
         @media (max-width: 767px) {
-            #messages-panel { height: calc(100vh - 7rem); }
+            #messages-panel { height: calc(100vh - 7.5rem); }
             #conv-pane  { width: 100%; }
             #chat-pane  { width: 100%; display: none; }
             #chat-pane.mobile-chat-open  { display: flex; }
             #conv-pane.mobile-chat-open  { display: none; }
         }
 
-        /* â”€â”€ Mobile safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-        * { box-sizing: border-box; }
+        /* Fix duplicate hidden class on search grid */
+        #search-results-grid { display: none; }
+        #search-results-grid.visible { display: grid; }
+
+        /* Card hover */
+        .listing-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .listing-card { transition: all 0.2s ease; }
+
+        /* Input focus */
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #ea580c !important; box-shadow: 0 0 0 3px rgba(234,88,12,0.1); }
+
+        /* Dashboard section */
+        .dashboard-section { display: block; }
+        .dashboard-section.hidden { display: none; }
+
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
-        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        @media (max-width: 640px) {
-            .sm\:hidden-mobile { display: none !important; }
-        }
+
+        /* Logo word mark */
+        .logo-mark { font-weight: 900; letter-spacing: -0.5px; }
+        .logo-mark span { color: #ea580c; }
+
+        /* Stat card icon */
+        .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
+<body class="bg-slate-50" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
 
-    <!-- Mobile top bar -->
-    <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 shadow-sm shrink-0 z-30">
-        <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 transition">
+    <!-- ── Mobile top bar ─────────────────────────────────────────── -->
+    <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 shadow-sm shrink-0 z-30">
+        <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 transition">
             <i class="fas fa-bars text-lg"></i>
         </button>
         <div class="flex items-center gap-2">
-            <img src="logo.png" alt="FindMyNyumba"
-                 class="h-8 w-auto object-contain mix-blend-multiply brightness-125"
-                 onerror="this.style.display='none'">
-            <span class="text-base font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
+            <img src="logo.png" alt="FindMyNyumba" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
         </div>
         <img id="mobile-avatar"
              src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
@@ -55,129 +87,160 @@
 
     <div class="flex flex-1 overflow-hidden relative">
 
+        <!-- Sidebar overlay (mobile) -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
 
+        <!-- ── SIDEBAR ─────────────────────────────────────────────── -->
         <aside id="sidebar"
                class="fixed md:relative -translate-x-full md:translate-x-0
-                      w-64 bg-white shadow-xl flex flex-col z-40 md:z-20 h-full top-0 left-0">
+                      w-64 bg-white border-r border-slate-100 shadow-xl md:shadow-none
+                      flex flex-col z-40 md:z-20 h-full top-0 left-0">
 
-            <!-- Logo in sidebar -->
-            <div class="p-5 border-b border-gray-50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
+            <!-- Logo -->
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5">
                     <img src="logo.png" alt="FindMyNyumba"
-                         class="h-8 w-auto object-contain mix-blend-multiply brightness-125"
+                         class="h-8 w-auto object-contain"
                          onerror="this.style.display='none'">
-                    <span class="text-lg font-black text-black">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Student Portal</div>
                 </div>
-                <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100">
+                <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
                     <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
 
-            <nav class="flex-1 py-3 overflow-y-auto">
-                <button id="nav-overview"  onclick="switchTab('overview')"  class="nav-link nav-link-active w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-[#ea580c]"><i class="fas fa-home w-5 text-center"></i> Overview</button>
-                <button id="nav-saved"     onclick="switchTab('saved')"     class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-heart w-5 text-center"></i> Saved Rooms</button>
-                <button id="nav-messages"  onclick="switchTab('messages')"  class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-comments w-5 text-center"></i> Messages</button>
-                <button id="nav-profile"   onclick="switchTab('profile')"   class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-user w-5 text-center"></i> Profile</button>
-                <button id="nav-settings"  onclick="switchTab('settings')"  class="nav-link w-full flex items-center gap-3 px-6 py-3.5 text-left font-bold text-sm transition-all text-gray-600 hover:bg-gray-50"><i class="fas fa-cog w-5 text-center"></i> Settings</button>
+            <!-- Nav -->
+            <nav class="flex-1 py-3 px-2 overflow-y-auto space-y-0.5">
+                <button id="nav-overview"  onclick="switchTab('overview')"
+                    class="nav-link nav-link-active w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-[#ea580c]">
+                    <i class="fas fa-home w-4 text-center"></i> Overview
+                </button>
+                <button id="nav-saved"     onclick="switchTab('saved')"
+                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
+                    <i class="fas fa-heart w-4 text-center"></i> Saved Rooms
+                </button>
+                <button id="nav-messages"  onclick="switchTab('messages')"
+                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
+                    <i class="fas fa-comments w-4 text-center"></i> Messages
+                </button>
+                <button id="nav-profile"   onclick="switchTab('profile')"
+                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
+                    <i class="fas fa-user w-4 text-center"></i> Profile
+                </button>
+                <button id="nav-settings"  onclick="switchTab('settings')"
+                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
+                    <i class="fas fa-cog w-4 text-center"></i> Settings
+                </button>
             </nav>
 
-            <div class="p-4 border-t border-gray-100">
-                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 font-bold rounded-xl transition text-sm">
-                    <i class="fas fa-sign-out-alt w-5 text-center"></i> Logout
+            <div class="px-2 pb-4 border-t border-slate-100 pt-2 shrink-0">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-semibold transition text-sm">
+                    <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
                 </button>
             </div>
         </aside>
 
+        <!-- ── MAIN CONTENT ────────────────────────────────────────── -->
         <main class="flex-1 flex flex-col overflow-hidden">
 
             <!-- Desktop header -->
-            <header class="hidden md:flex justify-between items-center px-8 py-4 bg-white border-b border-gray-100 shrink-0 shadow-sm z-10">
-                <h2 id="page-title" class="text-xl font-black text-black uppercase tracking-tight">Overview</h2>
-                <div class="flex items-center gap-4">
+            <header class="hidden md:flex justify-between items-center px-8 py-4 bg-white border-b border-slate-100 shrink-0 shadow-sm z-10">
+                <h2 id="page-title" class="text-lg font-black text-slate-900 uppercase tracking-tight">Overview</h2>
+                <div class="flex items-center gap-3">
                     <div class="text-right">
-                        <p id="header-name" class="font-black text-black text-sm">Student</p>
-                        <p class="text-xs text-gray-400 font-semibold">Student Account</p>
+                        <p id="header-name" class="font-bold text-slate-800 text-sm leading-tight">Student</p>
+                        <p class="text-xs text-slate-400 font-medium">Student Account</p>
                     </div>
                     <img id="header-avatar"
                          src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
-                         class="w-10 h-10 rounded-full shadow-md object-cover border-2 border-white cursor-pointer"
+                         class="w-10 h-10 rounded-full shadow object-cover border-2 border-white cursor-pointer ring-2 ring-orange-100"
                          onclick="switchTab('profile')" alt="Profile">
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
 
-                <!-- â”€â”€ OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- ── OVERVIEW ──────────────────────────────────────── -->
                 <div id="overview-section" class="dashboard-section">
+
+                    <!-- Stat cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div class="stat-icon bg-orange-50 text-[#ea580c]"><i class="fas fa-heart"></i></div>
                             <div>
-                                <p class="text-gray-400 text-xs font-black uppercase tracking-wider mb-1">Saved Rooms</p>
-                                <h3 id="stat-saved" class="text-3xl font-black text-black"><i class="fas fa-spinner fa-spin text-gray-300 text-2xl"></i></h3>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-0.5">Saved Rooms</p>
+                                <h3 id="stat-saved" class="text-2xl font-black text-slate-900">
+                                    <i class="fas fa-spinner fa-spin text-slate-300 text-xl"></i>
+                                </h3>
                             </div>
-                            <div class="w-11 h-11 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-heart"></i></div>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                            <div class="stat-icon bg-orange-50 text-[#ea580c]"><i class="fas fa-envelope"></i></div>
                             <div>
-                                <p class="text-gray-400 text-xs font-black uppercase tracking-wider mb-1">Unread Messages</p>
-                                <h3 id="stat-messages" class="text-3xl font-black text-[#ea580c]"><i class="fas fa-spinner fa-spin text-orange-300 text-2xl"></i></h3>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-0.5">Unread Messages</p>
+                                <h3 id="stat-messages" class="text-2xl font-black text-[#ea580c]">
+                                    <i class="fas fa-spinner fa-spin text-orange-300 text-xl"></i>
+                                </h3>
                             </div>
-                            <div class="w-11 h-11 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-envelope"></i></div>
                         </div>
-                        <div class="bg-[#ea580c] p-5 rounded-2xl shadow-sm flex items-center justify-between cursor-pointer hover:bg-orange-700 transition"
+                        <div class="bg-[#ea580c] p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-orange-700 transition group"
                              onclick="window.location.href='browse.html'">
+                            <div class="stat-icon bg-white/20 text-white"><i class="fas fa-search"></i></div>
                             <div>
-                                <p class="text-orange-200 text-xs font-black uppercase tracking-wider mb-1">Find a Room</p>
+                                <p class="text-orange-200 text-xs font-bold uppercase tracking-wider mb-0.5">Find a Room</p>
                                 <h3 class="text-sm font-black text-white">Browse All Properties</h3>
                             </div>
-                            <div class="w-11 h-11 rounded-full bg-white/20 text-white flex items-center justify-center text-lg flex-shrink-0"><i class="fas fa-search"></i></div>
                         </div>
                     </div>
 
+                    <!-- Search bar -->
                     <div class="mb-5 flex gap-2">
                         <input type="text" id="search-input"
                                placeholder="Search by location, price, or keyword..."
-                               class="flex-1 min-w-0 p-3 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-[#ea580c] font-semibold text-sm text-gray-800">
+                               class="flex-1 min-w-0 px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm font-medium text-sm text-slate-800 focus:ring-2 focus:ring-[#ea580c] transition">
                         <button onclick="searchProperties()"
-                                class="bg-[#ea580c] text-white px-4 py-3 rounded-xl font-black shadow hover:bg-black transition flex items-center gap-2 flex-shrink-0 text-sm">
+                                class="bg-[#ea580c] text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition flex items-center gap-2 flex-shrink-0 text-sm">
                             <i class="fas fa-search"></i><span class="hidden sm:inline">Find</span>
                         </button>
                     </div>
 
-                    <div id="search-results-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 hidden"></div>
+                    <!-- Search results -->
+                    <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5"></div>
 
-                    <h3 class="text-sm font-black mb-3 text-black uppercase tracking-wide">Recent Listings</h3>
+                    <!-- Recent listings -->
+                    <h3 class="text-xs font-black mb-3 text-slate-400 uppercase tracking-widest">Recent Listings</h3>
                     <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
-                <!-- â”€â”€ SAVED ROOMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- ── SAVED ROOMS ────────────────────────────────────── -->
                 <div id="saved-section" class="dashboard-section hidden">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8">
-                        <h2 class="text-lg font-black mb-6 text-black">Saved Properties</h2>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                        <h2 class="text-base font-black mb-6 text-slate-900">Saved Properties</h2>
                         <div id="saved-rooms-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                        <div id="saved-empty" class="text-center py-12">
-                            <i class="fas fa-heart text-gray-200 text-5xl mb-4 block"></i>
-                            <p class="text-gray-400 font-bold mb-4 text-sm">You haven't saved any rooms yet.</p>
-                            <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition inline-block text-sm">Browse Properties</a>
+                        <div id="saved-empty" class="text-center py-12 hidden">
+                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-heart text-slate-300 text-2xl"></i>
+                            </div>
+                            <p class="text-slate-400 font-semibold mb-4 text-sm">You haven't saved any rooms yet.</p>
+                            <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition inline-block text-sm">Browse Properties</a>
                         </div>
                     </div>
                 </div>
 
-                <!-- â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- ── MESSAGES ───────────────────────────────────────── -->
                 <div id="messages-section" class="dashboard-section hidden">
-                    <div id="messages-panel" class="flex bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div id="messages-panel" class="flex bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
 
                         <!-- Conversation list pane -->
-                        <div id="conv-pane" class="w-full md:w-2/5 lg:w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col flex-shrink-0">
-                            <div class="p-4 border-b border-gray-200 bg-white">
-                                <h3 class="font-black text-sm text-black">Conversations</h3>
+                        <div id="conv-pane" class="w-full md:w-2/5 lg:w-1/3 border-r border-slate-100 bg-slate-50 flex flex-col flex-shrink-0">
+                            <div class="px-4 py-3.5 border-b border-slate-100 bg-white shrink-0">
+                                <h3 class="font-black text-sm text-slate-900">Conversations</h3>
                             </div>
                             <div id="conversation-list" class="flex-1 overflow-y-auto">
-                                <div class="p-6 text-center text-gray-400 text-sm">
-                                    <i class="fas fa-comments text-3xl text-gray-200 mb-3 block"></i>
-                                    <p class="font-semibold">No conversations yet.</p>
-                                    <p class="text-xs mt-1">Message a landlord from a listing to get started.</p>
+                                <div class="p-6 text-center text-slate-400 text-sm">
+                                    <i class="fas fa-comments text-3xl text-slate-200 mb-3 block"></i>
+                                    <p class="font-semibold text-sm">No conversations yet.</p>
+                                    <p class="text-xs mt-1 text-slate-400">Message a landlord from a listing to get started.</p>
                                 </div>
                             </div>
                         </div>
@@ -185,21 +248,23 @@
                         <!-- Chat pane -->
                         <div id="chat-pane" class="hidden md:flex flex-col flex-1 bg-white relative min-w-0">
                             <button id="chat-back-btn" onclick="closeMobileChat()"
-                                    class="md:hidden flex items-center gap-2 px-4 py-3 text-[#ea580c] font-bold text-sm border-b border-gray-100 bg-white">
+                                    class="md:hidden flex items-center gap-2 px-4 py-3 text-[#ea580c] font-bold text-sm border-b border-slate-100 bg-white shrink-0">
                                 <i class="fas fa-arrow-left"></i> Back
                             </button>
-                            <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-300 p-6">
-                                <i class="fas fa-comments text-4xl mb-3"></i>
-                                <p class="font-bold text-sm text-gray-400 text-center">Select a conversation to start messaging</p>
+                            <div id="chat-empty-state" class="flex-1 flex flex-col items-center justify-center text-slate-300 p-6">
+                                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-comments text-2xl text-slate-300"></i>
+                                </div>
+                                <p class="font-bold text-sm text-slate-400 text-center">Select a conversation to start messaging</p>
                             </div>
-                            <div id="chat-header" class="p-4 border-b border-gray-200 bg-white hidden items-center">
+                            <div id="chat-header" class="px-4 py-3 border-b border-slate-100 bg-white hidden items-center shrink-0">
                                 <div class="min-w-0 flex-1">
-                                    <h4 id="chat-landlord-name" class="font-black text-sm text-black truncate">Landlord</h4>
-                                    <p id="chat-property-ref" class="text-xs font-bold text-[#ea580c] truncate"></p>
+                                    <h4 id="chat-landlord-name" class="font-black text-sm text-slate-900 truncate">Landlord</h4>
+                                    <p id="chat-property-ref" class="text-xs font-semibold text-[#ea580c] truncate"></p>
                                 </div>
                             </div>
-                            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30 hidden"></div>
-                            <div id="chat-input-area" class="p-3 bg-white border-t border-gray-100 hidden">
+                            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/40 hidden"></div>
+                            <div id="chat-input-area" class="p-3 bg-white border-t border-slate-100 hidden shrink-0">
                                 <div id="attach-preview" class="hidden mb-2 flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2 text-xs font-semibold text-orange-700 max-w-full overflow-hidden">
                                     <i class="fas fa-paperclip"></i>
                                     <span id="attach-preview-name" class="flex-1 truncate"></span>
@@ -208,13 +273,13 @@
                                 <form id="chat-form" class="flex items-center gap-2" onsubmit="sendStudentMessage(event)">
                                     <input type="file" id="chat-attachment" class="hidden" accept="image/*,.pdf,.doc,.docx,.txt" onchange="previewAttachment(this)">
                                     <button type="button" onclick="document.getElementById('chat-attachment').click()"
-                                            class="w-11 h-11 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#ea580c] hover:border-[#ea580c] transition flex-shrink-0" title="Attach file or photo">
+                                            class="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-[#ea580c] hover:border-[#ea580c] transition flex-shrink-0">
                                         <i class="fas fa-paperclip text-sm"></i>
                                     </button>
                                     <input type="text" id="chat-input" autocomplete="off"
-                                           class="flex-1 bg-gray-50 px-4 py-3 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-medium text-sm"
+                                           class="flex-1 bg-slate-50 px-4 py-2.5 border border-transparent rounded-xl font-medium text-sm text-slate-800"
                                            placeholder="Type a message...">
-                                    <button type="submit" class="bg-[#ea580c] text-white w-11 h-11 rounded-xl flex items-center justify-center hover:bg-black transition flex-shrink-0">
+                                    <button type="submit" class="bg-[#ea580c] text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-orange-700 transition flex-shrink-0">
                                         <i class="fas fa-paper-plane text-sm"></i>
                                     </button>
                                 </form>
@@ -223,66 +288,96 @@
                     </div>
                 </div>
 
-                <!-- â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- ── PROFILE ────────────────────────────────────────── -->
                 <div id="profile-section" class="dashboard-section hidden">
-                    <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 max-w-2xl shadow-sm">
-                        <h3 class="text-lg font-black text-black mb-6">Profile Details</h3>
+                    <div class="max-w-2xl">
 
-                        <div id="profile-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">Profile updated successfully!</div>
-                        <div id="profile-error"   class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
-
-                        <form id="profileForm" class="space-y-4" onsubmit="saveProfile(event)">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-1.5">Full Name</label>
-                                    <input type="text" id="profile-name" required
-                                           class="w-full p-3 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-1.5">Phone Number</label>
-                                    <input type="tel" id="profile-phone" placeholder="+260..."
-                                           class="w-full p-3 bg-gray-50 border border-transparent rounded-xl outline-none focus:border-[#ea580c] focus:bg-white transition font-bold text-black text-sm">
+                        <!-- Profile card header -->
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-5">
+                            <div class="bg-gradient-to-r from-orange-500 to-orange-600 h-20 relative">
+                                <div class="absolute -bottom-6 left-6">
+                                    <img id="profile-avatar-display"
+                                         src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+                                         class="w-14 h-14 rounded-full border-4 border-white shadow-md object-cover">
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-black text-gray-500 uppercase tracking-wide mb-1.5">Email Address</label>
-                                <input type="email" id="profile-email" disabled
-                                       class="w-full p-3 bg-gray-100 border border-transparent rounded-xl text-gray-400 font-bold text-sm cursor-not-allowed">
-                                <p class="text-[10px] text-gray-400 mt-1 ml-1">Email cannot be changed here. Contact support.</p>
+                            <div class="pt-9 pb-5 px-6">
+                                <p id="profile-name-display" class="font-black text-slate-900 text-base">Student</p>
+                                <p id="profile-email-display" class="text-xs text-slate-400 font-medium mt-0.5"></p>
                             </div>
-                            <button type="submit" id="profile-save-btn"
-                                    class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-black transition shadow text-sm">
-                                Save Changes
-                            </button>
-                        </form>
+                        </div>
+
+                        <!-- Profile form -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                            <h3 class="text-sm font-black text-slate-900 mb-5">Edit Profile</h3>
+
+                            <div id="profile-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">
+                                <i class="fas fa-check-circle mr-2"></i>Profile updated successfully!
+                            </div>
+                            <div id="profile-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
+
+                            <form id="profileForm" class="space-y-4" onsubmit="saveProfile(event)">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Full Name</label>
+                                        <input type="text" id="profile-name" required
+                                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Phone Number</label>
+                                        <input type="tel" id="profile-phone" placeholder="+260..."
+                                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 transition">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Email Address</label>
+                                    <input type="email" id="profile-email" disabled
+                                           class="w-full px-4 py-3 bg-slate-100 border border-slate-100 rounded-xl text-slate-400 font-medium text-sm cursor-not-allowed">
+                                    <p class="text-[10px] text-slate-400 mt-1.5">Email cannot be changed here. Contact support.</p>
+                                </div>
+                                <button type="submit" id="profile-save-btn"
+                                        class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-700 transition shadow text-sm">
+                                    Save Changes
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                <!-- â”€â”€ SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!-- ── SETTINGS ──────────────────────────────────────── -->
                 <div id="settings-section" class="dashboard-section hidden">
                     <div class="max-w-2xl space-y-5">
-
-                        <div class="bg-white p-5 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
-                            <h4 class="text-sm font-black text-black mb-4 border-b border-gray-100 pb-3">
-                                <i class="fas fa-shield-alt text-[#ea580c] mr-2"></i> Change Password
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                            <h4 class="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
+                                <i class="fas fa-shield-alt text-[#ea580c]"></i> Change Password
                             </h4>
-                            <div id="pwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">Password updated!</div>
-                            <div id="pwd-error"   class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
+                            <p class="text-xs text-slate-400 mb-5">Must be 8-12 characters with uppercase, lowercase, number and symbol.</p>
+
+                            <div id="pwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">
+                                <i class="fas fa-check-circle mr-2"></i>Password updated successfully!
+                            </div>
+                            <div id="pwd-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
+
                             <form onsubmit="updatePassword(event)" class="space-y-3">
-                                <input type="password" id="current-password" required placeholder="Current password"
-                                       class="w-full p-3 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium text-sm">
-                                <input type="password" id="new-password" required placeholder="New password (8-12 chars, mixed case, number, symbol)"
-                                       class="w-full p-3 bg-gray-50 rounded-xl outline-none focus:border-[#ea580c] border border-transparent font-medium text-sm">
-                                <button type="submit" class="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-800 transition text-sm">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Current Password</label>
+                                    <input type="password" id="current-password" required placeholder="Current password"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-sm transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">New Password</label>
+                                    <input type="password" id="new-password" required placeholder="New password"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-sm transition">
+                                </div>
+                                <button type="submit" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-700 transition text-sm">
                                     Update Password
                                 </button>
                             </form>
                         </div>
-
                     </div>
                 </div>
 
-            </div>
+            </div><!-- /overflow-y-auto -->
         </main>
     </div>
 
@@ -293,21 +388,20 @@
 'use strict';
 const API = 'http://127.0.0.1:8000/api/v1';
 
-// â”€â”€ XSS helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// XSS helper
 function esc(str) {
     if (str === null || str === undefined) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// â”€â”€ Auth guard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Auth guard
 (function() {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) window.location.replace('login.html');
 })();
-
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
-// â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Sidebar
 function openSidebar() {
     document.getElementById('sidebar').classList.remove('-translate-x-full');
     document.getElementById('sidebar-overlay').classList.remove('hidden');
@@ -317,7 +411,7 @@ function closeSidebar() {
     document.getElementById('sidebar-overlay').classList.add('hidden');
 }
 
-// â”€â”€ Mobile chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Mobile chat
 function openMobileChat() {
     if (window.innerWidth < 768) {
         document.getElementById('conv-pane').classList.add('mobile-chat-open');
@@ -331,170 +425,154 @@ function closeMobileChat() {
     if (window.innerWidth < 768) document.getElementById('chat-pane').style.display = 'none';
 }
 
-// â”€â”€ Tab switcher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Tab switcher
 function switchTab(tab) {
     document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-link').forEach(b => {
         b.classList.remove('nav-link-active', 'text-[#ea580c]');
-        b.classList.add('text-gray-600');
+        b.classList.add('text-slate-600');
     });
-
     const section = document.getElementById(`${tab}-section`);
     const navBtn  = document.getElementById(`nav-${tab}`);
     if (section) section.classList.remove('hidden');
-    if (navBtn)  { navBtn.classList.add('nav-link-active', 'text-[#ea580c]'); navBtn.classList.remove('text-gray-600'); }
-
+    if (navBtn)  { navBtn.classList.add('nav-link-active', 'text-[#ea580c]'); navBtn.classList.remove('text-slate-600'); }
     const titles = { overview: 'Overview', saved: 'Saved Rooms', messages: 'Messages', profile: 'Profile', settings: 'Settings' };
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[tab] || tab;
-
     closeSidebar();
-
     if (tab === 'messages') loadConversations();
     if (tab === 'profile')  loadProfileData();
 }
 
-// â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Toast
 function showToast(msg, type = 'success') {
     const el = document.getElementById('fmn-toast');
-    el.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-gray-800'}`;
+    el.className = `fixed bottom-5 right-4 z-[9999] flex items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-slate-800'}`;
     el.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${esc(msg)}`;
     el.classList.remove('hidden');
     setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
-// â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Logout
 function logout() {
     ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     window.location.replace('login.html');
 }
 
-// â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Boot
 async function initDashboard() {
     const token = getToken();
     try {
         const res  = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.status === 401) { logout(); return; }
         if (!res.ok) throw new Error();
-
         const user = await res.json();
-
-        // Role guard â€” redirect wrong roles
         if (user.role !== 'student') {
             const dest = { student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
             window.location.replace(dest[user.role] || 'login.html');
             return;
         }
-
         window._currentUser = user;
-        const initials  = (user.full_name || 'S').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        const initials  = (user.full_name || 'S').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
         const avatarSrc = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=ea580c&color=fff`;
-
         const headerName   = document.getElementById('header-name');
         const headerAvatar = document.getElementById('header-avatar');
         const mobileAvatar = document.getElementById('mobile-avatar');
+        const profileAv    = document.getElementById('profile-avatar-display');
+        const profileNmD   = document.getElementById('profile-name-display');
+        const profileEmD   = document.getElementById('profile-email-display');
         if (headerName)   headerName.textContent = user.full_name || 'Student';
         if (headerAvatar) headerAvatar.src = avatarSrc;
         if (mobileAvatar) mobileAvatar.src = avatarSrc;
-
+        if (profileAv)    profileAv.src = avatarSrc;
+        if (profileNmD)   profileNmD.textContent = user.full_name || 'Student';
+        if (profileEmD)   profileEmD.textContent = user.email || '';
     } catch { /* non-fatal */ }
-
     loadOverviewStats();
 }
 
-// â”€â”€ Overview stats â€” uses the real /students/dashboard/overview endpoint â”€â”€â”€â”€â”€â”€
+// Overview stats
 async function loadOverviewStats() {
     const token      = getToken();
     const statSaved  = document.getElementById('stat-saved');
     const statMsgs   = document.getElementById('stat-messages');
     const recentGrid = document.getElementById('recent-listings-container');
-
     try {
-        const res  = await fetch(`${API}/students/dashboard/overview`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
-
+        const res  = await fetch(`${API}/students/dashboard/overview`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.status === 401) { logout(); return; }
         if (!res.ok) throw new Error(`${res.status}`);
-
         const data = await res.json();
-
         if (statSaved) statSaved.textContent = data.stats?.saved_count           ?? '0';
         if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count ?? '0';
-
         const props = data.recent_properties || [];
         if (!props.length) {
             if (recentGrid) recentGrid.innerHTML = `
-                <div class="col-span-full py-10 text-center bg-white rounded-2xl border border-gray-100">
-                    <i class="fas fa-home text-5xl text-gray-200 mb-4 block"></i>
-                    <p class="text-gray-400 font-bold mb-4 text-sm">No listings available right now.</p>
-                    <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition inline-block text-sm">Browse All Properties</a>
+                <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-100">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-home text-2xl text-slate-300"></i>
+                    </div>
+                    <p class="text-slate-400 font-semibold mb-4 text-sm">No listings available right now.</p>
+                    <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition inline-block text-sm">Browse All Properties</a>
                 </div>`;
             return;
         }
-
         if (recentGrid) recentGrid.innerHTML = props.map(prop => `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer flex flex-col group hover:shadow-md transition"
+            <div class="listing-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer flex flex-col"
                  onclick="window.location.href='listing.html?id=${encodeURIComponent(prop.id)}'">
-                <div class="h-44 bg-gray-100 relative overflow-hidden flex-shrink-0">
+                <div class="h-44 bg-slate-100 relative overflow-hidden flex-shrink-0">
                     <img src="${esc(prop.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}"
-                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                          onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'"
                          alt="${esc(prop.title)}">
                     ${prop.is_boosted ? '<div class="absolute top-2 left-2 bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-lg"><i class="fas fa-bolt mr-1"></i>Featured</div>' : ''}
                 </div>
                 <div class="p-4 flex-1 flex flex-col">
-                    <h4 class="font-black text-sm text-black truncate mb-1">${esc(prop.title)}</h4>
-                    <p class="text-[#ea580c] font-black text-sm mb-1">ZMW ${Number(prop.price).toLocaleString()}</p>
-                    <p class="text-gray-400 text-xs font-medium truncate"><i class="fas fa-map-marker-alt mr-1"></i>${esc(prop.location)}</p>
+                    <h4 class="font-black text-sm text-slate-900 truncate mb-1">${esc(prop.title)}</h4>
+                    <p class="text-[#ea580c] font-black text-sm mb-1.5">ZMW ${Number(prop.price).toLocaleString()}</p>
+                    <p class="text-slate-400 text-xs font-medium truncate"><i class="fas fa-map-marker-alt mr-1 text-[#ea580c]"></i>${esc(prop.location)}</p>
                 </div>
             </div>`).join('');
-
     } catch {
-        if (statSaved) statSaved.innerHTML = '<span class="text-base text-gray-400 font-bold">â€”</span>';
-        if (statMsgs)  statMsgs.innerHTML  = '<span class="text-base text-gray-400 font-bold">â€”</span>';
+        if (statSaved) statSaved.innerHTML = '<span class="text-lg text-slate-400 font-bold">--</span>';
+        if (statMsgs)  statMsgs.innerHTML  = '<span class="text-lg text-slate-400 font-bold">--</span>';
         if (recentGrid) recentGrid.innerHTML = `
             <div class="col-span-full py-10 text-center bg-red-50 rounded-2xl border border-red-100">
                 <i class="fas fa-wifi text-4xl text-red-300 mb-3 block"></i>
-                <p class="text-red-500 font-bold mb-4 text-sm">Could not connect to server.</p>
-                <button onclick="loadOverviewStats()" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-black shadow hover:bg-black transition text-sm">
+                <p class="text-red-500 font-semibold mb-4 text-sm">Could not connect to server.</p>
+                <button onclick="loadOverviewStats()" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition text-sm">
                     <i class="fas fa-redo mr-2"></i>Retry
                 </button>
             </div>`;
     }
 }
 
-// â”€â”€ Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Search
 async function searchProperties() {
     const q    = (document.getElementById('search-input')?.value || '').trim();
     const grid = document.getElementById('search-results-grid');
-    if (!q) { grid.classList.add('hidden'); return; }
-
-    grid.classList.remove('hidden');
-    grid.innerHTML = '<div class="col-span-full text-center py-6 text-gray-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Searching...</div>';
-
+    if (!q) { grid.classList.remove('visible'); grid.style.display='none'; return; }
+    grid.style.display = 'grid';
+    grid.innerHTML = '<div class="col-span-full text-center py-6 text-slate-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-2"></i>Searching...</div>';
     try {
         const res  = await fetch(`${API}/properties?q=${encodeURIComponent(q)}`);
         const data = await res.json();
-
         if (!data.length) {
-            grid.innerHTML = '<div class="col-span-full text-center py-6 text-gray-400 text-sm font-semibold">No results found for your search.</div>';
+            grid.innerHTML = '<div class="col-span-full text-center py-6 text-slate-400 text-sm font-semibold">No results found.</div>';
             return;
         }
-
         grid.innerHTML = data.map(p => `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md transition"
+            <div class="listing-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer"
                  onclick="window.location.href='listing.html?id=${encodeURIComponent(p.id)}'">
-                <div class="h-36 bg-gray-100 overflow-hidden">
+                <div class="h-36 bg-slate-100 overflow-hidden">
                     <img src="${esc(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'}"
                          class="w-full h-full object-cover"
                          onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'"
                          alt="${esc(p.title)}">
                 </div>
                 <div class="p-3">
-                    <h4 class="font-black text-sm text-black truncate">${esc(p.title)}</h4>
+                    <h4 class="font-black text-sm text-slate-900 truncate">${esc(p.title)}</h4>
                     <p class="text-[#ea580c] font-black text-sm">ZMW ${Number(p.price).toLocaleString()}</p>
-                    <p class="text-gray-400 text-xs truncate"><i class="fas fa-map-marker-alt mr-1"></i>${esc(p.location)}</p>
+                    <p class="text-slate-400 text-xs truncate"><i class="fas fa-map-marker-alt mr-1"></i>${esc(p.location)}</p>
                 </div>
             </div>`).join('');
     } catch {
@@ -502,49 +580,47 @@ async function searchProperties() {
     }
 }
 window.searchProperties = searchProperties;
-
-document.getElementById('search-input')?.addEventListener('keypress', e => {
-    if (e.key === 'Enter') searchProperties();
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('search-input')?.addEventListener('keypress', e => {
+        if (e.key === 'Enter') searchProperties();
+    });
 });
 
-// â”€â”€ Conversations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Conversations
 let _activePropId = null;
 let _activeOtherId = null;
 
 async function loadConversations() {
     const token  = getToken();
     const listEl = document.getElementById('conversation-list');
-    listEl.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
-
+    listEl.innerHTML = '<div class="p-4 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
     try {
         const res   = await fetch(`${API}/messages/conversations`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) throw new Error();
         const convs = await res.json();
-
         if (!convs.length) {
             listEl.innerHTML = `
-                <div class="p-6 text-center text-gray-400 text-sm">
-                    <i class="fas fa-comments text-3xl text-gray-200 mb-3 block"></i>
+                <div class="p-6 text-center text-slate-400 text-sm">
+                    <i class="fas fa-comments text-3xl text-slate-200 mb-3 block"></i>
                     <p class="font-semibold">No conversations yet.</p>
                     <p class="text-xs mt-1">Message a landlord from a listing to get started.</p>
                 </div>`;
             return;
         }
-
         listEl.innerHTML = convs.map(c => `
-            <div class="p-4 border-b border-gray-100 hover:bg-orange-50 cursor-pointer transition"
+            <div class="px-4 py-3 border-b border-slate-100 hover:bg-orange-50 cursor-pointer transition"
                  onclick="openThread(${c.other_user_id}, ${c.property_id || 0}, '${esc(c.other_user_name)}', '${esc(c.property_title)}')">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-orange-100 text-[#ea580c] flex items-center justify-center font-black text-sm flex-shrink-0">
                         ${esc((c.other_user_name || 'U').charAt(0).toUpperCase())}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between">
-                            <span class="font-black text-sm text-black truncate">${esc(c.other_user_name)}</span>
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="font-bold text-sm text-slate-900 truncate">${esc(c.other_user_name)}</span>
                             ${c.unread_count > 0 ? `<span class="bg-[#ea580c] text-white text-[10px] font-black rounded-full px-1.5 py-0.5 flex-shrink-0">${c.unread_count}</span>` : ''}
                         </div>
                         <p class="text-xs text-[#ea580c] font-semibold truncate">${esc(c.property_title)}</p>
-                        <p class="text-xs text-gray-400 truncate">${esc(c.last_message)}</p>
+                        <p class="text-xs text-slate-400 truncate">${esc(c.last_message)}</p>
                     </div>
                 </div>
             </div>`).join('');
@@ -556,34 +632,26 @@ async function loadConversations() {
 async function openThread(otherId, propId, otherName, propTitle) {
     _activeOtherId = otherId;
     _activePropId  = propId;
-
-    const header   = document.getElementById('chat-header');
-    const messages = document.getElementById('chat-messages');
-    const inputArea= document.getElementById('chat-input-area');
+    const header     = document.getElementById('chat-header');
+    const messages   = document.getElementById('chat-messages');
+    const inputArea  = document.getElementById('chat-input-area');
     const emptyState = document.getElementById('chat-empty-state');
-
     document.getElementById('chat-landlord-name').textContent = otherName;
     document.getElementById('chat-property-ref').textContent  = propTitle;
-
     header.classList.remove('hidden'); header.classList.add('flex');
     messages.classList.remove('hidden');
     inputArea.classList.remove('hidden');
     emptyState.classList.add('hidden');
-
     openMobileChat();
-
     const token = getToken();
-    messages.innerHTML = '<div class="text-center text-gray-400 text-sm py-4"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
-
+    messages.innerHTML = '<div class="text-center text-slate-400 text-sm py-4"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
     try {
         const res  = await fetch(`${API}/messages/thread/${propId}/${otherId}`, { headers: { 'Authorization': `Bearer ${token}` } });
         const msgs = await res.json();
-
         if (!msgs.length) {
-            messages.innerHTML = '<div class="text-center text-gray-400 text-sm py-8">No messages yet. Say hello!</div>';
+            messages.innerHTML = '<div class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello!</div>';
             return;
         }
-
         messages.innerHTML = msgs.map(m => {
             const mine = m.is_mine;
             let attachHtml = '';
@@ -608,13 +676,12 @@ async function openThread(otherId, propId, otherName, propTitle) {
     }
 }
 
-// â”€â”€ Attachment helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Attachment helpers
 function previewAttachment(input) {
     const file = input.files[0];
     if (!file) return;
-    const MAX_MB = 10;
-    if (file.size > MAX_MB * 1024 * 1024) {
-        showToast(`File too large. Max ${MAX_MB}MB.`, 'error');
+    if (file.size > 10 * 1024 * 1024) {
+        showToast('File too large. Max 10MB.', 'error');
         input.value = '';
         return;
     }
@@ -635,14 +702,11 @@ async function sendStudentMessage(e) {
     const fileInput  = document.getElementById('chat-attachment');
     const content    = input.value.trim();
     const file       = fileInput?.files[0];
-
     if (!content && !file) return;
     if (!_activeOtherId) return;
-
     const token = getToken();
     const submitBtn = document.querySelector('#chat-form button[type="submit"]');
     if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-sm"></i>'; }
-
     try {
         let res;
         if (file) {
@@ -651,19 +715,10 @@ async function sendStudentMessage(e) {
             if (_activePropId) fd.append('property_id', _activePropId);
             fd.append('content', content || `[Attachment: ${file.name}]`);
             fd.append('attachment', file);
-            res = await fetch(`${API}/messages/send`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: fd,
-            });
+            res = await fetch(`${API}/messages/send`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
         } else {
-            res = await fetch(`${API}/messages/send`, {
-                method:  'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content }),
-            });
+            res = await fetch(`${API}/messages/send`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content }) });
         }
-
         if (res.ok) {
             input.value = '';
             clearAttachment();
@@ -682,43 +737,37 @@ async function sendStudentMessage(e) {
 }
 window.sendStudentMessage = sendStudentMessage;
 
-// â”€â”€ Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Profile
 function loadProfileData() {
     const user = window._currentUser;
     if (!user) return;
     const nameEl  = document.getElementById('profile-name');
     const phoneEl = document.getElementById('profile-phone');
     const emailEl = document.getElementById('profile-email');
-    if (nameEl)  nameEl.value  = user.full_name    || '';
-    if (phoneEl) phoneEl.value = user.phone        || '';
-    if (emailEl) emailEl.value = user.email        || '';
+    if (nameEl)  nameEl.value  = user.full_name || '';
+    if (phoneEl) phoneEl.value = user.phone     || '';
+    if (emailEl) emailEl.value = user.email     || '';
 }
 
 async function saveProfile(e) {
     e.preventDefault();
-    const token   = getToken();
-    const name    = document.getElementById('profile-name').value.trim();
-    const phone   = document.getElementById('profile-phone').value.trim();
-    const sucEl   = document.getElementById('profile-success');
-    const errEl   = document.getElementById('profile-error');
-    const btn     = document.getElementById('profile-save-btn');
-
+    const token = getToken();
+    const name  = document.getElementById('profile-name').value.trim();
+    const phone = document.getElementById('profile-phone').value.trim();
+    const sucEl = document.getElementById('profile-success');
+    const errEl = document.getElementById('profile-error');
+    const btn   = document.getElementById('profile-save-btn');
     sucEl.classList.add('hidden');
     errEl.classList.add('hidden');
-
     if (!name) { errEl.textContent = 'Full name cannot be empty.'; errEl.classList.remove('hidden'); return; }
-
     btn.disabled = true; btn.textContent = 'Saving...';
-
     try {
-        const res = await fetch(`${API}/students/profile`, {
-            method:  'PUT',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ full_name: name, phone }),
-        });
+        const res  = await fetch(`${API}/students/profile`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: name, phone }) });
         const data = await res.json();
         if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to update profile.');
         if (window._currentUser) { window._currentUser.full_name = name; window._currentUser.phone = phone; }
+        const nmD = document.getElementById('profile-name-display');
+        if (nmD) nmD.textContent = name;
         sucEl.classList.remove('hidden');
         showToast('Profile updated!');
     } catch (err) {
@@ -729,7 +778,7 @@ async function saveProfile(e) {
     }
 }
 
-// â”€â”€ Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Password
 async function updatePassword(e) {
     e.preventDefault();
     const token   = getToken();
@@ -737,23 +786,16 @@ async function updatePassword(e) {
     const newPwd  = document.getElementById('new-password').value;
     const sucEl   = document.getElementById('pwd-success');
     const errEl   = document.getElementById('pwd-error');
-
     sucEl.classList.add('hidden');
     errEl.classList.add('hidden');
-
     const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
     if (!pwdRegex.test(newPwd)) {
         errEl.textContent = 'Password must be 8-12 characters with uppercase, lowercase, number, and special character.';
         errEl.classList.remove('hidden');
         return;
     }
-
     try {
-        const res  = await fetch(`${API}/students/settings/password`, {
-            method:  'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ current_password: current, new_password: newPwd }),
-        });
+        const res  = await fetch(`${API}/students/settings/password`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ current_password: current, new_password: newPwd }) });
         const data = await res.json();
         if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to update password.');
         sucEl.classList.remove('hidden');

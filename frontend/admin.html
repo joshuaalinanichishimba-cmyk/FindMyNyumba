@@ -8,34 +8,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="logo.png">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .tab-section { display: none; }
-        .tab-section.active { display: block; }
-        #sidebar { transition: transform 0.3s ease; }
-        .sidebar-link { position: relative; }
-        .sidebar-link.active {
-            background-color: #fff7ed !important;
-            color: #ea580c !important;
-        }
-        .sidebar-link.active::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 4px;
-            background-color: #ea580c;
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-        }
-
-        /* â”€â”€ Mobile safety â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-        * { box-sizing: border-box; }
+        :root { --orange: #ea580c; --orange-dark: #c2410c; --orange-light: #fff7ed; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
-        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        @media (max-width: 640px) {
-            .sm\:hidden-mobile { display: none !important; }
-        }
+
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+
+        #sidebar { transition: transform 0.3s ease; }
+
+        .sidebar-link { position: relative; border-left: 3px solid transparent; transition: all 0.15s; }
+        .sidebar-link.active { background: var(--orange-light) !important; color: var(--orange) !important; border-left-color: var(--orange); font-weight: 700; }
+        .sidebar-link:hover:not(.active) { background: #f9fafb; }
+
+        /* Stat card */
+        .stat-card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+        /* Bar chart */
+        #growth-chart, #analytics-growth-chart { display: flex; align-items: flex-end; gap: 6px; height: 9rem; padding: 0 4px; }
+
+        /* Form */
+        .fmn-input { width:100%; padding:10px 13px; border:1.5px solid #e5e7eb; border-radius:10px; outline:none; font-size:14px; transition:border-color 0.15s; }
+        .fmn-input:focus { border-color:var(--orange); }
+
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:10px; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.8s linear infinite; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -48,7 +49,6 @@
         if (typeof resource === 'string' && resource.includes('/api/v1/')) {
             config = config || {};
             config.headers = config.headers || {};
-            // Admin tokens stored under 'adminToken' in sessionStorage only
             const token = sessionStorage.getItem('adminToken');
             if (token && !config.headers['Authorization'] && !config.headers['authorization']) {
                 config.headers['Authorization'] = 'Bearer ' + token;
@@ -64,22 +64,22 @@
 <div class="flex h-screen overflow-hidden">
 
     <!-- SIDEBAR -->
-    <aside id="sidebar"
-           class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-200 shadow-sm
-                  flex flex-col py-5 px-3 -translate-x-full lg:translate-x-0">
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-100 shadow-sm flex flex-col -translate-x-full lg:translate-x-0">
 
         <!-- Logo -->
-        <div class="px-3 mb-6 flex items-center gap-2">
-            <img src="logo.png" alt="FindMyNyumba"
-                 class="h-8 w-auto object-contain"
+        <div class="px-5 py-5 border-b border-slate-100 flex items-center gap-3">
+            <img src="logo.png" alt="FindMyNyumba" class="h-9 w-auto object-contain"
                  onerror="this.style.display='none'">
-            <div>
-                <div class="font-black text-slate-900 text-sm leading-tight">FindMy<span class="text-[#ea580c]">Nyumba</span></div>
-                <div class="text-[10px] text-orange-500 font-bold uppercase tracking-wider">Admin Panel</div>
-            </div>
         </div>
 
-        <nav class="flex flex-col gap-0.5 flex-1 overflow-y-auto">
+        <!-- Admin badge -->
+        <div class="px-5 py-2.5 border-b border-slate-50">
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#ea580c] uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded-full">
+                <i class="fas fa-shield-alt text-[9px]"></i> Admin Panel
+            </span>
+        </div>
+
+        <nav class="flex flex-col flex-1 overflow-y-auto py-2 px-3 gap-0.5">
             <a id="nav-dashboard"     class="sidebar-link active flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('dashboard')"><i class="fas fa-chart-pie w-5 text-center"></i> Dashboard</a>
             <a id="nav-users"         class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('users')"><i class="fas fa-users w-5 text-center"></i> Users</a>
             <a id="nav-listings"      class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('listings')"><i class="fas fa-building w-5 text-center"></i> Listings</a>
@@ -90,68 +90,72 @@
             <a id="nav-settings"      class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('settings')"><i class="fas fa-cog w-5 text-center"></i> Settings</a>
         </nav>
 
-        <button onclick="showChangePassword()"
-                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50 font-semibold transition text-sm mt-1">
-            <i class="fas fa-key w-5 text-center"></i> Change Password
-        </button>
-
-        <button onclick="logout()"
-                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-semibold transition text-sm mt-2">
-            <i class="fas fa-sign-out-alt w-5 text-center"></i> Logout
-        </button>
+        <div class="p-3 border-t border-slate-100 space-y-1">
+            <button onclick="showChangePassword()"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50 font-semibold transition text-sm">
+                <i class="fas fa-key w-5 text-center"></i> Change Password
+            </button>
+            <button onclick="logout()"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-semibold transition text-sm">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i> Logout
+            </button>
+        </div>
     </aside>
 
     <!-- MAIN -->
     <main class="flex-1 overflow-y-auto flex flex-col">
 
         <!-- Top bar -->
-        <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+        <header class="bg-white border-b border-slate-100 px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
             <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition">
                     <i class="fas fa-bars text-slate-600"></i>
                 </button>
                 <h1 id="page-title" class="text-base font-black text-slate-900 uppercase tracking-wide">Dashboard</h1>
             </div>
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-[#ea580c] rounded-full flex items-center justify-center text-white text-xs font-black">A</div>
-                <span class="hidden sm:block text-sm font-bold text-slate-700">Admin</span>
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 bg-[#ea580c] rounded-xl flex items-center justify-center text-white text-sm font-black">A</div>
+                <div class="hidden sm:block">
+                    <p id="admin-name-display" class="text-sm font-bold text-slate-800 leading-tight">Admin</p>
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Administrator</p>
+                </div>
             </div>
         </header>
 
         <div class="p-4 md:p-8 flex-1">
 
-            <!-- -- DASHBOARD TAB --------------------------- -->
+            <!-- DASHBOARD TAB -->
             <div id="tab-dashboard" class="tab-section active">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Total Users</div>
-                        <div id="stat-users" class="text-3xl font-black text-slate-900">â€”</div>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+                    <div class="stat-card border-t-4 border-t-[#ea580c]">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Total Users</div>
+                        <div id="stat-users" class="text-3xl font-black text-slate-900">—</div>
                     </div>
-                    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Listings</div>
-                        <div id="stat-listings" class="text-3xl font-black text-slate-900">â€”</div>
+                    <div class="stat-card border-t-4 border-t-blue-500">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Listings</div>
+                        <div id="stat-listings" class="text-3xl font-black text-slate-900">—</div>
                     </div>
-                    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Messages</div>
-                        <div id="stat-messages" class="text-3xl font-black text-slate-900">â€”</div>
+                    <div class="stat-card border-t-4 border-t-green-500">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Messages</div>
+                        <div id="stat-messages" class="text-3xl font-black text-slate-900">—</div>
                     </div>
-                    <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Pending Reports</div>
-                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">â€”</div>
+                    <div class="stat-card border-t-4 border-t-orange-400">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Pending Reviews</div>
+                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">—</div>
                     </div>
                 </div>
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-                    <h3 class="font-black text-slate-900 mb-1">Platform Growth</h3>
-                    <p class="text-xs text-slate-400 mb-4">Users and listings over time</p>
-                    <div class="flex items-center gap-4 mb-2">
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-[#ea580c] rounded-sm inline-block"></span>Users</span>
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-slate-300 rounded-sm inline-block"></span>Listings</span>
+                    <h3 class="font-black text-slate-900 mb-0.5">Platform Growth</h3>
+                    <p class="text-xs text-slate-400 mb-4">Users and listings over the past 6 months</p>
+                    <div class="flex items-center gap-4 mb-3">
+                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-[#ea580c] rounded inline-block"></span>Users</span>
+                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-slate-300 rounded inline-block"></span>Listings</span>
                     </div>
-                    <div id="growth-chart" class="flex items-end gap-2 h-36 px-1"></div>
+                    <div id="growth-chart"></div>
                 </div>
             </div>
 
-            <!-- -- USERS TAB ------------------------------- -->
+            <!-- USERS TAB -->
             <div id="tab-users" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -159,8 +163,8 @@
                         <span id="user-count-badge" class="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full">Loading...</span>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm min-w-full max-w-lg mx-4">
-                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide">
+                        <table class="w-full text-sm" style="min-width:560px">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide border-b border-slate-100">
                                 <tr>
                                     <th class="text-left px-5 py-3 font-bold">Name</th>
                                     <th class="text-left px-5 py-3 font-bold hidden md:table-cell">Email</th>
@@ -177,15 +181,15 @@
                 </div>
             </div>
 
-            <!-- -- LISTINGS TAB ---------------------------- -->
+            <!-- LISTINGS TAB -->
             <div id="tab-listings" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100">
                         <h3 class="font-black text-slate-900">All Listings</h3>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm min-w-full max-w-lg mx-4">
-                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide">
+                        <table class="w-full text-sm" style="min-width:520px">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide border-b border-slate-100">
                                 <tr>
                                     <th class="text-left px-5 py-3 font-bold">Title</th>
                                     <th class="text-left px-5 py-3 font-bold hidden md:table-cell">Location</th>
@@ -201,16 +205,16 @@
                 </div>
             </div>
 
-            <!-- -- VERIFICATIONS TAB ----------------------- -->
+            <!-- VERIFICATIONS TAB -->
             <div id="tab-verifications" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100">
                         <h3 class="font-black text-slate-900">Verification Queue</h3>
-                        <p class="text-xs text-slate-400 mt-1">Landlords and student hosts awaiting identity verification.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Landlords and student hosts awaiting identity verification.</p>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm min-w-full max-w-lg mx-4">
-                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide">
+                        <table class="w-full text-sm" style="min-width:580px">
+                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide border-b border-slate-100">
                                 <tr>
                                     <th class="text-left px-5 py-3 font-bold">User</th>
                                     <th class="text-left px-5 py-3 font-bold">Role</th>
@@ -227,7 +231,7 @@
                 </div>
             </div>
 
-            <!-- -- REPORTS TAB ----------------------------- -->
+            <!-- REPORTS TAB -->
             <div id="tab-reports" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-slate-100">
@@ -239,69 +243,67 @@
                 </div>
             </div>
 
-            <!-- -- ANALYTICS TAB --------------------------- -->
+            <!-- ANALYTICS TAB -->
             <div id="tab-analytics" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-                    <h3 class="font-black text-slate-900 mb-1">Growth Analytics</h3>
+                    <h3 class="font-black text-slate-900 mb-0.5">Growth Analytics</h3>
                     <p class="text-xs text-slate-400 mb-4">Platform growth over the past 6 months</p>
-                    <div class="flex items-center gap-4 mb-2">
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-[#ea580c] rounded-sm inline-block"></span>Users</span>
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-slate-300 rounded-sm inline-block"></span>Listings</span>
+                    <div class="flex items-center gap-4 mb-3">
+                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-[#ea580c] rounded inline-block"></span>Users</span>
+                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-slate-300 rounded inline-block"></span>Listings</span>
                     </div>
-                    <div id="analytics-growth-chart" class="flex items-end gap-2 h-48 px-1"></div>
+                    <div id="analytics-growth-chart"></div>
                 </div>
             </div>
 
-            <!-- -- ANNOUNCEMENTS TAB ------------------------ -->
+            <!-- ANNOUNCEMENTS TAB -->
             <div id="tab-announcements" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-2xl">
                     <h3 class="font-black text-slate-900 mb-5">Broadcast Announcement</h3>
-                    <div id="announce-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">Announcement sent successfully!</div>
-                    <div id="announce-error"   class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
+                    <div id="announce-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100 flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i> Announcement sent successfully!
+                    </div>
+                    <div id="announce-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Title</label>
-                            <input type="text" id="announce-title" placeholder="e.g. Scheduled maintenance on Sunday"
-                                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
+                            <input type="text" id="announce-title" placeholder="e.g. Scheduled maintenance on Sunday" class="fmn-input">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Message</label>
-                            <textarea id="announce-body" rows="4" placeholder="Message to broadcast to users..."
-                                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition resize-none"></textarea>
+                            <textarea id="announce-body" rows="4" placeholder="Message to broadcast to users..." class="fmn-input resize-none"></textarea>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Target Audience</label>
-                            <select id="announce-target"
-                                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] bg-white transition">
+                            <select id="announce-target" class="fmn-input">
                                 <option value="all">All Users</option>
                                 <option value="student">Students Only</option>
                                 <option value="landlord">Landlords Only</option>
                                 <option value="student_host">Student Hosts Only</option>
                             </select>
                         </div>
-                        <button onclick="sendAnnouncement()"
-                            class="bg-[#ea580c] text-white font-bold px-6 py-3 rounded-xl hover:bg-orange-700 transition text-sm">
-                            Send Announcement
+                        <button onclick="sendAnnouncement()" class="bg-[#ea580c] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#c2410c] transition text-sm">
+                            <i class="fas fa-bullhorn mr-2"></i>Send Announcement
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- -- SETTINGS TAB ---------------------------- -->
+            <!-- SETTINGS TAB -->
             <div id="tab-settings" class="tab-section">
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-2xl">
                     <h3 class="font-black text-slate-900 mb-5">Platform Settings</h3>
-                    <div id="settings-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">Settings saved successfully.</div>
+                    <div id="settings-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100 flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i> Settings saved successfully.
+                    </div>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Platform Name</label>
-                            <input type="text" id="setting-name" value="FindMyNyumba"
-                                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
+                            <input type="text" id="setting-name" value="FindMyNyumba" class="fmn-input">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Support Email</label>
-                            <input type="email" id="setting-email" placeholder="support@findmynyumba.com"
-                                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
+                            <input type="email" id="setting-email" placeholder="support@findmynyumba.com" class="fmn-input">
                         </div>
                         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
                             <div>
@@ -323,15 +325,14 @@
                                 <div class="w-10 h-5 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#ea580c]"></div>
                             </label>
                         </div>
-                        <button onclick="saveSettings()"
-                            class="bg-[#ea580c] text-white font-bold px-6 py-3 rounded-xl hover:bg-orange-700 transition text-sm">
+                        <button onclick="saveSettings()" class="bg-[#ea580c] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#c2410c] transition text-sm">
                             Save Settings
                         </button>
                     </div>
                 </div>
             </div>
 
-        </div><!-- /p-4 -->
+        </div>
     </main>
 </div>
 
@@ -350,33 +351,32 @@
 <!-- Change Password Modal -->
 <div id="change-pwd-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-        <h3 class="font-black text-slate-900 mb-1 text-base">Change Password</h3>
-        <p class="text-xs text-slate-400 mb-5">Minimum 8 characters with uppercase, lowercase, number & symbol.</p>
-
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-black text-slate-900 text-base">Change Password</h3>
+            <button onclick="closeChangePassword()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+        <p class="text-xs text-slate-400 mb-5">Minimum 8 characters with uppercase, lowercase, number &amp; symbol.</p>
         <div id="cpwd-error"   class="hidden mb-4 p-3 bg-red-50 text-red-600 text-xs font-semibold rounded-xl border border-red-100"></div>
-        <div id="cpwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-xs font-semibold rounded-xl border border-green-100">Password changed successfully.</div>
-
+        <div id="cpwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-xs font-semibold rounded-xl border border-green-100 flex items-center gap-2"><i class="fas fa-check-circle"></i> Password changed successfully.</div>
         <div class="space-y-3 mb-5">
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Current Password</label>
-                <input id="cpwd-old" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                    class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
+                <input id="cpwd-old" type="password" placeholder="••••••••" class="fmn-input">
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">New Password</label>
-                <input id="cpwd-new" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                    class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
+                <input id="cpwd-new" type="password" placeholder="••••••••" class="fmn-input">
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Confirm New Password</label>
-                <input id="cpwd-confirm" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                    class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#ea580c] transition">
+                <input id="cpwd-confirm" type="password" placeholder="••••••••" class="fmn-input">
             </div>
         </div>
-
         <div class="flex gap-3">
             <button onclick="closeChangePassword()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 hover:bg-slate-50 transition">Cancel</button>
-            <button onclick="submitChangePassword()" id="cpwd-btn" class="flex-1 px-4 py-2.5 rounded-xl bg-[#ea580c] text-white text-sm font-black hover:bg-orange-700 transition">Update</button>
+            <button onclick="submitChangePassword()" id="cpwd-btn" class="flex-1 px-4 py-2.5 rounded-xl bg-[#ea580c] text-white text-sm font-black hover:bg-[#c2410c] transition">Update</button>
         </div>
     </div>
 </div>
@@ -386,39 +386,21 @@
 const API = 'http://127.0.0.1:8000/api/v1';
 let modalCallback = null;
 
-// -- XSS helper ----------------------------------------------------------------
 function esc(str) {
-    if (str === null || str === undefined) return 'â€”';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    if (str === null || str === undefined) return '—';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// -- Auth guard ----------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
     const token = sessionStorage.getItem('adminToken');
     const role  = sessionStorage.getItem('adminRole');
-    if (!token || role !== 'admin') {
-        window.location.replace('admin-login.html');
-        return;
-    }
-
-    // Verify token is still valid with the server
+    if (!token || role !== 'admin') { window.location.replace('admin-login.html'); return; }
     fetch(`${API}/auth/me`)
-        .then(r => {
-            if (r.status === 401 || r.status === 403) {
-                logout();
-            }
-        })
-        .catch(() => { /* network error â€” allow offline use */ });
-
+        .then(r => { if (r.status === 401 || r.status === 403) logout(); })
+        .catch(() => {});
     const name = sessionStorage.getItem('adminName') || 'Admin';
-    const nameEl = document.querySelector('.text-sm.font-bold.text-slate-700');
+    const nameEl = document.getElementById('admin-name-display');
     if (nameEl) nameEl.textContent = name;
-
     loadDashboard();
 });
 
@@ -429,19 +411,13 @@ function logout() {
     window.location.replace('admin-login.html');
 }
 
-// -- Change Password -----------------------------------------------------------
 function showChangePassword() {
-    document.getElementById('cpwd-old').value     = '';
-    document.getElementById('cpwd-new').value     = '';
-    document.getElementById('cpwd-confirm').value = '';
+    ['cpwd-old','cpwd-new','cpwd-confirm'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('cpwd-error').classList.add('hidden');
     document.getElementById('cpwd-success').classList.add('hidden');
     document.getElementById('change-pwd-modal').classList.remove('hidden');
 }
-
-function closeChangePassword() {
-    document.getElementById('change-pwd-modal').classList.add('hidden');
-}
+function closeChangePassword() { document.getElementById('change-pwd-modal').classList.add('hidden'); }
 
 async function submitChangePassword() {
     const oldPwd  = document.getElementById('cpwd-old').value;
@@ -450,83 +426,34 @@ async function submitChangePassword() {
     const errEl   = document.getElementById('cpwd-error');
     const sucEl   = document.getElementById('cpwd-success');
     const btn     = document.getElementById('cpwd-btn');
-
-    errEl.classList.add('hidden');
-    sucEl.classList.add('hidden');
-
-    if (!oldPwd || !newPwd || !confirm) {
-        errEl.textContent = 'All fields are required.';
-        errEl.classList.remove('hidden');
-        return;
-    }
-
+    errEl.classList.add('hidden'); sucEl.classList.add('hidden');
+    if (!oldPwd || !newPwd || !confirm) { errEl.textContent = 'All fields are required.'; errEl.classList.remove('hidden'); return; }
     const PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
-    if (!PWD_RE.test(newPwd)) {
-        errEl.textContent = 'Password must be 8+ characters with uppercase, lowercase, number, and symbol.';
-        errEl.classList.remove('hidden');
-        return;
-    }
-
-    if (newPwd !== confirm) {
-        errEl.textContent = 'New passwords do not match.';
-        errEl.classList.remove('hidden');
-        return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Updatingâ€¦';
-
+    if (!PWD_RE.test(newPwd)) { errEl.textContent = 'Password must be 8+ characters with uppercase, lowercase, number, and symbol.'; errEl.classList.remove('hidden'); return; }
+    if (newPwd !== confirm) { errEl.textContent = 'New passwords do not match.'; errEl.classList.remove('hidden'); return; }
+    btn.disabled = true; btn.textContent = 'Updating…';
     try {
-        const res  = await fetch(`${API}/admin/change-password`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({
-                old_password:     oldPwd,
-                new_password:     newPwd,
-                confirm_password: confirm,
-            }),
-        });
+        const res  = await fetch(`${API}/admin/change-password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ old_password: oldPwd, new_password: newPwd, confirm_password: confirm }) });
         const data = await res.json();
-
         if (!res.ok) throw new Error(data.detail || 'Failed to update password.');
-
         sucEl.classList.remove('hidden');
-        document.getElementById('cpwd-old').value     = '';
-        document.getElementById('cpwd-new').value     = '';
-        document.getElementById('cpwd-confirm').value = '';
+        ['cpwd-old','cpwd-new','cpwd-confirm'].forEach(id => document.getElementById(id).value = '');
         setTimeout(closeChangePassword, 1800);
-
-    } catch (err) {
-        errEl.textContent = err.message;
-        errEl.classList.remove('hidden');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Update';
-    }
+    } catch (err) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+    finally { btn.disabled = false; btn.textContent = 'Update'; }
 }
 
-
-
-// -- Navigation (dashboard functions continue below) --------------------------
 function showTab(name) {
     document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
-
     const tab = document.getElementById('tab-' + name);
     const nav = document.getElementById('nav-' + name);
     if (tab) tab.classList.add('active');
     if (nav) nav.classList.add('active');
-
-    const titles = {
-        dashboard: 'Dashboard', users: 'Users', listings: 'Listings',
-        verifications: 'Verifications', reports: 'Reports',
-        analytics: 'Analytics', announcements: 'Announcements', settings: 'Settings',
-    };
+    const titles = { dashboard: 'Dashboard', users: 'Users', listings: 'Listings', verifications: 'Verifications', reports: 'Reports', analytics: 'Analytics', announcements: 'Announcements', settings: 'Settings' };
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[name] || name;
-
     closeSidebar();
-
     if (name === 'users')         loadUsers();
     if (name === 'listings')      loadListings();
     if (name === 'reports')       loadReports();
@@ -543,18 +470,16 @@ function closeSidebar() {
     document.getElementById('overlay').classList.add('hidden');
 }
 
-// -- Dashboard -----------------------------------------------------------------
 async function loadDashboard() {
     try {
         const res  = await fetch(`${API}/admin/stats`);
         if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('stat-users').textContent    = data.total_users    ?? 'â€”';
-        document.getElementById('stat-listings').textContent = data.total_listings ?? 'â€”';
-        document.getElementById('stat-messages').textContent = data.total_messages ?? 'â€”';
+        document.getElementById('stat-users').textContent    = data.total_users    ?? '—';
+        document.getElementById('stat-listings').textContent = data.total_listings ?? '—';
+        document.getElementById('stat-messages').textContent = data.total_messages ?? '—';
         document.getElementById('stat-reports').textContent  = (data.pending_listings ?? 0) + (data.pending_verifs ?? 0);
     } catch { /* stats fail silently */ }
-
     try {
         const res  = await fetch(`${API}/admin/analytics/growth`);
         if (!res.ok) throw new Error();
@@ -570,8 +495,7 @@ function renderGrowthChart(data, containerId) {
     container.innerHTML = data.months.map((month, i) => {
         const uH = Math.round(((data.users[i] || 0) / maxVal) * 100);
         const lH = Math.round(((data.listings?.[i] || 0) / maxVal) * 100);
-        return `
-        <div class="flex flex-col items-center gap-1 flex-1 min-w-0">
+        return `<div class="flex flex-col items-center gap-1 flex-1 min-w-0">
             <div class="w-full flex items-end gap-0.5 justify-center" style="height:100%">
                 <div class="flex-1 bg-[#ea580c] rounded-t transition-all" style="height:${uH}%" title="Users: ${data.users[i]}"></div>
                 <div class="flex-1 bg-slate-200 rounded-t transition-all" style="height:${lH}%" title="Listings: ${data.listings?.[i] || 0}"></div>
@@ -581,27 +505,19 @@ function renderGrowthChart(data, containerId) {
     }).join('');
 }
 
-// -- Users ---------------------------------------------------------------------
 async function loadUsers() {
     const tbody = document.getElementById('users-table');
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</td></tr>';
     try {
         const res   = await fetch(`${API}/admin/users`);
         if (!res.ok) throw new Error('Server error');
         const users = await res.json();
-
         document.getElementById('user-count-badge').textContent = `${users.length} users`;
-
-        if (!users.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400">No users found.</td></tr>';
-            return;
-        }
-
+        if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400">No users found.</td></tr>'; return; }
         const roleBadge = r => {
             const map = { admin: 'bg-red-100 text-red-700', landlord: 'bg-blue-100 text-blue-700', student_host: 'bg-purple-100 text-purple-700', student: 'bg-green-100 text-green-700' };
             return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${map[r] || 'bg-slate-100 text-slate-600'}">${esc(r)}</span>`;
         };
-
         tbody.innerHTML = users.map(u => `
             <tr class="hover:bg-slate-50 border-b border-slate-50">
                 <td class="px-5 py-3 font-semibold text-slate-900 text-sm">${esc(u.full_name)}</td>
@@ -619,9 +535,7 @@ async function loadUsers() {
                     </button>
                 </td>
             </tr>`).join('');
-    } catch {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400 text-sm">Failed to load users.</td></tr>';
-    }
+    } catch { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400 text-sm">Failed to load users.</td></tr>'; }
 }
 
 function toggleSuspend(userId, email, isActive) {
@@ -635,25 +549,18 @@ function toggleSuspend(userId, email, isActive) {
     );
 }
 
-// -- Listings ------------------------------------------------------------------
 async function loadListings() {
     const tbody = document.getElementById('listings-table');
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</td></tr>';
     try {
         const res      = await fetch(`${API}/admin/all-listings`);
         if (!res.ok) throw new Error();
         const listings = await res.json();
-
-        if (!listings.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400">No listings found.</td></tr>';
-            return;
-        }
-
+        if (!listings.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400">No listings found.</td></tr>'; return; }
         const statusBadge = s => {
             const map = { active: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', rejected: 'bg-red-100 text-red-700' };
             return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${map[s] || 'bg-slate-100 text-slate-600'}">${esc(s) || 'unknown'}</span>`;
         };
-
         tbody.innerHTML = listings.map(l => `
             <tr class="hover:bg-slate-50 border-b border-slate-50">
                 <td class="px-5 py-3 font-semibold text-slate-900 text-sm max-w-[160px] truncate">${esc(l.title)}</td>
@@ -669,19 +576,11 @@ async function loadListings() {
                     </div>
                 </td>
             </tr>`).join('');
-    } catch {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-400 text-sm">Failed to load listings.</td></tr>';
-    }
+    } catch { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-400 text-sm">Failed to load listings.</td></tr>'; }
 }
 
-async function approveListing(id) {
-    const res = await fetch(`${API}/admin/listings/${id}/approve`, { method: 'PATCH' });
-    if (res.ok) loadListings();
-}
-async function rejectListing(id) {
-    const res = await fetch(`${API}/admin/listings/${id}/reject`, { method: 'PATCH' });
-    if (res.ok) loadListings();
-}
+async function approveListing(id) { const res = await fetch(`${API}/admin/listings/${id}/approve`, { method: 'PATCH' }); if (res.ok) loadListings(); }
+async function rejectListing(id)  { const res = await fetch(`${API}/admin/listings/${id}/reject`,  { method: 'PATCH' }); if (res.ok) loadListings(); }
 function deleteListing(id, title) {
     showModal('Delete Listing', `Permanently delete "${title}"? This cannot be undone.`, async () => {
         await fetch(`${API}/admin/listings/${id}`, { method: 'DELETE' });
@@ -689,22 +588,15 @@ function deleteListing(id, title) {
     });
 }
 
-// -- Verifications -------------------------------------------------------------
 async function loadVerifications() {
     const tbody = document.getElementById('verify-table-body');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</td></tr>';
-
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</td></tr>';
     try {
         const res  = await fetch(`${API}/admin/verifications`);
         if (!res.ok) throw new Error();
         const data = await res.json();
-
-        if (!data || !data.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 italic">No pending verifications. ?</td></tr>';
-            return;
-        }
-
+        if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 italic">No pending verifications.</td></tr>'; return; }
         tbody.innerHTML = data.map(v => `
             <tr class="hover:bg-slate-50 border-b border-slate-50">
                 <td class="px-5 py-3 text-sm">
@@ -723,15 +615,13 @@ async function loadVerifications() {
                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-600">Pending Review</span>
                 </td>
                 <td class="px-5 py-3">
-                    <div class="flex gap-2 flex-wrap">
+                    <div class="flex gap-1.5 flex-wrap">
                         <button onclick="approveVerification(${v.id})" class="bg-green-500 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-green-600 transition uppercase">Approve</button>
                         <button onclick="rejectVerification(${v.id})"  class="bg-red-50 text-red-600 px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-red-100 transition uppercase">Reject</button>
                     </div>
                 </td>
             </tr>`).join('');
-    } catch {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400 text-sm">Failed to load verifications.</td></tr>';
-    }
+    } catch { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400 text-sm">Failed to load verifications.</td></tr>'; }
 }
 
 async function approveVerification(userId) {
@@ -740,21 +630,15 @@ async function approveVerification(userId) {
         if (res.ok) loadVerifications();
     });
 }
-
 async function rejectVerification(userId) {
-    const reason = window.prompt("Rejection reason (optional â€” shown to user):") ?? "";
+    const reason = window.prompt("Rejection reason (optional — shown to user):") ?? "";
     showModal("Reject Verification", "Reject this verification? The user will be notified.", async () => {
-        const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reason: reason.trim() || null }),
-        });
+        const res = await fetch(`${API}/admin/verifications/${userId}/reject`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: reason.trim() || null }) });
         if (res.ok) { showToast("Verification rejected.", "success"); loadVerifications(); }
         else showToast("Failed to reject.", "error");
     });
 }
 
-// -- Analytics -----------------------------------------------------------------
 async function loadAnalytics() {
     try {
         const res  = await fetch(`${API}/admin/analytics/growth`);
@@ -764,23 +648,17 @@ async function loadAnalytics() {
     } catch { /* fail silently */ }
 }
 
-// -- Reports -------------------------------------------------------------------
 async function loadReports() {
     const el = document.getElementById('reports-list');
-    el.innerHTML = '<div class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</div>';
+    el.innerHTML = '<div class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</div>';
     try {
         const res     = await fetch(`${API}/admin/reports`);
         if (!res.ok) throw new Error();
         const reports = await res.json();
-
-        if (!reports.length) {
-            el.innerHTML = '<div class="text-center py-10 text-slate-400">No reports found.</div>';
-            return;
-        }
-
+        if (!reports.length) { el.innerHTML = '<div class="text-center py-10 text-slate-400">No reports found.</div>'; return; }
         el.innerHTML = reports.map(r => `
             <div class="p-5 hover:bg-slate-50 transition">
-                <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <div class="font-bold text-slate-900 text-sm">Report #${r.id}</div>
                         <div class="text-xs text-slate-400 mt-0.5">Listing: ${esc(r.listing_id)} &middot; Reporter: ${esc(r.reporter_id)}</div>
@@ -793,9 +671,7 @@ async function loadReports() {
                     </div>
                 </div>
             </div>`).join('');
-    } catch {
-        el.innerHTML = '<div class="text-center py-10 text-red-400 text-sm">Failed to load reports.</div>';
-    }
+    } catch { el.innerHTML = '<div class="text-center py-10 text-red-400 text-sm">Failed to load reports.</div>'; }
 }
 
 async function dismissReport(reportId) {
@@ -803,52 +679,26 @@ async function dismissReport(reportId) {
     if (res.ok) loadReports();
 }
 
-// -- Announcements -------------------------------------------------------------
 async function sendAnnouncement() {
     const title  = document.getElementById('announce-title').value.trim();
     const body   = document.getElementById('announce-body').value.trim();
     const target = document.getElementById('announce-target').value;
     const errEl  = document.getElementById('announce-error');
     const sucEl  = document.getElementById('announce-success');
-
-    errEl.classList.add('hidden');
-    sucEl.classList.add('hidden');
-
-    if (!title || !body) {
-        errEl.textContent = 'Title and message are required.';
-        errEl.classList.remove('hidden');
-        return;
-    }
-
+    errEl.classList.add('hidden'); sucEl.classList.add('hidden');
+    if (!title || !body) { errEl.textContent = 'Title and message are required.'; errEl.classList.remove('hidden'); return; }
     try {
-        const res = await fetch(`${API}/admin/announcements`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ title, body, target }),
-        });
+        const res = await fetch(`${API}/admin/announcements`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, body, target }) });
         if (!res.ok) throw new Error();
         sucEl.classList.remove('hidden');
         document.getElementById('announce-title').value = '';
         document.getElementById('announce-body').value  = '';
-    } catch {
-        errEl.textContent = 'Failed to send announcement. Try again.';
-        errEl.classList.remove('hidden');
-    }
+    } catch { errEl.textContent = 'Failed to send announcement. Try again.'; errEl.classList.remove('hidden'); }
 }
 
-// -- Settings ------------------------------------------------------------------
 async function saveSettings() {
     try {
-        const res = await fetch(`${API}/admin/settings/update`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({
-                platform_name:    document.getElementById('setting-name').value.trim(),
-                support_email:    document.getElementById('setting-email').value.trim(),
-                require_approval: document.getElementById('setting-approval').checked,
-                maintenance_mode: document.getElementById('setting-maintenance').checked,
-            }),
-        });
+        const res = await fetch(`${API}/admin/settings/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform_name: document.getElementById('setting-name').value.trim(), support_email: document.getElementById('setting-email').value.trim(), require_approval: document.getElementById('setting-approval').checked, maintenance_mode: document.getElementById('setting-maintenance').checked }) });
         if (!res.ok) throw new Error();
         const el = document.getElementById('settings-success');
         el.classList.remove('hidden');
@@ -856,7 +706,6 @@ async function saveSettings() {
     } catch { /* fail silently */ }
 }
 
-// -- Modal ---------------------------------------------------------------------
 function showModal(title, body, cb) {
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal-body').textContent  = body;
@@ -867,13 +716,20 @@ function showModal(title, body, cb) {
         closeModal();
     };
 }
+function closeModal() { document.getElementById('confirm-modal').classList.add('hidden'); modalCallback = null; }
 
-function closeModal() {
-    document.getElementById('confirm-modal').classList.add('hidden');
-    modalCallback = null;
+function showToast(msg, type = 'success') {
+    const old = document.getElementById('fmn-toast'); if (old) old.remove();
+    const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    const icon  = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const t = document.createElement('div');
+    t.id = 'fmn-toast';
+    t.className = `fixed bottom-6 right-6 z-[9999] flex items-center gap-2 px-5 py-4 rounded-xl shadow-2xl font-bold text-sm text-white ${color} transition-all duration-300 opacity-0 translate-y-2`;
+    t.innerHTML = `<i class="fas ${icon}"></i>${msg}`;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.remove('opacity-0','translate-y-2'));
+    setTimeout(() => { t.classList.add('opacity-0','translate-y-2'); setTimeout(() => t.remove(), 300); }, 3500);
 }
 </script>
 </body>
 </html>
-
-

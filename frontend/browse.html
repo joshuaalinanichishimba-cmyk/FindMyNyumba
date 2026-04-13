@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Student Housing - FindMyNyumba</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
+function resolveImageUrl(raw) {
+    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+    const url = String(raw).trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
+}
+</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         #filters-sidebar { transition: transform 0.3s ease, opacity 0.3s ease; }
@@ -389,7 +397,7 @@
 
         container.innerHTML = listings.map(p => {
             const price      = Number(p.price).toLocaleString();
-            const imgUrl     = p.image_url || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+            const imgUrl     = resolveImageUrl(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
             const safeTitle  = String(p.title    || '').replace(/"/g, '&quot;');
             const safeLoc    = String(p.location || '').replace(/</g, '&lt;');
 
@@ -455,9 +463,25 @@
 
         fetchListings(preQuery ? `?q=${encodeURIComponent(preQuery)}` : '');
     });
-    </script>
+    
+// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
+function resolveImageUrl(raw) {
+    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+    const url = String(raw).trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
+}
+</script>
     <script>
     document.getElementById('current-year').textContent = new Date().getFullYear();
+
+// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
+function resolveImageUrl(raw) {
+    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+    const url = String(raw).trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
+}
 </script>
 </body>
 </html>

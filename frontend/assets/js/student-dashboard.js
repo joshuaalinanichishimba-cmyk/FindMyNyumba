@@ -32,7 +32,7 @@ window.loadSavedProperties = async function() {
         // Render properties if they exist
         grid.innerHTML = properties.map(p => `
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group" onclick="window.location.href='listing.html?id=${p.id}'">
-                <img src="${p.image_url || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}" class="w-full h-48 object-cover group-hover:scale-105 transition">
+                <img src="${resolveImageUrl(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}" class="w-full h-48 object-cover group-hover:scale-105 transition">
                 <div class="p-4">
                     <h4 class="font-black text-gray-800 truncate">${p.title}</h4>
                     <p class="text-[#ea580c] font-black mt-1">ZMW ${Number(p.price).toLocaleString()}</p>

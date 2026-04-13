@@ -1,6 +1,62 @@
-
-.env
+﻿# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.db
+*.sqlite
 *.sqlite3
-.vercel
-.env*.local
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backups
+*.bak
+*.backup
+*.old
+*.tmp
+
+# Uploads (keep structure but not files)
+static/uploads/properties/*
+static/uploads/attachments/*
+static/uploads/verification/*
+!static/uploads/properties/.gitkeep
+!static/uploads/attachments/.gitkeep
+!static/uploads/verification/.gitkeep
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+*.egg-info/

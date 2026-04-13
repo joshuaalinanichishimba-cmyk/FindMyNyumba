@@ -42,8 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         properties.forEach(prop => {
             // FIX: backend returns image_url, not photo_url
             // FIX: was a syntax error â€” raw URL without quotes
-            const imageUrl = prop.image_url
-                || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
+            const imageUrl = proresolveImageUrl(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
 
             const boostedBadge = prop.is_boosted
                 ? `<span class="absolute top-3 left-3 bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow">
