@@ -23,7 +23,7 @@ app = FastAPI(title="FindMyNyumba", version="1.0.0")
 # -- CORS ----------------------------------------------------------------------
 # allow_credentials=True cannot be combined with allow_origins=["*"].
 # Use explicit origins in production; keep dev origins for local testing.
-ALLOWED_origins = ["https://find-my-nyumba-original.vercel.app", "https://nyumba-web.vercel.app", 
+ALLOWED_origins = ["https://find-my-nyumba-original.vercel.app", "https://nyumba-web.vercel.app", "https://find-my-nyumba-original.vercel.app", "https://nyumba-web.vercel.app", 
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "http://localhost:3000",
