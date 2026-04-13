@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const query  = params.get('q') || '';
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/api/v1/properties');
+        const response = await fetch('https://find-my-nyumba-original.vercel.app/api/v1/properties');
         if (!response.ok) throw new Error(`Server error ${response.status}`);
         let properties = await response.json();
 

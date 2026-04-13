@@ -1,5 +1,5 @@
-﻿"""
-main.py — FindMyNyumba FastAPI entry point
+"""
+main.py � FindMyNyumba FastAPI entry point
 
 FIXES:
 - Correct import paths for all endpoint modules
@@ -20,10 +20,10 @@ from app.api.v1.endpoints import auth, student, landlords, student_hosts, admin,
 
 app = FastAPI(title="FindMyNyumba", version="1.0.0")
 
-# ── CORS ──────────────────────────────────────────────────────────────────────
+# -- CORS ----------------------------------------------------------------------
 # allow_credentials=True cannot be combined with allow_origins=["*"].
 # Use explicit origins in production; keep dev origins for local testing.
-ALLOWED_ORIGINS = [
+ALLOWED_origins = ["https://find-my-nyumba-original.vercel.app", "https://nyumba-web.vercel.app", 
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "http://localhost:3000",
@@ -40,19 +40,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Static files (uploaded property images, attachments, verification docs) ───
+# -- Static files (uploaded property images, attachments, verification docs) ---
 # Creates the directory if absent so the app doesn't crash on a fresh clone.
 for static_dir in ["static/uploads/properties", "static/uploads/attachments", "static/uploads/verification"]:
     Path(static_dir).mkdir(parents=True, exist_ok=True)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# ── Health check ──────────────────────────────────────────────────────────────
+# -- Health check --------------------------------------------------------------
 @app.get("/")
 def home():
     return {"status": "online", "project": "FindMyNyumba"}
 
-# ── Routers ───────────────────────────────────────────────────────────────────
+# -- Routers -------------------------------------------------------------------
 # Auth  (login, register, forgot-password, /me)
 app.include_router(auth.router,          prefix="/api/v1/auth")
 

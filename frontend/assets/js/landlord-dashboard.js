@@ -27,7 +27,7 @@ window.switchTab = function(tabId) {
 // --- 2. DATA FETCHING WITH LOADING & EMPTY STATES ---
 window.fetchStats = async function() {
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/landlord/stats');
+        const res = await fetch('https://find-my-nyumba-original.vercel.app/api/v1/landlord/stats');
         if (res.ok) {
             const stats = await res.json();
             const totalEl = document.getElementById('stat-total');
@@ -48,7 +48,7 @@ window.fetchListings = async function() {
     tbody.innerHTML = `<tr><td colspan="4" class="text-center py-12 text-gray-400 font-bold"><i class="fas fa-spinner fa-spin text-2xl mb-2 text-[#ea580c]"></i><br>Loading your properties...</td></tr>`;
 
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/properties');
+        const res = await fetch('https://find-my-nyumba-original.vercel.app/api/v1/properties');
         if(!res.ok) throw new Error("Backend rejected request");
         
         const props = await res.json();
@@ -96,7 +96,7 @@ window.deleteListing = async function(id, btnElement) {
     btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/properties/${id}`, { method: 'DELETE' });
+        const res = await fetch(`https://find-my-nyumba-original.vercel.app/api/v1/properties/${id}`, { method: 'DELETE' });
         if(res.ok) {
             row.remove();
             window.fetchStats(); // Update dashboard numbers seamlessly
@@ -124,7 +124,7 @@ window.handleVerifyUpload = async function(input, type) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
 
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/landlord/upload-doc', { method: 'POST', body: formData });
+        const res = await fetch('https://find-my-nyumba-original.vercel.app/api/v1/landlord/upload-doc', { method: 'POST', body: formData });
         if (res.ok) {
             btn.innerHTML = `<i class="fas fa-check text-green-600 mr-2"></i> ${file.name.substring(0, 12)}...`;
             btn.classList.add('bg-green-50', 'border', 'border-green-200');
@@ -158,7 +158,7 @@ window.loadLandlordMessages = async function() {
     chatMessages.classList.remove('hidden');
 
     try {
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/messages/${window.activeChatId}`);
+        const res = await fetch(`https://find-my-nyumba-original.vercel.app/api/v1/messages/${window.activeChatId}`);
         if(res.ok) {
             const msgs = await res.json();
             chatMessages.innerHTML = msgs.map(m => {
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input.value = ''; // clear box
             
             // Send reply to backend
-            await fetch('http://127.0.0.1:8000/api/v1/messages', {
+            await fetch('https://find-my-nyumba-original.vercel.app/api/v1/messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -241,7 +241,7 @@ window.sendLandlordMessage = async function(e) {
 
     // 2. Send to Backend
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/messages', {
+        const res = await fetch('https://find-my-nyumba-original.vercel.app/api/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -268,7 +268,7 @@ window.sendLandlordMessage = async function(e) {
 // --- NOTIFICATION ENGINE ---
 window.loadNotifications = async function() {
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/notifications/landlord/1');
+        const res = await fetch('https://find-my-nyumba-original.vercel.app/api/v1/notifications/landlord/1');
         const notifs = await res.json();
         const badge = document.getElementById('notif-badge');
         const list = document.getElementById('notif-list');

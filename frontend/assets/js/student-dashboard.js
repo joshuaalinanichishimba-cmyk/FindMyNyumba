@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/api/v1";
+const API_URL = "https://find-my-nyumba-original.vercel.app/api/v1";
 
 function getAuthHeaders() {
     return {
