@@ -1,243 +1,230 @@
-﻿"""
-app/api/v1/endpoints/messages.py
+"""
+app/api/v1/endpoints/students.py
 
-FIXES:
-- Dual-support for POST /messages/send: Now gracefully handles both JSON payloads 
-  (from property.html) and FormData payloads (from messages.html). Fixes 422 error.
+Student dashboard endpoints. The original file shipped under this name was
+a copy of messages.py, which meant every call from dashboard-student.html
+to /students/* returned 404. This module rebuilds the surface the frontend
+actually uses:
+
+  GET  /students/dashboard/overview      → cards + recent listings + recommendations
+  GET  /students/saved                   → saved rooms (empty until SavedListing model exists)
+  POST /students/saved/{listing_id}      → save a listing (acknowledge until model exists)
+  DELETE /students/saved/{listing_id}    → unsave a listing
+  PUT  /students/profile                 → update profile
+  POST /students/settings/password       → change password
+
+Notes:
+  * "Saved rooms" needs a junction table (SavedListing) to persist across
+    sessions. Until that model is added, the GET endpoint returns an empty
+    list and POST/DELETE return success without persisting. The UI already
+    renders the empty state correctly, so the dashboard works end-to-end.
+  * Password regex is kept identical to auth.py so a password that registers
+    successfully can also be changed later (the original landlord/host
+    endpoints used a stricter {8,12} bound — fixed there too).
 """
 
-import shutil
-from pathlib import Path
+import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Request
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.core.security import get_password_hash, verify_password
 from app.models.listing import Listing
 from app.models.message import Message
 from app.models.user import User
 
-router = APIRouter(prefix="/messages", tags=["Messages"])
-
-ATTACH_DIR = Path("static/uploads/attachments")
-
-# ── Unread count ──────────────────────────────────────────────────────────────
-@router.get("/unread-count")
-def get_unread_count(
-    current_user: User = Depends(get_current_user),
-    db: Session        = Depends(get_db),
-):
-    count = db.query(Message).filter(
-        Message.receiver_id == current_user.id,
-        Message.is_read     == False,
-    ).count()
-    return {"unread_count": count}
+router = APIRouter(prefix="/students", tags=["Students"])
 
 
-# ── Conversations list ────────────────────────────────────────────────────────
-@router.get("/conversations")
-def get_conversations(
-    current_user: User = Depends(get_current_user),
-    db: Session        = Depends(get_db),
-):
-    all_msgs = (
-        db.query(Message)
-        .filter(
-            or_(
-                Message.sender_id   == current_user.id,
-                Message.receiver_id == current_user.id,
-            )
+# Single source of truth for password complexity rules across the app.
+# Matches auth.py: at least 8 chars, lower + upper + digit + symbol.
+PASSWORD_RE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
+PASSWORD_RULE_MSG = (
+    "Password must be at least 8 characters and include uppercase, "
+    "lowercase, a number, and a special character."
+)
+
+
+# ── Role guard ────────────────────────────────────────────────────────────────
+def require_student(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != "student":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Student access required.",
         )
-        .order_by(Message.created_at.desc())
-        .all()
-    )
-
-    seen    = {}
-    threads = []
-
-    for msg in all_msgs:
-        other_id = msg.receiver_id if msg.sender_id == current_user.id else msg.sender_id
-        prop_id  = msg.property_id or 0
-        key      = (other_id, prop_id)
-
-        if key in seen:
-            continue
-        seen[key] = True
-
-        other_user = db.query(User).filter(User.id == other_id).first()
-        other_name = other_user.full_name if other_user else "Unknown"
-
-        prop_title = None
-        if prop_id:
-            listing = db.query(Listing).filter(Listing.id == prop_id).first()
-            if listing:
-                prop_title = listing.title
-
-        unread_count = db.query(Message).filter(
-            Message.sender_id   == other_id,
-            Message.receiver_id == current_user.id,
-            Message.property_id == (prop_id if prop_id else None),
-            Message.is_read     == False,
-        ).count()
-
-        threads.append({
-            "other_user_id":   other_id,
-            "other_user_name": other_name,
-            "property_id":     prop_id,
-            "property_title":  prop_title or "General Inquiry",
-            "last_message":    msg.content,
-            "unread_count":    unread_count,
-        })
-
-    return threads
+    return current_user
 
 
-# ── Thread (individual conversation) ─────────────────────────────────────────
-@router.get("/thread/{property_id}/{other_user_id}")
-def get_thread(
-    property_id:   int,
-    other_user_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session        = Depends(get_db),
-):
-    prop_filter = (
-        Message.property_id == property_id if property_id else Message.property_id.is_(None)
-    )
-
-    msgs = (
-        db.query(Message)
-        .filter(
-            prop_filter,
-            or_(
-                and_(Message.sender_id == current_user.id,  Message.receiver_id == other_user_id),
-                and_(Message.sender_id == other_user_id,    Message.receiver_id == current_user.id),
-            ),
-        )
-        .order_by(Message.created_at.asc())
-        .all()
-    )
-
-    for msg in msgs:
-        if msg.receiver_id == current_user.id and not msg.is_read:
-            msg.is_read = True
-    db.commit()
-
-    result = []
-    for msg in msgs:
-        is_me = msg.sender_id == current_user.id
-        other_user = None if is_me else db.query(User).filter(User.id == msg.sender_id).first()
-        result.append({
-            "id":              msg.id,
-            "content":         msg.content,
-            "is_mine":         is_me,
-            "sender_name":     "Me" if is_me else (other_user.full_name if other_user else "Unknown"),
-            "created_at":      msg.created_at.isoformat() if msg.created_at else None,
-            "attachment_url":  msg.attachment_url,
-            "attachment_name": msg.attachment_name,
-            "attachment_type": msg.attachment_type,
-        })
-
-    return result
+# ── Helpers ───────────────────────────────────────────────────────────────────
+def _resolve_image(raw: Optional[str]) -> Optional[str]:
+    """
+    Listing.image_url is stored as a bare filename (e.g. "12_room.jpg").
+    Return a path relative to the API host so the frontend doesn't have to
+    guess. Frontend's resolveImageUrl() prepends the host as needed.
+    """
+    if not raw:
+        return None
+    if raw.startswith("http://") or raw.startswith("https://"):
+        return raw
+    if raw.startswith("/"):
+        return raw
+    return f"/static/uploads/properties/{raw}"
 
 
-# ── Send message (Smart JSON/Form Handler) ────────────────────────────────────
-ALLOWED_ATTACH_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp",
-                        "application/pdf", "text/plain",
-                        "application/msword",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
-MAX_ATTACH_MB = 10
+def _listing_card(l: Listing) -> dict:
+    """Compact representation used in dashboard cards/grids."""
+    return {
+        "id":         l.id,
+        "title":      l.title,
+        "price":      l.price,
+        "location":   l.location,
+        "image_url":  _resolve_image(l.image_url),
+        "is_boosted": l.is_boosted,
+        "created_at": l.created_at.isoformat() if l.created_at else None,
+    }
 
 
-@router.post("/send")
-async def send_message(
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    db: Session        = Depends(get_db),
+# ── GET /students/dashboard/overview ──────────────────────────────────────────
+@router.get("/dashboard/overview")
+def get_overview(
+    student: User = Depends(require_student),
+    db:      Session = Depends(get_db),
 ):
     """
-    Smart endpoint that checks the Content-Type.
-    Accepts both application/json (property pages) and multipart/form-data (messages dashboard).
-    Supports optional file/image attachments when sending via form-data.
+    Powers the student overview tab. Frontend reads:
+      - data.stats.saved_count
+      - data.stats.unread_messages_count
+      - data.recent_properties (array of compact listing cards)
     """
-    content_type = request.headers.get("content-type", "")
-
-    attachment_url  = None
-    attachment_name = None
-    attachment_type = None
-
-    if "application/json" in content_type:
-        data        = await request.json()
-        receiver_id = data.get("receiver_id")
-        content     = data.get("content", "")
-        prop_val    = data.get("property_id")
-        property_id = int(prop_val) if prop_val else None
-    else:
-        form        = await request.form()
-        receiver_id = form.get("receiver_id")
-        content     = form.get("content", "")
-        prop_val    = form.get("property_id")
-        property_id = int(prop_val) if prop_val and prop_val != "null" else None
-
-        # Handle optional attachment
-        attachment_file = form.get("attachment")
-        if attachment_file and hasattr(attachment_file, "filename") and attachment_file.filename:
-            mime = attachment_file.content_type or "application/octet-stream"
-            if mime not in ALLOWED_ATTACH_TYPES:
-                raise HTTPException(status_code=400,
-                    detail="Unsupported file type. Allowed: images, PDF, Word docs, text files.")
-
-            ATTACH_DIR.mkdir(parents=True, exist_ok=True)
-            safe_name = f"{current_user.id}_{attachment_file.filename.replace(' ', '_')}"
-            dest = ATTACH_DIR / safe_name
-            file_bytes = await attachment_file.read()
-            if len(file_bytes) > MAX_ATTACH_MB * 1024 * 1024:
-                raise HTTPException(status_code=400, detail=f"Attachment exceeds {MAX_ATTACH_MB}MB limit.")
-            with open(dest, "wb") as f:
-                f.write(file_bytes)
-
-            attachment_url  = f"/static/uploads/attachments/{safe_name}"
-            attachment_name = attachment_file.filename
-            attachment_type = "image" if mime.startswith("image/") else "file"
-
-            # Allow empty content if attachment present
-            if not str(content).strip():
-                content = f"[Attachment: {attachment_file.filename}]"
-
-    if not receiver_id:
-        raise HTTPException(status_code=422, detail="receiver_id is required")
-
-    receiver_id = int(receiver_id)
-
-    if not content or not str(content).strip():
-        raise HTTPException(status_code=400, detail="Message cannot be empty.")
-
-    receiver = db.query(User).filter(User.id == receiver_id).first()
-    if not receiver:
-        raise HTTPException(status_code=404, detail="Recipient not found.")
-
-    msg = Message(
-        sender_id       = current_user.id,
-        receiver_id     = receiver_id,
-        property_id     = property_id,
-        content         = str(content).strip(),
-        is_read         = False,
-        attachment_url  = attachment_url,
-        attachment_name = attachment_name,
-        attachment_type = attachment_type,
+    unread_messages_count = (
+        db.query(Message)
+          .filter(Message.receiver_id == student.id, Message.is_read == False)
+          .count()
     )
-    db.add(msg)
-    db.commit()
-    db.refresh(msg)
+
+    # TODO: once SavedListing model exists, count saved rows for this user.
+    saved_count = 0
+
+    recent_properties = (
+        db.query(Listing)
+          .filter(Listing.status == "active")
+          .order_by(Listing.is_boosted.desc(), Listing.created_at.desc())
+          .limit(6)
+          .all()
+    )
 
     return {
-        "status":          "success",
-        "detail":          "Message sent!",
-        "id":              msg.id,
-        "attachment_url":  attachment_url,
-        "attachment_name": attachment_name,
-        "attachment_type": attachment_type,
+        "stats": {
+            "saved_count":           saved_count,
+            "unread_messages_count": unread_messages_count,
+        },
+        "recent_properties": [_listing_card(l) for l in recent_properties],
     }
+
+
+# ── Saved rooms (stubbed until SavedListing model lands) ──────────────────────
+@router.get("/saved")
+def list_saved(
+    student: User = Depends(require_student),
+    db:      Session = Depends(get_db),
+):
+    """
+    Returns the student's saved listings. Currently returns an empty list —
+    persistence will come once the SavedListing junction table is added.
+    The dashboard renders the empty state correctly, so this is non-breaking.
+    """
+    return []
+
+
+@router.post("/saved/{listing_id}", status_code=201)
+def save_listing(
+    listing_id: int,
+    student:    User    = Depends(require_student),
+    db:         Session = Depends(get_db),
+):
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    # TODO: insert into saved_listings(user_id, listing_id, created_at)
+    return {"status": "success", "message": "Saved."}
+
+
+@router.delete("/saved/{listing_id}")
+def unsave_listing(
+    listing_id: int,
+    student:    User    = Depends(require_student),
+    db:         Session = Depends(get_db),
+):
+    # TODO: delete from saved_listings
+    return {"status": "success", "message": "Removed."}
+
+
+# ── PUT /students/profile ─────────────────────────────────────────────────────
+class ProfileUpdate(BaseModel):
+    full_name: str
+    phone:     Optional[str] = None
+
+
+@router.put("/profile")
+def update_profile(
+    payload: ProfileUpdate,
+    student: User    = Depends(require_student),
+    db:      Session = Depends(get_db),
+):
+    if not payload.full_name.strip():
+        raise HTTPException(status_code=400, detail="Full name cannot be empty.")
+
+    student.full_name = payload.full_name.strip()
+    if payload.phone is not None:
+        # Allow clearing the phone with an empty string
+        student.phone_number = payload.phone.strip() or None
+    db.commit()
+
+    return {
+        "status":  "success",
+        "message": "Profile updated successfully.",
+        "user": {
+            "id":        student.id,
+            "full_name": student.full_name,
+            "email":     student.email,
+            "phone":     student.phone_number,
+        },
+    }
+
+
+# ── POST /students/settings/password ──────────────────────────────────────────
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password:     str
+
+
+@router.post("/settings/password")
+def change_password(
+    payload: PasswordChange,
+    student: User    = Depends(require_student),
+    db:      Session = Depends(get_db),
+):
+    if not verify_password(payload.current_password, student.hashed_password):
+        raise HTTPException(status_code=401, detail="Current password is incorrect.")
+
+    if payload.current_password == payload.new_password:
+        raise HTTPException(
+            status_code=400,
+            detail="New password must be different from your current password.",
+        )
+
+    if not PASSWORD_RE.match(payload.new_password):
+        raise HTTPException(status_code=400, detail=PASSWORD_RULE_MSG)
+
+    student.hashed_password = get_password_hash(payload.new_password)
+    # Reset any pending password-reset token so it can't be reused after a
+    # voluntary password change.
+    student.reset_token_hash = None
+    student.reset_token_used = True
+    db.commit()
+
+    return {"status": "success", "message": "Password updated successfully."}

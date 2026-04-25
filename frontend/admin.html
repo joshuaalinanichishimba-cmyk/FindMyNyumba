@@ -22,13 +22,10 @@
         .sidebar-link.active { background: var(--orange-light) !important; color: var(--orange) !important; border-left-color: var(--orange); font-weight: 700; }
         .sidebar-link:hover:not(.active) { background: #f9fafb; }
 
-        /* Stat card */
         .stat-card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 
-        /* Bar chart */
         #growth-chart, #analytics-growth-chart { display: flex; align-items: flex-end; gap: 6px; height: 9rem; padding: 0 4px; }
 
-        /* Form */
         .fmn-input { width:100%; padding:10px 13px; border:1.5px solid #e5e7eb; border-radius:10px; outline:none; font-size:14px; transition:border-color 0.15s; }
         .fmn-input:focus { border-color:var(--orange); }
 
@@ -41,17 +38,27 @@
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-<!-- JWT auto-attach interceptor -->
+<!--
+  JWT auto-attach interceptor.
+
+  FIX: original read sessionStorage.adminToken only. login.html stores under
+  localStorage.token / sessionStorage.token, so admins coming through the
+  unified login were silently unauthenticated. We now look in both places.
+-->
 <script>
-(function() {
+(function () {
     const _fetch = window.fetch;
-    window.fetch = async function(resource, config) {
+    window.fetch = function (resource, config) {
         if (typeof resource === 'string' && resource.includes('/api/v1/')) {
             config = config || {};
             config.headers = config.headers || {};
-            const token = sessionStorage.getItem('adminToken');
-            if (token && !config.headers['Authorization'] && !config.headers['authorization']) {
-                config.headers['Authorization'] = 'Bearer ' + token;
+            const hasAuth = config.headers['Authorization'] || config.headers['authorization'];
+            if (!hasAuth) {
+                const token =
+                    sessionStorage.getItem('adminToken') ||
+                    localStorage.getItem('token') ||
+                    sessionStorage.getItem('token');
+                if (token) config.headers['Authorization'] = 'Bearer ' + token;
             }
         }
         return _fetch(resource, config);
@@ -66,13 +73,11 @@
     <!-- SIDEBAR -->
     <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-100 shadow-sm flex flex-col -translate-x-full lg:translate-x-0">
 
-        <!-- Logo -->
         <div class="px-5 py-5 border-b border-slate-100 flex items-center gap-3">
             <img src="logo.png" alt="FindMyNyumba" class="h-9 w-auto object-contain"
                  onerror="this.style.display='none'">
         </div>
 
-        <!-- Admin badge -->
         <div class="px-5 py-2.5 border-b border-slate-50">
             <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#ea580c] uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded-full">
                 <i class="fas fa-shield-alt text-[9px]"></i> Admin Panel
@@ -105,7 +110,6 @@
     <!-- MAIN -->
     <main class="flex-1 overflow-y-auto flex flex-col">
 
-        <!-- Top bar -->
         <header class="bg-white border-b border-slate-100 px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
             <div class="flex items-center gap-3">
                 <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition">
@@ -383,21 +387,72 @@
 
 <script>
 'use strict';
-const API = 'http://127.0.0.1:8000/api/v1';
+
+/* FindMyNyumba runtime config — auto-detects backend host */
+const FMN = (function () {
+    const host = window.location.hostname;
+    const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+    const API_HOST = isLocal
+        ? 'http://127.0.0.1:8000'
+        : 'https://findmynyumba-backend.onrender.com';
+    return { API_HOST, API_BASE: API_HOST + '/api/v1' };
+})();
+const API = FMN.API_BASE;
+
 let modalCallback = null;
 
 function esc(str) {
     if (str === null || str === undefined) return '—';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    const token = sessionStorage.getItem('adminToken');
-    const role  = sessionStorage.getItem('adminRole');
-    if (!token || role !== 'admin') { window.location.replace('admin-login.html'); return; }
-    fetch(`${API}/auth/me`)
-        .then(r => { if (r.status === 401 || r.status === 403) logout(); })
-        .catch(() => {});
+/*
+   Auth check.
+   FIX: original required adminToken/adminRole only and bounced everyone else
+   to a non-existent admin-login.html. We now accept either the admin-specific
+   keys OR the unified token+role keys, then verify the role server-side via
+   /auth/me. If the server says you're not admin, you go back to login.html.
+*/
+window.addEventListener('DOMContentLoaded', async () => {
+    const adminToken = sessionStorage.getItem('adminToken');
+    const adminRole  = sessionStorage.getItem('adminRole');
+    const stdToken   = localStorage.getItem('token')  || sessionStorage.getItem('token');
+    const stdRole    = localStorage.getItem('role')   || sessionStorage.getItem('role');
+
+    const haveToken = adminToken || stdToken;
+    if (!haveToken) {
+        window.location.replace('login.html');
+        return;
+    }
+
+    // Verify role with the server before showing admin UI.
+    try {
+        const res = await fetch(`${API}/auth/me`);
+        if (res.status === 401 || res.status === 403) { logout(); return; }
+        if (!res.ok) throw new Error();
+        const me = await res.json();
+        if (me.role !== 'admin') {
+            // Wrong role — clear admin keys and bounce to the right dashboard.
+            ['adminToken', 'adminRole', 'adminName'].forEach(k => sessionStorage.removeItem(k));
+            const fallback = {
+                student:      'dashboard-student.html',
+                student_host: 'dashboard-student-host.html',
+                landlord:     'dashboard-landlord.html',
+            }[me.role] || 'login.html';
+            window.location.replace(fallback);
+            return;
+        }
+        // Refresh admin name for the header (even if user came in via standard login).
+        if (!sessionStorage.getItem('adminName')) {
+            sessionStorage.setItem('adminName', me.full_name || 'Admin');
+        }
+    } catch {
+        logout();
+        return;
+    }
+
     const name = sessionStorage.getItem('adminName') || 'Admin';
     const nameEl = document.getElementById('admin-name-display');
     if (nameEl) nameEl.textContent = name;
@@ -405,10 +460,12 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function logout() {
-    sessionStorage.removeItem('adminToken');
-    sessionStorage.removeItem('adminRole');
-    sessionStorage.removeItem('adminName');
-    window.location.replace('admin-login.html');
+    // Clear BOTH conventions so the next login starts fresh.
+    ['adminToken', 'adminRole', 'adminName', 'token', 'role'].forEach(k => {
+        sessionStorage.removeItem(k);
+        localStorage.removeItem(k);
+    });
+    window.location.replace('login.html');
 }
 
 function showChangePassword() {
@@ -433,8 +490,12 @@ async function submitChangePassword() {
     if (newPwd !== confirm) { errEl.textContent = 'New passwords do not match.'; errEl.classList.remove('hidden'); return; }
     btn.disabled = true; btn.textContent = 'Updating…';
     try {
-        const res  = await fetch(`${API}/admin/change-password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ old_password: oldPwd, new_password: newPwd, confirm_password: confirm }) });
-        const data = await res.json();
+        const res  = await fetch(`${API}/admin/change-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ old_password: oldPwd, new_password: newPwd, confirm_password: confirm }),
+        });
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.detail || 'Failed to update password.');
         sucEl.classList.remove('hidden');
         ['cpwd-old','cpwd-new','cpwd-confirm'].forEach(id => document.getElementById(id).value = '');
@@ -608,7 +669,7 @@ async function loadVerifications() {
                 </td>
                 <td class="px-5 py-3 hidden md:table-cell">
                     ${v.documents && v.documents.length
-                        ? v.documents.map(d => `<a href="${esc(d.url)}" target="_blank" class="inline-flex items-center gap-1 text-xs font-bold text-orange-500 hover:underline mr-2"><i class="fas fa-file-alt"></i>${esc(d.label)}</a>`).join('')
+                        ? v.documents.map(d => `<a href="${FMN.API_HOST}${esc(d.url)}" target="_blank" class="inline-flex items-center gap-1 text-xs font-bold text-orange-500 hover:underline mr-2"><i class="fas fa-file-alt"></i>${esc(d.label)}</a>`).join('')
                         : '<span class="text-xs text-slate-400 italic">No docs</span>'}
                 </td>
                 <td class="px-5 py-3">
@@ -633,7 +694,11 @@ async function approveVerification(userId) {
 async function rejectVerification(userId) {
     const reason = window.prompt("Rejection reason (optional — shown to user):") ?? "";
     showModal("Reject Verification", "Reject this verification? The user will be notified.", async () => {
-        const res = await fetch(`${API}/admin/verifications/${userId}/reject`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: reason.trim() || null }) });
+        const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reason: reason.trim() || null }),
+        });
         if (res.ok) { showToast("Verification rejected.", "success"); loadVerifications(); }
         else showToast("Failed to reject.", "error");
     });
@@ -688,7 +753,11 @@ async function sendAnnouncement() {
     errEl.classList.add('hidden'); sucEl.classList.add('hidden');
     if (!title || !body) { errEl.textContent = 'Title and message are required.'; errEl.classList.remove('hidden'); return; }
     try {
-        const res = await fetch(`${API}/admin/announcements`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, body, target }) });
+        const res = await fetch(`${API}/admin/announcements`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, body, target }),
+        });
         if (!res.ok) throw new Error();
         sucEl.classList.remove('hidden');
         document.getElementById('announce-title').value = '';
@@ -698,7 +767,16 @@ async function sendAnnouncement() {
 
 async function saveSettings() {
     try {
-        const res = await fetch(`${API}/admin/settings/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform_name: document.getElementById('setting-name').value.trim(), support_email: document.getElementById('setting-email').value.trim(), require_approval: document.getElementById('setting-approval').checked, maintenance_mode: document.getElementById('setting-maintenance').checked }) });
+        const res = await fetch(`${API}/admin/settings/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                platform_name:    document.getElementById('setting-name').value.trim(),
+                support_email:    document.getElementById('setting-email').value.trim(),
+                require_approval: document.getElementById('setting-approval').checked,
+                maintenance_mode: document.getElementById('setting-maintenance').checked,
+            }),
+        });
         if (!res.ok) throw new Error();
         const el = document.getElementById('settings-success');
         el.classList.remove('hidden');

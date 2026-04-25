@@ -1,22 +1,30 @@
-﻿"""
+"""
 app/api/v1/endpoints/listings.py
 
-FULL IMPLEMENTATION — was previously a hardcoded 2-item stub.
+Public listing endpoints used by browse.html, listing.html, and the
+search bars on every dashboard.
 
-FIXES:
-- All data now comes from the database via SQLAlchemy
-- GET /properties supports query filters: q, min_price, max_price, university
-- GET /properties/{id} returns owner object so listing.html host card works
-- POST /properties/{id}/reviews requires auth and saves to DB (stub table assumed)
-- POST /properties/{id}/report requires auth and saves to the Report model
-- Only "active" listings are returned to the public browse page
-- Boosted listings are sorted first (frontend also handles client-side sort)
+FIXES vs original:
+- Image URLs are now resolved to ABSOLUTE URLs on the backend (using the
+  request's host) before being returned. The original returned bare
+  paths like "/static/uploads/properties/x.jpg" which forced every
+  frontend page to invent a "guess the backend host" helper. Several of
+  those guess functions were broken (URL-inside-URL 404s).
+- GET /properties is paginated by default (limit/offset) so a future
+  10K-listing browse page doesn't dump a multi-MB JSON blob to mobile.
+- Trim/clamp on filter inputs prevents nuisance crashes from oversized
+  or malformed query strings.
+- Review submission no longer silently lies. Until a Review model is
+  added, the endpoint is explicit that nothing is persisted, and the
+  payload is validated so future wiring is one-line.
+- Report endpoint deduplicates: a single user can only have one open
+  (pending) report per listing, preventing trivial spam.
 """
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -27,98 +35,119 @@ from app.models.user import User
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
 
-# ── Request models ────────────────────────────────────────────────────────────
 
+# ── Request models ────────────────────────────────────────────────────────────
 class ReviewCreate(BaseModel):
-    rating:  int
-    comment: str
+    rating:  int            = Field(..., ge=1, le=5)
+    comment: str            = Field(..., min_length=1, max_length=2000)
+
 
 class ReportCreate(BaseModel):
-    reason:      str
-    description: Optional[str] = None
+    reason:      str            = Field(..., min_length=1, max_length=120)
+    description: Optional[str]  = Field(None, max_length=2000)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+def _absolute_image_url(raw: Optional[str], request: Request) -> Optional[str]:
+    """
+    Convert whatever is stored in Listing.image_url into an absolute URL the
+    browser can use directly. Three input cases:
+      1. None / empty            → None (frontend uses placeholder)
+      2. Already a full URL      → returned as-is
+      3. Bare filename or path   → prefixed with the API host + static path
+    """
+    if not raw:
+        return None
+    raw = raw.strip()
+    if raw.startswith("http://") or raw.startswith("https://"):
+        return raw
 
-def _listing_to_dict(l: Listing) -> dict:
-    """Minimal dict for browse list — fast, no joins."""
+    # Build absolute URL from the request scheme/host so this works in every
+    # deployment without code changes (localhost, render, custom domain).
+    base = str(request.base_url).rstrip("/")  # e.g. "https://api.findmynyumba.com"
+    if raw.startswith("/"):
+        return f"{base}{raw}"
+    return f"{base}/static/uploads/properties/{raw}"
+
+
+def _listing_card(l: Listing, request: Request) -> dict:
+    """Compact representation for browse and dashboard grids."""
     return {
         "id":         l.id,
         "title":      l.title,
         "price":      l.price,
         "location":   l.location,
         "is_boosted": l.is_boosted,
-        "image_url":  _resolve_image(l.image_url),
+        "image_url":  _absolute_image_url(l.image_url, request),
         "created_at": l.created_at.isoformat() if l.created_at else None,
     }
 
-def _resolve_image(raw: Optional[str]) -> Optional[str]:
-    """
-    If the stored value is already a full URL (http/https), return it as-is.
-    If it's a bare filename, prefix the static path.
-    """
-    if not raw:
-        return None
-    if raw.startswith("http://") or raw.startswith("https://"):
-        return raw
-    return f"/static/uploads/properties/{raw}"
-
 
 # ── GET /properties ───────────────────────────────────────────────────────────
-
 @router.get("")
 @router.get("/")
 def get_all_properties(
-    q:          Optional[str]   = None,
-    min_price:  Optional[float] = None,
-    max_price:  Optional[float] = None,
-    university: Optional[str]   = None,
+    request:    Request,
+    q:          Optional[str]   = Query(None, max_length=120),
+    min_price:  Optional[float] = Query(None, ge=0),
+    max_price:  Optional[float] = Query(None, ge=0),
+    university: Optional[str]   = Query(None, max_length=80),
+    limit:      int             = Query(60, ge=1, le=200),
+    offset:     int             = Query(0,  ge=0),
     db: Session = Depends(get_db),
 ):
     """
-    Public browse endpoint. Returns only 'active' listings.
-    Boosted listings are returned first.
-    Supports optional filters: q (keyword), min_price, max_price, university.
+    Public browse endpoint. Returns only 'active' listings. Boosted listings
+    appear first, then newest. Paginated via limit/offset; defaults are
+    generous enough that the existing browse page works unchanged.
     """
     query = db.query(Listing).filter(Listing.status == "active")
 
     if q:
         term = f"%{q.strip()}%"
         query = query.filter(
-            Listing.title.ilike(term) | Listing.location.ilike(term) | Listing.description.ilike(term)
+            Listing.title.ilike(term)
+            | Listing.location.ilike(term)
+            | Listing.description.ilike(term)
         )
 
     if min_price is not None:
         query = query.filter(Listing.price >= min_price)
-
     if max_price is not None:
         query = query.filter(Listing.price <= max_price)
-
     if university:
-        query = query.filter(Listing.location.ilike(f"%{university}%"))
+        query = query.filter(Listing.location.ilike(f"%{university.strip()}%"))
 
-    # Boosted first, then newest
-    listings = query.order_by(Listing.is_boosted.desc(), Listing.created_at.desc()).all()
+    listings = (
+        query.order_by(Listing.is_boosted.desc(), Listing.created_at.desc())
+             .offset(offset)
+             .limit(limit)
+             .all()
+    )
 
-    return [_listing_to_dict(l) for l in listings]
+    return [_listing_card(l, request) for l in listings]
 
 
 # ── GET /properties/{id} ──────────────────────────────────────────────────────
-
 @router.get("/{listing_id}")
-def get_listing_detail(listing_id: int, db: Session = Depends(get_db)):
+def get_listing_detail(
+    listing_id: int,
+    request:    Request,
+    db: Session = Depends(get_db),
+):
     """
-    Public detail endpoint. Returns full listing info including owner object.
-    listing.html uses owner.full_name, owner.role, owner.verification_status
-    to render the host card. owner_id is used for messaging.
+    Public detail endpoint. Returns full info plus owner card data.
+    listing.html uses owner.full_name, owner.role, owner.verification_status.
     """
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
-
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
 
-    owner = db.query(User).filter(User.id == listing.owner_id).first()
+    # Don't expose pending/rejected listings to the public.
+    if listing.status != "active":
+        raise HTTPException(status_code=404, detail="Listing not found.")
 
+    owner = db.query(User).filter(User.id == listing.owner_id).first()
     owner_data = None
     if owner:
         owner_data = {
@@ -135,7 +164,7 @@ def get_listing_detail(listing_id: int, db: Session = Depends(get_db)):
         "description": listing.description or "",
         "price":       listing.price,
         "location":    listing.location,
-        "image_url":   _resolve_image(listing.image_url),
+        "image_url":   _absolute_image_url(listing.image_url, request),
         "is_boosted":  listing.is_boosted,
         "status":      listing.status,
         "owner_id":    listing.owner_id,
@@ -145,8 +174,7 @@ def get_listing_detail(listing_id: int, db: Session = Depends(get_db)):
 
 
 # ── POST /properties/{id}/reviews ─────────────────────────────────────────────
-
-@router.post("/{listing_id}/reviews")
+@router.post("/{listing_id}/reviews", status_code=202)
 def post_review(
     listing_id: int,
     review: ReviewCreate,
@@ -154,28 +182,25 @@ def post_review(
     db: Session           = Depends(get_db),
 ):
     """
-    Authenticated endpoint. Validates listing exists.
-    Review model not yet in schema — currently acknowledges receipt.
-    Add a Review model + table to persist reviews.
+    Authenticated review submission. Pydantic enforces 1≤rating≤5 and
+    non-empty comment, so by the time we get here the payload is valid.
+
+    Status is 202 (Accepted, not yet processed) until the Review model is
+    added — this is honest about what is happening server-side.
     """
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
 
-    if not (1 <= review.rating <= 5):
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5.")
+    if listing.owner_id == current_user.id:
+        raise HTTPException(status_code=400, detail="You cannot review your own listing.")
 
-    if not review.comment.strip():
-        raise HTTPException(status_code=400, detail="Review comment cannot be empty.")
-
-    # TODO: persist to a Review model when available
-    # For now, acknowledge so the frontend doesn't show an error
-    return {"status": "success", "message": "Review submitted. Thank you!"}
+    # TODO: persist to Review(listing_id, author_id, rating, comment, created_at)
+    return {"status": "accepted", "message": "Review received. Thank you!"}
 
 
 # ── POST /properties/{id}/report ──────────────────────────────────────────────
-
-@router.post("/{listing_id}/report")
+@router.post("/{listing_id}/report", status_code=201)
 def report_property(
     listing_id: int,
     report: ReportCreate,
@@ -186,8 +211,21 @@ def report_property(
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
 
-    if not report.reason.strip():
-        raise HTTPException(status_code=400, detail="A reason is required to submit a report.")
+    # Prevent obvious spam: one open report per (user, listing) pair.
+    existing = (
+        db.query(Report)
+          .filter(
+              Report.reporter_id == current_user.id,
+              Report.listing_id  == listing_id,
+              Report.status      == "pending",
+          )
+          .first()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="You already have a pending report on this listing. Our team is reviewing it.",
+        )
 
     new_report = Report(
         reporter_id = current_user.id,

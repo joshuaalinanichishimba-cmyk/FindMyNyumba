@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Property Details - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="icon" type="image/png" href="logo.png">
@@ -14,7 +14,7 @@
         #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
         #toast.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
 
-        /* Ã¢â€â‚¬Ã¢â€â‚¬ Mobile safety Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+        /* Mobile safety */
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
@@ -61,8 +61,9 @@
                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%239ca3af'%3ELoading image...%3C/text%3E%3C/svg%3E"
                      alt="Property"
                      class="w-full h-full object-cover">
-                <div id="boosted-badge" class="hidden absolute top-3 right-3 bg-[#ea580c] text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse">
-                    ? Featured
+                <!-- FIX: original had a corrupted '?' character in the badge -->
+                <div id="boosted-badge" class="hidden absolute top-3 right-3 bg-[#ea580c] text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
+                    <i class="fas fa-star"></i> Featured
                 </div>
             </div>
 
@@ -120,7 +121,7 @@
             <!-- Host card -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <div id="host-avatar"
-                    class="w-16 h-16 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-xl mx-auto mb-3 font-black border-4 border-white shadow-md">?</div>
+                    class="w-16 h-16 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-xl mx-auto mb-3 font-black border-4 border-white shadow-md">&nbsp;</div>
                 <h3 id="host-name" class="text-lg font-bold text-gray-800 mb-1">Loading...</h3>
                 <div id="host-badge" class="text-xs text-gray-400 mb-4"></div>
                 <button id="msg-landlord-btn"
@@ -261,7 +262,18 @@
 
 <script>
 'use strict';
-const API_BASE      = 'http://127.0.0.1:8000/api/v1';
+
+/* FindMyNyumba runtime config — auto-detects backend host */
+const FMN = (function () {
+    const host = window.location.hostname;
+    const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+    const API_HOST = isLocal
+        ? 'http://127.0.0.1:8000'
+        : 'https://findmynyumba-backend.onrender.com';
+    return { API_HOST, API_BASE: API_HOST + '/api/v1' };
+})();
+const API_BASE = FMN.API_BASE;
+
 let currentProperty = null;
 let selectedRating  = 5;
 let leafletMap      = null;
@@ -270,7 +282,7 @@ let toastTimer;
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 const getRole  = () => localStorage.getItem('role')  || sessionStorage.getItem('role');
 
-// -- Toast ---------------------------------------------------------------------
+/* ── Toast ────────────────────────────────────────────────────────────────── */
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-gray-800' };
@@ -281,63 +293,58 @@ function showToast(msg, type = 'success') {
     toastTimer = setTimeout(() => { t.classList.replace('show', 'hide'); }, 3500);
 }
 
-// -- Auth-aware nav ------------------------------------------------------------
+/* ── Auth-aware nav ───────────────────────────────────────────────────────── */
 (function initNav() {
     const token = getToken();
     const role  = getRole();
     if (!token || !role) return;
-    const routes = { student: 'dashboard-student', student_host: 'dashboard-student-host', landlord: 'dashboard-landlord', admin: 'admin' };
+    /* FIX: original was missing .html suffix on every dashboard route */
+    const routes = {
+        student:      'dashboard-student.html',
+        student_host: 'dashboard-student-host.html',
+        landlord:     'dashboard-landlord.html',
+        admin:        'admin.html',
+    };
     const dash = document.getElementById('nav-dashboard');
-    if (dash) { dash.href = routes[role] || 'browse'; dash.classList.remove('hidden'); }
+    if (dash) { dash.href = routes[role] || 'browse.html'; dash.classList.remove('hidden'); }
     document.getElementById('nav-login')?.classList.add('hidden');
 })();
 
-// -- Image URL resolver --------------------------------------------------------
-/**
- * THE FIX for the 404 image bug seen in logs:
- *
- * The DB stores image_url as a complete URL:
- *   "https://findmynyumba-backend.onrender.com/static/uploads/properties/filename.jpg"
- *
- * The old code did:
- *   path = url.replace(/^\/+/, '')          ? "https://findmynyumba-backend.onrender.com/static/..."  (unchanged, no leading slash)
- *   src  = `https://findmynyumba-backend.onrender.com/${path}` ? "https://findmynyumba-backend.onrender.com/https://findmynyumba-backend.onrender.com/static/..."  ? BROKEN
- *
- * The browser then requests:
- *   GET /http%3A//127.0.0.1%3A8000/static/... ? 404
- *
- * This function checks: if it already starts with "http", use it as-is.
- * Only prepend the host for bare paths like "/static/uploads/...".
- */
+/* ── Image URL resolver ───────────────────────────────────────────────────── */
 function resolveImageUrl(raw) {
     if (!raw) return null;
     const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url; // ? Already a full absolute URL. Use directly. No prepending.
-    }
-    // Bare path Ã¯Â¿Â½ make it absolute
-    return 'https://findmynyumba-backend.onrender.com' + (url.startsWith('/') ? url : '/' + url);
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
 }
 
-// -- Modal helpers -------------------------------------------------------------
+/* ── Modal helpers ────────────────────────────────────────────────────────── */
 function openModal(id)  { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
 function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+
 function openReportModal() {
-    if (!getToken()) { showToast('Please log in to report a listing.', 'info'); setTimeout(() => window.location.href = 'login', 1800); return; }
+    /* FIX: original navigated to 'login' (no .html) */
+    if (!getToken()) {
+        showToast('Please log in to report a listing.', 'info');
+        setTimeout(() => window.location.href = 'login.html', 1800);
+        return;
+    }
     openModal('report-modal');
 }
 function closeReportModal() { closeModal('report-modal'); }
 
-// -- Map -----------------------------------------------------------------------
+/* ── Map ──────────────────────────────────────────────────────────────────── */
 function initMap(lat, lng, label) {
     if (leafletMap) { leafletMap.remove(); leafletMap = null; }
     leafletMap = L.map('property-map').setView([lat, lng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'Ã¯Â¿Â½ OpenStreetMap' }).addTo(leafletMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(leafletMap);
     L.marker([lat, lng]).addTo(leafletMap).bindPopup(label).openPopup();
     setTimeout(() => leafletMap.invalidateSize(), 400);
 }
 
-// -- Load listing --------------------------------------------------------------
+/* ── Load listing ─────────────────────────────────────────────────────────── */
 async function loadData() {
     const id = new URLSearchParams(window.location.search).get('id');
     if (!id) { showToast('No listing ID in URL.', 'error'); return; }
@@ -348,31 +355,32 @@ async function loadData() {
         const data = await res.json();
         currentProperty = data;
 
-        // Text Ã¯Â¿Â½ innerText is XSS-safe
-        document.getElementById('prop-title').innerText         = data.title       || 'Ã¯Â¿Â½';
-        document.getElementById('prop-location-text').innerText = data.location    || 'Ã¯Â¿Â½';
+        /* FIX: original placeholders were the corrupted "Ã¯Â¿Â½" sequence */
+        document.getElementById('prop-title').innerText         = data.title       || 'Untitled';
+        document.getElementById('prop-location-text').innerText = data.location    || 'Location not specified';
         document.getElementById('prop-description').innerText   = data.description || 'No description provided.';
         document.getElementById('prop-price').innerText         = `ZMW ${Number(data.price).toLocaleString()}`;
         document.title = `${data.title || 'Property'} - FindMyNyumba`;
 
         if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
 
-        // Image Ã¯Â¿Â½ THE FIX
+        /* Image */
         const imgEl  = document.getElementById('main-image');
         const rawUrl = data.image_url || (Array.isArray(data.images) && data.images[0]) || null;
         const imgSrc = resolveImageUrl(rawUrl);
+        const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80';
         if (imgSrc) {
             imgEl.src = imgSrc;
-            imgEl.onerror = () => { imgEl.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80'; };
+            imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = FALLBACK; };
         } else {
-            imgEl.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80';
+            imgEl.src = FALLBACK;
         }
 
-        // Host card
+        /* Host card */
         const owner = data.owner;
         if (owner) {
             const name     = owner.full_name || 'Host';
-            const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+            const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
             document.getElementById('host-avatar').innerText = initials;
             document.getElementById('host-name').innerText   = name;
             const roleLabel = (owner.role || '').replace(/_/g, ' ').toUpperCase();
@@ -382,7 +390,7 @@ async function loadData() {
             document.getElementById('host-badge').innerHTML = verBadge;
         }
 
-        // Map Ã¯Â¿Â½ default to Lusaka centre; swap coords when geocoding is added
+        /* Map: default to Lusaka centre. Replace with real coords once geocoding is added. */
         initMap(-15.4167, 28.2833, data.title || 'Property');
 
     } catch (err) {
@@ -391,7 +399,7 @@ async function loadData() {
     }
 }
 
-// -- Stars ---------------------------------------------------------------------
+/* ── Stars ────────────────────────────────────────────────────────────────── */
 function initStars() {
     const stars = Array.from(document.querySelectorAll('#star-container .fa-star'));
     stars.forEach((s, i) => {
@@ -401,26 +409,36 @@ function initStars() {
     });
 }
 
-// -- Boot ----------------------------------------------------------------------
+/* ── Agreement ────────────────────────────────────────────────────────────── */
+/* FIX: original read p.owner_role; the backend payload exposes p.owner.role */
 function openAgreement() {
     const p = currentProperty;
     if (!p) return;
+    const ownerRole = p.owner?.role || '';
     const params = new URLSearchParams({
         address: p.location || '',
         rent:    p.price    || '',
-        type:    (p.owner_role === 'student_host') ? 'student_host' : 'landlord',
+        type:    ownerRole === 'student_host' ? 'student_host' : 'landlord',
     });
     window.open('agreement.html?' + params.toString(), '_blank');
 }
 window.openAgreement = openAgreement;
 
+/* ── Boot ─────────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initStars();
 
-    // Message modal
+    const yearEl = document.getElementById('current-year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    /* Message modal */
     document.getElementById('msg-landlord-btn').addEventListener('click', () => {
-        if (!getToken()) { showToast('Please log in to send a message.', 'info'); setTimeout(() => window.location.href = 'login', 1800); return; }
+        if (!getToken()) {
+            showToast('Please log in to send a message.', 'info');
+            setTimeout(() => window.location.href = 'login.html', 1800);
+            return;
+        }
         if (!currentProperty) { showToast('Still loading...', 'info'); return; }
         document.getElementById('modal-prop-title').innerText = currentProperty.title || 'Property';
         document.getElementById('modal-message-body').value = '';
@@ -431,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('message-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('message-modal'); });
     document.getElementById('report-modal').addEventListener('click',  e => { if (e.target === e.currentTarget) closeReportModal(); });
 
-    // Send message
+    /* Send message */
     document.getElementById('modal-send-btn').addEventListener('click', async () => {
         const token   = getToken();
         const content = document.getElementById('modal-message-body').value.trim();
@@ -441,8 +459,13 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Sending...';
         try {
             const res = await fetch(`${API_BASE}/messages/send`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ receiver_id: currentProperty.owner_id, property_id: currentProperty.id, content }),
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    receiver_id: currentProperty.owner_id,
+                    property_id: currentProperty.id,
+                    content,
+                }),
             });
             if (res.ok) { showToast('Message sent! The host will reply soon.', 'success'); closeModal('message-modal'); }
             else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to send.', 'error'); }
@@ -450,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.innerHTML = 'Send Inquiry'; }
     });
 
-    // Post review
+    /* Post review */
     document.getElementById('post-review-btn').addEventListener('click', async () => {
         const token   = getToken();
         const comment = document.getElementById('review-comment').value.trim();
@@ -461,7 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Posting...';
         try {
             const res = await fetch(`${API_BASE}/properties/${currentProperty.id}/reviews`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ rating: selectedRating, comment }),
             });
             if (res.ok) { showToast('Review posted!', 'success'); document.getElementById('review-comment').value = ''; }
@@ -470,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.innerHTML = 'Post Review'; }
     });
 
-    // Report submit
+    /* Report submit */
     document.getElementById('report-submit-btn').addEventListener('click', async () => {
         const token  = getToken();
         const reason = document.getElementById('report-reason').value;
@@ -482,7 +506,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Submitting...';
         try {
             const res = await fetch(`${API_BASE}/properties/${currentProperty.id}/report`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ reason, description: desc || null }),
             });
             if (res.ok) {
@@ -490,14 +515,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeReportModal();
                 document.getElementById('report-reason').value = '';
                 document.getElementById('report-description').value = '';
-            } else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed.', 'error'); }
+            } else {
+                const d = await res.json().catch(() => ({}));
+                showToast(typeof d.detail === 'string' ? d.detail : 'Failed.', 'error');
+            }
         } catch { showToast('Network error.', 'error'); }
         finally { btn.disabled = false; btn.innerHTML = 'Submit Report'; }
     });
 });
-</script>
-<script>
-    document.getElementById('current-year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>

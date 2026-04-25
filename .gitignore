@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -14,30 +14,25 @@ venv.bak/
 *.db
 *.sqlite
 *.sqlite3
-
 # Logs
 *.log
 logs/
 *.log.*
-
 # OS
 .DS_Store
 Thumbs.db
 desktop.ini
-
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
 # Backups
 *.bak
 *.backup
 *.old
 *.tmp
-
 # Uploads (keep structure but not files)
 static/uploads/properties/*
 static/uploads/attachments/*
@@ -45,20 +40,18 @@ static/uploads/verification/*
 !static/uploads/properties/.gitkeep
 !static/uploads/attachments/.gitkeep
 !static/uploads/verification/.gitkeep
-
 # Environment
 .env
 .env.local
 .env.*.local
-
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
-
 # Build
 dist/
 build/
 *.egg-info/
 .vercel
 .env*.local
+*.pyc

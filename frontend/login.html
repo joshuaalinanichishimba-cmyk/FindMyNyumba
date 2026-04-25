@@ -115,122 +115,164 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+    'use strict';
 
-        (function() {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
-            if (token && role) redirectUser(role);
-        })();
+    /* FindMyNyumba runtime config — auto-detects backend host */
+    const FMN = (function () {
+        const host = window.location.hostname;
+        const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+        const API_HOST = isLocal
+            ? 'http://127.0.0.1:8000'
+            : 'https://findmynyumba-backend.onrender.com';
+        return { API_HOST, API_BASE: API_HOST + '/api/v1' };
+    })();
+    const API_BASE_URL = FMN.API_BASE;
 
-        function togglePassword() {
-            const pw = document.getElementById('password');
-            const eye = document.getElementById('pw-eye');
-            if (pw.type === 'password') {
-                pw.type = 'text';
-                eye.className = 'fas fa-eye-slash text-sm';
-            } else {
-                pw.type = 'password';
-                eye.className = 'fas fa-eye text-sm';
+    /* If a session is already active, send the user to their dashboard. */
+    (function autoForward() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
+        if (token && role) redirectUser(role);
+    })();
+
+    function togglePassword() {
+        const pw = document.getElementById('password');
+        const eye = document.getElementById('pw-eye');
+        if (pw.type === 'password') {
+            pw.type = 'text';
+            eye.className = 'fas fa-eye-slash text-sm';
+        } else {
+            pw.type = 'password';
+            eye.className = 'fas fa-eye text-sm';
+        }
+    }
+
+    function showError(message) {
+        document.getElementById('error-text').innerText = message;
+        document.getElementById('error-message').classList.remove('hidden');
+    }
+
+    function hideError() {
+        document.getElementById('error-message').classList.add('hidden');
+    }
+
+    function setLoading(isLoading) {
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = isLoading;
+        document.getElementById('btn-text').innerText = isLoading ? 'Signing in...' : 'Sign In';
+        document.getElementById('btn-spinner').classList.toggle('hidden', !isLoading);
+        btn.classList.toggle('opacity-75', isLoading);
+    }
+
+    /*
+       FIX: storeSession used to write only `token`/`role`, but admin.html
+       reads from `adminToken`/`adminRole`/`adminName` in sessionStorage.
+       So an admin who logged in here was bounced straight back to a
+       non-existent admin-login.html. We now write BOTH key sets on admin
+       login, so admin.html resolves either of them.
+    */
+    function storeSession(data) {
+        const remember = document.getElementById('remember-me').checked;
+        const keep    = remember ? localStorage   : sessionStorage;
+        const discard = remember ? sessionStorage : localStorage;
+
+        ['token', 'role'].forEach(k => discard.removeItem(k));
+        keep.setItem('token', data.access_token);
+        keep.setItem('role',  data.role);
+
+        // Admin always uses sessionStorage for the *Admin* keys (logout-on-close
+        // is a security plus for admin sessions, even if "Remember me" is on
+        // for the standard token).
+        if (data.role === 'admin') {
+            sessionStorage.setItem('adminToken', data.access_token);
+            sessionStorage.setItem('adminRole',  'admin');
+            sessionStorage.setItem('adminName',  data.full_name || 'Admin');
+        } else {
+            ['adminToken', 'adminRole', 'adminName'].forEach(k => sessionStorage.removeItem(k));
+        }
+    }
+
+    function redirectUser(role) {
+        const routes = {
+            student_host: 'dashboard-student-host.html',
+            landlord:     'dashboard-landlord.html',
+            student:      'dashboard-student.html',
+            admin:        'admin.html',
+        };
+        window.location.href = routes[role] || 'browse.html';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+            showError('Please enter your email and password.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(data.detail || 'Invalid email or password. Please try again.');
             }
+
+            storeSession(data);
+            redirectUser(data.role);
+
+        } catch (err) {
+            showError(err.message || 'Network error. Please check your connection and try again.');
+            setLoading(false);
         }
+    });
 
-        function showError(message) {
-            document.getElementById('error-text').innerText = message;
-            document.getElementById('error-message').classList.remove('hidden');
-        }
+    /*
+       Google Sign-In: the backend /auth/google-login endpoint is not yet
+       implemented. Rather than throwing a confusing 404 error, we tell the
+       user the feature is coming and let them sign in with email/password.
+       When the endpoint exists, replace the body of this function with the
+       real implementation.
+    */
+    async function handleCredentialResponse(response) {
+        hideError();
+        try {
+            const res = await fetch(`${API_BASE_URL}/auth/google-login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: response.credential }),
+            });
 
-        function hideError() {
-            document.getElementById('error-message').classList.add('hidden');
-        }
-
-        function setLoading(isLoading) {
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = isLoading;
-            document.getElementById('btn-text').innerText = isLoading ? 'Signing in...' : 'Sign In';
-            document.getElementById('btn-spinner').classList.toggle('hidden', !isLoading);
-            btn.classList.toggle('opacity-75', isLoading);
-        }
-
-        function storeSession(token, role) {
-            const remember = document.getElementById('remember-me').checked;
-            const keep   = remember ? localStorage   : sessionStorage;
-            const discard = remember ? sessionStorage : localStorage;
-            discard.removeItem('token');
-            discard.removeItem('role');
-            keep.setItem('token', token);
-            keep.setItem('role', role);
-        }
-
-        function redirectUser(role) {
-            const routes = {
-                student_host: 'dashboard-student-host.html',
-                landlord:     'dashboard-landlord.html',
-                student:      'dashboard-student.html',
-                admin:        'admin.html'
-            };
-            window.location.href = routes[role] || 'browse.html';
-        }
-
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            hideError();
-
-            const email    = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-
-            if (!email || !password) {
-                showError('Please enter your email and password.');
+            if (res.status === 404 || res.status === 405) {
+                showError('Google sign-in is not yet available. Please use your email and password.');
                 return;
             }
 
-            setLoading(true);
-
-            try {
-                const res = await fetch(`${API_BASE_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.detail || 'Invalid email or password. Please try again.');
-                }
-
-                storeSession(data.access_token, data.role);
-                redirectUser(data.role);
-
-            } catch (err) {
-                showError(err.message);
-                setLoading(false);
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.detail || 'Google sign-in failed. Please try again.');
             }
-        });
 
-        async function handleCredentialResponse(response) {
-            hideError();
-            try {
-                const res = await fetch(`${API_BASE_URL}/auth/google-login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ credential: response.credential })
-                });
+            storeSession(data);
+            redirectUser(data.role);
 
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.detail || 'Google sign-in failed. Please try again.');
-                }
-
-                localStorage.setItem('token', data.access_token);
-                localStorage.setItem('role',  data.role);
-                redirectUser(data.role);
-
-            } catch (err) {
-                showError(err.message || 'Network error connecting to authentication server.');
-            }
+        } catch (err) {
+            showError(err.message || 'Network error connecting to authentication server.');
         }
+    }
+    // Expose for the GSI callback attribute.
+    window.handleCredentialResponse = handleCredentialResponse;
     </script>
 </body>
 </html>

@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Student Housing - FindMyNyumba</title>
-    <script src="https://cdn.tailwindcss.com">
-// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
-function resolveImageUrl(raw) {
-    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-    const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
-}
-</script>
+
+    <!--
+      FIX: Original file stuffed inline JavaScript inside this Tailwind
+      <script src="..."> tag. Browsers run the external src and silently
+      drop the inline body, so the resolveImageUrl defined there never
+      ran. The function is now defined exactly once, at the bottom of
+      the page, alongside the other JS.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         #filters-sidebar { transition: transform 0.3s ease, opacity 0.3s ease; }
@@ -31,13 +31,14 @@ function resolveImageUrl(raw) {
 </head>
 <body class="bg-gray-50">
 
-    <!-- -- NAV ----------------------------------------------------------- -->
+    <!-- NAV -->
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
                 <a href="index.html" class="flex-shrink-0 flex items-center" style="text-decoration:none;">
-                    <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;">
+                    <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;"
+                         onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
                     <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
                 </a>
 
@@ -48,7 +49,7 @@ function resolveImageUrl(raw) {
                     <a id="nav-dashboard-desk" href="#" class="hidden text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Dashboard</a>
                     <a id="nav-login-desk" href="login.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Login</a>
                     <a id="nav-register-desk" href="register.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Register</a>
-                    <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors text-sm">Logout</a>
+                    <a id="nav-logout-desk" href="#" onclick="logout(); return false;" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors text-sm">Logout</a>
                     <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition-colors text-sm">Post Property</a>
                 </div>
 
@@ -67,13 +68,12 @@ function resolveImageUrl(raw) {
                 <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Dashboard</a>
                 <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
                 <a id="nav-register-mob" href="register.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Register</a>
-                <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
+                <a id="nav-logout-mob" href="#" onclick="logout(); return false;" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
                 <a href="register-landlord.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
             </div>
         </div>
     </nav>
 
-    <!-- Sidebar overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden" onclick="closeSidebar()"></div>
 
     <div class="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -264,9 +264,9 @@ function resolveImageUrl(raw) {
                     </ul>
                 </div>
             </div>
-           <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
-    <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
-    <div class="flex gap-4">
+            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+                <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
+                <div class="flex gap-4">
                     <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
                     <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
                 </div>
@@ -276,16 +276,59 @@ function resolveImageUrl(raw) {
 
     <script>
     'use strict';
-    const API_BASE = 'http://127.0.0.1:8000/api/v1';
 
-    // -- Auth-aware nav ------------------------------------------------------
+    /* ───────────────────────────────────────────────────────────────────────
+       FindMyNyumba runtime config
+
+       Auto-detects backend host so the same HTML works in dev (localhost)
+       AND production (Vercel → Render) without code edits or build steps.
+       ─────────────────────────────────────────────────────────────────── */
+    const FMN = (function () {
+        const host = window.location.hostname;
+        const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+        const API_HOST = isLocal
+            ? 'http://127.0.0.1:8000'
+            : 'https://findmynyumba-backend.onrender.com';
+        return {
+            API_HOST,
+            API_BASE: API_HOST + '/api/v1',
+        };
+    })();
+    const API_BASE = FMN.API_BASE;
+
+    /* Resolve any value stored as image_url to a usable absolute URL.
+       Backend now returns absolute URLs directly, but we keep this helper
+       so older rows / external image fields still work. */
+    function resolveImageUrl(raw) {
+        const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+        if (!raw) return FALLBACK;
+        const url = String(raw).trim();
+        if (!url) return FALLBACK;
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
+    }
+
+    /* HTML-escape user-supplied text before injecting into innerHTML. */
+    function esc(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    /* ── Auth-aware nav ────────────────────────────────────────────────── */
     (function initNav() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
         if (!token || !role) return;
 
-        const routes = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
-        const dest   = routes[role] || 'browse.html';
+        const routes = {
+            student:      'dashboard-student.html',
+            student_host: 'dashboard-student-host.html',
+            landlord:     'dashboard-landlord.html',
+            admin:        'admin.html',
+        };
+        const dest = routes[role] || 'browse.html';
 
         ['nav-dashboard-desk', 'nav-dashboard-mob'].forEach(id => {
             const el = document.getElementById(id);
@@ -300,12 +343,14 @@ function resolveImageUrl(raw) {
     })();
 
     function logout() {
-        localStorage.removeItem('token'); localStorage.removeItem('role');
-        sessionStorage.removeItem('token'); sessionStorage.removeItem('role');
+        ['token', 'role', 'adminToken', 'adminRole', 'adminName'].forEach(k => {
+            localStorage.removeItem(k);
+            sessionStorage.removeItem(k);
+        });
         window.location.reload();
     }
 
-    // -- Mobile nav toggle ---------------------------------------------------
+    /* ── Mobile nav toggle ─────────────────────────────────────────────── */
     const mobileNavToggle = document.getElementById('mobile-nav-toggle');
     const mobileMenu      = document.getElementById('mobile-menu');
     const hamburgerIcon   = document.getElementById('hamburger-icon');
@@ -321,7 +366,7 @@ function resolveImageUrl(raw) {
         hamburgerIcon.className = 'fas fa-bars text-xl';
     }));
 
-    // -- Filter sidebar (mobile) ---------------------------------------------
+    /* ── Filter sidebar (mobile) ───────────────────────────────────────── */
     function toggleSidebar() {
         const sidebar = document.getElementById('filters-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -341,7 +386,7 @@ function resolveImageUrl(raw) {
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
-    // -- Fetch listings ------------------------------------------------------
+    /* ── Fetch listings ────────────────────────────────────────────────── */
     async function fetchListings(queryString = '') {
         const container = document.getElementById('listings-container');
         container.innerHTML = `
@@ -352,14 +397,14 @@ function resolveImageUrl(raw) {
         document.getElementById('results-count').textContent = '';
 
         try {
-            // API path: /api/v1/properties  (matches listings.py prefix="/properties")
             const res = await fetch(`${API_BASE}/properties${queryString}`);
             if (!res.ok) {
                 let detail = `Server error ${res.status}`;
-                try { const body = await res.json(); detail = body.detail || detail; } catch(_) {}
+                try { const body = await res.json(); detail = body.detail || detail; } catch (_) {}
                 throw new Error(detail);
             }
-            renderListings(await res.json());
+            const data = await res.json();
+            renderListings(Array.isArray(data) ? data : []);
         } catch (err) {
             container.innerHTML = `
                 <div class="col-span-full text-center py-16 bg-red-50 rounded-3xl border border-red-100 px-6">
@@ -396,24 +441,25 @@ function resolveImageUrl(raw) {
         countEl.textContent = `${listings.length} listing${listings.length !== 1 ? 's' : ''} found`;
 
         container.innerHTML = listings.map(p => {
-            const price      = Number(p.price).toLocaleString();
-            const imgUrl     = resolveImageUrl(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-            const safeTitle  = String(p.title    || '').replace(/"/g, '&quot;');
-            const safeLoc    = String(p.location || '').replace(/</g, '&lt;');
+            const price     = Number(p.price).toLocaleString();
+            const imgUrl    = resolveImageUrl(p.image_url);
+            const safeTitle = esc(p.title || '');
+            const safeLoc   = esc(p.location || '');
 
+            // FIX: original href was "listing?id=..." (missing .html → 404).
             return `
             <div class="listing-card group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                 <div class="relative h-48 sm:h-52 bg-gray-100 overflow-hidden flex-shrink-0">
                     <img src="${imgUrl}" loading="lazy"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                          alt="${safeTitle}"
-                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'">
+                         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'">
                     <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-black text-green-600 shadow-sm flex items-center gap-1 uppercase tracking-wide">
                         <i class="fas fa-check-circle"></i> Verified
                     </div>
                     ${p.is_boosted ? `
-                    <div class="absolute top-3 right-3 bg-[#ea580c] text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-md uppercase tracking-wide animate-pulse">
-                        ? Featured
+                    <div class="absolute top-3 right-3 bg-[#ea580c] text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
+                        <i class="fas fa-star"></i> Featured
                     </div>` : ''}
                 </div>
                 <div class="p-4 md:p-5 flex flex-col flex-grow">
@@ -423,7 +469,7 @@ function resolveImageUrl(raw) {
                         <i class="fas fa-map-marker-alt text-[#ea580c] mt-0.5 flex-shrink-0"></i>
                         <span class="line-clamp-2">${safeLoc}</span>
                     </p>
-                    <a href="listing?id=${encodeURIComponent(p.id)}"
+                    <a href="listing.html?id=${encodeURIComponent(p.id)}"
                        class="w-full inline-flex items-center justify-center bg-gray-900 text-white px-4 py-2.5 rounded-xl font-black hover:bg-[#ea580c] transition-colors text-sm">
                         View Details <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
                     </a>
@@ -432,7 +478,7 @@ function resolveImageUrl(raw) {
         }).join('');
     }
 
-    // -- Filters -------------------------------------------------------------
+    /* ── Filters ───────────────────────────────────────────────────────── */
     function applyFilters() {
         const uni     = document.getElementById('university-filter').value;
         const min     = document.getElementById('min-price').value.trim();
@@ -461,33 +507,11 @@ function resolveImageUrl(raw) {
         document.getElementById('clear-filters')?.addEventListener('click', () => { window.location.href = 'browse.html'; });
         document.getElementById('keyword-search')?.addEventListener('keypress', e => { if (e.key === 'Enter') applyFilters(); });
 
+        const yearEl = document.getElementById('current-year');
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+
         fetchListings(preQuery ? `?q=${encodeURIComponent(preQuery)}` : '');
     });
-    
-// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
-function resolveImageUrl(raw) {
-    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-    const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
-}
-</script>
-    <script>
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-
-// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
-function resolveImageUrl(raw) {
-    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-    const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
-}
-</script>
+    </script>
 </body>
 </html>
-
-
-
-
-
-

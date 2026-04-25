@@ -36,7 +36,7 @@
                      src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300"
                      class="w-full sm:w-28 h-40 sm:h-28 object-cover rounded-xl shadow-sm flex-shrink-0"
                      alt="Property image"
-                     onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300'">
+                     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300'">
                 <div class="flex-1 min-w-0">
                     <p class="font-bold text-gray-500 uppercase text-[10px] tracking-widest mb-3">Property Information</p>
                     <div class="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -101,9 +101,27 @@
 
     <script>
     'use strict';
-    const API_BASE = 'http://127.0.0.1:8000/api/v1';
 
-    // -- Helpers ---------------------------------------------------------------
+    /* FindMyNyumba runtime config — auto-detects backend host */
+    const FMN = (function () {
+        const host = window.location.hostname;
+        const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+        const API_HOST = isLocal
+            ? 'http://127.0.0.1:8000'
+            : 'https://findmynyumba-backend.onrender.com';
+        return { API_HOST, API_BASE: API_HOST + '/api/v1' };
+    })();
+    const API_BASE = FMN.API_BASE;
+
+    /* Image URL resolver: handles full URLs, bare paths, and bare filenames. */
+    function resolveImageUrl(raw) {
+        if (!raw) return null;
+        const url = String(raw).trim();
+        if (!url) return null;
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
+    }
+
     function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
 
     function showToast(msg, type = 'success') {
@@ -124,17 +142,15 @@
     }
     function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
 
-    // -- Load property info from API -------------------------------------------
-    // FIX: was hitting /landlord/properties/:id which requires landlord auth.
-    //      Changed to the public /properties/:id endpoint so any visitor can load it.
+    /* ── Load property info from public detail endpoint ───────────────────── */
     async function loadPropertyInfo() {
         const urlParams = new URLSearchParams(window.location.search);
         const propId = urlParams.get('id');
 
         if (!propId) {
-            document.getElementById('prop-title').textContent = 'Property not specified.';
-            document.getElementById('prop-location').textContent = '--';
-            document.getElementById('prop-price').textContent = '--';
+            document.getElementById('prop-title').textContent    = 'Property not specified.';
+            document.getElementById('prop-location').textContent = '—';
+            document.getElementById('prop-price').textContent    = '—';
             return;
         }
 
@@ -153,23 +169,24 @@
             locationEl.textContent = data.location || 'Unknown';
             locationEl.title       = data.location || '';
             document.getElementById('prop-price').textContent = 'ZMW ' + parseFloat(data.price).toLocaleString();
-            if (data.image_url) document.getElementById('prop-image').src = data.image_url;
 
-            // Store the property owner id for the message send call
+            /* FIX: original used data.image_url verbatim; if backend returned a
+               relative path, the browser resolved it against the frontend host
+               (Vercel) and 404'd. Now goes through resolveImageUrl. */
+            const resolved = resolveImageUrl(data.image_url);
+            if (resolved) document.getElementById('prop-image').src = resolved;
+
             if (data.owner_id) document.getElementById('landlord-id').value = data.owner_id;
 
         } catch (e) {
             console.error('[contact-landlord] loadPropertyInfo:', e);
             document.getElementById('prop-title').textContent    = 'Could not load property.';
-            document.getElementById('prop-location').textContent = '--';
-            document.getElementById('prop-price').textContent    = '--';
+            document.getElementById('prop-location').textContent = '—';
+            document.getElementById('prop-price').textContent    = '—';
         }
     }
 
-    // -- Form submit: calls real messages API ----------------------------------
-    // FIX: previously used a fake setTimeout+alert and never called the backend.
-    //      Now posts to POST /api/v1/messages/send with proper auth header.
-    //      Falls back gracefully with an error message if the user is not logged in.
+    /* ── Form submit ──────────────────────────────────────────────────────── */
     document.getElementById('contactForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         hideFormError();
@@ -200,23 +217,21 @@
                 method: 'POST',
                 headers: {
                     'Content-Type':  'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     receiver_id: parseInt(landlordId, 10),
                     property_id: propId ? parseInt(propId, 10) : null,
-                    // Prepend contact info into the message body so the landlord has it
-                    content: `[From: ${name} | Contact: ${contact}]\n\n${body}`
-                })
+                    content: `[From: ${name} | Contact: ${contact}]\n\n${body}`,
+                }),
             });
 
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.detail || 'Failed to send message.');
 
             showToast('Message sent! The landlord will be notified on their dashboard.', 'success');
             btn.innerHTML = '<i class="fas fa-check"></i> Message Sent';
 
-            // Redirect back to browse after short delay
             setTimeout(() => { window.location.href = 'browse.html'; }, 2000);
 
         } catch (err) {
@@ -231,5 +246,3 @@
     </script>
 </body>
 </html>
-
-
