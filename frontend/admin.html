@@ -133,19 +133,19 @@
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
                     <div class="stat-card border-t-4 border-t-[#ea580c]">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Total Users</div>
-                        <div id="stat-users" class="text-3xl font-black text-slate-900">—</div>
+                        <div id="stat-users" class="text-3xl font-black text-slate-900">Ã¢â‚¬â€</div>
                     </div>
                     <div class="stat-card border-t-4 border-t-blue-500">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Listings</div>
-                        <div id="stat-listings" class="text-3xl font-black text-slate-900">—</div>
+                        <div id="stat-listings" class="text-3xl font-black text-slate-900">Ã¢â‚¬â€</div>
                     </div>
                     <div class="stat-card border-t-4 border-t-green-500">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Messages</div>
-                        <div id="stat-messages" class="text-3xl font-black text-slate-900">—</div>
+                        <div id="stat-messages" class="text-3xl font-black text-slate-900">Ã¢â‚¬â€</div>
                     </div>
                     <div class="stat-card border-t-4 border-t-orange-400">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Pending Reviews</div>
-                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">—</div>
+                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">Ã¢â‚¬â€</div>
                     </div>
                 </div>
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
@@ -367,15 +367,15 @@
         <div class="space-y-3 mb-5">
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Current Password</label>
-                <input id="cpwd-old" type="password" placeholder="••••••••" class="fmn-input">
+                <input id="cpwd-old" type="password" placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢" class="fmn-input">
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">New Password</label>
-                <input id="cpwd-new" type="password" placeholder="••••••••" class="fmn-input">
+                <input id="cpwd-new" type="password" placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢" class="fmn-input">
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Confirm New Password</label>
-                <input id="cpwd-confirm" type="password" placeholder="••••••••" class="fmn-input">
+                <input id="cpwd-confirm" type="password" placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢" class="fmn-input">
             </div>
         </div>
         <div class="flex gap-3">
@@ -388,13 +388,13 @@
 <script>
 'use strict';
 
-/* FindMyNyumba runtime config — auto-detects backend host */
+/* FindMyNyumba runtime config Ã¢â‚¬â€ auto-detects backend host */
 const FMN = (function () {
     const host = window.location.hostname;
     const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
     const API_HOST = isLocal
         ? 'http://127.0.0.1:8000'
-        : 'https://findmynyumba-backend.onrender.com';
+        : 'https://findmynyumba.onrender.com';
     return { API_HOST, API_BASE: API_HOST + '/api/v1' };
 })();
 const API = FMN.API_BASE;
@@ -402,7 +402,7 @@ const API = FMN.API_BASE;
 let modalCallback = null;
 
 function esc(str) {
-    if (str === null || str === undefined) return '—';
+    if (str === null || str === undefined) return 'Ã¢â‚¬â€';
     return String(str)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -434,7 +434,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (!res.ok) throw new Error();
         const me = await res.json();
         if (me.role !== 'admin') {
-            // Wrong role — clear admin keys and bounce to the right dashboard.
+            // Wrong role Ã¢â‚¬â€ clear admin keys and bounce to the right dashboard.
             ['adminToken', 'adminRole', 'adminName'].forEach(k => sessionStorage.removeItem(k));
             const fallback = {
                 student:      'dashboard-student.html',
@@ -488,7 +488,7 @@ async function submitChangePassword() {
     const PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     if (!PWD_RE.test(newPwd)) { errEl.textContent = 'Password must be 8+ characters with uppercase, lowercase, number, and symbol.'; errEl.classList.remove('hidden'); return; }
     if (newPwd !== confirm) { errEl.textContent = 'New passwords do not match.'; errEl.classList.remove('hidden'); return; }
-    btn.disabled = true; btn.textContent = 'Updating…';
+    btn.disabled = true; btn.textContent = 'UpdatingÃ¢â‚¬Â¦';
     try {
         const res  = await fetch(`${API}/admin/change-password`, {
             method: 'POST',
@@ -536,9 +536,9 @@ async function loadDashboard() {
         const res  = await fetch(`${API}/admin/stats`);
         if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('stat-users').textContent    = data.total_users    ?? '—';
-        document.getElementById('stat-listings').textContent = data.total_listings ?? '—';
-        document.getElementById('stat-messages').textContent = data.total_messages ?? '—';
+        document.getElementById('stat-users').textContent    = data.total_users    ?? 'Ã¢â‚¬â€';
+        document.getElementById('stat-listings').textContent = data.total_listings ?? 'Ã¢â‚¬â€';
+        document.getElementById('stat-messages').textContent = data.total_messages ?? 'Ã¢â‚¬â€';
         document.getElementById('stat-reports').textContent  = (data.pending_listings ?? 0) + (data.pending_verifs ?? 0);
     } catch { /* stats fail silently */ }
     try {
@@ -692,7 +692,7 @@ async function approveVerification(userId) {
     });
 }
 async function rejectVerification(userId) {
-    const reason = window.prompt("Rejection reason (optional — shown to user):") ?? "";
+    const reason = window.prompt("Rejection reason (optional Ã¢â‚¬â€ shown to user):") ?? "";
     showModal("Reject Verification", "Reject this verification? The user will be notified.", async () => {
         const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
             method: "POST",
@@ -811,3 +811,4 @@ function showToast(msg, type = 'success') {
 </script>
 </body>
 </html>
+

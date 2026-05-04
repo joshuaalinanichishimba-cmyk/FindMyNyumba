@@ -10,7 +10,7 @@ function resolveImageUrl(raw) {
     if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
     const url = String(raw).trim();
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
+    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
 }
 </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -332,7 +332,7 @@ function resolveImageUrl(raw) {
                     <form id="passwordForm" class="space-y-3">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Current Password</label>
-                            <input type="password" id="pwd-current" required placeholder="••••••••" class="fmn-input">
+                            <input type="password" id="pwd-current" required placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢" class="fmn-input">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">New Password</label>
@@ -461,7 +461,7 @@ async function loadOverview() {
                 if (h3) h3.innerText = 'Verification Rejected' + (d.rejection_reason ? ': ' + d.rejection_reason : '');
             } else { alertEl.classList.add('hidden'); }
         }
-    } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = '—'; }); }
+    } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = 'Ã¢â‚¬â€'; }); }
 }
 
 async function loadListings() {
@@ -518,7 +518,7 @@ async function loadConversations() {
         listDiv.innerHTML = convos.map(c => {
             const isUnread = c.unread_count > 0;
             const propId = c.property_id ?? 0;
-            const preview = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'…' : (c.last_message || '');
+            const preview = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'Ã¢â‚¬Â¦' : (c.last_message || '');
             const safeName  = (c.other_user_name  || '').replace(/'/g,"\\'");
             const safeTitle = (c.property_title   || '').replace(/'/g,"\\'");
             return `<div onclick="openThread(${propId},${c.other_user_id},'${safeName}','${safeTitle}')" class="p-4 cursor-pointer hover:bg-orange-50 transition border-b border-gray-100 ${isUnread ? 'bg-orange-50/40' : 'bg-white'}">
@@ -590,8 +590,8 @@ async function loadVerification() {
         const showForm = verification_status !== 'verified' && verification_status !== 'pending';
         container.innerHTML = (statusHTML[verification_status] || statusHTML['unverified']) + (showForm ? `
             <form id="verifyForm" class="space-y-4">
-                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Student ID Card <span class="text-red-500">*</span></label><input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p></div>
-                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Hostel Allocation Slip or Proof of Residence <span class="text-red-500">*</span></label><input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF · Max 10MB</p></div>
+                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Student ID Card <span class="text-red-500">*</span></label><input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF Ã‚Â· Max 10MB</p></div>
+                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Hostel Allocation Slip or Proof of Residence <span class="text-red-500">*</span></label><input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF Ã‚Â· Max 10MB</p></div>
                 <button type="submit" class="w-full bg-[#ea580c] text-white py-3 rounded-xl font-black hover:bg-[#c2410c] transition shadow text-sm">Submit Verification Documents</button>
             </form>` : '');
         document.getElementById('verifyForm')?.addEventListener('submit', async (e) => {
@@ -755,7 +755,7 @@ function resolveImageUrl(raw) {
     if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
     const url = String(raw).trim();
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
+    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
 }
 </script>
 <script>document.addEventListener("error", function(e){ if(e.target.tagName=="IMG") e.target.src="https://placehold.co/600x400/0A1128/FFFFFF?text=Image+Not+Found"; }, true);
@@ -764,7 +764,7 @@ function resolveImageUrl(raw) {
     if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
     const url = String(raw).trim();
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
+    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
 }
 </script><script>document.addEventListener("error", function(e){ if(e.target.tagName=="IMG") e.target.src="https://placehold.co/600x400/0A1128/FFFFFF?text=Image+Not+Found"; }, true);
 // -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
@@ -772,7 +772,8 @@ function resolveImageUrl(raw) {
     if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
     const url = String(raw).trim();
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba-backend.onrender.com/' + url.replace(/^\/+/, '');
+    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
 }
 </script></body>
 </html>
+

@@ -102,13 +102,13 @@
     <script>
     'use strict';
 
-    /* FindMyNyumba runtime config — auto-detects backend host */
+    /* FindMyNyumba runtime config Ã¢â‚¬â€ auto-detects backend host */
     const FMN = (function () {
         const host = window.location.hostname;
         const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
         const API_HOST = isLocal
             ? 'http://127.0.0.1:8000'
-            : 'https://findmynyumba-backend.onrender.com';
+            : 'https://findmynyumba.onrender.com';
         return { API_HOST, API_BASE: API_HOST + '/api/v1' };
     })();
     const API_BASE = FMN.API_BASE;
@@ -142,15 +142,15 @@
     }
     function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
 
-    /* ── Load property info from public detail endpoint ───────────────────── */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Load property info from public detail endpoint Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
     async function loadPropertyInfo() {
         const urlParams = new URLSearchParams(window.location.search);
         const propId = urlParams.get('id');
 
         if (!propId) {
             document.getElementById('prop-title').textContent    = 'Property not specified.';
-            document.getElementById('prop-location').textContent = '—';
-            document.getElementById('prop-price').textContent    = '—';
+            document.getElementById('prop-location').textContent = 'Ã¢â‚¬â€';
+            document.getElementById('prop-price').textContent    = 'Ã¢â‚¬â€';
             return;
         }
 
@@ -181,12 +181,12 @@
         } catch (e) {
             console.error('[contact-landlord] loadPropertyInfo:', e);
             document.getElementById('prop-title').textContent    = 'Could not load property.';
-            document.getElementById('prop-location').textContent = '—';
-            document.getElementById('prop-price').textContent    = '—';
+            document.getElementById('prop-location').textContent = 'Ã¢â‚¬â€';
+            document.getElementById('prop-price').textContent    = 'Ã¢â‚¬â€';
         }
     }
 
-    /* ── Form submit ──────────────────────────────────────────────────────── */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ Form submit Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
     document.getElementById('contactForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         hideFormError();
@@ -246,3 +246,4 @@
     </script>
 </body>
 </html>
+

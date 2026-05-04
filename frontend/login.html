@@ -117,13 +117,13 @@
     <script>
     'use strict';
 
-    /* FindMyNyumba runtime config — auto-detects backend host */
+    /* FindMyNyumba runtime config Ã¢â‚¬â€ auto-detects backend host */
     const FMN = (function () {
         const host = window.location.hostname;
         const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
         const API_HOST = isLocal
             ? 'http://127.0.0.1:8000'
-            : 'https://findmynyumba-backend.onrender.com';
+            : 'https://findmynyumba.onrender.com';
         return { API_HOST, API_BASE: API_HOST + '/api/v1' };
     })();
     const API_BASE_URL = FMN.API_BASE;
@@ -276,3 +276,4 @@
     </script>
 </body>
 </html>
+

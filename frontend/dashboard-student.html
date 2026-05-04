@@ -71,7 +71,7 @@
 </head>
 <body class="bg-slate-50" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
 
-    <!-- ── Mobile top bar ─────────────────────────────────────────── -->
+    <!-- â”€â”€ Mobile top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 shadow-sm shrink-0 z-30">
         <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 transition">
             <i class="fas fa-bars text-lg"></i>
@@ -90,7 +90,7 @@
         <!-- Sidebar overlay (mobile) -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
 
-        <!-- ── SIDEBAR ─────────────────────────────────────────────── -->
+        <!-- â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <aside id="sidebar"
                class="fixed md:relative -translate-x-full md:translate-x-0
                       w-64 bg-white border-r border-slate-100 shadow-xl md:shadow-none
@@ -140,7 +140,7 @@
             </div>
         </aside>
 
-        <!-- ── MAIN CONTENT ────────────────────────────────────────── -->
+        <!-- â”€â”€ MAIN CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <main class="flex-1 flex flex-col overflow-hidden">
 
             <!-- Desktop header -->
@@ -160,7 +160,7 @@
 
             <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
 
-                <!-- ── OVERVIEW ──────────────────────────────────────── -->
+                <!-- â”€â”€ OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div id="overview-section" class="dashboard-section">
 
                     <!-- Stat cards -->
@@ -212,7 +212,7 @@
                     <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
-                <!-- ── SAVED ROOMS ────────────────────────────────────── -->
+                <!-- â”€â”€ SAVED ROOMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div id="saved-section" class="dashboard-section hidden">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <h2 class="text-base font-black mb-6 text-slate-900">Saved Properties</h2>
@@ -227,7 +227,7 @@
                     </div>
                 </div>
 
-                <!-- ── MESSAGES ───────────────────────────────────────── -->
+                <!-- â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div id="messages-section" class="dashboard-section hidden">
                     <div id="messages-panel" class="flex bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
 
@@ -288,7 +288,7 @@
                     </div>
                 </div>
 
-                <!-- ── PROFILE ────────────────────────────────────────── -->
+                <!-- â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div id="profile-section" class="dashboard-section hidden">
                     <div class="max-w-2xl">
 
@@ -344,7 +344,7 @@
                     </div>
                 </div>
 
-                <!-- ── SETTINGS ──────────────────────────────────────── -->
+                <!-- â”€â”€ SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div id="settings-section" class="dashboard-section hidden">
                     <div class="max-w-2xl space-y-5">
                         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
@@ -811,3 +811,4 @@ document.addEventListener('DOMContentLoaded', initDashboard);
 </script>
 </body>
 </html>
+

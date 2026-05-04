@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyNyumba â€” Admin Portal</title>
+    <title>FindMyNyumba Ã¢â‚¬â€ Admin Portal</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -359,7 +359,7 @@
             <div class="field">
                 <label for="admin-password">Master Password</label>
                 <div class="input-wrap">
-                    <input id="admin-password" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    <input id="admin-password" type="password" placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢"
                            autocomplete="current-password" required>
                     <svg class="input-icon" width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
@@ -399,7 +399,7 @@
         <a href="admin-forgot-password.html" class="forgot-link">Forgot password?</a>
     </div>
 
-    <p class="footnote">FindMyNyumba Â© 2026 Â· Admin access is logged and monitored</p>
+    <p class="footnote">FindMyNyumba Ã‚Â© 2026 Ã‚Â· Admin access is logged and monitored</p>
 
 </div>
 
@@ -475,7 +475,7 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
     const attemptBar = document.getElementById('attempt-bar');
 
     btn.disabled          = true;
-    btnText.textContent   = 'Verifyingâ€¦';
+    btnText.textContent   = 'VerifyingÃ¢â‚¬Â¦';
     spinner.style.display = 'block';
 
     try {
@@ -500,13 +500,13 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
             throw new Error(data.detail || 'Authentication failed. Access denied.');
         }
 
-        // Success â€” store in sessionStorage only (clears on tab close)
+        // Success Ã¢â‚¬â€ store in sessionStorage only (clears on tab close)
         sessionStorage.setItem('adminToken', data.access_token);
         sessionStorage.setItem('adminRole',  'admin');
         sessionStorage.setItem('adminName',  data.user?.name || 'Admin');
 
         attemptBar.style.display = 'none';
-        showAlert('Access granted. Redirectingâ€¦', 'success');
+        showAlert('Access granted. RedirectingÃ¢â‚¬Â¦', 'success');
         setTimeout(() => window.location.replace('admin.html'), 900);
 
     } catch (err) {
@@ -529,4 +529,5 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
 
 </body>
 </html>
+
 
