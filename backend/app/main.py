@@ -1,4 +1,4 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -13,7 +13,7 @@ app = FastAPI(
 # Configure CORS - Allow all origins for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://find-my-nyumba-original.vercel.app","https://nyumba-web.vercel.app","http://localhost:5500","http://127.0.0.1:5500","http://localhost:3000","http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
