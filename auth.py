@@ -1,0 +1,1 @@
+def register(username, password, phone_number):\n    # existing code...\n    user = User(username=username, password=password, phone_number=phone_number)  # Persisting phone number\n    db.session.add(user)\n    db.session.commit()\n    return user\n
