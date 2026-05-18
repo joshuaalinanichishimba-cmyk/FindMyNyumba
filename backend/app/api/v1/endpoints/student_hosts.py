@@ -1,15 +1,13 @@
 """
 app/api/v1/endpoints/student_hosts.py
 
-FIXES vs original:
-- Password regex aligned with auth.py (8+, was 8-12).
-- Upload validation: MIME + size guards on listing images and verification
-  documents. Filenames slugged + randomized to prevent collisions and
-  path traversal.
-- Image URLs in responses are now ABSOLUTE (built from request.base_url).
-- All inquiry / message reads only touch messages this user actually owns.
-- /student-host/inquiries endpoint added (was missing — landlord had it,
-  student-host did not, even though the dashboard nav implies a parity).
+FIXES vs previous version:
+- nearest_institution is now saved to the Listing model (was accepted but dropped).
+- PUT /student-host/properties/{id} added for editing listings.
+- PATCH /student-host/properties/{id}/availability added for toggling available/taken.
+- PATCH /student-host/properties/{id}/spots added for managing spot counts.
+- Listing responses now include nearest_institution, availability_status, total_spots, available_spots.
+- Password regex aligned with auth.py (8+, no upper limit).
 """
 
 import re
@@ -114,6 +112,25 @@ async def _save_upload(
     return safe_name
 
 
+def _listing_response(l: Listing, request: Request) -> dict:
+    """Standard listing dict used across all host endpoints."""
+    return {
+        "id":                  l.id,
+        "title":               l.title,
+        "description":         l.description or "",
+        "price":               l.price,
+        "location":            l.location,
+        "nearest_institution": l.nearest_institution,
+        "status":              l.status,
+        "is_boosted":          l.is_boosted,
+        "availability_status": l.availability_status or "available",
+        "total_spots":         l.total_spots or 1,
+        "available_spots":     l.available_spots if l.available_spots is not None else (l.total_spots or 1),
+        "image_url":           _absolute_image_url(l.image_url, request),
+        "created_at":          l.created_at.isoformat() if l.created_at else None,
+    }
+
+
 # ── Dashboard Stats ───────────────────────────────────────────────────────────
 @router.get("/dashboard/stats")
 def get_host_stats(
@@ -160,30 +177,20 @@ def get_host_listings(
           .order_by(Listing.created_at.desc())
           .all()
     )
-    return [
-        {
-            "id":         l.id,
-            "title":      l.title,
-            "price":      l.price,
-            "location":   l.location,
-            "status":     l.status,
-            "is_boosted": l.is_boosted,
-            "image_url":  _absolute_image_url(l.image_url, request),
-            "created_at": l.created_at.isoformat() if l.created_at else None,
-        }
-        for l in listings
-    ]
+    return [_listing_response(l, request) for l in listings]
 
 
 @router.post("/properties", status_code=201)
 @router.post("/listings",   status_code=201)
 async def create_host_listing(
+    request:             Request,
     title:               str            = Form(..., min_length=3, max_length=160),
     price:               float          = Form(..., ge=0),
     location:            str            = Form(..., min_length=2, max_length=200),
     description:         str            = Form(..., min_length=10, max_length=4000),
     nearest_institution: Optional[str]  = Form(None, max_length=120),
-    images: Optional[List[UploadFile]] = File(None),
+    total_spots:         int            = Form(1, ge=1, le=50),
+    images: Optional[List[UploadFile]]  = File(None),
     host:   User    = Depends(require_student_host),
     db:     Session = Depends(get_db),
 ):
@@ -203,20 +210,166 @@ async def create_host_listing(
                 first_image_name = saved
 
     listing = Listing(
-        title       = title.strip(),
-        description = description.strip(),
-        price       = price,
-        location    = location.strip(),
-        image_url   = first_image_name,
-        status      = "pending",
-        owner_id    = host.id,
+        title               = title.strip(),
+        description         = description.strip(),
+        price               = price,
+        location            = location.strip(),
+        nearest_institution = (nearest_institution or "").strip() or None,
+        image_url           = first_image_name,
+        status              = "pending",
+        owner_id            = host.id,
+        total_spots         = total_spots,
+        available_spots     = total_spots,
+        availability_status = "available",
     )
     db.add(listing)
     db.commit()
     db.refresh(listing)
-    return {"status": "success", "message": "Bedspace submitted for review!", "id": listing.id}
+    return {
+        "status": "success",
+        "message": "Bedspace submitted for review!",
+        "id": listing.id,
+        "listing": _listing_response(listing, request),
+    }
 
 
+# ── Edit Listing ──────────────────────────────────────────────────────────────
+@router.put("/properties/{listing_id}")
+async def edit_host_listing(
+    listing_id:          int,
+    request:             Request,
+    title:               str            = Form(..., min_length=3, max_length=160),
+    price:               float          = Form(..., ge=0),
+    location:            str            = Form(..., min_length=2, max_length=200),
+    description:         str            = Form(..., min_length=10, max_length=4000),
+    nearest_institution: Optional[str]  = Form(None, max_length=120),
+    total_spots:         int            = Form(1, ge=1, le=50),
+    images: Optional[List[UploadFile]]  = File(None),
+    host:   User    = Depends(require_student_host),
+    db:     Session = Depends(get_db),
+):
+    listing = (
+        db.query(Listing)
+          .filter(Listing.id == listing_id, Listing.owner_id == host.id)
+          .first()
+    )
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+
+    listing.title               = title.strip()
+    listing.description         = description.strip()
+    listing.price               = price
+    listing.location            = location.strip()
+    listing.nearest_institution = (nearest_institution or "").strip() or None
+
+    # Update spots — available_spots can't exceed total_spots
+    old_total = listing.total_spots or 1
+    listing.total_spots = total_spots
+    if total_spots < old_total:
+        listing.available_spots = min(listing.available_spots or 0, total_spots)
+    elif total_spots > old_total:
+        # Increase available by the same delta
+        listing.available_spots = (listing.available_spots or 0) + (total_spots - old_total)
+
+    # Handle new images (optional — keep existing if none uploaded)
+    if images:
+        has_real_file = any(img.filename for img in images)
+        if has_real_file:
+            first_new = None
+            for img in images[:10]:
+                if not img.filename:
+                    continue
+                saved = await _save_upload(
+                    img,
+                    UPLOAD_DIR,
+                    host.id,
+                    allowed_types=ALLOWED_IMAGE_TYPES,
+                    max_mb=MAX_IMAGE_SIZE_MB,
+                )
+                if first_new is None:
+                    first_new = saved
+            if first_new:
+                listing.image_url = first_new
+
+    db.commit()
+    db.refresh(listing)
+    return {
+        "status": "success",
+        "message": "Listing updated successfully.",
+        "listing": _listing_response(listing, request),
+    }
+
+
+# ── Toggle Availability ──────────────────────────────────────────────────────
+class AvailabilityUpdate(BaseModel):
+    availability_status: str = Field(..., pattern="^(available|taken)$")
+
+
+@router.patch("/properties/{listing_id}/availability")
+def toggle_availability(
+    listing_id: int,
+    payload:    AvailabilityUpdate,
+    host:       User    = Depends(require_student_host),
+    db:         Session = Depends(get_db),
+):
+    listing = (
+        db.query(Listing)
+          .filter(Listing.id == listing_id, Listing.owner_id == host.id)
+          .first()
+    )
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+
+    listing.availability_status = payload.availability_status
+    if payload.availability_status == "taken":
+        listing.available_spots = 0
+    elif listing.available_spots == 0:
+        # Restore to at least 1 when marking available again
+        listing.available_spots = listing.total_spots or 1
+    db.commit()
+
+    label = "available" if payload.availability_status == "available" else "fully taken"
+    return {"status": "success", "message": f"Listing marked as {label}."}
+
+
+# ── Update Spots ──────────────────────────────────────────────────────────────
+class SpotsUpdate(BaseModel):
+    available_spots: int = Field(..., ge=0)
+
+
+@router.patch("/properties/{listing_id}/spots")
+def update_spots(
+    listing_id: int,
+    payload:    SpotsUpdate,
+    host:       User    = Depends(require_student_host),
+    db:         Session = Depends(get_db),
+):
+    listing = (
+        db.query(Listing)
+          .filter(Listing.id == listing_id, Listing.owner_id == host.id)
+          .first()
+    )
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+
+    total = listing.total_spots or 1
+    if payload.available_spots > total:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Available spots cannot exceed total spots ({total}).",
+        )
+
+    listing.available_spots = payload.available_spots
+    listing.availability_status = "taken" if payload.available_spots == 0 else "available"
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Available spots updated to {payload.available_spots}/{total}.",
+    }
+
+
+# ── Delete Listing ────────────────────────────────────────────────────────────
 @router.delete("/properties/{listing_id}")
 def delete_host_listing(
     listing_id: int,
@@ -235,7 +388,33 @@ def delete_host_listing(
     return {"status": "success", "message": "Listing deleted."}
 
 
-# ── Inquiries (was missing — landlord had this, host did not) ─────────────────
+
+
+# ── Boost Listing ─────────────────────────────────────────────────────────────
+@router.post("/properties/{listing_id}/boost")
+def boost_host_listing(
+    listing_id: int,
+    host:       User    = Depends(require_student_host),
+    db:         Session = Depends(get_db),
+):
+    """Toggle the is_boosted flag for a listing owned by this host."""
+    listing = (
+        db.query(Listing)
+          .filter(Listing.id == listing_id, Listing.owner_id == host.id)
+          .first()
+    )
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    listing.is_boosted = not listing.is_boosted
+    db.commit()
+    return {
+        "status":  "success",
+        "message": "Listing boosted!" if listing.is_boosted else "Boost removed.",
+        "boosted": listing.is_boosted,
+    }
+
+
+# ── Inquiries ─────────────────────────────────────────────────────────────────
 @router.get("/inquiries")
 def get_host_inquiries(
     host: User    = Depends(require_student_host),

@@ -1,7 +1,7 @@
 """
 app/api/v1/endpoints/admin_router.py
 
-FULL IMPLEMENTATION — was previously a 3-line stub returning zeros.
+FULL IMPLEMENTATION.
 
 Endpoints the admin.html frontend calls:
   GET  /admin/stats
@@ -21,14 +21,20 @@ Endpoints the admin.html frontend calls:
   POST /admin/settings/update
   POST /admin/change-password
 
-Security: all endpoints require admin role (enforced via require_admin dependency).
+FIX vs previous version:
+  - GET /admin/verifications previously returned placeholder document URLs
+    ({user_id}_doc1_placeholder). Landlords.py saves files as
+    "{user_id}_doc1_{rand}_{original_name}" and "{user_id}_doc2_{rand}_{original_name}".
+    The endpoint now scans the verification upload directory to find the actual
+    filenames for each user and returns absolute URLs the admin can open directly.
 """
 
 import re
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -42,6 +48,8 @@ from app.models.user import User
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
+VERIFY_DIR = Path("static/uploads/verification")
+
 
 # ── Role guard ─────────────────────────────────────────────────────────────────
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
@@ -53,12 +61,49 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
+# ── Helpers ────────────────────────────────────────────────────────────────────
+def _get_verification_docs(user_id: int, request: Request) -> list:
+    """
+    Scan the verification upload directory for files belonging to user_id.
+    Filenames follow the pattern: {user_id}_doc1_{rand}_{original} and
+                                  {user_id}_doc2_{rand}_{original}
+    Returns a list of dicts: [{label, url}, ...]
+    """
+    docs = []
+    if not VERIFY_DIR.exists():
+        return docs
+
+    prefix = f"{user_id}_"
+    base_url = str(request.base_url).rstrip("/")
+
+    doc1_files = sorted(VERIFY_DIR.glob(f"{user_id}_doc1_*"))
+    doc2_files = sorted(VERIFY_DIR.glob(f"{user_id}_doc2_*"))
+
+    if doc1_files:
+        docs.append({
+            "label": "ID Document",
+            "url":   f"{base_url}/static/uploads/verification/{doc1_files[-1].name}",
+        })
+    else:
+        docs.append({"label": "ID Document", "url": None})
+
+    if doc2_files:
+        docs.append({
+            "label": "Ownership Document",
+            "url":   f"{base_url}/static/uploads/verification/{doc2_files[-1].name}",
+        })
+    else:
+        docs.append({"label": "Ownership Document", "url": None})
+
+    return docs
+
+
 # ── GET /admin/stats ──────────────────────────────────────────────────────────
 @router.get("/stats")
 def get_stats(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
-    total_users    = db.query(User).count()
-    total_listings = db.query(Listing).count()
-    total_messages = db.query(Message).count()
+    total_users      = db.query(User).count()
+    total_listings   = db.query(Listing).count()
+    total_messages   = db.query(Message).count()
     pending_listings = db.query(Listing).filter(Listing.status == "pending").count()
     pending_verifs   = db.query(User).filter(
         User.verification_status == "pending",
@@ -67,12 +112,12 @@ def get_stats(admin: User = Depends(require_admin), db: Session = Depends(get_db
     pending_reports  = db.query(Report).filter(Report.status == "pending").count()
 
     return {
-        "total_users":     total_users,
-        "total_listings":  total_listings,
-        "total_messages":  total_messages,
+        "total_users":      total_users,
+        "total_listings":   total_listings,
+        "total_messages":   total_messages,
         "pending_listings": pending_listings,
-        "pending_verifs":  pending_verifs,
-        "pending_reports": pending_reports,
+        "pending_verifs":   pending_verifs,
+        "pending_reports":  pending_reports,
     }
 
 
@@ -163,8 +208,16 @@ def delete_listing(listing_id: int, admin: User = Depends(require_admin), db: Se
 
 # ── GET /admin/verifications ──────────────────────────────────────────────────
 @router.get("/verifications")
-def get_verifications(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
-    """Return landlords and student_hosts with pending verification."""
+def get_verifications(
+    request: Request,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Return landlords and student_hosts with pending verification.
+    Document URLs are resolved by scanning the verification upload directory
+    for files matching the user's ID pattern, so admins can actually open them.
+    """
     users = db.query(User).filter(
         User.verification_status == "pending",
         User.role.in_(["landlord", "student_host"]),
@@ -172,17 +225,12 @@ def get_verifications(admin: User = Depends(require_admin), db: Session = Depend
 
     return [
         {
-            "id":        u.id,
-            "full_name": u.full_name,
-            "email":     u.email,
-            "role":      u.role,
+            "id":                  u.id,
+            "full_name":           u.full_name,
+            "email":               u.email,
+            "role":                u.role,
             "verification_status": u.verification_status,
-            # Document URLs would be served from /static/uploads/verification/
-            # The naming convention is: {user_id}_doc1_<filename> and {user_id}_doc2_<filename>
-            "documents": [
-                {"label": "ID Document",        "url": f"/static/uploads/verification/{u.id}_doc1_placeholder"},
-                {"label": "Ownership Document", "url": f"/static/uploads/verification/{u.id}_doc2_placeholder"},
-            ],
+            "documents":           _get_verification_docs(u.id, request),
         }
         for u in users
     ]
@@ -224,15 +272,25 @@ def reject_verification(
 @router.get("/reports")
 def get_reports(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     reports = db.query(Report).order_by(Report.created_at.desc()).all()
+
+    # Batch-fetch reporter names and listing titles to avoid N+1
+    reporter_ids = {r.reporter_id for r in reports}
+    listing_ids  = {r.listing_id  for r in reports if r.listing_id}
+    reporters    = {u.id: u for u in db.query(User).filter(User.id.in_(reporter_ids)).all()} if reporter_ids else {}
+    listings     = {l.id: l for l in db.query(Listing).filter(Listing.id.in_(listing_ids)).all()} if listing_ids else {}
+
     return [
         {
-            "id":          r.id,
-            "listing_id":  r.listing_id,
-            "reporter_id": r.reporter_id,
-            "reason":      r.reason,
-            "description": r.description,
-            "status":      r.status,
-            "created_at":  r.created_at.isoformat() if r.created_at else None,
+            "id":             r.id,
+            "listing_id":     r.listing_id,
+            "listing_title":  listings[r.listing_id].title if r.listing_id and r.listing_id in listings else None,
+            "reporter_id":    r.reporter_id,
+            "reporter_name":  reporters[r.reporter_id].full_name if r.reporter_id in reporters else "Unknown",
+            "reporter_email": reporters[r.reporter_id].email     if r.reporter_id in reporters else "",
+            "reason":         r.reason,
+            "description":    r.description,
+            "status":         r.status,
+            "created_at":     r.created_at.isoformat() if r.created_at else None,
         }
         for r in reports
     ]
@@ -254,7 +312,7 @@ def dismiss_report(report_id: int, admin: User = Depends(require_admin), db: Ses
 def get_growth(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     """
     Returns monthly user and listing registration counts for the last 6 months.
-    Uses Python-side grouping for SQLite compatibility (strftime is not universal).
+    Uses Python-side grouping for cross-DB compatibility.
     """
     from collections import defaultdict
     from datetime import date
@@ -262,7 +320,6 @@ def get_growth(admin: User = Depends(require_admin), db: Session = Depends(get_d
     today = date.today()
     months = []
     for i in range(5, -1, -1):
-        # Walk back i months from current month
         m = today.month - i
         y = today.year
         while m <= 0:
@@ -272,7 +329,6 @@ def get_growth(admin: User = Depends(require_admin), db: Session = Depends(get_d
     def label(y, m):
         return datetime(y, m, 1).strftime("%b %Y")
 
-    # Fetch all users and listings created in the last 6 months
     cutoff = datetime(months[0][0], months[0][1], 1, tzinfo=timezone.utc)
 
     all_users    = db.query(User.created_at).filter(User.created_at    >= cutoff).all()
@@ -313,8 +369,6 @@ def send_announcement(
     if not payload.title.strip() or not payload.body.strip():
         raise HTTPException(status_code=400, detail="Title and message body are required.")
 
-    # Wire to your notification / email provider here.
-    # For now: persist as system messages to all targeted users.
     target_roles = (
         ["student", "landlord", "student_host"]
         if payload.target == "all"
@@ -347,8 +401,7 @@ def update_settings(
     payload: SettingsPayload,
     admin: User = Depends(require_admin),
 ):
-    # In production, persist these to a settings table or .env override.
-    # For now we acknowledge receipt so the frontend doesn't error.
+    # TODO: persist to a settings table or env override in production.
     return {"status": "success", "message": "Settings saved."}
 
 

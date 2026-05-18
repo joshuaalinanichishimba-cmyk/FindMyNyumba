@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyNyumba Ã¢â‚¬â€ Admin Portal</title>
+    <title>FindMyNyumba &mdash; Admin Portal</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,11 +15,11 @@
             --panel:     #111318;
             --border:    rgba(255,255,255,0.07);
             --border-hi: rgba(234,88,12,0.5);
-            --text:      #f0f2f5;
+            --text:      #f0f2f5;s
             --muted:     #6b7280;
             --accent:    #ea580c;
             --accent-hi: #fb923c;
-            --danger:    #ef4444;
+            --danger:    #ef4444;a
             --success:   #22c55e;
             --warn:      #f59e0b;
             --input-bg:  #1a1d24;
@@ -142,7 +142,6 @@
             box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 24px 48px rgba(0,0,0,0.4);
         }
 
-        /* -- Alert -- */
         .alert {
             display: none;
             align-items: flex-start;
@@ -166,7 +165,6 @@
         .alert.warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fcd34d; display: flex; }
         .alert svg { flex-shrink: 0; margin-top: 1px; }
 
-        /* -- Fields -- */
         .field { margin-bottom: 1rem; }
 
         .field label {
@@ -210,27 +208,24 @@
             box-shadow: 0 0 0 3px rgba(234,88,12,0.12);
         }
 
-        .field input:focus + .input-icon,
-        .field input:focus ~ .input-icon { color: var(--accent); }
         .field input::placeholder { color: #2d3340; }
 
         .pwd-toggle {
             position: absolute;
-            right: 11px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            cursor: pointer;
             color: var(--muted);
-            padding: 4px;
+            cursor: pointer;
+            padding: 2px;
             display: flex;
             align-items: center;
             transition: color 0.2s;
         }
         .pwd-toggle:hover { color: var(--text); }
 
-        /* -- Submit button -- */
         .btn-submit {
             width: 100%;
             padding: 12px;
@@ -262,18 +257,15 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* -- Attempt counter -- */
         .attempt-bar {
             display: none;
-            margin-top: 0.75rem;
-            font-size: 0.72rem;
-            font-family: 'DM Mono', monospace;
+            margin-top: 10px;
+            font-size: 0.75rem;
             color: var(--warn);
             text-align: center;
-            letter-spacing: 0.04em;
+            font-family: 'DM Mono', monospace;
         }
 
-        /* -- Divider / footer -- */
         .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
 
         .security-note {
@@ -292,19 +284,18 @@
         .links-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-top: 1.25rem;
         }
 
         .back-link, .forgot-link {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--muted);
             text-decoration: none;
             transition: color 0.2s;
         }
         .back-link:hover  { color: var(--text); }
-        .forgot-link      { color: var(--accent-hi); font-weight: 600; }
-        .forgot-link:hover { color: var(--accent); }
+        .forgot-link:hover { color: var(--accent-hi); }
+        .forgot-link { color: var(--accent); }
 
         .footnote {
             text-align: center;
@@ -321,7 +312,7 @@
 <div class="container">
 
     <div class="header">
-        <a href="browse.html" class="logo-wrap">
+        <a href="login.html" class="logo-wrap">
             <img src="logo.png" alt="FindMyNyumba"
                  onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block'">
             <span id="logo-fallback" class="logo-fallback">FindMyNyumba</span>
@@ -329,7 +320,7 @@
         <h1>Admin Portal</h1>
         <div class="access-badge">
             <span class="badge-dot"></span>
-            Authorised Personnel Only
+            Restricted Access
         </div>
     </div>
 
@@ -359,7 +350,7 @@
             <div class="field">
                 <label for="admin-password">Master Password</label>
                 <div class="input-wrap">
-                    <input id="admin-password" type="password" placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢"
+                    <input id="admin-password" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                            autocomplete="current-password" required>
                     <svg class="input-icon" width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
@@ -378,7 +369,6 @@
                 <div class="spinner" id="spinner"></div>
             </button>
 
-            <!-- Shown after a failed attempt so admin knows they have limited tries -->
             <div class="attempt-bar" id="attempt-bar"></div>
 
         </form>
@@ -395,26 +385,33 @@
     </div>
 
     <div class="links-row">
-        <a href="login.html" class="back-link">? Regular login</a>
+        <a href="login.html" class="back-link">&larr; Regular login</a>
         <a href="admin-forgot-password.html" class="forgot-link">Forgot password?</a>
     </div>
 
-    <p class="footnote">FindMyNyumba Ã‚Â© 2026 Ã‚Â· Admin access is logged and monitored</p>
+    <p class="footnote">FindMyNyumba &copy; 2026 &middot; Admin access is logged and monitored</p>
 
 </div>
 
 <script>
 'use strict';
-const API = 'http://127.0.0.1:8000/api/v1';
 
-// -- Redirect if already authenticated ----------------------------------------
+/* Auto-detect API host so this works locally AND in production */
+const API = (function () {
+    const host = window.location.hostname;
+    const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+    const base = isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com';
+    return base + '/api/v1';
+})();
+
+/* Redirect if already authenticated */
 (function () {
     const token = sessionStorage.getItem('adminToken');
     const role  = sessionStorage.getItem('adminRole');
     if (token && role === 'admin') window.location.replace('admin.html');
 })();
 
-// -- Password visibility toggle ------------------------------------------------
+/* Password visibility toggle */
 const pwdInput = document.getElementById('admin-password');
 const eyeIcon  = document.getElementById('eye-icon');
 
@@ -430,14 +427,14 @@ document.getElementById('pwd-toggle').addEventListener('click', () => {
     eyeIcon.innerHTML = show ? EYE_SHUT : EYE_OPEN;
 });
 
-// Tab: email ? password
+/* Tab: email → password */
 document.getElementById('admin-email').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); pwdInput.focus(); }
 });
 
-// -- Alert helpers -------------------------------------------------------------
+/* Alert helpers */
 const ICONS = {
-    error: `<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>`,
+    error:   `<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>`,
     success: `<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>`,
     warning: `<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>`,
 };
@@ -456,7 +453,7 @@ function hideAlert() {
     el.className = 'alert';
 }
 
-// -- Form submit ---------------------------------------------------------------
+/* Form submit — calls /auth/login (shared endpoint, role checked server-side) */
 document.getElementById('admin-form').addEventListener('submit', async e => {
     e.preventDefault();
     hideAlert();
@@ -475,11 +472,12 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
     const attemptBar = document.getElementById('attempt-bar');
 
     btn.disabled          = true;
-    btnText.textContent   = 'VerifyingÃ¢â‚¬Â¦';
+    btnText.textContent   = 'Verifying\u2026';
     spinner.style.display = 'block';
 
     try {
-        const res  = await fetch(`${API}/admin/login`, {
+        /* Use the shared /auth/login endpoint — role is enforced below */
+        const res  = await fetch(`${API}/auth/login`, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ email, password }),
@@ -487,10 +485,9 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
         const data = await res.json();
 
         if (res.status === 429) {
-            // Account locked
             showAlert(data.detail || 'Too many failed attempts. Account locked.', 'warning');
             attemptBar.style.display = 'none';
-            btn.disabled = true; // keep disabled while locked
+            btn.disabled = true;
             btnText.textContent = 'Locked';
             spinner.style.display = 'none';
             return;
@@ -500,23 +497,28 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
             throw new Error(data.detail || 'Authentication failed. Access denied.');
         }
 
-        // Success Ã¢â‚¬â€ store in sessionStorage only (clears on tab close)
+        /* Enforce admin-only access on the client side as a second check */
+        if (data.role !== 'admin') {
+            throw new Error('Access denied. This portal is for administrators only.');
+        }
+
+        /* Store in sessionStorage only (clears on tab close) */
         sessionStorage.setItem('adminToken', data.access_token);
         sessionStorage.setItem('adminRole',  'admin');
-        sessionStorage.setItem('adminName',  data.user?.name || 'Admin');
+        sessionStorage.setItem('adminName',  data.full_name || 'Admin');
 
         attemptBar.style.display = 'none';
-        showAlert('Access granted. RedirectingÃ¢â‚¬Â¦', 'success');
+        showAlert('Access granted. Redirecting\u2026', 'success');
         setTimeout(() => window.location.replace('admin.html'), 900);
 
     } catch (err) {
         const msg = err.message || 'Authentication failed.';
 
-        // Extract remaining attempts hint from message if present
+        /* Show remaining-attempts hint if present in error message */
         const match = msg.match(/(\d+) attempt/);
         if (match) {
             attemptBar.style.display = 'block';
-            attemptBar.textContent   = `? ${match[1]} attempt(s) remaining before lockout`;
+            attemptBar.textContent   = `\u26a0\ufe0f ${match[1]} attempt(s) remaining before lockout`;
         }
 
         showAlert(msg, 'error');
@@ -529,5 +531,3 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
 
 </body>
 </html>
-
-

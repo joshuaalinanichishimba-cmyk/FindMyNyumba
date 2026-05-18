@@ -10,16 +10,30 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure CORS - Allow all origins for development
+# FIX: Read CORS origins from settings so new deployment URLs can be added
+# by editing .env (ALLOWED_ORIGINS=url1,url2) without touching code.
+# Falls back to the known list if settings fail to load during cold-start.
+try:
+    from app.core.config import settings
+    _cors_origins = settings.allowed_origins_list
+except Exception:
+    _cors_origins = [
+        "https://find-my-nyumba-original.vercel.app",
+        "https://nyumba-web.vercel.app",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://find-my-nyumba-original.vercel.app","https://nyumba-web.vercel.app","http://localhost:5500","http://127.0.0.1:5500","http://localhost:3000","http://127.0.0.1:3000"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Basic test endpoint
 @app.get("/")
 def root():
     return {"status": "online", "message": "FindMyNyumba API is running"}

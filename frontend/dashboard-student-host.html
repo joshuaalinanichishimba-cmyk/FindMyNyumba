@@ -4,15 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Student Host Dashboard - FindMyNyumba</title>
-    <script src="https://cdn.tailwindcss.com">
-// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
-function resolveImageUrl(raw) {
-    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-    const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
-}
-</script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="logo.png">
     <style>
@@ -46,6 +38,9 @@ function resolveImageUrl(raw) {
         .fmn-input { width:100%; padding:10px 13px; border:1.5px solid #e5e7eb; border-radius:10px; outline:none; font-size:14px; transition:border-color 0.15s; background:#fafafa; }
         .fmn-input:focus { border-color:var(--orange); background:#fff; }
         .fmn-input:disabled { background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
+
+        .toggle-available { background:#22c55e; } .toggle-available:hover { background:#16a34a; }
+        .toggle-taken     { background:#ef4444; } .toggle-taken:hover     { background:#dc2626; }
 
         ::-webkit-scrollbar { width:5px; }
         ::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:10px; }
@@ -154,12 +149,13 @@ function resolveImageUrl(raw) {
                         <tr class="text-xs font-bold uppercase text-gray-400 tracking-wide">
                             <th class="px-5 py-3">Property</th>
                             <th class="px-5 py-3">Price</th>
+                            <th class="px-5 py-3">Spots</th>
                             <th class="px-5 py-3">Status</th>
                             <th class="px-5 py-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="my-listings-body" class="text-sm divide-y divide-gray-50">
-                        <tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Loading your listings...</td></tr>
+                        <tr><td colspan="5" class="p-8 text-center text-gray-400 italic">Loading your listings...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -177,7 +173,7 @@ function resolveImageUrl(raw) {
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Price per Month (ZMW)</label>
-                            <input type="number" id="prop-price" required class="fmn-input">
+                            <input type="number" id="prop-price" required min="0" class="fmn-input">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -207,6 +203,13 @@ function resolveImageUrl(raw) {
                             <input type="text" id="prop-location" required class="fmn-input">
                         </div>
                     </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Bedspaces</label>
+                            <input type="number" id="prop-spots" value="1" min="1" max="50" required class="fmn-input">
+                            <p class="text-[11px] text-gray-400 mt-1">How many spots are you offering?</p>
+                        </div>
+                    </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
                         <textarea id="prop-desc" rows="4" required class="fmn-input resize-none"></textarea>
@@ -219,6 +222,79 @@ function resolveImageUrl(raw) {
                         <i class="fas fa-upload mr-2"></i>Submit for Review
                     </button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Edit Listing Modal -->
+        <div id="edit-modal" class="fixed inset-0 z-[100] hidden">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditModal()"></div>
+            <div class="absolute inset-4 lg:inset-y-8 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between p-5 border-b border-gray-100 shrink-0">
+                    <h3 class="font-black text-gray-900 text-lg">Edit Listing</h3>
+                    <button onclick="closeEditModal()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-5 lg:p-8">
+                    <form id="editForm" class="space-y-5">
+                        <input type="hidden" id="edit-id">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Title</label>
+                                <input type="text" id="edit-title" required class="fmn-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Price (ZMW)</label>
+                                <input type="number" id="edit-price" required min="0" class="fmn-input">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nearest Institution</label>
+                                <select id="edit-university" class="fmn-input">
+                                    <option value="UNZA">University of Zambia (UNZA)</option>
+                                    <option value="CBU">Copperbelt University (CBU)</option>
+                                    <option value="MU">Mulungushi University</option>
+                                    <option value="KNU">Kwame Nkrumah University</option>
+                                    <option value="LMMU">Levy Mwanawasa Medical University</option>
+                                    <option value="MUKUBA">Mukuba University</option>
+                                    <option value="CHALU">Chalimbana University</option>
+                                    <option value="ZAOU">Zambian Open University</option>
+                                    <option value="EDEN">Eden University</option>
+                                    <option value="LAMU">Lusaka Apex Medical University</option>
+                                    <option value="CAVENDISH">Cavendish University</option>
+                                    <option value="TAU">Texila American University</option>
+                                    <option value="EHC">Evelyn Hone College</option>
+                                    <option value="NIPA">NIPA</option>
+                                    <option value="RUSANGU">Rusangu University</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Location / Area</label>
+                                <input type="text" id="edit-location" required class="fmn-input">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Bedspaces</label>
+                                <input type="number" id="edit-spots" min="1" max="50" required class="fmn-input">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
+                            <textarea id="edit-desc" rows="4" required class="fmn-input resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Replace Images (optional)</label>
+                            <input type="file" id="edit-images" accept="image/jpeg,image/png,image/webp" multiple class="fmn-input">
+                            <p class="text-[11px] text-gray-400 mt-1">Leave empty to keep current images.</p>
+                        </div>
+                        <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-base hover:bg-[#c2410c] transition shadow-sm">
+                            <i class="fas fa-save mr-2"></i>Save Changes
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -332,11 +408,11 @@ function resolveImageUrl(raw) {
                     <form id="passwordForm" class="space-y-3">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Current Password</label>
-                            <input type="password" id="pwd-current" required placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢" class="fmn-input">
+                            <input type="password" id="pwd-current" required placeholder="Enter current password" class="fmn-input">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">New Password</label>
-                            <input type="password" id="pwd-new" required placeholder="8-12 chars, mixed case, number, symbol" class="fmn-input">
+                            <input type="password" id="pwd-new" required placeholder="Min 8 chars, mixed case, number, symbol" class="fmn-input">
                         </div>
                         <button type="submit" class="bg-gray-900 text-white px-8 py-3 rounded-xl font-black hover:bg-gray-800 transition text-sm">Update Password</button>
                     </form>
@@ -348,12 +424,21 @@ function resolveImageUrl(raw) {
 
 <script>
 'use strict';
-const API_BASE = "http://127.0.0.1:8000/api/v1";
+const API_BASE = "https://findmynyumba.onrender.com/api/v1";
 
 let currentChatOtherId = null, currentChatPropId = null, _currentUser = null;
 const _loadedTabs = new Set();
 let _pollInterval = null, _activeTab = 'overview';
 
+// ── Image URL resolver (single definition) ──────────────────────────────────
+function resolveImageUrl(raw) {
+    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+    const url = String(raw).trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return API_BASE.replace('/api/v1', '/') + url.replace(/^\/+/, '');
+}
+
+// ── Polling ──────────────────────────────────────────────────────────────────
 function startPolling() {
     if (_pollInterval) return;
     _pollInterval = setInterval(() => {
@@ -366,6 +451,7 @@ function startPolling() {
 function stopPolling() { clearInterval(_pollInterval); _pollInterval = null; }
 document.addEventListener('visibilitychange', () => { document.hidden ? stopPolling() : startPolling(); });
 
+// ── Auth helpers ─────────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
 function authHeaders(isJson = false) {
     const h = { 'Authorization': `Bearer ${getToken()}` };
@@ -377,6 +463,7 @@ function clearSession() {
     window.location.replace('login.html');
 }
 
+// ── Toast ────────────────────────────────────────────────────────────────────
 function showToast(msg, type = 'success') {
     const old = document.getElementById('fmn-toast'); if (old) old.remove();
     const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
@@ -390,6 +477,7 @@ function showToast(msg, type = 'success') {
     setTimeout(() => { t.classList.add('opacity-0','translate-y-2'); setTimeout(() => t.remove(), 300); }, 3500);
 }
 
+// ── Init ─────────────────────────────────────────────────────────────────────
 async function initDashboard() {
     if (!getToken()) { window.location.replace('login.html'); return; }
     try {
@@ -398,7 +486,7 @@ async function initDashboard() {
         if (!res.ok) throw new Error();
         const user = await res.json();
         if (user.role !== 'student_host') {
-            const dest = { student: 'dashboard-student.html', landlord: 'dashboard-landlord.html' };
+            const dest = { student: 'dashboard-student.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
             window.location.replace(dest[user.role] || 'login.html'); return;
         }
         _currentUser = user;
@@ -409,6 +497,7 @@ async function initDashboard() {
     startPolling();
 }
 
+// ── Tab switching ────────────────────────────────────────────────────────────
 function switchTab(tabId) {
     _activeTab = tabId;
     document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden-view'));
@@ -428,6 +517,7 @@ function switchTab(tabId) {
     document.body.classList.remove('overflow-hidden');
 }
 
+// ── Unread badge ─────────────────────────────────────────────────────────────
 async function updateUnreadBadge() {
     try {
         const res = await fetch(`${API_BASE}/messages/unread-count`, { headers: authHeaders() });
@@ -439,6 +529,7 @@ async function updateUnreadBadge() {
     } catch (_) {}
 }
 
+// ── Overview ─────────────────────────────────────────────────────────────────
 async function loadOverview() {
     const ids = ['stat-active','stat-pending','stat-views','stat-inquiries'];
     ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = '<span class="stat-spinner"></span>'; });
@@ -461,36 +552,90 @@ async function loadOverview() {
                 if (h3) h3.innerText = 'Verification Rejected' + (d.rejection_reason ? ': ' + d.rejection_reason : '');
             } else { alertEl.classList.add('hidden'); }
         }
-    } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = 'Ã¢â‚¬â€'; }); }
+    } catch (e) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.innerText = '--'; }); }
 }
 
+// ── Listings table ───────────────────────────────────────────────────────────
 async function loadListings() {
     const tbody = document.getElementById('my-listings-body');
-    tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400"><span class="stat-spinner"></span></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400"><span class="stat-spinner"></span></td></tr>';
     try {
         const res = await fetch(`${API_BASE}/student-host/properties`, { headers: authHeaders() });
         if (!res.ok) throw new Error();
         const props = await res.json();
         if (!props.length) {
-            tbody.innerHTML = `<tr><td colspan="4" class="p-12 text-center"><div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-home text-2xl text-gray-200"></i></div><p class="text-gray-400 font-bold mb-3 text-sm">No bedspaces listed yet.</p><button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#c2410c] transition">+ Add Your First Listing</button></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="p-12 text-center"><div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-home text-2xl text-gray-200"></i></div><p class="text-gray-400 font-bold mb-3 text-sm">No bedspaces listed yet.</p><button onclick="switchTab('upload')" class="bg-[#ea580c] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#c2410c] transition">+ Add Your First Listing</button></td></tr>`;
             return;
         }
         const statusStyles = { active:'bg-green-100 text-green-700', pending:'bg-yellow-100 text-yellow-700', rejected:'bg-red-100 text-red-600' };
         tbody.innerHTML = props.map(p => {
             const badge = statusStyles[p.status] || 'bg-gray-100 text-gray-600';
             const img = p.image_url ? `<img src="${resolveImageUrl(p.image_url)}" class="w-12 h-12 rounded-xl object-cover mr-3 shrink-0" onerror="this.style.display='none'">` : `<div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mr-3 shrink-0"><i class="fas fa-home text-gray-300"></i></div>`;
+            const avail = p.availability_status || 'available';
+            const availBtnClass = avail === 'available' ? 'toggle-available' : 'toggle-taken';
+            const availIcon = avail === 'available' ? 'fa-toggle-on' : 'fa-toggle-off';
+            const availLabel = avail === 'available' ? 'Available' : 'Taken';
+            const spots = `${p.available_spots ?? p.total_spots ?? 1}/${p.total_spots ?? 1}`;
+            const safeTitle = (p.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
             return `<tr class="hover:bg-slate-50 transition border-b border-gray-50">
                 <td class="px-5 py-4"><div class="flex items-center">${img}<div><p class="font-bold text-gray-900 text-sm">${p.title}</p><p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-map-marker-alt mr-1"></i>${p.location}</p></div></div></td>
                 <td class="px-5 py-4 font-bold text-sm text-gray-700">ZMW ${Number(p.price).toLocaleString()}</td>
+                <td class="px-5 py-4">
+                    <span class="text-xs font-bold text-gray-600">${spots} spots</span>
+                    <button onclick="toggleAvailability(${p.id}, '${avail}')" class="ml-2 ${availBtnClass} text-white text-[10px] font-black px-2 py-0.5 rounded-lg inline-flex items-center gap-1 transition" title="Toggle availability"><i class="fas ${availIcon}"></i>${availLabel}</button>
+                </td>
                 <td class="px-5 py-4"><span class="px-2 py-0.5 ${badge} text-[10px] font-black rounded-lg uppercase">${p.status || 'pending'}</span>${p.is_boosted ? '<span class="ml-2 badge-boosted px-2 py-0.5 text-[10px] font-black rounded-lg uppercase"><i class="fas fa-bolt mr-1"></i>Boosted</span>' : ''}</td>
-                <td class="px-5 py-4"><button onclick="deleteProperty(${p.id}, '${p.title.replace(/'/g,"\\'")}', this)" class="text-red-500 hover:text-red-700 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 transition" title="Delete"><i class="fas fa-trash text-sm"></i></button></td>
+                <td class="px-5 py-4">
+                    <div class="flex items-center gap-1">
+                        <button onclick='openEditModal(${JSON.stringify(p).replace(/'/g,"&#39;")})' class="text-blue-500 hover:text-blue-700 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 transition" title="Edit"><i class="fas fa-pen text-sm"></i></button>
+                        <button onclick="deleteProperty(${p.id}, '${safeTitle}', this)" class="text-red-500 hover:text-red-700 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 transition" title="Delete"><i class="fas fa-trash text-sm"></i></button>
+                    </div>
+                </td>
             </tr>`;
         }).join('');
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold text-sm">Could not load listings. <button onclick="_loadedTabs.delete('listings'); loadListings()" class="underline ml-2">Retry</button></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500 font-bold text-sm">Could not load listings. <button onclick="_loadedTabs.delete('listings'); loadListings()" class="underline ml-2">Retry</button></td></tr>`;
     }
 }
 
+// ── Toggle availability ──────────────────────────────────────────────────────
+async function toggleAvailability(listingId, currentStatus) {
+    const newStatus = currentStatus === 'available' ? 'taken' : 'available';
+    try {
+        const res = await fetch(`${API_BASE}/student-host/properties/${listingId}/availability`, {
+            method: 'PATCH',
+            headers: authHeaders(true),
+            body: JSON.stringify({ availability_status: newStatus })
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(typeof e.detail === 'string' ? e.detail : 'Update failed.'); }
+        showToast(`Listing marked as ${newStatus}.`);
+        _loadedTabs.delete('listings'); loadListings();
+    } catch (e) { showToast(e.message || 'Could not update.', 'error'); }
+}
+
+// ── Edit modal ───────────────────────────────────────────────────────────────
+function openEditModal(listing) {
+    document.getElementById('edit-id').value = listing.id;
+    document.getElementById('edit-title').value = listing.title || '';
+    document.getElementById('edit-price').value = listing.price || 0;
+    document.getElementById('edit-location').value = listing.location || '';
+    document.getElementById('edit-desc').value = listing.description || '';
+    document.getElementById('edit-spots').value = listing.total_spots || 1;
+    const uniSelect = document.getElementById('edit-university');
+    if (listing.nearest_institution) {
+        uniSelect.value = listing.nearest_institution;
+    }
+    document.getElementById('edit-images').value = '';
+    document.getElementById('edit-modal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+}
+
+// ── Delete property ──────────────────────────────────────────────────────────
 async function deleteProperty(id, title, btn) {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
@@ -501,6 +646,7 @@ async function deleteProperty(id, title, btn) {
     } catch (e) { showToast(e.message || 'Could not delete.', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash text-sm"></i>'; }
 }
 
+// ── Conversations ────────────────────────────────────────────────────────────
 async function loadConversations() {
     const listDiv = document.getElementById('conv-list');
     listDiv.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</div>';
@@ -518,7 +664,7 @@ async function loadConversations() {
         listDiv.innerHTML = convos.map(c => {
             const isUnread = c.unread_count > 0;
             const propId = c.property_id ?? 0;
-            const preview = (c.last_message || '').length > 45 ? c.last_message.slice(0,45)+'Ã¢â‚¬Â¦' : (c.last_message || '');
+            const preview = (c.last_message || '').length > 45 ? c.last_message.slice(0,45) + '...' : (c.last_message || '');
             const safeName  = (c.other_user_name  || '').replace(/'/g,"\\'");
             const safeTitle = (c.property_title   || '').replace(/'/g,"\\'");
             return `<div onclick="openThread(${propId},${c.other_user_id},'${safeName}','${safeTitle}')" class="p-4 cursor-pointer hover:bg-orange-50 transition border-b border-gray-100 ${isUnread ? 'bg-orange-50/40' : 'bg-white'}">
@@ -536,6 +682,7 @@ async function loadConversations() {
     }
 }
 
+// ── Chat thread ──────────────────────────────────────────────────────────────
 async function openThread(propId, otherId, otherName, propTitle) {
     currentChatPropId  = propId;
     currentChatOtherId = otherId;
@@ -574,6 +721,7 @@ async function openThread(propId, otherId, otherName, propTitle) {
     } catch (e) { msgDiv.innerHTML = '<div class="text-red-500 p-4 text-center text-sm">Failed to load messages.</div>'; }
 }
 
+// ── Verification ─────────────────────────────────────────────────────────────
 async function loadVerification() {
     const container = document.getElementById('verification-content');
     if (!container) return;
@@ -590,8 +738,8 @@ async function loadVerification() {
         const showForm = verification_status !== 'verified' && verification_status !== 'pending';
         container.innerHTML = (statusHTML[verification_status] || statusHTML['unverified']) + (showForm ? `
             <form id="verifyForm" class="space-y-4">
-                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Student ID Card <span class="text-red-500">*</span></label><input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF Ã‚Â· Max 10MB</p></div>
-                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Hostel Allocation Slip or Proof of Residence <span class="text-red-500">*</span></label><input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF Ã‚Â· Max 10MB</p></div>
+                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Student ID Card <span class="text-red-500">*</span></label><input type="file" id="verify-doc1" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF &middot; Max 10MB</p></div>
+                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Hostel Allocation Slip or Proof of Residence <span class="text-red-500">*</span></label><input type="file" id="verify-doc2" required accept="image/jpeg,image/png,application/pdf" class="fmn-input"><p class="text-[11px] text-gray-400 mt-1">JPEG, PNG or PDF &middot; Max 10MB</p></div>
                 <button type="submit" class="w-full bg-[#ea580c] text-white py-3 rounded-xl font-black hover:bg-[#c2410c] transition shadow text-sm">Submit Verification Documents</button>
             </form>` : '');
         document.getElementById('verifyForm')?.addEventListener('submit', async (e) => {
@@ -615,6 +763,7 @@ async function loadVerification() {
     }
 }
 
+// ── Profile ──────────────────────────────────────────────────────────────────
 function loadProfile() {
     if (!_currentUser) return;
     const el = (id) => document.getElementById(id);
@@ -628,6 +777,7 @@ function logout() {
     clearSession();
 }
 
+// ── DOM ready: wire up forms and sidebar ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar  = document.getElementById('sidebar');
     const overlay  = document.getElementById('mobile-overlay');
@@ -643,6 +793,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeBtn?.addEventListener('click', toggleSidebar);
     overlay?.addEventListener('click', toggleSidebar);
 
+    // Profile form
     document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]'); const orig = btn.innerText;
@@ -660,13 +811,14 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.innerText = orig; }
     });
 
+    // Password form — regex now matches backend (8+ chars, no upper limit)
     document.getElementById('passwordForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]'); const orig = btn.innerText;
         const currentPwd = document.getElementById('pwd-current')?.value;
         const newPwd     = document.getElementById('pwd-new')?.value;
-        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d\D]{8,12}$/;
-        if (!re.test(newPwd)) { showToast('Password must be 8-12 chars with uppercase, lowercase, number, and special character.', 'error'); return; }
+        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+        if (!re.test(newPwd)) { showToast('Password must be 8+ chars with uppercase, lowercase, number, and special character.', 'error'); return; }
         btn.disabled = true; btn.innerText = 'Updating...';
         try {
             const res = await fetch(`${API_BASE}/student-host/settings/password`, { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ current_password: currentPwd, new_password: newPwd }) });
@@ -678,6 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.innerText = orig; }
     });
 
+    // Upload (create) form
     document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]'); const orig = btn.innerText;
@@ -688,6 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fd.append('location', document.getElementById('prop-location').value.trim());
         fd.append('description', document.getElementById('prop-desc').value.trim());
         fd.append('nearest_institution', document.getElementById('prop-university')?.value || '');
+        fd.append('total_spots', document.getElementById('prop-spots')?.value || '1');
         const imgs = document.getElementById('prop-images');
         if (imgs?.files) for (const f of imgs.files) fd.append('images', f);
         try {
@@ -700,6 +854,33 @@ document.addEventListener('DOMContentLoaded', () => {
         finally { btn.disabled = false; btn.innerText = orig; }
     });
 
+    // Edit form
+    document.getElementById('editForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]'); const orig = btn.innerText;
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+        const listingId = document.getElementById('edit-id').value;
+        const fd = new FormData();
+        fd.append('title',       document.getElementById('edit-title').value.trim());
+        fd.append('price',       document.getElementById('edit-price').value);
+        fd.append('location',    document.getElementById('edit-location').value.trim());
+        fd.append('description', document.getElementById('edit-desc').value.trim());
+        fd.append('nearest_institution', document.getElementById('edit-university')?.value || '');
+        fd.append('total_spots', document.getElementById('edit-spots')?.value || '1');
+        const imgs = document.getElementById('edit-images');
+        if (imgs?.files) for (const f of imgs.files) fd.append('images', f);
+        try {
+            const res = await fetch(`${API_BASE}/student-host/properties/${listingId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${getToken()}` }, body: fd });
+            const data = await res.json();
+            if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Update failed.');
+            showToast('Listing updated!');
+            closeEditModal();
+            _loadedTabs.delete('listings'); loadListings(); loadOverview();
+        } catch (err) { showToast(err.message || 'Could not update listing.', 'error'); }
+        finally { btn.disabled = false; btn.innerText = orig; }
+    });
+
+    // Chat reply form
     document.getElementById('reply-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!currentChatOtherId) return;
@@ -708,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn       = document.getElementById('chat-send-btn');
         const attachLbl = document.getElementById('attach-name');
         const content   = input.value.trim();
-        if (!content) return;
+        if (!content && !(fileInput?.files.length > 0)) return;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>'; btn.disabled = true;
         const fd = new FormData();
         fd.append('receiver_id', currentChatOtherId); fd.append('content', content);
@@ -726,6 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ── Image preview ────────────────────────────────────────────────────────────
 function previewHostImages(input) {
     let prev = document.getElementById('host-img-preview');
     if (!prev) {
@@ -749,31 +931,9 @@ function previewHostImages(input) {
 }
 
 initDashboard();
-
-// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
-function resolveImageUrl(raw) {
-    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-    const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
-}
 </script>
-<script>document.addEventListener("error", function(e){ if(e.target.tagName=="IMG") e.target.src="https://placehold.co/600x400/0A1128/FFFFFF?text=Image+Not+Found"; }, true);
-// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
-function resolveImageUrl(raw) {
-    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-    const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
-}
-</script><script>document.addEventListener("error", function(e){ if(e.target.tagName=="IMG") e.target.src="https://placehold.co/600x400/0A1128/FFFFFF?text=Image+Not+Found"; }, true);
-// -- resolveImageUrl: prevents URL-inside-URL 404s --------------------------
-function resolveImageUrl(raw) {
-    if (!raw) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-    const url = String(raw).trim();
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://findmynyumba.onrender.com/' + url.replace(/^\/+/, '');
-}
-</script></body>
+<script>
+document.addEventListener("error", function(e){ if(e.target.tagName==="IMG") e.target.src="https://placehold.co/600x400/0A1128/FFFFFF?text=Image+Not+Found"; }, true);
+</script>
+</body>
 </html>
-

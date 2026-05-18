@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -71,7 +71,7 @@
 </head>
 <body class="bg-slate-50" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
 
-    <!-- â”€â”€ Mobile top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!--  Mobile top bar  -->
     <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 shadow-sm shrink-0 z-30">
         <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 transition">
             <i class="fas fa-bars text-lg"></i>
@@ -90,7 +90,7 @@
         <!-- Sidebar overlay (mobile) -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
 
-        <!-- â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!--  SIDEBAR  -->
         <aside id="sidebar"
                class="fixed md:relative -translate-x-full md:translate-x-0
                       w-64 bg-white border-r border-slate-100 shadow-xl md:shadow-none
@@ -140,7 +140,7 @@
             </div>
         </aside>
 
-        <!-- â”€â”€ MAIN CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!--  MAIN CONTENT  -->
         <main class="flex-1 flex flex-col overflow-hidden">
 
             <!-- Desktop header -->
@@ -160,7 +160,7 @@
 
             <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
 
-                <!-- â”€â”€ OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!--  OVERVIEW  -->
                 <div id="overview-section" class="dashboard-section">
 
                     <!-- Stat cards -->
@@ -212,7 +212,7 @@
                     <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
-                <!-- â”€â”€ SAVED ROOMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!--  SAVED ROOMS  -->
                 <div id="saved-section" class="dashboard-section hidden">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
                         <h2 class="text-base font-black mb-6 text-slate-900">Saved Properties</h2>
@@ -227,7 +227,7 @@
                     </div>
                 </div>
 
-                <!-- â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!--  MESSAGES  -->
                 <div id="messages-section" class="dashboard-section hidden">
                     <div id="messages-panel" class="flex bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
 
@@ -288,7 +288,7 @@
                     </div>
                 </div>
 
-                <!-- â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!--  PROFILE  -->
                 <div id="profile-section" class="dashboard-section hidden">
                     <div class="max-w-2xl">
 
@@ -344,14 +344,14 @@
                     </div>
                 </div>
 
-                <!-- â”€â”€ SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+                <!--  SETTINGS  -->
                 <div id="settings-section" class="dashboard-section hidden">
                     <div class="max-w-2xl space-y-5">
                         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                             <h4 class="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
                                 <i class="fas fa-shield-alt text-[#ea580c]"></i> Change Password
                             </h4>
-                            <p class="text-xs text-slate-400 mb-5">Must be 8-12 characters with uppercase, lowercase, number and symbol.</p>
+                            <p class="text-xs text-slate-400 mb-5">Must be at least 8 characters with uppercase, lowercase, a number, and a special character.</p>
 
                             <div id="pwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">
                                 <i class="fas fa-check-circle mr-2"></i>Password updated successfully!
@@ -386,7 +386,17 @@
 
 <script>
 'use strict';
-const API = 'http://127.0.0.1:8000/api/v1';
+
+/* Auto-detect backend host  same pattern as browse.html / contact-landlord.html */
+const FMN = (function () {
+    const host    = window.location.hostname;
+    const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+    const API_HOST = isLocal
+        ? 'http://127.0.0.1:8000'
+        : 'https://findmynyumba.onrender.com';
+    return { API_HOST, API_BASE: API_HOST + '/api/v1' };
+})();
+const API = FMN.API_BASE;
 
 // XSS helper
 function esc(str) {
@@ -442,6 +452,7 @@ function switchTab(tab) {
     closeSidebar();
     if (tab === 'messages') loadConversations();
     if (tab === 'profile')  loadProfileData();
+    if (tab === 'saved')    loadSavedRooms();
 }
 
 // Toast
@@ -459,8 +470,11 @@ function logout() {
     window.location.replace('login.html');
 }
 
-// Boot
+// Boot — guard prevents re-runs if browser re-executes script on tab focus/reload
+let _dashboardInitialised = false;
 async function initDashboard() {
+    if (_dashboardInitialised) return;
+    _dashboardInitialised = true;
     const token = getToken();
     try {
         const res  = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -491,8 +505,12 @@ async function initDashboard() {
     loadOverviewStats();
 }
 
-// Overview stats
-async function loadOverviewStats() {
+// Overview stats — _overviewLoaded prevents duplicate calls on page re-focus;
+// the Retry button resets this flag before calling.
+let _overviewLoaded = false;
+async function loadOverviewStats(force = false) {
+    if (_overviewLoaded && !force) return;
+    _overviewLoaded = true;
     const token      = getToken();
     const statSaved  = document.getElementById('stat-saved');
     const statMsgs   = document.getElementById('stat-messages');
@@ -539,7 +557,7 @@ async function loadOverviewStats() {
             <div class="col-span-full py-10 text-center bg-red-50 rounded-2xl border border-red-100">
                 <i class="fas fa-wifi text-4xl text-red-300 mb-3 block"></i>
                 <p class="text-red-500 font-semibold mb-4 text-sm">Could not connect to server.</p>
-                <button onclick="loadOverviewStats()" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition text-sm">
+                <button onclick="_overviewLoaded=false; loadOverviewStats(true)" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition text-sm">
                     <i class="fas fa-redo mr-2"></i>Retry
                 </button>
             </div>`;
@@ -585,6 +603,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter') searchProperties();
     });
 });
+
+// Saved rooms
+async function loadSavedRooms() {
+    const token    = getToken();
+    const grid     = document.getElementById('saved-rooms-grid');
+    const emptyEl  = document.getElementById('saved-empty');
+    if (!grid) return;
+    grid.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</div>';
+    emptyEl?.classList.add('hidden');
+    try {
+        const res  = await fetch(`${API}/students/saved`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!data.length) {
+            grid.innerHTML = '';
+            emptyEl?.classList.remove('hidden');
+            return;
+        }
+        emptyEl?.classList.add('hidden');
+        grid.innerHTML = data.map(prop => `
+            <div class="listing-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer flex flex-col"
+                 onclick="window.location.href='listing.html?id=${encodeURIComponent(prop.id)}'">
+                <div class="h-44 bg-slate-100 relative overflow-hidden flex-shrink-0">
+                    <img src="${esc(prop.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}"
+                         class="w-full h-full object-cover"
+                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'"
+                         alt="${esc(prop.title)}">
+                    ${prop.is_boosted ? '<div class="absolute top-2 left-2 bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-lg"><i class="fas fa-bolt mr-1"></i>Featured</div>' : ''}
+                </div>
+                <div class="p-4 flex-1 flex flex-col">
+                    <h4 class="font-black text-sm text-slate-900 truncate mb-1">${esc(prop.title)}</h4>
+                    <p class="text-[#ea580c] font-black text-sm mb-1.5">ZMW ${Number(prop.price).toLocaleString()}</p>
+                    <p class="text-slate-400 text-xs font-medium truncate"><i class="fas fa-map-marker-alt mr-1 text-[#ea580c]"></i>${esc(prop.location)}</p>
+                </div>
+            </div>`).join('');
+    } catch {
+        grid.innerHTML = '<div class="col-span-full text-center py-8 text-red-400 text-sm font-semibold">Could not load saved rooms.</div>';
+    }
+}
+window.loadSavedRooms = loadSavedRooms;
 
 // Conversations
 let _activePropId = null;
@@ -788,9 +846,9 @@ async function updatePassword(e) {
     const errEl   = document.getElementById('pwd-error');
     sucEl.classList.add('hidden');
     errEl.classList.add('hidden');
-    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
+    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     if (!pwdRegex.test(newPwd)) {
-        errEl.textContent = 'Password must be 8-12 characters with uppercase, lowercase, number, and special character.';
+        errEl.textContent = 'Password must be at least 8 characters with uppercase, lowercase, a number, and a special character.';
         errEl.classList.remove('hidden');
         return;
     }

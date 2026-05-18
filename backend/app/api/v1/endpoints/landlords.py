@@ -58,11 +58,11 @@ PASSWORD_RULE_MSG = (
     "lowercase, a number, and a special character."
 )
 
-# Filename slug — strip path separators, keep only safe characters.
+# Filename slug  strip path separators, keep only safe characters.
 _SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+#  Helpers 
 def require_landlord(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "landlord":
         raise HTTPException(
@@ -129,7 +129,7 @@ async def _save_upload(
     return safe_name
 
 
-# ── Dashboard Stats ───────────────────────────────────────────────────────────
+#  Dashboard Stats 
 @router.get("/dashboard/stats")
 def get_stats(
     landlord: User    = Depends(require_landlord),
@@ -161,7 +161,7 @@ def get_stats(
     }
 
 
-# ── Properties ────────────────────────────────────────────────────────────────
+#  Properties 
 @router.get("/properties")
 def get_properties(
     request:  Request,
@@ -201,7 +201,7 @@ async def create_property(
 ):
     first_image_name = None
     if images:
-        # Cap at 10 images per listing — defence against payload-bombing.
+        # Cap at 10 images per listing  defence against payload-bombing.
         for img in images[:10]:
             if not img.filename:
                 continue
@@ -273,7 +273,7 @@ def boost_property(
     }
 
 
-# ── Inquiries ────────────────────────────────────────────────────────────────
+#  Inquiries 
 @router.get("/inquiries")
 def get_inquiries(
     landlord: User    = Depends(require_landlord),
@@ -281,7 +281,7 @@ def get_inquiries(
 ):
     """
     Returns the 50 most recent messages addressed to this landlord. Marks
-    THESE specific messages as read — not every unread message in the
+    THESE specific messages as read  not every unread message in the
     table (the original `update(...)` was effectively a sledgehammer).
     """
     messages = (
@@ -306,6 +306,7 @@ def get_inquiries(
             ids_to_mark_read.append(msg.id)
         result.append({
             "id":             msg.id,
+            "sender_id":      msg.sender_id,
             "sender_name":    sender.full_name if sender else "Unknown",
             "sender_email":   sender.email if sender else "",
             "property_title": listing.title if listing else "General Inquiry",
@@ -323,7 +324,7 @@ def get_inquiries(
     return result
 
 
-# ── Verification ──────────────────────────────────────────────────────────────
+#  Verification 
 @router.get("/verification")
 def get_verification(landlord: User = Depends(require_landlord)):
     return {
@@ -363,7 +364,7 @@ async def submit_verification(
     }
 
 
-# ── Profile ───────────────────────────────────────────────────────────────────
+#  Profile 
 class ProfileUpdate(BaseModel):
     full_name:     str           = Field(..., min_length=1, max_length=120)
     phone:         Optional[str] = Field(None, max_length=40)
@@ -388,7 +389,7 @@ def update_profile(
     return {"status": "success", "message": "Profile updated successfully."}
 
 
-# ── Change Password ───────────────────────────────────────────────────────────
+#  Change Password 
 class PasswordChange(BaseModel):
     current_password: str
     new_password:     str

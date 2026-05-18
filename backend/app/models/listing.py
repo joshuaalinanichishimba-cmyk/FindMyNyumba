@@ -3,8 +3,12 @@ app/models/listing.py
 
 FIX: status default changed from "active" → "pending".
      All new listings must go through admin review before going live.
-     The previous default of "active" would have made any listing created
-     directly via the ORM (e.g. in tests or scripts) bypass moderation.
+
+ADDED (Student Host Phase):
+  - nearest_institution : which university/college the bedspace is near
+  - availability_status : "available" | "taken" (independent of admin approval status)
+  - total_spots         : how many bedspaces the host is offering in this listing
+  - available_spots     : how many are still open (≤ total_spots)
 """
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
 from sqlalchemy.sql import func
@@ -24,8 +28,6 @@ class Listing(Base):
     image_url   = Column(String, nullable=True)
 
     # Workflow: pending | active | rejected
-    # FIX: default changed from "active" to "pending" — all new listings
-    # require admin approval before appearing in browse results.
     status      = Column(String, default="pending", nullable=False, index=True)
 
     # Boost: when True, listing appears at top of browse results
@@ -37,3 +39,16 @@ class Listing(Base):
     # FK to owner (landlord or student_host)
     owner_id    = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     owner       = relationship("User", back_populates="listings")
+
+    # ── Student Host bedspace fields ──────────────────────────────────────────
+    # Which institution the bedspace is near (e.g. "UNZA", "CBU")
+    nearest_institution = Column(String, nullable=True, index=True)
+
+    # Availability toggle — host can mark a listing as taken without deleting
+    # This is separate from admin "status" (pending/active/rejected).
+    # "available" means spots are open; "taken" means fully occupied.
+    availability_status = Column(String, default="available", nullable=False)
+
+    # Spot management — how many bedspaces in this listing
+    total_spots     = Column(Integer, default=1, nullable=False)
+    available_spots = Column(Integer, default=1, nullable=False)

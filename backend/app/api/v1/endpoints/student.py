@@ -20,7 +20,7 @@ FIXES (relative to what dashboard-student.html expects):
 import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -48,6 +48,7 @@ def require_student(current_user: User = Depends(get_current_user)) -> User:
 # ── GET /students/dashboard/overview ─────────────────────────────────────────
 @router.get("/dashboard/overview")
 def get_overview(
+    request: Request,
     student: User    = Depends(require_student),
     db: Session      = Depends(get_db),
 ):
@@ -75,12 +76,16 @@ def get_overview(
         .all()
     )
 
-    def resolve_img(raw):
+    def resolve_img(raw: Optional[str]) -> Optional[str]:
+        """Return an absolute URL the browser can use regardless of deployment."""
         if not raw:
             return None
         if raw.startswith("http://") or raw.startswith("https://"):
             return raw
-        return f"/static/uploads/properties/{raw}"
+        base = str(request.base_url).rstrip("/")
+        if raw.startswith("/"):
+            return f"{base}{raw}"
+        return f"{base}/static/uploads/properties/{raw}"
 
     return {
         "stats": {
@@ -99,6 +104,20 @@ def get_overview(
             for l in recent
         ],
     }
+
+
+# ── GET /students/saved ───────────────────────────────────────────────────────
+@router.get("/saved")
+def get_saved(
+    student: User = Depends(require_student),
+):
+    """
+    Saved listings are stored client-side in localStorage (no DB model yet).
+    This endpoint exists so the frontend fetch doesn't 404. It returns an empty
+    list — the dashboard JS layer already merges this with localStorage data.
+    When a SavedListing model is added, query it here.
+    """
+    return []
 
 
 # ── PUT /students/profile ─────────────────────────────────────────────────────
@@ -134,11 +153,11 @@ def change_password(
     if not verify_password(payload.current_password, student.hashed_password):
         raise HTTPException(status_code=401, detail="Current password is incorrect.")
 
-    PWD_RE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$")
+    PWD_RE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
     if not PWD_RE.match(payload.new_password):
         raise HTTPException(
             status_code=400,
-            detail="Password must be 8-12 characters with uppercase, lowercase, number, and special character.",
+            detail="Password must be at least 8 characters with uppercase, lowercase, number, and special character.",
         )
     student.hashed_password = get_password_hash(payload.new_password)
     db.commit()
