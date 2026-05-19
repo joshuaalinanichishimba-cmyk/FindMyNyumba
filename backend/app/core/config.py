@@ -1,7 +1,7 @@
-"""
+ï»¿"""
 app/core/config.py
 Application settings loaded from environment variables / .env file.
-SECURITY: SECRET_KEY has no default — must be set in .env or the app
+SECURITY: SECRET_KEY has no default ï¿½ must be set in .env or the app
 will refuse to start. This prevents JWT forgery if .env is missing.
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "FindMyNyumba"
 
     # -- Database ---------------------------------------------------------------
-    DATABASE_URL: str  # Required — must be set in .env
+    DATABASE_URL: str  # Required ï¿½ must be set in .env
 
     # -- URLs -------------------------------------------------------------------
     FRONTEND_URL: str  = "http://localhost:5500"   # Update for production
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # -- Auth -------------------------------------------------------------------
     # SECURITY: no default value. App will crash on startup if SECRET_KEY is
-    # not provided, which is intentional — a missing key means no JWT signing.
+    # not provided, which is intentional ï¿½ a missing key means no JWT signing.
     SECRET_KEY: str
     ALGORITHM: str                    = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int  = 60 * 24 * 8  # 8 days
@@ -66,4 +66,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
 
