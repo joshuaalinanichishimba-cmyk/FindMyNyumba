@@ -56,3 +56,4 @@ if static_dir.exists():
     app.mount("/static", StaticFiles(directory="static"), name="static")
     print("✅ Static files mounted")
 
+
