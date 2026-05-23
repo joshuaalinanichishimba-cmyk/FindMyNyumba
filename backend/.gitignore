@@ -13,6 +13,9 @@ ENV/
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.wal
+*.shm
 
 # Logs
 *.log
@@ -35,24 +38,24 @@ desktop.ini
 *.bak
 *.backup
 *.old
-*.tmp
-
-# Uploads (keep structure but not files)
-backend/static/uploads/properties/*
-backend/static/uploads/attachments/*
-backend/static/uploads/verification/*
-!backend/static/uploads/properties/.gitkeep
-!backend/static/uploads/attachments/.gitkeep
-!backend/static/uploads/verification/.gitkeep
 
 # Environment
 .env
 .env.local
+.env.*.local
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Uploads (keep structure, not files)
+static/uploads/properties/*
+static/uploads/attachments/*
+static/uploads/verification/*
+!static/uploads/properties/.gitkeep
+!static/uploads/attachments/.gitkeep
+!static/uploads/verification/.gitkeep
 
 # Build
 dist/
