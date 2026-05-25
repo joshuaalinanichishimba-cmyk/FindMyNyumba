@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - FindMyNyumba</title>
+    <title>Landlord Dashboard - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,122 +12,90 @@
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         :root { --orange: #ea580c; --orange-light: #fff7ed; --orange-hover: #c2410c; }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-
-        /* Sidebar */
         #sidebar { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
-
-        /* Nav active state */
         .nav-link-active {
             background-color: #fff7ed !important;
             color: #ea580c !important;
             border-right: 3px solid #ea580c;
         }
-
-        /* Chat bubbles */
         .bubble-me   { background-color: #ea580c; color: white; border-bottom-right-radius: 4px; }
         .bubble-them { background-color: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; }
-
-        /* Messages panel height */
         #messages-panel { height: calc(100vh - 9rem); }
-
-        /* Mobile chat pane switching */
         @media (max-width: 767px) {
             #messages-panel { height: calc(100vh - 7.5rem); }
-            #conv-pane  { width: 100%; }
-            #chat-pane  { width: 100%; display: none; }
-            #chat-pane.mobile-chat-open  { display: flex; }
-            #conv-pane.mobile-chat-open  { display: none; }
+            #conv-pane { width: 100%; }
+            #chat-pane { width: 100%; display: none; }
+            #chat-pane.mobile-chat-open { display: flex; }
+            #conv-pane.mobile-chat-open { display: none; }
         }
-
-        /* Fix duplicate hidden class on search grid */
-        #search-results-grid { display: none; }
-        #search-results-grid.visible { display: grid; }
-
-        /* Card hover */
         .listing-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .listing-card { transition: all 0.2s ease; }
-
-        /* Input focus */
         input:focus, textarea:focus, select:focus { outline: none; border-color: #ea580c !important; box-shadow: 0 0 0 3px rgba(234,88,12,0.1); }
-
-        /* Dashboard section */
         .dashboard-section { display: block; }
         .dashboard-section.hidden { display: none; }
-
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
-
-        /* Logo word mark */
-        .logo-mark { font-weight: 900; letter-spacing: -0.5px; }
-        .logo-mark span { color: #ea580c; }
-
-        /* Stat card icon */
         .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
+        .status-pending  { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body class="bg-slate-50" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
 
-    <!--  Mobile top bar  -->
+    <!-- Mobile top bar -->
     <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 shadow-sm shrink-0 z-30">
         <button onclick="openSidebar()" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 transition">
             <i class="fas fa-bars text-lg"></i>
         </button>
-        <div class="flex items-center gap-2">
-            <img src="logo.png" alt="FindMyNyumba" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
-        </div>
+        <img src="logo.png" alt="FindMyNyumba" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
         <img id="mobile-avatar"
-             src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+             src="https://ui-avatars.com/api/?name=L&background=ea580c&color=fff"
              class="w-9 h-9 rounded-full object-cover border-2 border-white shadow cursor-pointer"
              onclick="switchTab('profile')" alt="Profile">
     </div>
 
     <div class="flex flex-1 overflow-hidden relative">
-
-        <!-- Sidebar overlay (mobile) -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden" onclick="closeSidebar()"></div>
 
-        <!--  SIDEBAR  -->
+        <!-- SIDEBAR -->
         <aside id="sidebar"
                class="fixed md:relative -translate-x-full md:translate-x-0
                       w-64 bg-white border-r border-slate-100 shadow-xl md:shadow-none
                       flex flex-col z-40 md:z-20 h-full top-0 left-0">
 
-            <!-- Logo -->
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2.5">
-                    <img src="logo.png" alt="FindMyNyumba"
-                         class="h-8 w-auto object-contain"
-                         onerror="this.style.display='none'">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Student Portal</div>
+                    <img src="logo.png" alt="FindMyNyumba" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Landlord Portal</div>
                 </div>
                 <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
                     <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
 
-            <!-- Nav -->
             <nav class="flex-1 py-3 px-2 overflow-y-auto space-y-0.5">
-                <button id="nav-overview"  onclick="switchTab('overview')"
+                <button id="nav-overview" onclick="switchTab('overview')"
                     class="nav-link nav-link-active w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-[#ea580c]">
-                    <i class="fas fa-home w-4 text-center"></i> Overview
+                    <i class="fas fa-chart-bar w-4 text-center"></i> Overview
                 </button>
-                <button id="nav-saved"     onclick="switchTab('saved')"
+                <button id="nav-properties" onclick="switchTab('properties')"
                     class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
-                    <i class="fas fa-heart w-4 text-center"></i> Saved Rooms
+                    <i class="fas fa-building w-4 text-center"></i> My Properties
                 </button>
-                <button id="nav-messages"  onclick="switchTab('messages')"
+                <button id="nav-messages" onclick="switchTab('messages')"
                     class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
                     <i class="fas fa-comments w-4 text-center"></i> Messages
+                    <span id="unread-badge" class="hidden ml-auto bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-full"></span>
                 </button>
-                <button id="nav-profile"   onclick="switchTab('profile')"
+                <button id="nav-profile" onclick="switchTab('profile')"
                     class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
                     <i class="fas fa-user w-4 text-center"></i> Profile
                 </button>
-                <button id="nav-settings"  onclick="switchTab('settings')"
+                <button id="nav-settings" onclick="switchTab('settings')"
                     class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
                     <i class="fas fa-cog w-4 text-center"></i> Settings
                 </button>
@@ -140,19 +108,18 @@
             </div>
         </aside>
 
-        <!--  MAIN CONTENT  -->
+        <!-- MAIN CONTENT -->
         <main class="flex-1 flex flex-col overflow-hidden">
 
-            <!-- Desktop header -->
             <header class="hidden md:flex justify-between items-center px-8 py-4 bg-white border-b border-slate-100 shrink-0 shadow-sm z-10">
                 <h2 id="page-title" class="text-lg font-black text-slate-900 uppercase tracking-tight">Overview</h2>
                 <div class="flex items-center gap-3">
                     <div class="text-right">
-                        <p id="header-name" class="font-bold text-slate-800 text-sm leading-tight">Student</p>
-                        <p class="text-xs text-slate-400 font-medium">Student Account</p>
+                        <p id="header-name" class="font-bold text-slate-800 text-sm leading-tight">Landlord</p>
+                        <p class="text-xs text-slate-400 font-medium">Landlord Account</p>
                     </div>
                     <img id="header-avatar"
-                         src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+                         src="https://ui-avatars.com/api/?name=L&background=ea580c&color=fff"
                          class="w-10 h-10 rounded-full shadow object-cover border-2 border-white cursor-pointer ring-2 ring-orange-100"
                          onclick="switchTab('profile')" alt="Profile">
                 </div>
@@ -160,16 +127,14 @@
 
             <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
 
-                <!--  OVERVIEW  -->
+                <!-- OVERVIEW -->
                 <div id="overview-section" class="dashboard-section">
-
-                    <!-- Stat cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                            <div class="stat-icon bg-orange-50 text-[#ea580c]"><i class="fas fa-heart"></i></div>
+                            <div class="stat-icon bg-orange-50 text-[#ea580c]"><i class="fas fa-building"></i></div>
                             <div>
-                                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-0.5">Saved Rooms</p>
-                                <h3 id="stat-saved" class="text-2xl font-black text-slate-900">
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-0.5">My Properties</p>
+                                <h3 id="stat-properties" class="text-2xl font-black text-slate-900">
                                     <i class="fas fa-spinner fa-spin text-slate-300 text-xl"></i>
                                 </h3>
                             </div>
@@ -183,55 +148,117 @@
                                 </h3>
                             </div>
                         </div>
-                        <div class="bg-[#ea580c] p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-orange-700 transition group"
-                             onclick="window.location.href='browse.html'">
-                            <div class="stat-icon bg-white/20 text-white"><i class="fas fa-search"></i></div>
+                        <div class="bg-[#ea580c] p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-orange-700 transition"
+                             onclick="switchTab('properties')">
+                            <div class="stat-icon bg-white/20 text-white"><i class="fas fa-plus"></i></div>
                             <div>
-                                <p class="text-orange-200 text-xs font-bold uppercase tracking-wider mb-0.5">Find a Room</p>
-                                <h3 class="text-sm font-black text-white">Browse All Properties</h3>
+                                <p class="text-orange-200 text-xs font-bold uppercase tracking-wider mb-0.5">Quick Action</p>
+                                <h3 class="text-sm font-black text-white">Add New Property</h3>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Search bar -->
-                    <div class="mb-5 flex gap-2">
-                        <input type="text" id="search-input"
-                               placeholder="Search by location, price, or keyword..."
-                               class="flex-1 min-w-0 px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm font-medium text-sm text-slate-800 focus:ring-2 focus:ring-[#ea580c] transition">
-                        <button onclick="searchProperties()"
-                                class="bg-[#ea580c] text-white px-5 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition flex items-center gap-2 flex-shrink-0 text-sm">
-                            <i class="fas fa-search"></i><span class="hidden sm:inline">Find</span>
+                    <h3 class="text-xs font-black mb-3 text-slate-400 uppercase tracking-widest">My Latest Properties</h3>
+                    <div id="overview-properties" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <!-- MY PROPERTIES -->
+                <div id="properties-section" class="dashboard-section hidden">
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-base font-black text-slate-900">My Properties</h2>
+                        <button onclick="showAddPropertyForm()"
+                                class="bg-[#ea580c] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-orange-700 transition flex items-center gap-2 shadow">
+                            <i class="fas fa-plus text-xs"></i> Add Property
                         </button>
                     </div>
 
-                    <!-- Search results -->
-                    <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5"></div>
-
-                    <!-- Recent listings -->
-                    <h3 class="text-xs font-black mb-3 text-slate-400 uppercase tracking-widest">Recent Listings</h3>
-                    <div id="recent-listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                </div>
-
-                <!--  SAVED ROOMS  -->
-                <div id="saved-section" class="dashboard-section hidden">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
-                        <h2 class="text-base font-black mb-6 text-slate-900">Saved Properties</h2>
-                        <div id="saved-rooms-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                        <div id="saved-empty" class="text-center py-12 hidden">
-                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-heart text-slate-300 text-2xl"></i>
-                            </div>
-                            <p class="text-slate-400 font-semibold mb-4 text-sm">You haven't saved any rooms yet.</p>
-                            <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition inline-block text-sm">Browse Properties</a>
+                    <!-- Add/Edit Property Form -->
+                    <div id="property-form-container" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 id="form-title" class="text-sm font-black text-slate-900">Add New Property</h3>
+                            <button onclick="hidePropertyForm()" class="text-slate-400 hover:text-slate-600 transition">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
+
+                        <div id="form-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
+                        <div id="form-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100"></div>
+
+                        <form id="propertyForm" class="space-y-4" onsubmit="submitProperty(event)">
+                            <input type="hidden" id="prop-id">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Title <span class="text-red-400">*</span></label>
+                                    <input type="text" id="prop-title" required placeholder="e.g. Cosy Room in Chelston"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Price (ZMW/month) <span class="text-red-400">*</span></label>
+                                    <input type="number" id="prop-price" required placeholder="e.g. 2500" min="0"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Location <span class="text-red-400">*</span></label>
+                                    <input type="text" id="prop-location" required placeholder="e.g. Lusaka, Chelston"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Nearest University</label>
+                                    <input type="text" id="prop-university" placeholder="e.g. UNZA, CBU"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Property Type <span class="text-red-400">*</span></label>
+                                    <select id="prop-type" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                        <option value="">Select type</option>
+                                        <option value="room">Single Room</option>
+                                        <option value="flat">Flat / Apartment</option>
+                                        <option value="house">House</option>
+                                        <option value="shared">Shared Room</option>
+                                        <option value="studio">Studio</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Bedrooms</label>
+                                    <input type="number" id="prop-bedrooms" placeholder="e.g. 2" min="1"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Description <span class="text-red-400">*</span></label>
+                                <textarea id="prop-description" required rows="3" placeholder="Describe your property..."
+                                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Photos</label>
+                                <input type="file" id="prop-images" multiple accept="image/*"
+                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                <p class="text-[10px] text-slate-400 mt-1">Upload up to 5 photos. Max 5MB each.</p>
+                            </div>
+                            <div class="flex gap-3 pt-2">
+                                <button type="submit" id="prop-submit-btn"
+                                        class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-700 transition shadow text-sm">
+                                    Save Property
+                                </button>
+                                <button type="button" onclick="hidePropertyForm()"
+                                        class="bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition text-sm">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
                     </div>
+
+                    <!-- Properties List -->
+                    <div id="properties-list" class="space-y-4"></div>
                 </div>
 
-                <!--  MESSAGES  -->
+                <!-- MESSAGES -->
                 <div id="messages-section" class="dashboard-section hidden">
                     <div id="messages-panel" class="flex bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-
-                        <!-- Conversation list pane -->
                         <div id="conv-pane" class="w-full md:w-2/5 lg:w-1/3 border-r border-slate-100 bg-slate-50 flex flex-col flex-shrink-0">
                             <div class="px-4 py-3.5 border-b border-slate-100 bg-white shrink-0">
                                 <h3 class="font-black text-sm text-slate-900">Conversations</h3>
@@ -240,12 +267,10 @@
                                 <div class="p-6 text-center text-slate-400 text-sm">
                                     <i class="fas fa-comments text-3xl text-slate-200 mb-3 block"></i>
                                     <p class="font-semibold text-sm">No conversations yet.</p>
-                                    <p class="text-xs mt-1 text-slate-400">Message a landlord from a listing to get started.</p>
+                                    <p class="text-xs mt-1 text-slate-400">Students will message you from your listings.</p>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Chat pane -->
                         <div id="chat-pane" class="hidden md:flex flex-col flex-1 bg-white relative min-w-0">
                             <button id="chat-back-btn" onclick="closeMobileChat()"
                                     class="md:hidden flex items-center gap-2 px-4 py-3 text-[#ea580c] font-bold text-sm border-b border-slate-100 bg-white shrink-0">
@@ -259,27 +284,17 @@
                             </div>
                             <div id="chat-header" class="px-4 py-3 border-b border-slate-100 bg-white hidden items-center shrink-0">
                                 <div class="min-w-0 flex-1">
-                                    <h4 id="chat-landlord-name" class="font-black text-sm text-slate-900 truncate">Landlord</h4>
+                                    <h4 id="chat-student-name" class="font-black text-sm text-slate-900 truncate">Student</h4>
                                     <p id="chat-property-ref" class="text-xs font-semibold text-[#ea580c] truncate"></p>
                                 </div>
                             </div>
                             <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/40 hidden"></div>
                             <div id="chat-input-area" class="p-3 bg-white border-t border-slate-100 hidden shrink-0">
-                                <div id="attach-preview" class="hidden mb-2 flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2 text-xs font-semibold text-orange-700 max-w-full overflow-hidden">
-                                    <i class="fas fa-paperclip"></i>
-                                    <span id="attach-preview-name" class="flex-1 truncate"></span>
-                                    <button type="button" onclick="clearAttachment()" class="text-red-400 hover:text-red-600 ml-1"><i class="fas fa-times"></i></button>
-                                </div>
-                                <form id="chat-form" class="flex items-center gap-2" onsubmit="sendStudentMessage(event)">
-                                    <input type="file" id="chat-attachment" class="hidden" accept="image/*,.pdf,.doc,.docx,.txt" onchange="previewAttachment(this)">
-                                    <button type="button" onclick="document.getElementById('chat-attachment').click()"
-                                            class="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-[#ea580c] hover:border-[#ea580c] transition flex-shrink-0">
-                                        <i class="fas fa-paperclip text-sm"></i>
-                                    </button>
-                                    <input type="text" id="chat-input" autocomplete="off"
-                                           class="flex-1 bg-slate-50 px-4 py-2.5 border border-transparent rounded-xl font-medium text-sm text-slate-800"
-                                           placeholder="Type a message...">
-                                    <button type="submit" class="bg-[#ea580c] text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-orange-700 transition flex-shrink-0">
+                                <form id="chat-form" onsubmit="sendMessage(event)" class="flex items-center gap-2">
+                                    <input id="chat-input" type="text" placeholder="Type a message..."
+                                           class="flex-1 min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
+                                    <button type="submit"
+                                            class="w-10 h-10 flex items-center justify-center bg-[#ea580c] text-white rounded-xl hover:bg-orange-700 transition flex-shrink-0">
                                         <i class="fas fa-paper-plane text-sm"></i>
                                     </button>
                                 </form>
@@ -288,45 +303,40 @@
                     </div>
                 </div>
 
-                <!--  PROFILE  -->
+                <!-- PROFILE -->
                 <div id="profile-section" class="dashboard-section hidden">
                     <div class="max-w-2xl">
-
-                        <!-- Profile card header -->
                         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-5">
                             <div class="bg-gradient-to-r from-orange-500 to-orange-600 h-20 relative">
                                 <div class="absolute -bottom-6 left-6">
                                     <img id="profile-avatar-display"
-                                         src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+                                         src="https://ui-avatars.com/api/?name=L&background=ea580c&color=fff"
                                          class="w-14 h-14 rounded-full border-4 border-white shadow-md object-cover">
                                 </div>
                             </div>
                             <div class="pt-9 pb-5 px-6">
-                                <p id="profile-name-display" class="font-black text-slate-900 text-base">Student</p>
+                                <p id="profile-name-display" class="font-black text-slate-900 text-base">Landlord</p>
                                 <p id="profile-email-display" class="text-xs text-slate-400 font-medium mt-0.5"></p>
+                                <span class="inline-block mt-1 bg-slate-900 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Landlord</span>
                             </div>
                         </div>
-
-                        <!-- Profile form -->
                         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                             <h3 class="text-sm font-black text-slate-900 mb-5">Edit Profile</h3>
-
                             <div id="profile-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">
                                 <i class="fas fa-check-circle mr-2"></i>Profile updated successfully!
                             </div>
                             <div id="profile-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
-
                             <form id="profileForm" class="space-y-4" onsubmit="saveProfile(event)">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Full Name</label>
                                         <input type="text" id="profile-name" required
-                                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 transition">
+                                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Phone Number</label>
                                         <input type="tel" id="profile-phone" placeholder="+260..."
-                                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 transition">
+                                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
                                     </div>
                                 </div>
                                 <div>
@@ -334,6 +344,11 @@
                                     <input type="email" id="profile-email" disabled
                                            class="w-full px-4 py-3 bg-slate-100 border border-slate-100 rounded-xl text-slate-400 font-medium text-sm cursor-not-allowed">
                                     <p class="text-[10px] text-slate-400 mt-1.5">Email cannot be changed here. Contact support.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Business Name</label>
+                                    <input type="text" id="profile-business" placeholder="e.g. Chanda Rentals"
+                                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium transition">
                                 </div>
                                 <button type="submit" id="profile-save-btn"
                                         class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-700 transition shadow text-sm">
@@ -344,7 +359,7 @@
                     </div>
                 </div>
 
-                <!--  SETTINGS  -->
+                <!-- SETTINGS -->
                 <div id="settings-section" class="dashboard-section hidden">
                     <div class="max-w-2xl space-y-5">
                         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
@@ -352,12 +367,10 @@
                                 <i class="fas fa-shield-alt text-[#ea580c]"></i> Change Password
                             </h4>
                             <p class="text-xs text-slate-400 mb-5">Must be at least 8 characters with uppercase, lowercase, a number, and a special character.</p>
-
                             <div id="pwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100">
                                 <i class="fas fa-check-circle mr-2"></i>Password updated successfully!
                             </div>
                             <div id="pwd-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
-
                             <form onsubmit="updatePassword(event)" class="space-y-3">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Current Password</label>
@@ -377,28 +390,23 @@
                     </div>
                 </div>
 
-            </div><!-- /overflow-y-auto -->
+            </div>
         </main>
     </div>
 
-    <!-- Toast -->
     <div id="fmn-toast" class="fixed bottom-5 right-4 z-[9999] hidden items-center gap-2 px-5 py-3 rounded-xl shadow-2xl font-bold text-sm text-white"></div>
 
 <script>
 'use strict';
 
-/* Auto-detect backend host  same pattern as browse.html / contact-landlord.html */
 const FMN = (function () {
     const host    = window.location.hostname;
     const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
-    const API_HOST = isLocal
-        ? 'http://127.0.0.1:8000'
-        : 'https://findmynyumba.onrender.com';
+    const API_HOST = isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com';
     return { API_HOST, API_BASE: API_HOST + '/api/v1' };
 })();
 const API = FMN.API_BASE;
 
-// XSS helper
 function esc(str) {
     if (str === null || str === undefined) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -446,13 +454,13 @@ function switchTab(tab) {
     const navBtn  = document.getElementById(`nav-${tab}`);
     if (section) section.classList.remove('hidden');
     if (navBtn)  { navBtn.classList.add('nav-link-active', 'text-[#ea580c]'); navBtn.classList.remove('text-slate-600'); }
-    const titles = { overview: 'Overview', saved: 'Saved Rooms', messages: 'Messages', profile: 'Profile', settings: 'Settings' };
+    const titles = { overview: 'Overview', properties: 'My Properties', messages: 'Messages', profile: 'Profile', settings: 'Settings' };
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[tab] || tab;
     closeSidebar();
-    if (tab === 'messages') loadConversations();
-    if (tab === 'profile')  loadProfileData();
-    if (tab === 'saved')    loadSavedRooms();
+    if (tab === 'messages')   loadConversations();
+    if (tab === 'profile')    loadProfileData();
+    if (tab === 'properties') loadProperties();
 }
 
 // Toast
@@ -478,245 +486,295 @@ async function initDashboard() {
         if (res.status === 401) { logout(); return; }
         if (!res.ok) throw new Error();
         const user = await res.json();
-        if (user.role !== 'student') {
-            const dest = { student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+        // Role guard — redirect if not landlord
+        if (user.role !== 'landlord') {
+            const dest = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', admin: 'admin.html' };
             window.location.replace(dest[user.role] || 'login.html');
             return;
         }
         window._currentUser = user;
-        const initials  = (user.full_name || 'S').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+        const initials  = (user.full_name || 'L').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
         const avatarSrc = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=ea580c&color=fff`;
-        const headerName   = document.getElementById('header-name');
-        const headerAvatar = document.getElementById('header-avatar');
-        const mobileAvatar = document.getElementById('mobile-avatar');
-        const profileAv    = document.getElementById('profile-avatar-display');
-        const profileNmD   = document.getElementById('profile-name-display');
-        const profileEmD   = document.getElementById('profile-email-display');
-        if (headerName)   headerName.textContent = user.full_name || 'Student';
-        if (headerAvatar) headerAvatar.src = avatarSrc;
-        if (mobileAvatar) mobileAvatar.src = avatarSrc;
-        if (profileAv)    profileAv.src = avatarSrc;
-        if (profileNmD)   profileNmD.textContent = user.full_name || 'Student';
-        if (profileEmD)   profileEmD.textContent = user.email || '';
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el[el.tagName === 'IMG' ? 'src' : 'textContent'] = val; };
+        set('header-name', user.full_name || 'Landlord');
+        set('header-avatar', avatarSrc);
+        set('mobile-avatar', avatarSrc);
+        set('profile-avatar-display', avatarSrc);
+        set('profile-name-display', user.full_name || 'Landlord');
+        set('profile-email-display', user.email || '');
     } catch { /* non-fatal */ }
     loadOverviewStats();
 }
 
 // Overview stats
 async function loadOverviewStats() {
-    const token      = getToken();
-    const statSaved  = document.getElementById('stat-saved');
-    const statMsgs   = document.getElementById('stat-messages');
-    const recentGrid = document.getElementById('recent-listings-container');
+    const token = getToken();
     try {
-        const res  = await fetch(`${API}/students/dashboard/overview`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.status === 401) { logout(); return; }
-        if (!res.ok) throw new Error(`${res.status}`);
-        const data = await res.json();
-        if (statSaved) statSaved.textContent = data.stats?.saved_count           ?? '0';
-        if (statMsgs)  statMsgs.textContent  = data.stats?.unread_messages_count ?? '0';
-        const props = data.recent_properties || [];
-        if (!props.length) {
-            if (recentGrid) recentGrid.innerHTML = `
-                <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-100">
-                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-home text-2xl text-slate-300"></i>
-                    </div>
-                    <p class="text-slate-400 font-semibold mb-4 text-sm">No listings available right now.</p>
-                    <a href="browse.html" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition inline-block text-sm">Browse All Properties</a>
-                </div>`;
-            return;
+        const [propsRes, msgsRes] = await Promise.all([
+            fetch(`${API}/landlord/properties`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API}/messages/unread-count`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+
+        if (propsRes.ok) {
+            const props = await propsRes.json();
+            const list = Array.isArray(props) ? props : (props.properties || []);
+            const statEl = document.getElementById('stat-properties');
+            if (statEl) statEl.textContent = list.length;
+            const grid = document.getElementById('overview-properties');
+            if (grid) {
+                if (!list.length) {
+                    grid.innerHTML = `<div class="col-span-3 text-center py-12 text-slate-400">
+                        <i class="fas fa-building text-4xl mb-3 block text-slate-200"></i>
+                        <p class="font-semibold text-sm">No properties yet.</p>
+                        <button onclick="switchTab('properties')" class="mt-3 bg-[#ea580c] text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-orange-700 transition">Add Your First Property</button>
+                    </div>`;
+                } else {
+                    grid.innerHTML = list.slice(0, 6).map(p => propertyCard(p)).join('');
+                }
+            }
+        } else {
+            document.getElementById('stat-properties').textContent = '—';
         }
-        if (recentGrid) recentGrid.innerHTML = props.map(prop => `
-            <div class="listing-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer flex flex-col"
-                 onclick="window.location.href='listing.html?id=${encodeURIComponent(prop.id)}'">
-                <div class="h-44 bg-slate-100 relative overflow-hidden flex-shrink-0">
-                    <img src="${esc(prop.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}"
-                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'"
-                         alt="${esc(prop.title)}">
-                    ${prop.is_boosted ? '<div class="absolute top-2 left-2 bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-lg"><i class="fas fa-bolt mr-1"></i>Featured</div>' : ''}
-                </div>
-                <div class="p-4 flex-1 flex flex-col">
-                    <h4 class="font-black text-sm text-slate-900 truncate mb-1">${esc(prop.title)}</h4>
-                    <p class="text-[#ea580c] font-black text-sm mb-1.5">ZMW ${Number(prop.price).toLocaleString()}</p>
-                    <p class="text-slate-400 text-xs font-medium truncate"><i class="fas fa-map-marker-alt mr-1 text-[#ea580c]"></i>${esc(prop.location)}</p>
-                </div>
-            </div>`).join('');
+
+        if (msgsRes.ok) {
+            const msgData = await msgsRes.json();
+            const count = msgData.unread_count ?? msgData.count ?? 0;
+            const statMsgs = document.getElementById('stat-messages');
+            if (statMsgs) statMsgs.textContent = count;
+            const badge = document.getElementById('unread-badge');
+            if (badge && count > 0) { badge.textContent = count; badge.classList.remove('hidden'); }
+        } else {
+            document.getElementById('stat-messages').textContent = '0';
+        }
     } catch {
-        if (statSaved) statSaved.innerHTML = '<span class="text-lg text-slate-400 font-bold">--</span>';
-        if (statMsgs)  statMsgs.innerHTML  = '<span class="text-lg text-slate-400 font-bold">--</span>';
-        if (recentGrid) recentGrid.innerHTML = `
-            <div class="col-span-full py-10 text-center bg-red-50 rounded-2xl border border-red-100">
-                <i class="fas fa-wifi text-4xl text-red-300 mb-3 block"></i>
-                <p class="text-red-500 font-semibold mb-4 text-sm">Could not connect to server.</p>
-                <button onclick="loadOverviewStats()" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition text-sm">
-                    <i class="fas fa-redo mr-2"></i>Retry
+        document.getElementById('stat-properties').textContent = '—';
+        document.getElementById('stat-messages').textContent = '—';
+    }
+}
+
+function propertyCard(p) {
+    const img = p.images?.[0]?.url || p.image_url || '';
+    const status = p.status || 'pending';
+    const statusClass = status === 'approved' ? 'status-approved' : status === 'rejected' ? 'status-rejected' : 'status-pending';
+    const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+    return `<div class="listing-card bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        ${img ? `<img src="${esc(img)}" alt="${esc(p.title)}" class="w-full h-40 object-cover">` :
+                `<div class="w-full h-40 bg-slate-100 flex items-center justify-center"><i class="fas fa-building text-3xl text-slate-300"></i></div>`}
+        <div class="p-4">
+            <div class="flex items-start justify-between gap-2 mb-1">
+                <h4 class="font-black text-sm text-slate-900 leading-tight truncate">${esc(p.title)}</h4>
+                <span class="status-badge ${statusClass} flex-shrink-0">${esc(statusLabel)}</span>
+            </div>
+            <p class="text-xs text-slate-400 font-medium mb-2"><i class="fas fa-map-marker-alt mr-1 text-[#ea580c]"></i>${esc(p.location || '')}</p>
+            <p class="text-[#ea580c] font-black text-sm">ZMW ${Number(p.price || 0).toLocaleString()}<span class="text-slate-400 font-medium text-xs">/mo</span></p>
+            <div class="flex gap-2 mt-3">
+                <button onclick="editProperty(${p.id})" class="flex-1 bg-slate-100 text-slate-700 text-xs font-bold py-2 rounded-xl hover:bg-slate-200 transition">
+                    <i class="fas fa-edit mr-1"></i> Edit
+                </button>
+                <button onclick="deleteProperty(${p.id})" class="flex-1 bg-red-50 text-red-500 text-xs font-bold py-2 rounded-xl hover:bg-red-100 transition">
+                    <i class="fas fa-trash mr-1"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>`;
+}
+
+// Properties tab
+async function loadProperties() {
+    const token = getToken();
+    const list  = document.getElementById('properties-list');
+    list.innerHTML = '<div class="text-center py-8 text-slate-400"><i class="fas fa-spinner fa-spin text-2xl"></i></div>';
+    try {
+        const res  = await fetch(`${API}/landlord/properties`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.status === 401) { logout(); return; }
+        const data = await res.json();
+        const props = Array.isArray(data) ? data : (data.properties || []);
+        if (!props.length) {
+            list.innerHTML = `<div class="text-center py-16 text-slate-400">
+                <i class="fas fa-building text-5xl mb-4 block text-slate-200"></i>
+                <p class="font-semibold mb-4">You haven't listed any properties yet.</p>
+                <button onclick="showAddPropertyForm()" class="bg-[#ea580c] text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-700 transition text-sm">
+                    <i class="fas fa-plus mr-2"></i>Add Your First Property
                 </button>
             </div>`;
-    }
-}
-
-// Search
-async function searchProperties() {
-    const q    = (document.getElementById('search-input')?.value || '').trim();
-    const grid = document.getElementById('search-results-grid');
-    if (!q) { grid.classList.remove('visible'); grid.style.display='none'; return; }
-    grid.style.display = 'grid';
-    grid.innerHTML = '<div class="col-span-full text-center py-6 text-slate-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-2"></i>Searching...</div>';
-    try {
-        const res  = await fetch(`${API}/properties?q=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        if (!data.length) {
-            grid.innerHTML = '<div class="col-span-full text-center py-6 text-slate-400 text-sm font-semibold">No results found.</div>';
-            return;
+        } else {
+            list.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${props.map(p => propertyCard(p)).join('')}</div>`;
         }
-        grid.innerHTML = data.map(p => `
-            <div class="listing-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer"
-                 onclick="window.location.href='listing.html?id=${encodeURIComponent(p.id)}'">
-                <div class="h-36 bg-slate-100 overflow-hidden">
-                    <img src="${esc(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'}"
-                         class="w-full h-full object-cover"
-                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'"
-                         alt="${esc(p.title)}">
-                </div>
-                <div class="p-3">
-                    <h4 class="font-black text-sm text-slate-900 truncate">${esc(p.title)}</h4>
-                    <p class="text-[#ea580c] font-black text-sm">ZMW ${Number(p.price).toLocaleString()}</p>
-                    <p class="text-slate-400 text-xs truncate"><i class="fas fa-map-marker-alt mr-1"></i>${esc(p.location)}</p>
-                </div>
-            </div>`).join('');
     } catch {
-        grid.innerHTML = '<div class="col-span-full text-center py-4 text-red-400 text-sm">Search failed. Please try again.</div>';
+        list.innerHTML = '<div class="text-center py-8 text-red-400 text-sm font-semibold">Failed to load properties.</div>';
     }
 }
-window.searchProperties = searchProperties;
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('search-input')?.addEventListener('keypress', e => {
-        if (e.key === 'Enter') searchProperties();
-    });
-});
 
-// Saved rooms
-async function loadSavedRooms() {
-    const token    = getToken();
-    const grid     = document.getElementById('saved-rooms-grid');
-    const emptyEl  = document.getElementById('saved-empty');
-    if (!grid) return;
-    grid.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading...</div>';
-    emptyEl?.classList.add('hidden');
+function showAddPropertyForm() {
+    document.getElementById('form-title').textContent = 'Add New Property';
+    document.getElementById('prop-id').value = '';
+    document.getElementById('propertyForm').reset();
+    document.getElementById('prop-submit-btn').textContent = 'Save Property';
+    document.getElementById('form-error').classList.add('hidden');
+    document.getElementById('form-success').classList.add('hidden');
+    document.getElementById('property-form-container').classList.remove('hidden');
+    document.getElementById('property-form-container').scrollIntoView({ behavior: 'smooth' });
+    switchTab('properties');
+}
+
+function hidePropertyForm() {
+    document.getElementById('property-form-container').classList.add('hidden');
+    document.getElementById('propertyForm').reset();
+}
+
+async function editProperty(id) {
+    const token = getToken();
     try {
-        const res  = await fetch(`${API}/students/saved`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res  = await fetch(`${API}/landlord/properties/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const prop = await res.json();
+        document.getElementById('form-title').textContent = 'Edit Property';
+        document.getElementById('prop-id').value          = prop.id;
+        document.getElementById('prop-title').value       = prop.title || '';
+        document.getElementById('prop-price').value       = prop.price || '';
+        document.getElementById('prop-location').value    = prop.location || '';
+        document.getElementById('prop-university').value  = prop.university || '';
+        document.getElementById('prop-type').value        = prop.property_type || '';
+        document.getElementById('prop-bedrooms').value    = prop.bedrooms || '';
+        document.getElementById('prop-description').value = prop.description || '';
+        document.getElementById('prop-submit-btn').textContent = 'Update Property';
+        document.getElementById('form-error').classList.add('hidden');
+        document.getElementById('form-success').classList.add('hidden');
+        document.getElementById('property-form-container').classList.remove('hidden');
+        document.getElementById('property-form-container').scrollIntoView({ behavior: 'smooth' });
+    } catch {
+        showToast('Failed to load property details.', 'error');
+    }
+}
+
+async function submitProperty(e) {
+    e.preventDefault();
+    const token   = getToken();
+    const propId  = document.getElementById('prop-id').value;
+    const errEl   = document.getElementById('form-error');
+    const sucEl   = document.getElementById('form-success');
+    const btn     = document.getElementById('prop-submit-btn');
+    errEl.classList.add('hidden');
+    sucEl.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const fd = new FormData();
+    fd.append('title',         document.getElementById('prop-title').value.trim());
+    fd.append('price',         document.getElementById('prop-price').value);
+    fd.append('location',      document.getElementById('prop-location').value.trim());
+    fd.append('university',    document.getElementById('prop-university').value.trim());
+    fd.append('property_type', document.getElementById('prop-type').value);
+    fd.append('bedrooms',      document.getElementById('prop-bedrooms').value || '1');
+    fd.append('description',   document.getElementById('prop-description').value.trim());
+    const files = document.getElementById('prop-images').files;
+    for (let i = 0; i < Math.min(files.length, 5); i++) fd.append('images', files[i]);
+
+    try {
+        const url    = propId ? `${API}/landlord/properties/${propId}` : `${API}/landlord/properties`;
+        const method = propId ? 'PUT' : 'POST';
+        const res    = await fetch(url, { method, headers: { 'Authorization': `Bearer ${token}` }, body: fd });
+        const data   = await res.json();
+        if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to save property.');
+        sucEl.textContent = propId ? 'Property updated successfully!' : 'Property submitted for review!';
+        sucEl.classList.remove('hidden');
+        showToast(propId ? 'Property updated!' : 'Property submitted for review!');
+        setTimeout(() => { hidePropertyForm(); loadProperties(); loadOverviewStats(); }, 1500);
+    } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = propId ? 'Update Property' : 'Save Property';
+    }
+}
+
+async function deleteProperty(id) {
+    if (!confirm('Are you sure you want to delete this property?')) return;
+    const token = getToken();
+    try {
+        const res = await fetch(`${API}/landlord/properties/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) throw new Error();
-        const data = await res.json();
-        if (!data.length) {
-            grid.innerHTML = '';
-            emptyEl?.classList.remove('hidden');
-            return;
-        }
-        emptyEl?.classList.add('hidden');
-        grid.innerHTML = data.map(prop => `
-            <div class="listing-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer flex flex-col"
-                 onclick="window.location.href='listing.html?id=${encodeURIComponent(prop.id)}'">
-                <div class="h-44 bg-slate-100 relative overflow-hidden flex-shrink-0">
-                    <img src="${esc(prop.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'}"
-                         class="w-full h-full object-cover"
-                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600'"
-                         alt="${esc(prop.title)}">
-                    ${prop.is_boosted ? '<div class="absolute top-2 left-2 bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-lg"><i class="fas fa-bolt mr-1"></i>Featured</div>' : ''}
-                </div>
-                <div class="p-4 flex-1 flex flex-col">
-                    <h4 class="font-black text-sm text-slate-900 truncate mb-1">${esc(prop.title)}</h4>
-                    <p class="text-[#ea580c] font-black text-sm mb-1.5">ZMW ${Number(prop.price).toLocaleString()}</p>
-                    <p class="text-slate-400 text-xs font-medium truncate"><i class="fas fa-map-marker-alt mr-1 text-[#ea580c]"></i>${esc(prop.location)}</p>
-                </div>
-            </div>`).join('');
+        showToast('Property deleted.');
+        loadProperties();
+        loadOverviewStats();
     } catch {
-        grid.innerHTML = '<div class="col-span-full text-center py-8 text-red-400 text-sm font-semibold">Could not load saved rooms.</div>';
+        showToast('Failed to delete property.', 'error');
     }
 }
-window.loadSavedRooms = loadSavedRooms;
 
-// Conversations
-let _activePropId = null;
-let _activeOtherId = null;
+// Messages
+let _activeOtherId = null, _activePropId = null;
 
 async function loadConversations() {
-    const token  = getToken();
-    const listEl = document.getElementById('conversation-list');
-    listEl.innerHTML = '<div class="p-4 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
+    const token   = getToken();
+    const convList = document.getElementById('conversation-list');
+    convList.innerHTML = '<div class="p-4 text-center text-slate-400 text-sm"><i class="fas fa-spinner fa-spin"></i></div>';
     try {
         const res   = await fetch(`${API}/messages/conversations`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!res.ok) throw new Error();
+        if (res.status === 401) { logout(); return; }
         const convs = await res.json();
-        if (!convs.length) {
-            listEl.innerHTML = `
-                <div class="p-6 text-center text-slate-400 text-sm">
-                    <i class="fas fa-comments text-3xl text-slate-200 mb-3 block"></i>
-                    <p class="font-semibold">No conversations yet.</p>
-                    <p class="text-xs mt-1">Message a landlord from a listing to get started.</p>
-                </div>`;
-            return;
-        }
-        listEl.innerHTML = convs.map(c => `
-            <div class="px-4 py-3 border-b border-slate-100 hover:bg-orange-50 cursor-pointer transition"
-                 onclick="openThread(${c.other_user_id}, ${c.property_id || 0}, '${esc(c.other_user_name)}', '${esc(c.property_title)}')">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-orange-100 text-[#ea580c] flex items-center justify-center font-black text-sm flex-shrink-0">
-                        ${esc((c.other_user_name || 'U').charAt(0).toUpperCase())}
+        const list  = Array.isArray(convs) ? convs : (convs.conversations || []);
+        if (!list.length) {
+            convList.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm">
+                <i class="fas fa-comments text-3xl text-slate-200 mb-3 block"></i>
+                <p class="font-semibold text-sm">No conversations yet.</p>
+                <p class="text-xs mt-1 text-slate-400">Students will message you from your listings.</p>
+            </div>`;
+        } else {
+            convList.innerHTML = list.map(c => {
+                const name    = esc(c.other_user?.full_name || c.other_name || 'Student');
+                const preview = esc(c.last_message || '');
+                const propRef = esc(c.property_title || '');
+                const unread  = c.unread_count > 0 ? `<span class="ml-auto bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-full">${c.unread_count}</span>` : '';
+                return `<button onclick="openThread(${c.other_user?.id || c.other_id}, ${c.property_id || null}, '${name}', '${propRef}')"
+                                class="w-full text-left px-4 py-3.5 hover:bg-white transition border-b border-slate-100 flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-black text-sm flex-shrink-0">
+                        ${name.charAt(0)}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="font-bold text-sm text-slate-900 truncate">${esc(c.other_user_name)}</span>
-                            ${c.unread_count > 0 ? `<span class="bg-[#ea580c] text-white text-[10px] font-black rounded-full px-1.5 py-0.5 flex-shrink-0">${c.unread_count}</span>` : ''}
+                        <div class="flex items-center justify-between">
+                            <p class="font-bold text-sm text-slate-900 truncate">${name}</p>
+                            ${unread}
                         </div>
-                        <p class="text-xs text-[#ea580c] font-semibold truncate">${esc(c.property_title)}</p>
-                        <p class="text-xs text-slate-400 truncate">${esc(c.last_message)}</p>
+                        ${propRef ? `<p class="text-[10px] text-[#ea580c] font-semibold truncate">${propRef}</p>` : ''}
+                        <p class="text-xs text-slate-400 truncate mt-0.5">${preview}</p>
                     </div>
-                </div>
-            </div>`).join('');
+                </button>`;
+            }).join('');
+        }
     } catch {
-        listEl.innerHTML = '<div class="p-4 text-center text-red-400 text-sm">Failed to load conversations.</div>';
+        convList.innerHTML = '<div class="p-4 text-center text-red-400 text-sm">Failed to load conversations.</div>';
     }
 }
 
-async function openThread(otherId, propId, otherName, propTitle) {
+async function openThread(otherId, propId, name, propTitle) {
     _activeOtherId = otherId;
     _activePropId  = propId;
-    const header     = document.getElementById('chat-header');
-    const messages   = document.getElementById('chat-messages');
-    const inputArea  = document.getElementById('chat-input-area');
+    const header   = document.getElementById('chat-header');
+    const messages = document.getElementById('chat-messages');
+    const inputArea = document.getElementById('chat-input-area');
     const emptyState = document.getElementById('chat-empty-state');
-    document.getElementById('chat-landlord-name').textContent = otherName;
-    document.getElementById('chat-property-ref').textContent  = propTitle;
+    document.getElementById('chat-student-name').textContent  = name;
+    document.getElementById('chat-property-ref').textContent  = propTitle || '';
     header.classList.remove('hidden'); header.classList.add('flex');
     messages.classList.remove('hidden');
     inputArea.classList.remove('hidden');
     emptyState.classList.add('hidden');
     openMobileChat();
     const token = getToken();
-    messages.innerHTML = '<div class="text-center text-slate-400 text-sm py-4"><i class="fas fa-circle-notch fa-spin mr-1"></i>Loading...</div>';
+    messages.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-slate-300"></i></div>';
     try {
-        const res  = await fetch(`${API}/messages/thread/${propId}/${otherId}`, { headers: { 'Authorization': `Bearer ${token}` } });
-        const msgs = await res.json();
-        if (!msgs.length) {
-            messages.innerHTML = '<div class="text-center text-slate-400 text-sm py-8">No messages yet. Say hello!</div>';
-            return;
-        }
+        const url = propId ? `${API}/messages/thread/${propId}/${otherId}` : `${API}/messages/thread/${otherId}`;
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const msgs = Array.isArray(data) ? data : (data.messages || []);
+        const myId = window._currentUser?.id;
         messages.innerHTML = msgs.map(m => {
-            const mine = m.is_mine;
-            let attachHtml = '';
-            if (m.attachment_url) {
-                if (m.attachment_type === 'image') {
-                    attachHtml = `<div class="mt-1"><img src="${esc(m.attachment_url)}" class="max-w-[200px] rounded-xl border border-white/20 cursor-pointer" onclick="window.open('${esc(m.attachment_url)}','_blank')" alt="${esc(m.attachment_name)}"></div>`;
-                } else {
-                    attachHtml = `<div class="mt-1"><a href="${esc(m.attachment_url)}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold underline opacity-80 hover:opacity-100"><i class="fas fa-file"></i>${esc(m.attachment_name)}</a></div>`;
-                }
-            }
+            const mine = m.sender_id === myId;
             const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
             return `<div class="flex ${mine ? 'justify-end' : 'justify-start'}">
                 <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm font-medium ${mine ? 'bubble-me' : 'bubble-them'}">
-                    ${esc(m.content)}${attachHtml}
+                    ${esc(m.content)}
                     <div class="text-[10px] opacity-60 mt-1 ${mine ? 'text-right' : 'text-left'}">${time}</div>
                 </div>
             </div>`;
@@ -727,54 +785,24 @@ async function openThread(otherId, propId, otherName, propTitle) {
     }
 }
 
-// Attachment helpers
-function previewAttachment(input) {
-    const file = input.files[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-        showToast('File too large. Max 10MB.', 'error');
-        input.value = '';
-        return;
-    }
-    document.getElementById('attach-preview-name').textContent = file.name;
-    document.getElementById('attach-preview').classList.remove('hidden');
-}
-function clearAttachment() {
-    document.getElementById('chat-attachment').value = '';
-    document.getElementById('attach-preview').classList.add('hidden');
-    document.getElementById('attach-preview-name').textContent = '';
-}
-window.previewAttachment = previewAttachment;
-window.clearAttachment   = clearAttachment;
-
-async function sendStudentMessage(e) {
+async function sendMessage(e) {
     e.preventDefault();
-    const input      = document.getElementById('chat-input');
-    const fileInput  = document.getElementById('chat-attachment');
-    const content    = input.value.trim();
-    const file       = fileInput?.files[0];
-    if (!content && !file) return;
-    if (!_activeOtherId) return;
-    const token = getToken();
-    const submitBtn = document.querySelector('#chat-form button[type="submit"]');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-sm"></i>'; }
+    const input   = document.getElementById('chat-input');
+    const content = input.value.trim();
+    if (!content || !_activeOtherId) return;
+    const token   = getToken();
+    const btn     = document.querySelector('#chat-form button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-sm"></i>'; }
     try {
-        let res;
-        if (file) {
-            const fd = new FormData();
-            fd.append('receiver_id', _activeOtherId);
-            if (_activePropId) fd.append('property_id', _activePropId);
-            fd.append('content', content || `[Attachment: ${file.name}]`);
-            fd.append('attachment', file);
-            res = await fetch(`${API}/messages/send`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
-        } else {
-            res = await fetch(`${API}/messages/send`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content }) });
-        }
+        const res = await fetch(`${API}/messages/send`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content })
+        });
         if (res.ok) {
             input.value = '';
-            clearAttachment();
             await openThread(_activeOtherId, _activePropId,
-                document.getElementById('chat-landlord-name').textContent,
+                document.getElementById('chat-student-name').textContent,
                 document.getElementById('chat-property-ref').textContent);
         } else {
             const err = await res.json().catch(() => ({}));
@@ -783,42 +811,44 @@ async function sendStudentMessage(e) {
     } catch {
         showToast('Failed to send message.', 'error');
     } finally {
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-paper-plane text-sm"></i>'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane text-sm"></i>'; }
     }
 }
-window.sendStudentMessage = sendStudentMessage;
 
 // Profile
 function loadProfileData() {
     const user = window._currentUser;
     if (!user) return;
-    const nameEl  = document.getElementById('profile-name');
-    const phoneEl = document.getElementById('profile-phone');
-    const emailEl = document.getElementById('profile-email');
-    if (nameEl)  nameEl.value  = user.full_name || '';
-    if (phoneEl) phoneEl.value = user.phone     || '';
-    if (emailEl) emailEl.value = user.email     || '';
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('profile-name', user.full_name);
+    set('profile-phone', user.phone || user.phone_number);
+    set('profile-email', user.email);
+    set('profile-business', user.business_name);
 }
 
 async function saveProfile(e) {
     e.preventDefault();
     const token = getToken();
-    const name  = document.getElementById('profile-name').value.trim();
-    const phone = document.getElementById('profile-phone').value.trim();
     const sucEl = document.getElementById('profile-success');
     const errEl = document.getElementById('profile-error');
     const btn   = document.getElementById('profile-save-btn');
-    sucEl.classList.add('hidden');
-    errEl.classList.add('hidden');
+    sucEl.classList.add('hidden'); errEl.classList.add('hidden');
+    const name  = document.getElementById('profile-name').value.trim();
+    const phone = document.getElementById('profile-phone').value.trim();
+    const biz   = document.getElementById('profile-business').value.trim();
     if (!name) { errEl.textContent = 'Full name cannot be empty.'; errEl.classList.remove('hidden'); return; }
     btn.disabled = true; btn.textContent = 'Saving...';
     try {
-        const res  = await fetch(`${API}/students/profile`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: name, phone }) });
+        const res  = await fetch(`${API}/landlord/profile`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name: name, phone_number: phone, business_name: biz })
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to update profile.');
         if (window._currentUser) { window._currentUser.full_name = name; window._currentUser.phone = phone; }
-        const nmD = document.getElementById('profile-name-display');
-        if (nmD) nmD.textContent = name;
+        document.getElementById('profile-name-display').textContent = name;
+        document.getElementById('header-name').textContent = name;
         sucEl.classList.remove('hidden');
         showToast('Profile updated!');
     } catch (err) {
@@ -829,7 +859,6 @@ async function saveProfile(e) {
     }
 }
 
-// Password
 async function updatePassword(e) {
     e.preventDefault();
     const token   = getToken();
@@ -837,21 +866,24 @@ async function updatePassword(e) {
     const newPwd  = document.getElementById('new-password').value;
     const sucEl   = document.getElementById('pwd-success');
     const errEl   = document.getElementById('pwd-error');
-    sucEl.classList.add('hidden');
-    errEl.classList.add('hidden');
+    sucEl.classList.add('hidden'); errEl.classList.add('hidden');
     const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     if (!pwdRegex.test(newPwd)) {
         errEl.textContent = 'Password must be at least 8 characters with uppercase, lowercase, a number, and a special character.';
-        errEl.classList.remove('hidden');
-        return;
+        errEl.classList.remove('hidden'); return;
     }
     try {
-        const res  = await fetch(`${API}/students/settings/password`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ current_password: current, new_password: newPwd }) });
+        const res  = await fetch(`${API}/landlord/settings/password`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ current_password: current, new_password: newPwd })
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to update password.');
         sucEl.classList.remove('hidden');
         document.getElementById('current-password').value = '';
         document.getElementById('new-password').value     = '';
+        showToast('Password updated!');
     } catch (err) {
         errEl.textContent = err.message;
         errEl.classList.remove('hidden');
@@ -862,5 +894,3 @@ document.addEventListener('DOMContentLoaded', initDashboard);
 </script>
 </body>
 </html>
-
-
