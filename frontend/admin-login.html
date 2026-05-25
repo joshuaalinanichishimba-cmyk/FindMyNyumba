@@ -1,4 +1,4 @@
-a<!DOCTYPE html>
+﻿a<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -427,7 +427,7 @@ document.getElementById('pwd-toggle').addEventListener('click', () => {
     eyeIcon.innerHTML = show ? EYE_SHUT : EYE_OPEN;
 });
 
-/* Tab: email → password */
+/* Tab: email â†’ password */
 document.getElementById('admin-email').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); pwdInput.focus(); }
 });
@@ -453,7 +453,7 @@ function hideAlert() {
     el.className = 'alert';
 }
 
-/* Form submit — calls /auth/login (shared endpoint, role checked server-side) */
+/* Form submit â€” calls /auth/login (shared endpoint, role checked server-side) */
 document.getElementById('admin-form').addEventListener('submit', async e => {
     e.preventDefault();
     hideAlert();
@@ -476,7 +476,7 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
     spinner.style.display = 'block';
 
     try {
-        /* Use the shared /auth/login endpoint — role is enforced below */
+        /* Use the shared /auth/login endpoint â€” role is enforced below */
         const res  = await fetch(`${API}/auth/login`, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -531,3 +531,4 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
 
 </body>
 </html>
+

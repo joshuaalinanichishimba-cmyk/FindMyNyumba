@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -133,19 +133,19 @@
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
                     <div class="stat-card border-t-4 border-t-[#ea580c]">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Total Users</div>
-                        <div id="stat-users" class="text-3xl font-black text-slate-900">&mdash;</div>
+                        <div id="stat-users" class="text-3xl font-black text-slate-900">&mdash;Â</div>
                     </div>
                     <div class="stat-card border-t-4 border-t-blue-500">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Listings</div>
-                        <div id="stat-listings" class="text-3xl font-black text-slate-900">&mdash;</div>
+                        <div id="stat-listings" class="text-3xl font-black text-slate-900">&mdash;Â</div>
                     </div>
                     <div class="stat-card border-t-4 border-t-green-500">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Messages</div>
-                        <div id="stat-messages" class="text-3xl font-black text-slate-900">&mdash;</div>
+                        <div id="stat-messages" class="text-3xl font-black text-slate-900">&mdash;Â</div>
                     </div>
                     <div class="stat-card border-t-4 border-t-orange-400">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Pending Reviews</div>
-                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">&mdash;</div>
+                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">&mdash;Â</div>
                     </div>
                 </div>
                 <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
@@ -388,7 +388,7 @@
 <script>
 'use strict';
 
-/* FindMyNyumba runtime config &mdash; auto-detects backend host */
+/* FindMyNyumba runtime config &mdash;Â auto-detects backend host */
 const FMN = (function () {
     const host = window.location.hostname;
     const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
@@ -402,7 +402,7 @@ const API = FMN.API_BASE;
 let modalCallback = null;
 
 function esc(str) {
-    if (str === null || str === undefined) return '&mdash;';
+    if (str === null || str === undefined) return '&mdash;Â';
     return String(str)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -434,7 +434,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (!res.ok) throw new Error();
         const me = await res.json();
         if (me.role !== 'admin') {
-            // Wrong role &mdash; clear admin keys and bounce to the right dashboard.
+            // Wrong role &mdash;Â clear admin keys and bounce to the right dashboard.
             ['adminToken', 'adminRole', 'adminName'].forEach(k => sessionStorage.removeItem(k));
             const fallback = {
                 student:      'dashboard-student.html',
@@ -536,9 +536,9 @@ async function loadDashboard() {
         const res  = await fetch(`${API}/admin/stats`);
         if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById('stat-users').textContent    = data.total_users    ?? '&mdash;';
-        document.getElementById('stat-listings').textContent = data.total_listings ?? '&mdash;';
-        document.getElementById('stat-messages').textContent = data.total_messages ?? '&mdash;';
+        document.getElementById('stat-users').textContent    = data.total_users    ?? '&mdash;Â';
+        document.getElementById('stat-listings').textContent = data.total_listings ?? '&mdash;Â';
+        document.getElementById('stat-messages').textContent = data.total_messages ?? '&mdash;Â';
         document.getElementById('stat-reports').textContent  = (data.pending_listings ?? 0) + (data.pending_verifs ?? 0);
     } catch { /* stats fail silently */ }
     try {
@@ -692,7 +692,7 @@ async function approveVerification(userId) {
     });
 }
 async function rejectVerification(userId) {
-    const reason = window.prompt("Rejection reason (optional &mdash; shown to user):") ?? "";
+    const reason = window.prompt("Rejection reason (optional &mdash;Â shown to user):") ?? "";
     showModal("Reject Verification", "Reject this verification? The user will be notified.", async () => {
         const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
             method: "POST",
@@ -811,4 +811,5 @@ function showToast(msg, type = 'success') {
 </script>
 </body>
 </html>
+
 

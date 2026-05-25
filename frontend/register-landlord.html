@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -156,9 +156,14 @@
         </p>
     </div>
 
-    <script>
-        const API_BASE_URL = 'https://findmynyumba.onrender.com/api/v1';
-
+        <script>
+        // Determine API base URL based on environment
+        const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') 
+            ? 'http://127.0.0.1:8000/api/v1'
+            : 'https://findmynyumba-backend.onrender.com/api/v1';
+        
+        console.log('Using API URL:', API_BASE_URL);
+        
         function togglePw(fieldId, eyeId) {
             const f = document.getElementById(fieldId);
             const e = document.getElementById(eyeId);
@@ -212,7 +217,7 @@
 
             if (password !== confirm) return showError("Passwords do not match.");
 
-            const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d\D]{8,12}$/;
+            const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
             if (!pwdRegex.test(password)) {
                 return showError("Password must be 8-12 characters and include an uppercase letter, lowercase letter, number, and special character.");
             }
@@ -241,11 +246,14 @@
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Registration failed.');
+                if (!res.ok) throw new Error(data.detail || 'Registration failed. Please try again.');
 
                 document.getElementById('landlordForm').classList.add('hidden');
                 document.getElementById('success-message').classList.remove('hidden');
-                setTimeout(() => window.location.href = 'login.html', 2000);
+                
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
 
             } catch (err) {
                 showError(err.message);
@@ -257,3 +265,5 @@
     </script>
 </body>
 </html>
+
+
