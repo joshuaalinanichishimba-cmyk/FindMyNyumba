@@ -92,4 +92,5 @@ uvicorn==0.41.0
 watchfiles==1.1.1
 websockets==16.0
 wrapt==2.1.1
+cloudinary>=1.36.0
 
