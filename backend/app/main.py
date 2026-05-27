@@ -18,11 +18,13 @@ from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import Base, engine
 
-# Import all models so SQLAlchemy registers them before create_all
-import app.models  # noqa: F401
+# ── Import ALL models before create_all so every table is registered ──────────
+from app.models.user import User                    # noqa: F401
+from app.models.listing import Listing              # noqa: F401
+from app.models.saved_listing import SavedListing   # noqa: F401
+from app.models.report import Report                # noqa: F401
 
-# ── Create DB tables on startup (idempotent) ──────────────────────────────────
-# In production you would use Alembic migrations instead.
+# ── Create any missing DB tables (idempotent — safe to run on every startup) ──
 Base.metadata.create_all(bind=engine)
 
 # ── Ensure static upload directory exists ────────────────────────────────────
