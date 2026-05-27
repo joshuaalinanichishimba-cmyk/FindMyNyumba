@@ -1,0 +1,31 @@
+﻿{
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/**/*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/**/*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/assets/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/frontend/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
+    }
+  ]
+}

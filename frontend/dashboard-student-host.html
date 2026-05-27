@@ -93,7 +93,11 @@
             <button onclick="switchTab('profile')"      id="nav-profile"      class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-user-cog w-4 text-center"></i> Profile & Settings</button>
         </nav>
 
-        <div class="p-4 border-t border-gray-100">
+        <div class="p-4 border-t border-gray-100 space-y-1">
+            <a href="browse.html"
+               class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-orange-50 hover:text-[#ea580c] font-semibold rounded-xl transition text-sm">
+                <i class="fas fa-search w-4 text-center"></i> Browse Listings
+            </a>
             <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 font-semibold rounded-xl transition text-sm">
                 <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
             </button>
