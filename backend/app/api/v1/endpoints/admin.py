@@ -433,3 +433,15 @@ def change_password(
     admin.hashed_password = get_password_hash(payload.new_password)
     db.commit()
     return {"status": "success", "message": "Password changed successfully."}
+@router.post("/migrate-images")
+async def migrate_broken_images(db: Session = Depends(get_db)):
+    """ONE-TIME migration: nulls out local image URLs that will never load on Render."""
+    from app.models.listing import Listing
+    listings = db.query(Listing).all()
+    fixed = []
+    for l in listings:
+        if l.image_url and not l.image_url.startswith("https://"):
+            fixed.append({"id": l.id, "title": l.title, "old_url": l.image_url})
+            l.image_url = None
+    db.commit()
+    return {"fixed": len(fixed), "listings": fixed}
