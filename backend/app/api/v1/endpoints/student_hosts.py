@@ -21,6 +21,9 @@ from fastapi import (
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+import os
+import cloudinary
+import cloudinary.uploader
 from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
@@ -29,6 +32,13 @@ from app.models.message import Message
 from app.models.user import User
 
 router = APIRouter(prefix="/student-host", tags=["Student Host"])
+
+cloudinary.config(
+    cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key    = os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret = os.environ.get("CLOUDINARY_API_SECRET"),
+    secure     = True
+)
 
 UPLOAD_DIR = Path("static/uploads/properties")
 VERIFY_DIR = Path("static/uploads/verification")
@@ -111,6 +121,26 @@ async def _save_upload(
     (dest_dir / safe_name).write_bytes(data)
     return safe_name
 
+
+
+async def _upload_to_cloudinary(f: UploadFile) -> str:
+    """Upload image to Cloudinary and return the secure URL."""
+    mime = (f.content_type or "").lower()
+    if mime not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {mime}.")
+    data = await f.read()
+    if len(data) > MAX_IMAGE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=400, detail=f"File exceeds {MAX_IMAGE_SIZE_MB}MB limit.")
+    try:
+        result = cloudinary.uploader.upload(
+            data,
+            folder="findmynyumba/properties",
+            resource_type="image",
+            transformation=[{"width": 1200, "crop": "limit", "quality": "auto"}]
+        )
+        return result["secure_url"]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")
 
 def _listing_response(l: Listing, request: Request) -> dict:
     """Standard listing dict used across all host endpoints."""
@@ -199,15 +229,9 @@ async def create_host_listing(
         for img in images[:10]:
             if not img.filename:
                 continue
-            saved = await _save_upload(
-                img,
-                UPLOAD_DIR,
-                host.id,
-                allowed_types=ALLOWED_IMAGE_TYPES,
-                max_mb=MAX_IMAGE_SIZE_MB,
-            )
+            url = await _upload_to_cloudinary(img)
             if first_image_name is None:
-                first_image_name = saved
+                first_image_name = url
 
     listing = Listing(
         title               = title.strip(),
@@ -279,15 +303,9 @@ async def edit_host_listing(
             for img in images[:10]:
                 if not img.filename:
                     continue
-                saved = await _save_upload(
-                    img,
-                    UPLOAD_DIR,
-                    host.id,
-                    allowed_types=ALLOWED_IMAGE_TYPES,
-                    max_mb=MAX_IMAGE_SIZE_MB,
-                )
+                url = await _upload_to_cloudinary(img)
                 if first_new is None:
-                    first_new = saved
+                    first_new = url
             if first_new:
                 listing.image_url = first_new
 

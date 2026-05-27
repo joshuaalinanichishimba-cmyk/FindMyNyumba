@@ -407,6 +407,13 @@ const FMN = (function () {
 })();
 const API = FMN.API_BASE;
 
+function resolveImageUrl(raw) {
+    if (!raw) return '';
+    const url = String(raw).trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return FMN.API_HOST + (url.startsWith('/') ? url : '/static/uploads/properties/' + url);
+}
+
 function esc(str) {
     if (str === null || str === undefined) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -553,7 +560,7 @@ async function loadOverviewStats() {
 }
 
 function propertyCard(p) {
-    const img = p.images?.[0]?.url || p.image_url || '';
+    const img = resolveImageUrl(p.images?.[0]?.url || p.image_url || '');
     const status = p.status || 'pending';
     const statusClass = status === 'approved' ? 'status-approved' : status === 'rejected' ? 'status-rejected' : 'status-pending';
     const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
