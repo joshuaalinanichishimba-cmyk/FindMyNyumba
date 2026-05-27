@@ -29,7 +29,7 @@ def _fmt(listing: Listing, owner: Optional[User] = None) -> dict:
         "description": listing.description,
         "price":       listing.price,
         "location":    listing.location,
-        "image_url":   f"/static/uploads/properties/{listing.image_url}" if listing.image_url else None,
+        "image_url":   listing.image_url if (listing.image_url and listing.image_url.startswith("http")) else (f"/static/uploads/properties/{listing.image_url}" if listing.image_url else None),
         "is_boosted":  listing.is_boosted,
         "status":      listing.status,
         "created_at":  listing.created_at.isoformat() if listing.created_at else None,
