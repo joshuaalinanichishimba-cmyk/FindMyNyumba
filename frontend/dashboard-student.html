@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -387,7 +387,7 @@
 <script>
 'use strict';
 
-/* Auto-detect backend host  same pattern as browse.html / contact-landlord.html */
+/* Auto-detect backend host same pattern as browse.html / contact-landlord.html */
 const FMN = (function () {
     const host    = window.location.hostname;
     const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
@@ -803,7 +803,7 @@ function loadProfileData() {
     const phoneEl = document.getElementById('profile-phone');
     const emailEl = document.getElementById('profile-email');
     if (nameEl)  nameEl.value  = user.full_name || '';
-    if (phoneEl) phoneEl.value = user.phone     || '';
+    if (phoneEl) phoneEl.value = user.phone_number || '';
     if (emailEl) emailEl.value = user.email     || '';
 }
 
@@ -823,7 +823,7 @@ async function saveProfile(e) {
         const res  = await fetch(`${API}/students/profile`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name: name, phone }) });
         const data = await res.json();
         if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Failed to update profile.');
-        if (window._currentUser) { window._currentUser.full_name = name; window._currentUser.phone = phone; }
+        if (window._currentUser) { window._currentUser.full_name = name; window._currentUser.phone_number = phone; }
         const nmD = document.getElementById('profile-name-display');
         if (nmD) nmD.textContent = name;
         sucEl.classList.remove('hidden');
@@ -869,5 +869,3 @@ document.addEventListener('DOMContentLoaded', initDashboard);
 </script>
 </body>
 </html>
-
-
