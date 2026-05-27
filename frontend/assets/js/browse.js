@@ -1,3 +1,24 @@
+// Runtime config + image helper (kept small so this file can be used standalone).
+const FMN = (function () {
+    const host = window.location.hostname;
+    const isLocal = (host === 'localhost' || host === '127.0.0.1');
+    const API_HOST = isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com';
+    return {
+        API_HOST,
+        API_BASE: API_HOST + '/api/v1',
+        API_BASE_FALLBACK: isLocal ? null : 'https://findmynyumba-backend.onrender.com/api/v1',
+    };
+})();
+
+function resolveImageUrl(raw) {
+    const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
+    if (!raw) return FALLBACK;
+    const url = String(raw).trim();
+    if (!url) return FALLBACK;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const propertyGrid = document.getElementById('propertyGrid');
     if (!propertyGrid) return;
@@ -14,7 +35,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const query  = params.get('q') || '';
 
     try {
-        const response = await fetch('https://find-my-nyumba-original.vercel.app/api/v1/properties');
+        const primaryUrl = `${FMN.API_BASE}/properties`;
+        let response = await fetch(primaryUrl);
+        if (!response.ok && FMN.API_BASE_FALLBACK) {
+            const fallbackUrl = `${FMN.API_BASE_FALLBACK}/properties`;
+            response = await fetch(fallbackUrl);
+        }
         if (!response.ok) throw new Error(`Server error ${response.status}`);
         let properties = await response.json();
 
@@ -42,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         properties.forEach(prop => {
             // FIX: backend returns image_url, not photo_url
             // FIX: was a syntax error â€” raw URL without quotes
-            const imageUrl = proresolveImageUrl(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
+            const imageUrl = resolveImageUrl(p.image_url) || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600';
 
             const boostedBadge = prop.is_boosted
                 ? `<span class="absolute top-3 left-3 bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow">
