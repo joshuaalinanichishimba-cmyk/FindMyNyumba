@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import os
 
 # This line tells Python to look inside the current directory for the 'app' module

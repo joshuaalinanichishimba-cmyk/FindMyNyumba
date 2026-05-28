@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/api/v1/endpoints/messages.py
 
 FIXES vs previous version:
@@ -37,7 +37,7 @@ ALLOWED_ATTACH_TYPES = {
 MAX_ATTACH_MB = 10
 
 
-# ── Unread count ──────────────────────────────────────────────────────────────
+# ── Unread count ──────────────────────────────────────────────────────────[...]
 @router.get("/unread-count")
 def get_unread_count(
     current_user: User = Depends(get_current_user),

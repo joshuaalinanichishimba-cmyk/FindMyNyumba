@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/models/listing.py
 
 FIX: status default changed from "active" → "pending".
