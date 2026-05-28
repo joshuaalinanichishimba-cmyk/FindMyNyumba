@@ -7,7 +7,7 @@ ADDED FIELDS:
                              cannot be used to reset passwords.
   - reset_token_used       : Boolean flag — True after the token has been consumed.
                              Enforces one-time-use regardless of JWT expiry.
-  - reset_token_expires_at : UTC datetime when the active token expires.
+  - reset_token_expires : UTC datetime when the active token expires.
                              Used by the duplicate-token guard so an expired (unused)
                              token does not permanently block new reset requests.
 
@@ -65,12 +65,12 @@ class User(Base):
     # ── Password reset (one-time-use, hash-only storage) ──────────────────────
     # Plain token is NEVER stored — only its SHA-256 hash.
     # reset_token_used       : True the moment the token is consumed.
-    # reset_token_expires_at : When the token expires (UTC). Allows the duplicate-
+    # reset_token_expires : When the token expires (UTC). Allows the duplicate-
     #                          token guard to distinguish "active token" from
     #                          "expired unused token", preventing permanent lockout.
     reset_token_hash       = Column(String,                  nullable=True)
     reset_token_used       = Column(Boolean, default=False,  nullable=False)
-    reset_token_expires_at = Column(DateTime(timezone=True), nullable=True)
+    reset_token_expires = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     listings = relationship("Listing", back_populates="owner")

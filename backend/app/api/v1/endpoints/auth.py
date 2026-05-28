@@ -13,9 +13,9 @@ CHANGES IN THIS REVISION:
 - Email dispatch wired via app/utils/email.py (Resend).
 - settings.PRODUCTION used safely (field exists in config.py).
 - ALLOWED_EMAIL_DOMAINS updated for Zambia.
-- Duplicate-token guard checks reset_token_expires_at to prevent
+- Duplicate-token guard checks reset_token_expires to prevent
   permanent lockout after an expired unused token.
-- reset_token_expires_at written and cleared alongside token hash.
+- reset_token_expires written and cleared alongside token hash.
 """
 
 import hashlib
@@ -328,8 +328,8 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     token_is_active = (
         user.reset_token_hash is not None
         and user.reset_token_used == False
-        and user.reset_token_expires_at is not None
-        and user.reset_token_expires_at > _now()
+        and user.reset_token_expires is not None
+        and user.reset_token_expires > _now()
     )
     if token_is_active:
         log.warning("Duplicate reset request blocked for user %s", user.id)
@@ -340,7 +340,7 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
         plain_token                 = _build_reset_token(user.id)
         user.reset_token_hash       = _sha256(plain_token)
         user.reset_token_used       = False
-        user.reset_token_expires_at = _now() + timedelta(minutes=RESET_TOKEN_TTL_MINUTES)
+        user.reset_token_expires = _now() + timedelta(minutes=RESET_TOKEN_TTL_MINUTES)
         db.commit()
     except Exception as e:
         db.rollback()
@@ -397,7 +397,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
         user.hashed_password        = get_password_hash(payload.new_password)
         user.reset_token_used       = True
         user.reset_token_hash       = None
-        user.reset_token_expires_at = None   # clean up
+        user.reset_token_expires = None   # clean up
         user.failed_login_attempts  = 0
         user.lockout_until          = None
         db.commit()
