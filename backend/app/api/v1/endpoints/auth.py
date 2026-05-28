@@ -37,8 +37,19 @@ class LoginRequest(BaseModel):
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
-    full_name: Optional[str] = None
-    phone_number: Optional[str] = None
+    full_name:     Optional[str] = None
+    phone_number:  Optional[str] = None
+    role:          Optional[str] = "student"
+    # Student-specific
+    university:    Optional[str] = None
+    student_id:    Optional[str] = None
+    # Landlord-specific
+    business_name: Optional[str] = None
+    location:      Optional[str] = None
+    id_number:     Optional[str] = None
+
+    class Config:
+        extra = "ignore"   # silently drop any other fields the frontend sends
 
 
 class TokenResponse(BaseModel):
@@ -96,6 +107,11 @@ def _hash_token(raw_token: str) -> str:
     return hashlib.sha256(raw_token.encode()).hexdigest()
 
 
+def _empty_to_none(value: Optional[str]) -> Optional[str]:
+    """Convert empty strings from the frontend to None."""
+    return value if value else None
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -108,20 +124,28 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_409_CONFLICT,
             detail="An account with this email already exists.",
         )
+
     _validate_password_strength(payload.password)
-    if payload.phone_number:
-        _validate_phone_number(payload.phone_number)
+
+    phone = _empty_to_none(payload.phone_number)
+    if phone:
+        _validate_phone_number(phone)
+
     user = User(
         email=payload.email,
         hashed_password=get_password_hash(payload.password),
-        full_name=payload.full_name,
-        phone_number=payload.phone_number,
+        full_name=_empty_to_none(payload.full_name),
+        phone_number=phone,
+        role=payload.role or "student",
+        business_name=_empty_to_none(payload.business_name),
+        business_location=_empty_to_none(payload.location),
+        id_number=_empty_to_none(payload.id_number),
         is_active=False,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    logger.info("New user registered (pending activation): %s", user.email)
+    logger.info("New user registered (pending activation): %s (role=%s)", user.email, user.role)
     return {"message": "Registration successful. Please check your email to activate your account."}
 
 
@@ -139,7 +163,6 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This account has been deactivated.",
         )
-    # create_access_token expects data={"sub": ...}
     access_token = create_access_token(data={"sub": str(user.id)})
     logger.info("User logged in: %s", user.email)
     return TokenResponse(access_token=access_token)
