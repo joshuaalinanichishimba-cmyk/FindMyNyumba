@@ -9,6 +9,7 @@ Endpoints:
   POST /auth/forgot-password   — request reset link
   POST /auth/reset-password    — consume token, set new password
 
+<<<<<<< HEAD
 CHANGES IN THIS REVISION:
 - Email dispatch wired via app/utils/email.py (Resend).
 - settings.PRODUCTION used safely (field exists in config.py).
@@ -16,6 +17,33 @@ CHANGES IN THIS REVISION:
 - Duplicate-token guard checks reset_token_expires_at to prevent
   permanent lockout after an expired unused token.
 - reset_token_expires_at written and cleared alongside token hash.
+=======
+FIXES vs original:
+- /auth/register-landlord no longer trusts payload.role at all. It hard-locks
+  the new account to "landlord" so the endpoint can't be used to create
+  arbitrary roles via parameter tampering. (Original allowed creating
+  student_host accounts via this route.) student_host signups go through
+  /auth/register with role="student_host".
+- /auth/forgot-password no longer returns the plain reset token in the
+  response body. The original `_dev_token` field was a guaranteed-leak
+  vector once shipped. The token is logged at INFO level in dev only.
+- Reset tokens now expire after RESET_TOKEN_TTL_MINUTES. Expiry is encoded
+  into the token itself (signed with SECRET_KEY) so no schema change is
+  required. Server-side one-time-use is still enforced via the existing
+  reset_token_used flag.
+- Password rules centralized into a single regex/constant shared with
+  students.py / landlords.py / student_hosts.py.
+- Email normalisation (.lower().strip()) consistent across all paths.
+- /auth/me returns the same shape as before plus is_locked so dashboards
+  can render lockout state without an extra round-trip.
+- Email validation now checks domain against a whitelist of common providers
+  to prevent typos (e.g., exampl.com instead of example.com).
+- All database commits now wrapped in try/except with rollback on failure
+  to ensure clean state on transaction errors.
+- User response shape is now canonical and consistent across all endpoints.
+- Forgot-password validates email domain, prevents duplicate active tokens,
+  and has placeholder for email dispatch service integration.
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 """
 
 import hashlib
@@ -40,10 +68,17 @@ from app.utils.email import send_password_reset_email
 router = APIRouter(tags=["Auth"])
 log = logging.getLogger("findmynyumba.auth")
 
+<<<<<<< HEAD
 # ── Constants ──────────────────────────────────────────────────────────────────
 LOCKOUT_ATTEMPTS        = 5
 LOCKOUT_MINUTES         = 15
 RESET_TOKEN_TTL_MINUTES = 60
+=======
+# ── Constants ───────────────────────────────────────────────────────────[...]
+LOCKOUT_ATTEMPTS         = 5
+LOCKOUT_MINUTES          = 15
+RESET_TOKEN_TTL_MINUTES  = 60   # reset link valid for 1 hour
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 
 PASSWORD_RE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
 PASSWORD_RULE_MSG = (
@@ -53,6 +88,7 @@ PASSWORD_RULE_MSG = (
 
 ALLOWED_ROLES = {"student", "landlord", "student_host"}
 
+<<<<<<< HEAD
 # ── Email domain whitelist — Zambia-focused ────────────────────────────────────
 ALLOWED_EMAIL_DOMAINS = {
     # Zambian academic institutions
@@ -79,6 +115,20 @@ ALLOWED_EMAIL_DOMAINS = {
 
 
 # ── Request models ─────────────────────────────────────────────────────────────
+=======
+# Common email domains (local institutions + major providers)
+# Add/customize based on your target user base
+ALLOWED_EMAIL_DOMAINS = {
+    # Academic/Student
+    "student.co.ke", "ac.ke", "uni.ac.ke",
+    # Major global providers
+    "gmail.com", "yahoo.com", "outlook.com", "hotmail.com",
+    "protonmail.com", "icloud.com",
+}
+
+
+# ── Request models ─────────────────────────────────────────────────────────[...]
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 class LoginRequest(BaseModel):
     email:    str
     password: str
@@ -100,7 +150,11 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 
+<<<<<<< HEAD
 # ── Internal helpers ───────────────────────────────────────────────────────────
+=======
+# ── Internal helpers ────────────────────────────────────────────────────────[...]
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
@@ -110,16 +164,27 @@ def _now() -> datetime:
 
 
 def _validate_email_domain(email: str) -> None:
+<<<<<<< HEAD
     if "@" not in email:
         raise HTTPException(status_code=400, detail="Invalid email format.")
+=======
+    """Validate email domain against whitelist to catch typos."""
+    if "@" not in email:
+        raise HTTPException(status_code=400, detail="Invalid email format.")
+    
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     domain = email.split("@")[1].lower()
     if domain not in ALLOWED_EMAIL_DOMAINS:
         raise HTTPException(
             status_code=400,
+<<<<<<< HEAD
             detail=(
                 f"Email domain '{domain}' is not supported. "
                 "Please use gmail.com, yahoo.com, outlook.com, or a .zm institution email."
             ),
+=======
+            detail=f"Email domain '{domain}' not supported. Use gmail.com, yahoo.com, outlook.com, or student.co.ke",
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
         )
 
 
@@ -140,7 +205,14 @@ def _record_failed_attempt(user: User, db: Session) -> None:
     except Exception as e:
         db.rollback()
         log.error("Failed to record login attempt: %s", e)
+<<<<<<< HEAD
         raise HTTPException(status_code=500, detail="An error occurred. Please try again.")
+=======
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred. Please try again."
+        )
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 
 
 def _reset_failed_attempts(user: User, db: Session) -> None:
@@ -152,10 +224,27 @@ def _reset_failed_attempts(user: User, db: Session) -> None:
     except Exception as e:
         db.rollback()
         log.error("Failed to reset login attempts: %s", e)
+<<<<<<< HEAD
         raise HTTPException(status_code=500, detail="An error occurred. Please try again.")
 
 
 def _build_reset_token(user_id: int) -> str:
+=======
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred. Please try again."
+        )
+
+
+def _build_reset_token(user_id: int) -> str:
+    """
+    Reset tokens carry their own expiry, so we don't need a new DB column.
+    The JWT is signed with SECRET_KEY; the SHA-256 of this JWT is stored
+    on the user row and cleared on use, enforcing one-time consumption.
+    
+    Token expires after RESET_TOKEN_TTL_MINUTES.
+    """
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     payload = {
         "sub":   str(user_id),
         "scope": "pwd_reset",
@@ -166,6 +255,13 @@ def _build_reset_token(user_id: int) -> str:
 
 
 def _decode_reset_token(token: str) -> Optional[int]:
+<<<<<<< HEAD
+=======
+    """
+    Returns user_id on success, None on any failure.
+    Handles expired, malformed, and invalid tokens uniformly for security.
+    """
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     except jwt.ExpiredSignatureError:
@@ -174,11 +270,20 @@ def _decode_reset_token(token: str) -> Optional[int]:
     except JWTError as e:
         log.debug("Invalid password reset token: %s", type(e).__name__)
         return None
+<<<<<<< HEAD
 
     if payload.get("scope") != "pwd_reset":
         log.debug("Password reset token with wrong scope attempted")
         return None
 
+=======
+    
+    # Verify token is a password reset token (not some other JWT)
+    if payload.get("scope") != "pwd_reset":
+        log.debug("Password reset token with wrong scope attempted")
+        return None
+    
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     sub = payload.get("sub")
     try:
         return int(sub)
@@ -188,6 +293,7 @@ def _decode_reset_token(token: str) -> Optional[int]:
 
 
 def user_to_dict(user: User, include_token: Optional[str] = None) -> dict:
+<<<<<<< HEAD
     locked = bool(user.lockout_until and user.lockout_until > _now())
     response = {
         "id":                  user.id,
@@ -207,17 +313,64 @@ def user_to_dict(user: User, include_token: Optional[str] = None) -> dict:
     if include_token:
         response["access_token"] = include_token
         response["token_type"]   = "bearer"
+=======
+    """
+    Canonical user response shape used across all endpoints.
+    
+    Args:
+        user: User model instance
+        include_token: Optional JWT access token to include in response
+    
+    Returns:
+        Dictionary with consistent field names and structure
+    """
+    locked = bool(user.lockout_until and user.lockout_until > _now())
+    response = {
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone_number,
+        "role": user.role,
+        "avatar_url": user.avatar_url,
+        "is_active": user.is_active,
+        "is_verified": user.is_verified,
+        "is_locked": locked,
+        "verification_status": user.verification_status or "unverified",
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+    }
+    
+    # Optionally include landlord-specific field
+    if user.business_name:
+        response["business_name"] = user.business_name
+    
+    # Optionally include JWT token (for login/register responses)
+    if include_token:
+        response["access_token"] = include_token
+        response["token_type"] = "bearer"
+    
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     return response
 
 
 def _auth_response(user: User) -> dict:
+<<<<<<< HEAD
     token    = create_access_token(data={"sub": str(user.id), "role": user.role})
     response = user_to_dict(user, include_token=token)
+=======
+    """Auth endpoints response: includes access token."""
+    token = create_access_token(data={"sub": str(user.id), "role": user.role})
+    response = user_to_dict(user, include_token=token)
+    # For backwards compatibility with login/register clients expecting user_id
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     response["user_id"] = user.id
     return response
 
 
+<<<<<<< HEAD
 # ── POST /auth/login ───────────────────────────────────────────────────────────
+=======
+# ── POST /auth/login ────────────────────────────────────────────────────────[...]
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 @router.post("/login")
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
     email = payload.email.lower().strip()
@@ -255,8 +408,15 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Full name is required.")
 
     email = payload.email.lower().strip()
+<<<<<<< HEAD
     _validate_email_domain(email)
 
+=======
+    
+    # Validate email domain before checking database
+    _validate_email_domain(email)
+    
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=409, detail="An account with this email already exists.")
 
@@ -278,7 +438,14 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         log.error("Failed to create user account for %s: %s", email, e)
+<<<<<<< HEAD
         raise HTTPException(status_code=500, detail="Failed to create account. Please try again.")
+=======
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create account. Please try again."
+        )
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 
     return _auth_response(user)
 
@@ -290,7 +457,11 @@ def register_landlord(payload: RegisterRequest, db: Session = Depends(get_db)):
     return register(payload, db)
 
 
+<<<<<<< HEAD
 # ── GET /auth/me ───────────────────────────────────────────────────────────────
+=======
+# ── GET /auth/me ──────────────────────────────────────────────────────────[...]
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user)):
     return user_to_dict(current_user)
@@ -300,6 +471,7 @@ def get_me(current_user: User = Depends(get_current_user)):
 @router.post("/forgot-password")
 def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
     """
+<<<<<<< HEAD
     Issues a one-time, time-limited password reset token and emails it.
 
     Security:
@@ -313,6 +485,23 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     email = (payload.email or "").lower().strip()
     _validate_email_domain(email)
 
+=======
+    Generates a one-time, time-limited reset token. The token's SHA-256 hash
+    is stored on the user row so a DB breach cannot be used to mint resets.
+    The plain token is dispatched out-of-band (email) and is NEVER returned
+    in the API response.
+    
+    To prevent abuse:
+    - Email domain is validated (same as /register)
+    - Existing active tokens are not overwritten (rate limit)
+    - Response is always identical (no user enumeration)
+    """
+    email = (payload.email or "").lower().strip()
+    
+    # Validate email domain (consistent with /register)
+    _validate_email_domain(email)
+    
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
     user = db.query(User).filter(User.email == email).first()
 
     SAFE_RESPONSE = {
@@ -323,6 +512,7 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     if not user or not user.is_active:
         return SAFE_RESPONSE
 
+<<<<<<< HEAD
     # Block only if a token exists AND is still within its TTL AND unused.
     # An expired-but-unused token must NOT lock the user out permanently.
     token_is_active = (
@@ -365,6 +555,41 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     else:
         # Dev fallback: log reset URL when no API key configured
         log.debug("[DEV] No RESEND_API_KEY set. Reset URL for %s: %s", email, reset_url)
+=======
+    # Prevent rate limiting abuse: don't issue a new token if one is already active
+    # (not used and not expired). User must wait for token to expire or use existing one.
+    if user.reset_token_used == False and user.reset_token_hash is not None:
+        log.warning("Duplicate reset token request for user %s (may indicate abuse)", user.id)
+        return SAFE_RESPONSE  # Same response to avoid revealing duplicate attempt
+
+    try:
+        plain_token = _build_reset_token(user.id)
+        user.reset_token_hash = _sha256(plain_token)
+        user.reset_token_used = False
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        log.error("Failed to generate password reset token for %s: %s", email, e)
+        # Still return SAFE_RESPONSE to avoid leaking whether the user exists
+        return SAFE_RESPONSE
+
+    # TODO: Implement email dispatch via service (SendGrid, Mailgun, SES, etc.)
+    # Example integration:
+    #   try:
+    #       send_password_reset_email(
+    #           email=user.email,
+    #           reset_token=plain_token,
+    #           reset_url=f"{settings.FRONTEND_URL}/reset-password?token={plain_token}"
+    #       )
+    #   except Exception as e:
+    #       log.error("Failed to send password reset email to %s: %s", email, e)
+    #       # Still return SAFE_RESPONSE to not leak whether send failed
+    #       return SAFE_RESPONSE
+    
+    # For local development only: log token at DEBUG level (not INFO)
+    if not settings.PRODUCTION:
+        log.debug("[DEV] Password reset token for %s: %s", email, plain_token)
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 
     return SAFE_RESPONSE
 
@@ -373,10 +598,25 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
 @router.post("/reset-password")
 def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
     """
+<<<<<<< HEAD
     Validates and consumes a reset token, then updates the password.
     """
     user_id = _decode_reset_token(payload.token)
     if user_id is None:
+=======
+    Validate reset token (signature + expiry + one-time-use) and update password.
+    
+    Security checks:
+    - Token signature verified (JWT)
+    - Token expiry checked (embedded in JWT)
+    - Token marked as used after consumption
+    - Account lockout cleared on successful reset
+    """
+    user_id = _decode_reset_token(payload.token)
+    if user_id is None:
+        # Could be: signature failure, wrong scope, malformed sub, or expired.
+        # Unified message to avoid leaking which check failed.
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
 
     token_hash = _sha256(payload.token)
@@ -387,22 +627,41 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     ).first()
 
     if not user:
+        # Token was valid when checked above, but DB record missing or token already used
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
 
     if not PASSWORD_RE.match(payload.new_password):
         raise HTTPException(status_code=400, detail=PASSWORD_RULE_MSG)
 
     try:
+<<<<<<< HEAD
         user.hashed_password        = get_password_hash(payload.new_password)
         user.reset_token_used       = True
         user.reset_token_hash       = None
         user.reset_token_expires_at = None   # clean up
         user.failed_login_attempts  = 0
         user.lockout_until          = None
+=======
+        user.hashed_password  = get_password_hash(payload.new_password)
+        user.reset_token_used = True       # one-time-use enforced
+        user.reset_token_hash = None       # invalidate immediately
+
+        # Also clear any active lockout — successful reset implies the legitimate
+        # owner has regained control.
+        user.failed_login_attempts = 0
+        user.lockout_until         = None
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
         db.commit()
     except Exception as e:
         db.rollback()
         log.error("Failed to reset password for user %s: %s", user_id, e)
+<<<<<<< HEAD
         raise HTTPException(status_code=500, detail="Failed to reset password. Please try again.")
+=======
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to reset password. Please try again."
+        )
+>>>>>>> e24d4694023948b69f111abf90f536b8179594a3
 
     return {"status": "success", "detail": "Password reset successfully. Please log in."}
