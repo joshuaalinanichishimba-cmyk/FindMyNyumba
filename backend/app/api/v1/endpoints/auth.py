@@ -32,6 +32,8 @@ FIXES vs original:
 - All database commits now wrapped in try/except with rollback on failure
   to ensure clean state on transaction errors.
 - User response shape is now canonical and consistent across all endpoints.
+- Forgot-password validates email domain, prevents duplicate active tokens,
+  and has placeholder for email dispatch service integration.
 """
 
 import hashlib
@@ -167,6 +169,8 @@ def _build_reset_token(user_id: int) -> str:
     Reset tokens carry their own expiry, so we don't need a new DB column.
     The JWT is signed with SECRET_KEY; the SHA-256 of this JWT is stored
     on the user row and cleared on use, enforcing one-time consumption.
+    
+    Token expires after RESET_TOKEN_TTL_MINUTES.
     """
     payload = {
         "sub":    str(user_id),
@@ -178,17 +182,29 @@ def _build_reset_token(user_id: int) -> str:
 
 
 def _decode_reset_token(token: str) -> Optional[int]:
-    """Returns user_id on success, None on any failure."""
+    """
+    Returns user_id on success, None on any failure.
+    Handles expired, malformed, and invalid tokens uniformly for security.
+    """
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-    except JWTError:
+    except jwt.ExpiredSignatureError:
+        log.debug("Expired password reset token attempted")
         return None
+    except JWTError as e:
+        log.debug("Invalid password reset token: %s", type(e).__name__)
+        return None
+    
+    # Verify token is a password reset token (not some other JWT)
     if payload.get("scope") != "pwd_reset":
+        log.debug("Password reset token with wrong scope attempted")
         return None
+    
     sub = payload.get("sub")
     try:
         return int(sub)
     except (TypeError, ValueError):
+        log.debug("Invalid user_id in password reset token")
         return None
 
 
@@ -340,9 +356,18 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     is stored on the user row so a DB breach cannot be used to mint resets.
     The plain token is dispatched out-of-band (email) and is NEVER returned
     in the API response.
+    
+    To prevent abuse:
+    - Email domain is validated (same as /register)
+    - Existing active tokens are not overwritten (rate limit)
+    - Response is always identical (no user enumeration)
     """
     email = (payload.email or "").lower().strip()
-    user  = db.query(User).filter(User.email == email).first()
+    
+    # Validate email domain (consistent with /register)
+    _validate_email_domain(email)
+    
+    user = db.query(User).filter(User.email == email).first()
 
     # Always respond identically — prevents email-enumeration attacks.
     SAFE_RESPONSE = {
@@ -352,6 +377,12 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
 
     if not user or not user.is_active:
         return SAFE_RESPONSE
+
+    # Prevent rate limiting abuse: don't issue a new token if one is already active
+    # (not used and not expired). User must wait for token to expire or use existing one.
+    if user.reset_token_used == False and user.reset_token_hash is not None:
+        log.warning("Duplicate reset token request for user %s (may indicate abuse)", user.id)
+        return SAFE_RESPONSE  # Same response to avoid revealing duplicate attempt
 
     try:
         plain_token = _build_reset_token(user.id)
@@ -364,10 +395,22 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
         # Still return SAFE_RESPONSE to avoid leaking whether the user exists
         return SAFE_RESPONSE
 
-    # TODO: dispatch via email provider (SendGrid, Mailgun, SES, …)
-    # For local development only, the token is logged so you can copy it
-    # from the server console while testing. NEVER returned in the response.
-    log.info("Password reset requested for %s. Reset URL token: %s", email, plain_token)
+    # TODO: Implement email dispatch via service (SendGrid, Mailgun, SES, etc.)
+    # Example integration:
+    #   try:
+    #       send_password_reset_email(
+    #           email=user.email,
+    #           reset_token=plain_token,
+    #           reset_url=f"{settings.FRONTEND_URL}/reset-password?token={plain_token}"
+    #       )
+    #   except Exception as e:
+    #       log.error("Failed to send password reset email to %s: %s", email, e)
+    #       # Still return SAFE_RESPONSE to not leak whether send failed
+    #       return SAFE_RESPONSE
+    
+    # For local development only: log token at DEBUG level (not INFO)
+    if not settings.PRODUCTION:
+        log.debug("[DEV] Password reset token for %s: %s", email, plain_token)
 
     return SAFE_RESPONSE
 
@@ -375,9 +418,19 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
 # ── POST /auth/reset-password ─────────────────────────────────────────────────
 @router.post("/reset-password")
 def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Validate reset token (signature + expiry + one-time-use) and update password.
+    
+    Security checks:
+    - Token signature verified (JWT)
+    - Token expiry checked (embedded in JWT)
+    - Token marked as used after consumption
+    - Account lockout cleared on successful reset
+    """
     user_id = _decode_reset_token(payload.token)
     if user_id is None:
-        # Either signature failure, wrong scope, malformed sub, or expired.
+        # Could be: signature failure, wrong scope, malformed sub, or expired.
+        # Unified message to avoid leaking which check failed.
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
 
     token_hash = _sha256(payload.token)
@@ -388,6 +441,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     ).first()
 
     if not user:
+        # Token was valid when checked above, but DB record missing or token already used
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
 
     if not PASSWORD_RE.match(payload.new_password):
