@@ -133,7 +133,7 @@
                     </div>
                 </div>
 
-                <p class="text-[11px] text-slate-400 font-medium">Password: 8-12 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character.</p>
+                <p class="text-[11px] text-slate-400 font-medium">Password: at least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character.</p>
 
                 <label class="flex items-start gap-3 text-sm text-slate-600 cursor-pointer pt-1">
                     <input type="checkbox" id="terms" required class="mt-0.5 rounded border-slate-300 text-[#ea580c] focus:ring-[#ea580c] flex-shrink-0">
@@ -185,7 +185,7 @@
             else container.classList.add('hidden');
 
             let strength = 0;
-            if (val.length >= 8 && val.length <= 12) strength++;
+            if (val.length >= 8) strength++;
             if (/[A-Z]/.test(val) && /[a-z]/.test(val)) strength++;
             if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) strength++;
 
@@ -217,9 +217,9 @@
 
             if (password !== confirm) return showError("Passwords do not match.");
 
-            const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
+            const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
             if (!pwdRegex.test(password)) {
-                return showError("Password must be 8-12 characters and include an uppercase letter, lowercase letter, number, and special character.");
+                return showError("Password must be at least 8 characters and include an uppercase letter, lowercase letter, number, and special character.");
             }
 
             const btn = document.getElementById('submitBtn');

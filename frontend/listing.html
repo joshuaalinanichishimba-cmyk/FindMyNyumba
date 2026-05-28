@@ -60,11 +60,20 @@
                 <img id="main-image"
                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%239ca3af'%3ELoading image...%3C/text%3E%3C/svg%3E"
                      alt="Property"
-                     class="w-full h-full object-cover">
-                <!-- FIX: original had a corrupted '?' character in the badge -->
+                     class="w-full h-full object-cover transition-opacity duration-200">
+                <!-- Photo counter badge (shown when >1 photo) -->
+                <div id="photo-counter" class="hidden absolute bottom-3 right-3 bg-black/60 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
+                    <i class="fas fa-images text-xs"></i>
+                    <span id="photo-counter-text"></span>
+                </div>
                 <div id="boosted-badge" class="hidden absolute top-3 right-3 bg-[#ea580c] text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
                     <i class="fas fa-star"></i> Featured
                 </div>
+            </div>
+
+            <!-- Photo gallery thumbnails (shown only when listing has >1 image) -->
+            <div id="photo-gallery" class="hidden gap-2 overflow-x-auto pb-1 mt-2" style="display:none;">
+                <!-- thumbnails injected by loadData() -->
             </div>
 
             <!-- Details card -->
@@ -374,16 +383,46 @@ async function loadData() {
 
         if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
 
-        /* Image */
-        const imgEl  = document.getElementById('main-image');
-        const rawUrl = data.image_url || (Array.isArray(data.images) && data.images[0]) || null;
-        const imgSrc = resolveImageUrl(rawUrl);
+        /* Images — build gallery if multiple, else show single */
+        const imgEl    = document.getElementById('main-image');
         const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80';
-        if (imgSrc) {
-            imgEl.src = imgSrc;
-            imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = FALLBACK; };
-        } else {
+
+        // Normalise: prefer data.images array, fall back to data.image_url
+        let allImages = [];
+        if (Array.isArray(data.images) && data.images.length > 0) {
+            allImages = data.images.filter(Boolean).map(resolveImageUrl);
+        } else if (data.image_url) {
+            allImages = [resolveImageUrl(data.image_url)];
+        }
+
+        if (allImages.length === 0) {
             imgEl.src = FALLBACK;
+        } else {
+            imgEl.src = allImages[0];
+            imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = FALLBACK; };
+
+            if (allImages.length > 1) {
+                // Show photo counter badge
+                const counter = document.getElementById('photo-counter');
+                document.getElementById('photo-counter-text').textContent = `1 / ${allImages.length}`;
+                counter.classList.remove('hidden');
+
+                // Build thumbnail strip
+                const gallery = document.getElementById('photo-gallery');
+                gallery.removeAttribute('style');
+                gallery.style.display = 'flex';
+                gallery.innerHTML = allImages.map((url, i) => `
+                    <img
+                        src="${url}"
+                        data-index="${i}"
+                        alt="Photo ${i + 1}"
+                        loading="lazy"
+                        class="flex-shrink-0 w-20 h-16 sm:w-24 sm:h-18 object-cover rounded-xl cursor-pointer border-2 transition-all duration-150 ${i === 0 ? 'border-[#ea580c] shadow-md' : 'border-transparent opacity-70 hover:opacity-100 hover:border-[#ea580c]'}"
+                        onclick="switchMainImage(this, '${url}', ${i}, ${allImages.length})"
+                        onerror="this.style.display='none'"
+                    >
+                `).join('');
+            }
         }
 
         /* Host card */
@@ -410,7 +449,31 @@ async function loadData() {
 }
 
 /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Stars ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
-function initStars() {
+/* ── Gallery switcher ──────────────────────────────────────────────────────── */
+function switchMainImage(thumb, url, index, total) {
+    const mainImg = document.getElementById('main-image');
+    // Fade swap
+    mainImg.style.opacity = '0';
+    setTimeout(() => {
+        mainImg.src = url;
+        mainImg.onerror = () => { mainImg.onerror = null; };
+        mainImg.style.opacity = '1';
+    }, 100);
+    // Update counter
+    const counterText = document.getElementById('photo-counter-text');
+    if (counterText) counterText.textContent = `${index + 1} / ${total}`;
+    // Update thumbnail active state
+    document.querySelectorAll('#photo-gallery img').forEach(img => {
+        const active = img === thumb;
+        img.classList.toggle('border-[#ea580c]', active);
+        img.classList.toggle('shadow-md', active);
+        img.classList.toggle('opacity-70', !active);
+        img.classList.toggle('border-transparent', !active);
+    });
+}
+window.switchMainImage = switchMainImage;
+
+
     const stars = Array.from(document.querySelectorAll('#star-container .fa-star'));
     stars.forEach((s, i) => {
         s.addEventListener('mouseover', () => stars.forEach((x, j) => x.style.color = j <= i ? '#ea580c' : '#d1d5db'));

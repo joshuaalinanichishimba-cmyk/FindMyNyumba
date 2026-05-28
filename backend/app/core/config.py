@@ -1,13 +1,12 @@
-﻿"""
+"""
 app/core/config.py
 Application settings loaded from environment variables / .env file.
-SECURITY: SECRET_KEY has no default � must be set in .env or the app
+SECURITY: SECRET_KEY has no default — must be set in .env or the app
 will refuse to start. This prevents JWT forgery if .env is missing.
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 from typing import Optional
-import secrets
 
 
 class Settings(BaseSettings):
@@ -16,29 +15,46 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "FindMyNyumba"
 
     # -- Database ---------------------------------------------------------------
-    DATABASE_URL: str  # Required � must be set in .env
+    DATABASE_URL: str  # Required — must be set in .env
+
+    # -- Environment ------------------------------------------------------------
+    # Set PRODUCTION=true in production .env.
+    # Controls dev-only behaviour such as debug token logging.
+    PRODUCTION: bool = False
 
     # -- URLs -------------------------------------------------------------------
-    FRONTEND_URL: str  = "http://localhost:5500"   # Update for production
-    BACKEND_URL: str   = "http://127.0.0.1:8000"  # Update for production
+    FRONTEND_URL: str = "http://localhost:5500"   # Update for production
+    BACKEND_URL: str  = "http://127.0.0.1:8000"  # Update for production
 
     # -- Auth -------------------------------------------------------------------
-    # SECURITY: no default value. App will crash on startup if SECRET_KEY is
-    # not provided, which is intentional � a missing key means no JWT signing.
     SECRET_KEY: str
-    ALGORITHM: str                    = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int  = 60 * 24 * 8  # 8 days
+    ALGORITHM: str                   = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
+
+    # -- Email (Resend) ---------------------------------------------------------
+    # Sign up free at https://resend.com → API Keys → Create Key
+    # Add a verified sender domain in Resend dashboard, then set MAIL_FROM.
+    RESEND_API_KEY: str              = ""          # Required in production
+    MAIL_FROM: str                   = ""          # e.g. noreply@findmynyumba.com
+    MAIL_FROM_NAME: str              = "FindMyNyumba"
+
+    # -- Cloudinary (image hosting) --------------------------------------------
+    # Sign up free at https://cloudinary.com → Dashboard → API Keys
+    CLOUDINARY_CLOUD_NAME: str       = ""
+    CLOUDINARY_API_KEY: str          = ""
+    CLOUDINARY_API_SECRET: str       = ""
 
     # -- Admin seed (optional) --------------------------------------------------
-    # Used only for the first-run admin auto-creation failsafe in admin.py.
-    # Do NOT leave at default in production.
-    ADMIN_SEED_EMAIL: str    = "admin@findmynyumba.com"
-    ADMIN_SEED_PASSWORD: Optional[str] = None  # Must be set to enable seed
+    ADMIN_SEED_EMAIL: str            = "admin@findmynyumba.com"
+    ADMIN_SEED_PASSWORD: Optional[str] = None
 
     # -- CORS -------------------------------------------------------------------
-    # Comma-separated list of allowed origins.
-    # Example: "http://localhost:5500,https://findmynyumba.com"
-    ALLOWED_ORIGINS: str = "http://localhost:5500,http://127.0.0.1:5500,https://find-my-nyumba-original.vercel.app,https://nyumba-web.vercel.app"
+    ALLOWED_ORIGINS: str = (
+        "http://localhost:5500,"
+        "http://127.0.0.1:5500,"
+        "https://find-my-nyumba-original.vercel.app,"
+        "https://nyumba-web.vercel.app"
+    )
 
     @field_validator("SECRET_KEY")
     @classmethod
@@ -66,5 +82,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-

@@ -1,18 +1,21 @@
-﻿"""
+"""
 app/models/user.py
 
 ADDED FIELDS:
-  - reset_token_hash  : SHA-256 hash of the most recently issued reset token.
-                        Storing the hash (not the plain token) means a DB breach
-                        cannot be used to reset passwords.
-  - reset_token_used  : Boolean flag — True after the token has been consumed.
-                        Enforces one-time-use regardless of JWT expiry.
+  - reset_token_hash       : SHA-256 hash of the most recently issued reset token.
+                             Storing the hash (not the plain token) means a DB breach
+                             cannot be used to reset passwords.
+  - reset_token_used       : Boolean flag — True after the token has been consumed.
+                             Enforces one-time-use regardless of JWT expiry.
+  - reset_token_expires_at : UTC datetime when the active token expires.
+                             Used by the duplicate-token guard so an expired (unused)
+                             token does not permanently block new reset requests.
 
 After adding these columns run:
     alembic revision --autogenerate -m "add password reset token fields"
     alembic upgrade head
 
-Or for a quick dev cycle:
+Or for a quick dev cycle (destroys data):
     DROP TABLE users; restart uvicorn (SQLAlchemy recreates the table).
 """
 
@@ -61,9 +64,13 @@ class User(Base):
 
     # ── Password reset (one-time-use, hash-only storage) ──────────────────────
     # Plain token is NEVER stored — only its SHA-256 hash.
-    # reset_token_used is set to True the moment the token is consumed.
-    reset_token_hash = Column(String,  nullable=True)
-    reset_token_used = Column(Boolean, default=False, nullable=False)
+    # reset_token_used       : True the moment the token is consumed.
+    # reset_token_expires_at : When the token expires (UTC). Allows the duplicate-
+    #                          token guard to distinguish "active token" from
+    #                          "expired unused token", preventing permanent lockout.
+    reset_token_hash       = Column(String,                  nullable=True)
+    reset_token_used       = Column(Boolean, default=False,  nullable=False)
+    reset_token_expires_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     listings = relationship("Listing", back_populates="owner")
