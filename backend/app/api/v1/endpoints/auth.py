@@ -2,20 +2,12 @@
 app/api/v1/endpoints/auth.py
 
 Endpoints:
-  POST /auth/login             — email + password → JWT
-  POST /auth/register          — create student account
-  POST /auth/register-landlord — create landlord account
-  GET  /auth/me                — return current user from JWT
-  POST /auth/forgot-password   — request reset link
-  POST /auth/reset-password    — consume token, set new password
-
-CHANGES IN THIS REVISION:
-- Email dispatch wired via app/utils/email.py (Resend).
-- settings.PRODUCTION used safely (field exists in config.py).
-- ALLOWED_EMAIL_DOMAINS updated for Zambia.
-- Duplicate-token guard checks reset_token_expires to prevent
-  permanent lockout after an expired unused token.
-- reset_token_expires written and cleared alongside token hash.
+  POST /auth/login             � email + password ? JWT
+  POST /auth/register          � create student account
+  POST /auth/register-landlord � create landlord account
+  GET  /auth/me                � return current user from JWT
+  POST /auth/forgot-password   � request reset link
+  POST /auth/reset-password    � consume token, set new password
 """
 
 import hashlib
@@ -27,7 +19,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from jose import JWTError, jwt
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.api.deps import create_access_token, get_current_user
@@ -40,7 +32,6 @@ from app.utils.email import send_password_reset_email
 router = APIRouter(tags=["Auth"])
 log = logging.getLogger("findmynyumba.auth")
 
-# ── Constants ──────────────────────────────────────────────────────────────────
 LOCKOUT_ATTEMPTS        = 5
 LOCKOUT_MINUTES         = 15
 RESET_TOKEN_TTL_MINUTES = 60
@@ -53,75 +44,38 @@ PASSWORD_RULE_MSG = (
 
 ALLOWED_ROLES = {"student", "landlord", "student_host"}
 
-# ── Email domain whitelist — Zambia-focused ────────────────────────────────────
-ALLOWED_EMAIL_DOMAINS = {
-    # Zambian academic institutions
-    "unza.zm",
-    "cbu.ac.zm",
-    "mu.ac.zm",
-    "nipa.ac.zm",
-    "zaou.ac.zm",
-    "ac.zm",
-    "edu.zm",
-    # Global providers widely used in Zambia
-    "gmail.com",
-    "yahoo.com",
-    "yahoo.co.uk",
-    "outlook.com",
-    "hotmail.com",
-    "live.com",
-    "icloud.com",
-    "protonmail.com",
-    # Zambian ISP / corporate
-    "zamtel.zm",
-    "zesco.co.zm",
-}
+ALLOWED_EMAIL_PATTERN = re.compile(r'@([a-zA-Z0-9-]+\.)?(ac\.zm|edu\.zm|gmail\.com|yahoo\.com|yahoo\.co\.uk|outlook\.com|hotmail\.com|live\.com|icloud\.com|protonmail\.com|zamtel\.zm|zesco\.co\.zm)$', re.IGNORECASE)
 
+def _validate_email_domain(email: str) -> None:
+    if not ALLOWED_EMAIL_PATTERN.search(email.lower()):
+        raise HTTPException(
+            status_code=400,
+            detail="Email domain not supported. Use .ac.zm, .edu.zm, or major providers."
+        )
 
-# ── Request models ─────────────────────────────────────────────────────────────
 class LoginRequest(BaseModel):
     email:    str
     password: str
 
-
 class RegisterRequest(BaseModel):
     full_name: str
-    email:     EmailStr
-    password:  str
-    role:      str = "student"
-
+    email: EmailStr
+    password: str
+    role: str = "student"
+    phone_number: Optional[str] = None
 
 class ForgotPasswordRequest(BaseModel):
     email: str
-
 
 class ResetPasswordRequest(BaseModel):
     token:        str
     new_password: str
 
-
-# ── Internal helpers ───────────────────────────────────────────────────────────
 def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
-
 def _now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def _validate_email_domain(email: str) -> None:
-    if "@" not in email:
-        raise HTTPException(status_code=400, detail="Invalid email format.")
-    domain = email.split("@")[1].lower()
-    if domain not in ALLOWED_EMAIL_DOMAINS:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"Email domain '{domain}' is not supported. "
-                "Please use gmail.com, yahoo.com, outlook.com, or a .zm institution email."
-            ),
-        )
-
 
 def _check_lockout(user: User) -> None:
     if user.lockout_until and user.lockout_until > _now():
@@ -129,7 +83,6 @@ def _check_lockout(user: User) -> None:
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many failed attempts. Please try again later.",
         )
-
 
 def _record_failed_attempt(user: User, db: Session) -> None:
     try:
@@ -142,7 +95,6 @@ def _record_failed_attempt(user: User, db: Session) -> None:
         log.error("Failed to record login attempt: %s", e)
         raise HTTPException(status_code=500, detail="An error occurred. Please try again.")
 
-
 def _reset_failed_attempts(user: User, db: Session) -> None:
     try:
         user.failed_login_attempts = 0
@@ -154,7 +106,6 @@ def _reset_failed_attempts(user: User, db: Session) -> None:
         log.error("Failed to reset login attempts: %s", e)
         raise HTTPException(status_code=500, detail="An error occurred. Please try again.")
 
-
 def _build_reset_token(user_id: int) -> str:
     payload = {
         "sub":   str(user_id),
@@ -163,7 +114,6 @@ def _build_reset_token(user_id: int) -> str:
         "jti":   secrets.token_hex(8),
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-
 
 def _decode_reset_token(token: str) -> Optional[int]:
     try:
@@ -185,7 +135,6 @@ def _decode_reset_token(token: str) -> Optional[int]:
     except (TypeError, ValueError):
         log.debug("Invalid user_id in password reset token")
         return None
-
 
 def user_to_dict(user: User, include_token: Optional[str] = None) -> dict:
     locked = bool(user.lockout_until and user.lockout_until > _now())
@@ -209,15 +158,12 @@ def user_to_dict(user: User, include_token: Optional[str] = None) -> dict:
         response["token_type"]   = "bearer"
     return response
 
-
 def _auth_response(user: User) -> dict:
     token    = create_access_token(data={"sub": str(user.id), "role": user.role})
     response = user_to_dict(user, include_token=token)
     response["user_id"] = user.id
     return response
 
-
-# ── POST /auth/login ───────────────────────────────────────────────────────────
 @router.post("/login")
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
     email = payload.email.lower().strip()
@@ -237,21 +183,8 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         raise GENERIC_INVALID
 
     _reset_failed_attempts(user, db)
-    return {
-        "status": "success",
-        "message": "Registration successful. Please check your email to verify your account before logging in.",
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.full_name,
-            "role": user.role,
-            "phone_number": user.phone_number,
-            "is_verified": user.is_verified
-        }
-    }
+    return _auth_response(user)
 
-
-# ── POST /auth/register ────────────────────────────────────────────────────────
 @router.post("/register", status_code=201)
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     role = (payload.role or "student").lower().strip()
@@ -270,7 +203,6 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
 
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=409, detail="An account with this email already exists.")
-$phoneCheck
 
     if not PASSWORD_RE.match(payload.password):
         raise HTTPException(status_code=400, detail=PASSWORD_RULE_MSG)
@@ -281,9 +213,11 @@ $phoneCheck
             email           = email,
             hashed_password = get_password_hash(payload.password),
             role            = role,
-            is_active = False,  # Must verify email before login
+            is_active       = False,
             is_verified     = False,
         )
+        if payload.phone_number:
+            user.phone_number = payload.phone_number
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -305,34 +239,17 @@ $phoneCheck
         }
     }
 
-
-# ── POST /auth/register-landlord ───────────────────────────────────────────────
 @router.post("/register-landlord", status_code=201)
 def register_landlord(payload: RegisterRequest, db: Session = Depends(get_db)):
     payload.role = "landlord"
     return register(payload, db)
 
-
-# ── GET /auth/me ───────────────────────────────────────────────────────────────
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user)):
     return user_to_dict(current_user)
 
-
-# ── POST /auth/forgot-password ─────────────────────────────────────────────────
 @router.post("/forgot-password")
 def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
-    """
-    Issues a one-time, time-limited password reset token and emails it.
-
-    Security:
-    - Email domain validated (same rules as /register).
-    - Response always identical — no user enumeration.
-    - Duplicate-token guard blocks new token only if existing token is still
-      active (not expired, not used). Expired unused tokens can be replaced.
-    - Plain token never returned in API response.
-    - Token logged at DEBUG level in dev only.
-    """
     email = (payload.email or "").lower().strip()
     _validate_email_domain(email)
 
@@ -346,8 +263,6 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     if not user or not user.is_active:
         return SAFE_RESPONSE
 
-    # Block only if a token exists AND is still within its TTL AND unused.
-    # An expired-but-unused token must NOT lock the user out permanently.
     token_is_active = (
         user.reset_token_hash is not None
         and user.reset_token_used == False
@@ -358,7 +273,6 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
         log.warning("Duplicate reset request blocked for user %s", user.id)
         return SAFE_RESPONSE
 
-    # Generate token and persist hash + expiry
     try:
         plain_token                 = _build_reset_token(user.id)
         user.reset_token_hash       = _sha256(plain_token)
@@ -370,10 +284,8 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
         log.error("Failed to generate reset token for %s: %s", email, e)
         return SAFE_RESPONSE
 
-    # Build reset URL
     reset_url = f"{settings.FRONTEND_URL}/reset-password?token={plain_token}"
 
-    # Dispatch email
     if settings.PRODUCTION or settings.RESEND_API_KEY:
         try:
             send_password_reset_email(
@@ -383,21 +295,14 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
             )
         except Exception as e:
             log.error("Failed to send reset email to %s: %s", email, e)
-            # Token is saved — user can retry. Don't leak send failure.
             return SAFE_RESPONSE
     else:
-        # Dev fallback: log reset URL when no API key configured
         log.debug("[DEV] No RESEND_API_KEY set. Reset URL for %s: %s", email, reset_url)
 
     return SAFE_RESPONSE
 
-
-# ── POST /auth/reset-password ──────────────────────────────────────────────────
 @router.post("/reset-password")
 def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
-    """
-    Validates and consumes a reset token, then updates the password.
-    """
     user_id = _decode_reset_token(payload.token)
     if user_id is None:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
@@ -410,7 +315,6 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     ).first()
 
     if not user:
-        # Token was valid when checked above, but DB record missing or token already used
         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
 
     if not PASSWORD_RE.match(payload.new_password):
@@ -420,7 +324,7 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
         user.hashed_password        = get_password_hash(payload.new_password)
         user.reset_token_used       = True
         user.reset_token_hash       = None
-        user.reset_token_expires = None   # clean up
+        user.reset_token_expires = None
         user.failed_login_attempts  = 0
         user.lockout_until          = None
         db.commit()
@@ -430,6 +334,3 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
         raise HTTPException(status_code=500, detail="Failed to reset password. Please try again.")
 
     return {"status": "success", "detail": "Password reset successfully. Please log in."}
-
-
-# Trigger redeploy - 05/28/2026 18:06:26
