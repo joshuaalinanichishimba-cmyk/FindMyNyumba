@@ -1,4 +1,4 @@
-﻿from app.main import engine
+from app.main import engine
 from sqlalchemy import text
 
 def run_upgrade():

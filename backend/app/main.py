@@ -1,4 +1,4 @@
-﻿"""
+"""
 main.py
 FindMyNyumba FastAPI application entry point.
 

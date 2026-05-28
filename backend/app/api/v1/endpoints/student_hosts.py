@@ -60,7 +60,7 @@ PASSWORD_RULE_MSG = (
 _SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────[...]
 def require_student_host(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "student_host":
         raise HTTPException(
@@ -161,7 +161,7 @@ def _listing_response(l: Listing, request: Request) -> dict:
     }
 
 
-# ── Dashboard Stats ───────────────────────────────────────────────────────────
+# ── Dashboard Stats ────────────────────────────────────────────────────────[...]
 @router.get("/dashboard/stats")
 def get_host_stats(
     host: User    = Depends(require_student_host),
@@ -193,7 +193,7 @@ def get_host_stats(
     }
 
 
-# ── Listings ──────────────────────────────────────────────────────────────────
+# ── Listings ───────────────────────────────────────────────────────────[...]
 @router.get("/properties")
 @router.get("/listings")
 def get_host_listings(
@@ -257,7 +257,7 @@ async def create_host_listing(
     }
 
 
-# ── Edit Listing ──────────────────────────────────────────────────────────────
+# ── Edit Listing ─────────────────────────────────────────────────────────[...]
 @router.put("/properties/{listing_id}")
 async def edit_host_listing(
     listing_id:          int,
@@ -350,7 +350,7 @@ def toggle_availability(
     return {"status": "success", "message": f"Listing marked as {label}."}
 
 
-# ── Update Spots ──────────────────────────────────────────────────────────────
+# ── Update Spots ─────────────────────────────────────────────────────────[...]
 class SpotsUpdate(BaseModel):
     available_spots: int = Field(..., ge=0)
 
@@ -387,7 +387,7 @@ def update_spots(
     }
 
 
-# ── Delete Listing ────────────────────────────────────────────────────────────
+# ── Delete Listing ─────────────────────────────────────────────────────────[...]
 @router.delete("/properties/{listing_id}")
 def delete_host_listing(
     listing_id: int,
@@ -408,7 +408,7 @@ def delete_host_listing(
 
 
 
-# ── Boost Listing ─────────────────────────────────────────────────────────────
+# ── Boost Listing ─────────────────────────────────────────────────────────[...]
 @router.post("/properties/{listing_id}/boost")
 def boost_host_listing(
     listing_id: int,
@@ -432,7 +432,7 @@ def boost_host_listing(
     }
 
 
-# ── Inquiries ─────────────────────────────────────────────────────────────────
+# ── Inquiries ──────────────────────────────────────────────────────────[...]
 @router.get("/inquiries")
 def get_host_inquiries(
     host: User    = Depends(require_student_host),
@@ -477,7 +477,7 @@ def get_host_inquiries(
     return result
 
 
-# ── Verification ──────────────────────────────────────────────────────────────
+# ── Verification ─────────────────────────────────────────────────────────[...]
 @router.get("/verification")
 def get_host_verification(host: User = Depends(require_student_host)):
     return {
@@ -517,7 +517,7 @@ async def submit_verification(
     }
 
 
-# ── Profile ───────────────────────────────────────────────────────────────────
+# ── Profile ───────────────────────────────────────────────────────────[...]
 class ProfileUpdate(BaseModel):
     full_name: str           = Field(..., min_length=1, max_length=120)
     phone:     Optional[str] = Field(None, max_length=40)
@@ -539,7 +539,7 @@ def update_profile(
     return {"status": "success", "message": "Profile updated successfully."}
 
 
-# ── Change Password ───────────────────────────────────────────────────────────
+# ── Change Password ────────────────────────────────────────────────────────[...]
 class PasswordChange(BaseModel):
     current_password: str
     new_password:     str
