@@ -27,6 +27,8 @@ FIXES vs original:
 - Email normalisation (.lower().strip()) consistent across all paths.
 - /auth/me returns the same shape as before plus is_locked so dashboards
   can render lockout state without an extra round-trip.
+- Email validation now checks domain against a whitelist of common providers
+  to prevent typos (e.g., exampl.com instead of example.com).
 """
 
 import hashlib
@@ -50,7 +52,7 @@ from app.models.user import User
 router = APIRouter(tags=["Auth"])
 log = logging.getLogger("findmynyumba.auth")
 
-# ── Constants ─────────────────────────────────────────────────────────────────
+# ── Constants ───────────────────────────────────────────────────────────[...]
 LOCKOUT_ATTEMPTS         = 5
 LOCKOUT_MINUTES          = 15
 RESET_TOKEN_TTL_MINUTES  = 60   # reset link valid for 1 hour
@@ -63,8 +65,18 @@ PASSWORD_RULE_MSG = (
 
 ALLOWED_ROLES = {"student", "landlord", "student_host"}
 
+# Common email domains (local institutions + major providers)
+# Add/customize based on your target user base
+ALLOWED_EMAIL_DOMAINS = {
+    # Academic/Student
+    "student.co.ke", "ac.ke", "uni.ac.ke",
+    # Major global providers
+    "gmail.com", "yahoo.com", "outlook.com", "hotmail.com",
+    "protonmail.com", "icloud.com",
+}
 
-# ── Request models ────────────────────────────────────────────────────────────
+
+# ── Request models ─────────────────────────────────────────────────────────[...]
 class LoginRequest(BaseModel):
     email:    str
     password: str
@@ -86,13 +98,26 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 
-# ── Internal helpers ──────────────────────────────────────────────────────────
+# ── Internal helpers ────────────────────────────────────────────────────────[...]
 def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _validate_email_domain(email: str) -> None:
+    """Validate email domain against whitelist to catch typos."""
+    if "@" not in email:
+        raise HTTPException(status_code=400, detail="Invalid email format.")
+    
+    domain = email.split("@")[1].lower()
+    if domain not in ALLOWED_EMAIL_DOMAINS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Email domain '{domain}' not supported. Use gmail.com, yahoo.com, outlook.com, or student.co.ke",
+        )
 
 
 def _check_lockout(user: User) -> None:
@@ -161,7 +186,7 @@ def _auth_response(user: User) -> dict:
     }
 
 
-# ── POST /auth/login ──────────────────────────────────────────────────────────
+# ── POST /auth/login ────────────────────────────────────────────────────────[...]
 @router.post("/login")
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
     email = payload.email.lower().strip()
@@ -202,6 +227,10 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Full name is required.")
 
     email = payload.email.lower().strip()
+    
+    # Validate email domain before checking database
+    _validate_email_domain(email)
+    
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=409, detail="An account with this email already exists.")
 
@@ -236,7 +265,7 @@ def register_landlord(payload: RegisterRequest, db: Session = Depends(get_db)):
     return register(payload, db)
 
 
-# ── GET /auth/me ──────────────────────────────────────────────────────────────
+# ── GET /auth/me ──────────────────────────────────────────────────────────[...]
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user)):
     locked = bool(current_user.lockout_until and current_user.lockout_until > _now())
