@@ -27,7 +27,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from jose import JWTError, jwt
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import create_access_token, get_current_user
@@ -237,7 +237,18 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         raise GENERIC_INVALID
 
     _reset_failed_attempts(user, db)
-    return _auth_response(user)
+    return {
+        "status": "success",
+        "message": "Registration successful. Please check your email to verify your account before logging in.",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": user.role,
+            "phone_number": user.phone_number,
+            "is_verified": user.is_verified
+        }
+    }
 
 
 # ── POST /auth/register ────────────────────────────────────────────────────────
@@ -259,6 +270,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
 
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=409, detail="An account with this email already exists.")
+$phoneCheck
 
     if not PASSWORD_RE.match(payload.password):
         raise HTTPException(status_code=400, detail=PASSWORD_RULE_MSG)
@@ -269,7 +281,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
             email           = email,
             hashed_password = get_password_hash(payload.password),
             role            = role,
-            is_active       = True,
+            is_active = False,  # Must verify email before login
             is_verified     = False,
         )
         db.add(user)
@@ -280,7 +292,18 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         log.error("Failed to create user account for %s: %s", email, e)
         raise HTTPException(status_code=500, detail="Failed to create account. Please try again.")
 
-    return _auth_response(user)
+    return {
+        "status": "success",
+        "message": "Registration successful. Please check your email to verify your account before logging in.",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": user.role,
+            "phone_number": user.phone_number,
+            "is_verified": user.is_verified
+        }
+    }
 
 
 # ── POST /auth/register-landlord ───────────────────────────────────────────────
@@ -407,3 +430,4 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
         raise HTTPException(status_code=500, detail="Failed to reset password. Please try again.")
 
     return {"status": "success", "detail": "Password reset successfully. Please log in."}
+
