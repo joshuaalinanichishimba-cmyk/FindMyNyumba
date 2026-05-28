@@ -431,3 +431,5 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     return {"status": "success", "detail": "Password reset successfully. Please log in."}
 
+
+# Trigger redeploy - 05/28/2026 18:06:26

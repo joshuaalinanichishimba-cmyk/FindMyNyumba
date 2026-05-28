@@ -74,3 +74,5 @@ class User(Base):
 
     # Relationships
     listings = relationship("Listing", back_populates="owner")
+
+# Trigger redeploy - 05/28/2026 18:06:26
