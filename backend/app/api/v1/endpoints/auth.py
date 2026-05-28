@@ -29,6 +29,8 @@ FIXES vs original:
   can render lockout state without an extra round-trip.
 - Email validation now checks domain against a whitelist of common providers
   to prevent typos (e.g., exampl.com instead of example.com).
+- All database commits now wrapped in try/except with rollback on failure
+  to ensure clean state on transaction errors.
 """
 
 import hashlib
@@ -130,17 +132,33 @@ def _check_lockout(user: User) -> None:
 
 
 def _record_failed_attempt(user: User, db: Session) -> None:
-    user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
-    if user.failed_login_attempts >= LOCKOUT_ATTEMPTS:
-        user.lockout_until = _now() + timedelta(minutes=LOCKOUT_MINUTES)
-    db.commit()
+    try:
+        user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+        if user.failed_login_attempts >= LOCKOUT_ATTEMPTS:
+            user.lockout_until = _now() + timedelta(minutes=LOCKOUT_MINUTES)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        log.error("Failed to record login attempt: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred. Please try again."
+        )
 
 
 def _reset_failed_attempts(user: User, db: Session) -> None:
-    user.failed_login_attempts = 0
-    user.lockout_until         = None
-    user.last_login            = _now()
-    db.commit()
+    try:
+        user.failed_login_attempts = 0
+        user.lockout_until         = None
+        user.last_login            = _now()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        log.error("Failed to reset login attempts: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred. Please try again."
+        )
 
 
 def _build_reset_token(user_id: int) -> str:
@@ -237,17 +255,25 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     if not PASSWORD_RE.match(payload.password):
         raise HTTPException(status_code=400, detail=PASSWORD_RULE_MSG)
 
-    user = User(
-        full_name       = full_name,
-        email           = email,
-        hashed_password = get_password_hash(payload.password),
-        role            = role,
-        is_active       = True,
-        is_verified     = False,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        user = User(
+            full_name       = full_name,
+            email           = email,
+            hashed_password = get_password_hash(payload.password),
+            role            = role,
+            is_active       = True,
+            is_verified     = False,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    except Exception as e:
+        db.rollback()
+        log.error("Failed to create user account for %s: %s", email, e)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create account. Please try again."
+        )
 
     return _auth_response(user)
 
@@ -306,10 +332,16 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     if not user or not user.is_active:
         return SAFE_RESPONSE
 
-    plain_token = _build_reset_token(user.id)
-    user.reset_token_hash = _sha256(plain_token)
-    user.reset_token_used = False
-    db.commit()
+    try:
+        plain_token = _build_reset_token(user.id)
+        user.reset_token_hash = _sha256(plain_token)
+        user.reset_token_used = False
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        log.error("Failed to generate password reset token for %s: %s", email, e)
+        # Still return SAFE_RESPONSE to avoid leaking whether the user exists
+        return SAFE_RESPONSE
 
     # TODO: dispatch via email provider (SendGrid, Mailgun, SES, …)
     # For local development only, the token is logged so you can copy it
@@ -340,14 +372,22 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
     if not PASSWORD_RE.match(payload.new_password):
         raise HTTPException(status_code=400, detail=PASSWORD_RULE_MSG)
 
-    user.hashed_password  = get_password_hash(payload.new_password)
-    user.reset_token_used = True       # one-time-use enforced
-    user.reset_token_hash = None       # invalidate immediately
+    try:
+        user.hashed_password  = get_password_hash(payload.new_password)
+        user.reset_token_used = True       # one-time-use enforced
+        user.reset_token_hash = None       # invalidate immediately
 
-    # Also clear any active lockout — successful reset implies the legitimate
-    # owner has regained control.
-    user.failed_login_attempts = 0
-    user.lockout_until         = None
-    db.commit()
+        # Also clear any active lockout — successful reset implies the legitimate
+        # owner has regained control.
+        user.failed_login_attempts = 0
+        user.lockout_until         = None
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        log.error("Failed to reset password for user %s: %s", user_id, e)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to reset password. Please try again."
+        )
 
     return {"status": "success", "detail": "Password reset successfully. Please log in."}
