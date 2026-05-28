@@ -31,6 +31,7 @@ FIXES vs original:
   to prevent typos (e.g., exampl.com instead of example.com).
 - All database commits now wrapped in try/except with rollback on failure
   to ensure clean state on transaction errors.
+- User response shape is now canonical and consistent across all endpoints.
 """
 
 import hashlib
@@ -191,17 +192,51 @@ def _decode_reset_token(token: str) -> Optional[int]:
         return None
 
 
-def _auth_response(user: User) -> dict:
-    """Shape used by /login, /register, /register-landlord."""
-    token = create_access_token(data={"sub": str(user.id), "role": user.role})
-    return {
-        "access_token": token,
-        "token_type":   "bearer",
-        "role":         user.role,
-        "full_name":    user.full_name,
-        "email":        user.email,
-        "user_id":      user.id,
+def user_to_dict(user: User, include_token: Optional[str] = None) -> dict:
+    """
+    Canonical user response shape used across all endpoints.
+    
+    Args:
+        user: User model instance
+        include_token: Optional JWT access token to include in response
+    
+    Returns:
+        Dictionary with consistent field names and structure
+    """
+    locked = bool(user.lockout_until and user.lockout_until > _now())
+    response = {
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone": user.phone_number,
+        "role": user.role,
+        "avatar_url": user.avatar_url,
+        "is_active": user.is_active,
+        "is_verified": user.is_verified,
+        "is_locked": locked,
+        "verification_status": user.verification_status or "unverified",
+        "created_at": user.created_at.isoformat() if user.created_at else None,
     }
+    
+    # Optionally include landlord-specific field
+    if user.business_name:
+        response["business_name"] = user.business_name
+    
+    # Optionally include JWT token (for login/register responses)
+    if include_token:
+        response["access_token"] = include_token
+        response["token_type"] = "bearer"
+    
+    return response
+
+
+def _auth_response(user: User) -> dict:
+    """Auth endpoints response: includes access token."""
+    token = create_access_token(data={"sub": str(user.id), "role": user.role})
+    response = user_to_dict(user, include_token=token)
+    # For backwards compatibility with login/register clients expecting user_id
+    response["user_id"] = user.id
+    return response
 
 
 # ── POST /auth/login ────────────────────────────────────────────────────────[...]
@@ -294,21 +329,7 @@ def register_landlord(payload: RegisterRequest, db: Session = Depends(get_db)):
 # ── GET /auth/me ──────────────────────────────────────────────────────────[...]
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user)):
-    locked = bool(current_user.lockout_until and current_user.lockout_until > _now())
-    return {
-        "id":                  current_user.id,
-        "full_name":           current_user.full_name,
-        "email":               current_user.email,
-        "role":                current_user.role,
-        "phone":               current_user.phone_number,
-        "avatar_url":          current_user.avatar_url,
-        "is_active":           current_user.is_active,
-        "is_verified":         current_user.is_verified,
-        "is_locked":           locked,
-        "verification_status": current_user.verification_status or "unverified",
-        "business_name":       getattr(current_user, "business_name", None),
-        "created_at":          current_user.created_at.isoformat() if current_user.created_at else None,
-    }
+    return user_to_dict(current_user)
 
 
 # ── POST /auth/forgot-password ────────────────────────────────────────────────
