@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ali Subscription Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #0c0a1e; color: #f0f0f0; }
+        :root { --primary-glow: #00f2fe; --secondary-glow: #8A2BE2; }
+        main, header, footer { position: relative; z-index: 2; }
+        .gradient-text { background: linear-gradient(90deg, #fff, var(--primary-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .header.sticky { background: rgba(12, 10, 30, 0.8); backdrop-filter: blur(10px); }
+        .interactive-card { background: rgba(22, 21, 47, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; position: relative; }
+        .interactive-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .animate-on-scroll { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
+        [v-cloak] { display: none; }
+        .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
+        .hero-bg::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/1280px-Netflix_2015_logo.svg.png'), url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Spotify_icon.svg/1982px-Spotify_icon.svg.png'), url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Apple_Music_logo.svg/1024px-Apple_Music_logo.svg.png');
+            background-repeat: no-repeat; background-size: 300px, 150px, 150px;
+            background-position: calc(50% - 150px) 45%, 50% calc(50% + 80px), calc(50% + 150px) 45%;
+            opacity: 0.08; filter: blur(5px);
+        }
+        .gemini-loader { border: 4px solid rgba(255, 255, 255, 0.2); border-left-color: var(--primary-glow); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        .glass-form-card {
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .form-input-group { position: relative; }
+        .form-input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #f87171; width: 1.25rem; height: 1.25rem; }
+        .form-input-field, .form-select-field {
+            padding-left: 3rem; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white; border-radius: 12px; height: 50px; width: 100%;
+        }
+        .form-input-field::placeholder { color: #a0a0a0; }
+        .form-input-field:focus, .form-select-field:focus {
+            border-color: #f472b6; background: rgba(0, 0, 0, 0.3); outline: none; box-shadow: none;
+        }
+        .form-select-field { appearance: none; }
+        .form-select-arrow { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #e0e0e0; pointer-events: none; }
+        select option { background: #1f2937; color: white; }
+        .admin-dashboard-bg {
+             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <div id="app" v-cloak>
+        <div v-if="!isAdmin">
+            <header ref="header" class="fixed top-0 left-0 w-full p-5 z-50 transition-all duration-300">
+                <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-white">Ali Subscription Express</h1>
+                    <nav class="hidden md:flex space-x-8">
+                        <a href="#features" class="font-semibold text-white hover:text-cyan-300">Services</a>
+                        <a href="#pricing" class="font-semibold text-white hover:text-cyan-300">Pricing</a>
+                        <a href="#register" class="font-semibold text-white hover:text-cyan-300">Register</a>
+                        <a href="#testimonials" class="font-semibold text-white hover:text-cyan-300">Testimonials</a>
+                        <a href="#feedback" class="font-semibold text-white hover:text-cyan-300">Feedback</a>
+                        </nav>
+                    <a href="#" @click.prevent="showAdminLogin" class="text-xs text-gray-500 hover:text-white">Admin Panel</a>
+                </div>
+            </header>
+            <main>
+                <section class="hero min-h-screen flex items-center justify-center text-center px-4 relative bg-[#0c0a1e]">
+                    <div class="hero-bg"></div>
+                    <div class="animate-on-scroll z-10">
+                        <div class="inline-block bg-purple-600/50 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4 backdrop-blur-sm">Premium Streaming Services</div>
+                        <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-4">Ali <span class="gradient-text">Subscription</span> Express</h1>
+                        <p class="text-lg md:text-xl text-indigo-200 max-w-2xl mx-auto mb-8">Access Netflix, Spotify, and Apple Music at unbeatable prices.</p>
+                        <div class="flex justify-center items-center space-x-4"><a href="#pricing" class="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:scale-105">Get Started Now</a><a href="#features" class="inline-block bg-gray-700/50 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:scale-105 backdrop-blur-sm">View Services</a></div>
+                        <div class="mt-8 flex justify-center space-x-6 text-cyan-300"><span>● Serving Zambia</span><span>● Instant Activation</span></div>
+                    </div>
+                </section>
+                <section id="features" class="py-20 bg-[#0c0a1e]">
+                    <div class="max-w-6xl mx-auto px-4 text-center animate-on-scroll">
+                        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Your Favourite Services, <span class="gradient-text">Sorted.</span></h2>
+                        <div class="grid md:grid-cols-3 gap-8 mt-12 text-left">
+                            <div class="interactive-card p-8 transition-all duration-300"><h3 class="text-2xl font-bold mb-4 text-white">🎬 Netflix</h3><p class="text-indigo-200 mb-6">Unlimited movies, TV shows, and more. Shared and private profiles available.</p></div>
+                            <div class="interactive-card p-8 transition-all duration-300"><h3 class="text-2xl font-bold mb-4 text-white">🎶 Spotify</h3><p class="text-indigo-200 mb-6">70+ million songs, ad-free. Listen offline and get unlimited skips.</p></div>
+                            <div class="interactive-card p-8 transition-all duration-300"><h3 class="text-2xl font-bold mb-4 text-white">🎧 Apple Music</h3><p class="text-indigo-200 mb-6">100+ million songs in lossless audio. Pure vibes, no card needed.</p></div>
+                        </div>
+                    </div>
+                </section>
+                <section id="pricing" class="py-20 bg-[#100e26]">
+                    <div class="max-w-7xl mx-auto px-4 text-center animate-on-scroll">
+                        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Choose Your <span class="gradient-text">Perfect Plan</span></h2>
+                        <p class="text-indigo-200 max-w-2xl mx-auto mb-12">Select your service and enjoy instant activation at the best prices in Zambia.</p>
+                        <div v-for="service in services" :key="service.name" class="mb-16">
+                            <h3 class="text-3xl font-bold text-white mb-8">{{ service.name }}</h3>
+                            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 items-center">
+                                <div v-for="plan in service.plans" :key="plan.name" @click="selectPlan(plan)" :class="[plan.popular ? 'transform md:scale-110 ring-2 ring-purple-500' : '']" class="interactive-card p-8 text-left cursor-pointer transition-all duration-300 h-full flex flex-col justify-between">
+                                    <div>
+                                        <span v-if="plan.popular" class="absolute top-0 -mt-4 left-1/2 -translate-x-1/2 inline-block bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">Best Value</span>
+                                        <h4 class="text-xl font-bold mb-2 text-white">{{ plan.duration }}</h4>
+                                        <p class="text-5xl font-extrabold text-white mb-2">K{{ plan.price }}</p>
+                                        <ul class="space-y-3 text-indigo-200 mt-6 min-h-[60px]">
+                                            <li v-for="feature in plan.features" :key="feature" class="flex items-start">
+                                                <svg class="w-5 h-5 text-cyan-400 mr-2 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                <span>{{ feature }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <a href="#register" :class="[plan.popular ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black']" class="block w-full text-center mt-8 py-3 px-6 rounded-full font-bold transition-colors">Select Plan</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section id="register" class="py-20 bg-[#0c0a1e]">
+                    <div class="max-w-xl mx-auto px-4 text-center animate-on-scroll">
+                        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Start Your <span class="gradient-text">Streaming Journey</span></h2>
+                        <p class="text-indigo-200 mb-10">Fill in your details and we'll get you set up in no time.</p>
+                        <form @submit.prevent="handleSubmit" class="glass-form-card p-8 md:p-12 text-left space-y-6">
+                            <div class="form-input-group">
+                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                <input v-model="form.name" type="text" placeholder="Full Name *" required class="form-input-field">
+                            </div>
+                            <div class="form-input-group">
+                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg>
+                                <input v-model="form.email" type="email" placeholder="Email Address (Optional)" class="form-input-field">
+                            </div>
+                            <div class="form-input-group">
+                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.1a1.5 1.5 0 01-1.052 1.767l-2.387.995c.03.07.062.14.098.21l.005.01c.04.07.083.139.13.209l.026.038c.145.213.306.413.48.595l.04.042c.183.173.383.333.595.48l.038.026c.07.046.139.09.209.13l.01.005c.07.036.14.067.21.098l.995-2.387a1.5 1.5 0 011.767-1.052l3.1.716A1.5 1.5 0 0118 13.352V14.5a1.5 1.5 0 01-1.5 1.5h-1.052a10 10 0 01-9.92-8.696c-.068-.52-.068-1.05-.002-1.572A1.5 1.5 0 013.5 2H2z" clip-rule="evenodd" /></svg>
+                                <input v-model="form.number" type="tel" placeholder="Phone Number (097... or 076...) *" required class="form-input-field">
+                            </div>
+                            <div class="form-input-group">
+                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" /></svg>
+                                <select v-model="form.plan" required class="form-select-field">
+                                    <option value="" disabled>Select Subscription Plan *</option>
+                                    <optgroup v-for="service in services" :label="service.name" :key="service.name">
+                                        <option v-for="plan in service.plans" :value="plan.name" :key="plan.name">{{ plan.name }} - K{{ plan.price }}</option>
+                                    </optgroup>
+                                </select>
+                                <svg class="form-select-arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:scale-105 transition-transform flex items-center justify-center space-x-2">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009.175 17V5.414l1.715 4.34a1 1 0 00.868.513l4.312.216a1 1 0 00.725-1.681l-7-14z" /></svg>
+                                <span>Submit Registration</span>
+                            </button>
+                            <p class="text-center text-indigo-200 text-sm">After registration, we'll send you payment details and activation instructions.</p>
+                        </form>
+                        <transition name="fade">
+                            <div v-if="showPaymentSteps" class="mt-10 p-6 bg-gray-800 border border-gray-700 rounded-lg text-left">
+                                <h3 class="text-xl font-semibold text-white mb-4">Complete Your Payment</h3>
+                                <p class="text-indigo-200 mb-4" v-if="paymentStep === 1">
+                                    Registration submitted for {{ pendingPaymentDetails?.name }} ({{ pendingPaymentDetails?.plan }} - K{{ pendingPaymentDetails?.price }}).
+                                    Click below to view payment details.
+                                </p>
+                                <transition name="fade">
+                                    <div v-if="paymentStep === 2">
+                                        <p class="text-indigo-200 mb-4">Please send K{{ pendingPaymentDetails?.price }} to one of the following numbers:</p>
+                                        <div class="space-y-3 mb-6">
+                                            <div class="bg-gray-700 p-4 rounded-md">
+                                                <p class="font-medium text-white flex items-center"><span class="text-xl mr-2">📲</span> Airtel Money:</p>
+                                                <p class="text-cyan-300 font-bold text-lg pl-8">{{ myAirtel }}</p>
+                                                <p class="text-xs text-gray-400 pl-8">(Name: Joshua Chishimba)</p>
+                                            </div>
+                                            <div class="bg-gray-700 p-4 rounded-md">
+                                                <p class="font-medium text-white flex items-center"><span class="text-xl mr-2">📲</span> MTN Mobile Money (MoMo):</p>
+                                                <p class="text-cyan-300 font-bold text-lg pl-8">{{ myMtn }}</p>
+                                                <p class="text-xs text-gray-400 pl-8">(Name: Joshua Chishimba)</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-indigo-200 mb-4 text-sm">After sending, please click the button below to notify us.</p>
+                                        <button @click="confirmPaymentSent" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
+                                            I Have Sent the Payment
+                                        </button>
+                                    </div>
+                                </transition>
+                                <button v-if="paymentStep === 1" @click="paymentStep = 2" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    Show Payment Details
+                                </button>
+                            </div>
+                        </transition>
+                    </div>
+                </section>
+                <section id="testimonials" class="py-20 bg-[#100e26]">
+                    <div class="max-w-6xl mx-auto px-4 text-center animate-on-scroll">
+                         <h2 class="text-4xl md:text-5xl font-extrabold mb-4">What Our <span class="gradient-text">Clients Say</span></h2>
+                         <p class="text-indigo-200 mb-12">(Testimonials section placeholder)</p>
+                    </div>
+                </section>
+                <section id="feedback" class="py-20 bg-[#0c0a1e]">
+                     <div class="max-w-xl mx-auto px-4 text-center animate-on-scroll">
+                         <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Have <span class="gradient-text">Feedback?</span></h2>
+                         <p class="text-indigo-200 mb-10">Let us know how we can improve.</p>
+                         <form @submit.prevent="handleFeedback" class="glass-form-card p-8 md:p-12 text-left space-y-6">
+                            <textarea v-model="feedbackMessage" rows="5" placeholder="Your feedback..." class="w-full p-3 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 px-4 rounded-lg">Submit Feedback</button>
+                         </form>
+                    </div>
+                </section>
+            </main>
+            <footer class="text-center py-8 text-indigo-300 bg-[#100e26]">
+                <p>&copy; 2025 Ali Subscription Express. All rights reserved.</p>
+            </footer>
+        </div>
+        
+        <div v-else>
+            <div v-if="!authenticated" class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center" style="background-image: linear-gradient(rgba(45, 30, 80, 0.8), rgba(25, 15, 50, 0.9)), url('https://images.unsplash.com/photo-1522881193467-47b20b73147f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%D&auto=format&fit=crop&w=1740&q=80');">
+                <div class="w-full max-w-md">
+                    <div v-if="authView === 'signin'" class="bg-gray-900/70 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-2xl">
+                        <h2 class="text-3xl font-bold text-white text-center mb-2">Admin Sign In</h2>
+                        <p class="text-center text-gray-400 mb-6">Welcome back!</p>
+                        <form @submit.prevent="login" class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Username</label><input v-model="loginForm.username" type="text" placeholder="admin" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
+                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Password</label><input v-model="loginForm.password" type="password" placeholder="••••••••" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
+                            <p v-if="loginError" class="text-red-500 text-center text-sm">Incorrect username or password.</p>
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">Sign In</button>
+                            <div class="text-center text-sm text-gray-400"> <a href="#" @click.prevent="authView = 'forgot'" class="hover:text-white">Forgot Password?</a> </div>
+                        </form>
+                        <p class="text-center text-sm text-gray-300 mt-6">Don't have an account? <a href="#" @click.prevent="authView = 'signup'" class="font-bold text-white hover:underline">Sign Up</a></p>
+                    </div>
+                    <div v-if="authView === 'signup'" class="bg-gray-900/70 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-2xl">
+                        <h2 class="text-3xl font-bold text-white text-center mb-6">Create Admin Account</h2>
+                        <form @submit.prevent="handleSignup" class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Username</label><input v-model="signupForm.username" type="text" placeholder="Choose a username" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
+                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Password</label><input v-model="signupForm.password" type="password" placeholder="Create a strong password" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
+                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label><input v-model="signupForm.confirm" type="password" placeholder="Confirm your password" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">Sign Up</button>
+                        </form>
+                        <p class="text-center text-sm text-gray-300 mt-6">Already have an account? <a href="#" @click.prevent="authView = 'signin'" class="font-bold text-white hover:underline">Sign In</a></p>
+                    </div>
+                    <div v-if="authView === 'forgot'" class="bg-gray-900/70 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-2xl">
+                        <h2 class="text-3xl font-bold text-white text-center mb-6">Reset Password</h2>
+                        <form @submit.prevent="handleForgot" class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Email</label><input type="email" placeholder="Enter your email" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">Send Reset Link</button>
+                        </form>
+                        <p class="text-center text-sm text-gray-300 mt-6">Remembered your password? <a href="#" @click.prevent="authView = 'signin'" class="font-bold text-white hover:underline">Sign In</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div v-else class="admin-dashboard-bg min-h-screen p-4 sm:p-6 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8">
+                    <h1 class="text-3xl font-bold text-white mb-4 sm:mb-0">Admin Dashboard</h1>
+                    <div class="flex space-x-2">
+                        <button @click="exportToCSV" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Export CSV</button>
+                        <button @click="logout" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mb-8">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Total Revenue</h3><p class="text-3xl font-bold text-white">K{{ totalRevenue }}</p></div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">True Profit</h3><p class="text-3xl font-bold" :class="trueProfit >= 0 ? 'text-green-400' : 'text-red-400'">K{{ trueProfit }}</p></div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Customers</h3><p class="text-3xl font-bold text-white">{{ customers.length }}</p></div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Due Soon</h3><p class="text-3xl font-bold text-yellow-400">{{ dueSoonCount }}</p></div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Overdue</h3><p class="text-3xl font-bold text-red-400">{{ overdueCount }}</p></div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Loyal</h3><p class="text-3xl font-bold text-blue-400">{{ loyalCustomerCount }}</p></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                        <div class="p-4 flex flex-col sm:flex-row justify-between items-center border-b border-gray-700">
+                            <h2 class="text-xl font-bold text-white mb-4 sm:mb-0">Customers</h2>
+                            <input v-model="searchTerm" type="text" placeholder="Search by name or number..." class="w-full sm:w-64 p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead><tr class="bg-gray-700 text-gray-400 text-sm uppercase"><th class="p-4 font-medium">Name</th><th class="p-4 font-medium hidden md:table-cell">Phone</th><th class="p-4 font-medium">Status</th><th class="p-4 font-medium">Actions</th></tr></thead>
+                                <tbody>
+                                    <tr v-if="filteredCustomers.length === 0"><td colspan="4" class="text-center p-8 text-gray-400">No customers found matching your search.</td></tr>
+                                    <tr v-for="customer in filteredCustomers" :key="customer.id" class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
+                                        <td class="p-4">
+                                            <p class="text-white font-medium">{{ customer.name }}</p>
+                                            <p class="text-xs text-gray-400">{{ customer.plan_name }} | Due: {{ formatDate(customer.due_date) }}</p>
+                                        </td>
+                                        <td class="p-4 text-gray-300 hidden md:table-cell">
+                                            <a :href="'https://wa.me/26' + customer.number.replace(/^0+/, '')" target="_blank" class="flex items-center hover:text-green-400 transition-colors">
+                                                {{ customer.number }}
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009.175 17V5.414l1.715 4.34a1 1 0 00.868.513l4.312.216a1 1 0 00.725-1.681l-7-14z" /></svg>
+                                            </a>
+                                        </td>
+                                        <td class="p-4">
+                                            <span class="block mb-1 px-2 py-1 text-xs font-semibold rounded-full mr-2"
+                                                :class="customer.payment_confirmed ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'">
+                                                Payment: {{ customer.payment_confirmed ? 'Confirmed' : 'Pending' }}
+                                            </span>
+                                            <span class="block px-2 py-1 text-xs font-semibold rounded-full"
+                                                :class="getDetailedStatus(customer.due_date).class">
+                                                {{ getDetailedStatus(customer.due_date).text }}
+                                            </span>
+                                        </td>
+                                        <td class="p-4 flex items-center space-x-2">
+                                            <button v-if="!customer.payment_confirmed" @click="confirmCustomerPayment(customer)" class="text-yellow-400 hover:text-yellow-300 transition-colors" title="Confirm Payment & Send Details">✔️</button>
+                                            <button @click="generateAIReminder(customer)" class="text-cyan-400 hover:text-cyan-300 transition-colors" title="Generate AI Reminder">✨</button>
+                                            <button @click="openEditModal(customer)" class="text-blue-400 hover:text-blue-300 transition-colors" title="Edit/View Notes">📝</button>
+                                            <button @click="renewSubscription(customer)" class="text-green-400 hover:text-green-300 transition-colors" title="Renew Subscription">🔄</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold text-white mb-4">Service Credentials & Links</h3>
+                            <div class="space-y-4">
+                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Netflix Email</label> <input v-model="netflixEmail" type="email" placeholder="netflix@example.com" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
+                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Netflix Password</label> <input v-model="netflixPassword" type="password" placeholder="••••••••" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
+                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Spotify Link / Info</label> <input v-model="spotifyInfo" type="text" placeholder="e.g., Invite Link or Instructions" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
+                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Apple Music Link / Info</label> <input v-model="appleMusicInfo" type="text" placeholder="e.g., Invite Link or Instructions" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
+                                <button @click="saveCredentials" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg mt-4 transition-colors">Save Credentials</button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold text-white mb-4">✨ Growth Insights</h3>
+                            <button @click="generateBusinessInsights" :disabled="geminiLoading" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center disabled:opacity-50 transition-colors">
+                                <span v-if="!geminiLoading">Get AI Business Advice</span> <div v-else class="gemini-loader"></div>
+                            </button>
+                            <div v-if="businessInsights" class="mt-4 p-4 bg-gray-900/50 rounded-lg text-sm whitespace-pre-wrap">{{ businessInsights }}</div>
+                        </div>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-xl font-bold text-white mb-4">Financials</h3><div><canvas id="financialChart"></canvas></div></div>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-xl font-bold text-white mb-4">Plan Popularity</h3><div><canvas id="planChart"></canvas></div></div>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-xl font-bold text-white mb-4">Log Monthly Expense</h3><div class="flex items-center space-x-2"><span class="text-gray-400">K</span><input type="number" v-model.number="currentExpense" placeholder="e.g. 150" class="flex-grow p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"><button @click="logExpense" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors">Log</button></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="showPlanAdvisor" @click.self="showPlanAdvisor = false" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                <h2 class="text-2xl font-bold text-white mb-4">AI Plan Advisor</h2>
+                <p class="text-gray-300">This feature is coming soon!</p>
+                <button @click="showPlanAdvisor = false" class="mt-4 bg-purple-600 text-white py-2 px-4 rounded">Close</button>
+            </div>
+        </div>
+
+        <div v-if="aiReminder.show" @click.self="aiReminder.show = false" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                <h2 class="text-2xl font-bold text-white mb-4">AI-Generated Reminder</h2>
+                <p class="text-gray-300 mb-4">Message for {{ aiReminder.customer?.name }}:</p>
+                <textarea v-model="aiReminder.message" class="w-full h-40 p-2 bg-gray-700 rounded text-white"></textarea>
+                <div class="flex justify-end space-x-2 mt-4">
+                    <button @click="aiReminder.show = false" class="bg-gray-600 text-white py-2 px-4 rounded">Close</button>
+                    <a :href="'https://wa.me/26' + aiReminder.customer?.number.replace(/^0+/, '') + '?text=' + encodeURIComponent(aiReminder.message)" target="_blank" class="bg-green-600 text-white py-2 px-4 rounded">Send on WhatsApp</a>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="editingCustomer" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md overflow-y-auto max-h-[90vh]">
+                <h2 class="text-2xl font-bold text-white mb-4">Customer Details</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Name:</label>
+                        <input v-model="editingCustomer.name" type="text" class="w-full p-2 bg-gray-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Phone:</label>
+                        <input v-model="editingCustomer.number" type="tel" class="w-full p-2 bg-gray-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Email:</label>
+                        <input v-model="editingCustomer.email" type="email" class="w-full p-2 bg-gray-700 rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Plan:</label>
+                        <select v-model="editingCustomer.plan_name" class="w-full p-2 bg-gray-700 rounded text-white">
+                            <optgroup v-for="service in services" :label="service.name" :key="service.name">
+                                <option v-for="plan in service.plans" :value="plan.name" :key="plan.name">{{ plan.name }} - K{{ plan.price }}</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <p><strong class="text-gray-400">Due:</strong> {{ formatDate(editingCustomer.due_date) }}</p>
+                    <p><strong class="text-gray-400">Renewals:</strong> {{ editingCustomer.renewal_count }}</p>
+                    <div>
+                        <label class="block text-gray-400 mb-2">Notes:</label>
+                        <textarea v-model="editingCustomer.notes" class="w-full h-24 p-2 bg-gray-700 rounded text-white"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button @click="closeEditModal" class="bg-gray-600 text-white py-2 px-4 rounded">Cancel</button>
+                    <button @click="saveCustomerDetails" class="bg-blue-600 text-white py-2 px-4 rounded">Save</button>
+                </div>
+            </div>
+        </div>
+
+    </div> <script>
+       const { createApp, ref, onMounted, computed, nextTick } = Vue;
+
+createApp({
+    setup() {
+        // --- API & Auth State ---
+        const API_URL = 'http://127.0.0.1:8000/api/v1'; // Base URL is correct
+        const authToken = ref(localStorage.getItem('admin-token') || null);
+
+        // --- Refs & State ---
+        const isAdmin = ref(false), authenticated = ref(false), loginError = ref(false);
+        const myAirtel = '0973404727', myMtn = '0765158426', myEmail = 'Joshuaalinanichishimba@gmail.com';
+
+        // --- PLANS DATA STRUCTURE (Copied from your original Vue code for context) ---
+        const netflixPlans = [
+            { name: 'Netflix (Shared / 1 Mo)', duration: '1 Month (Shared)', price: 50, months: 1, features: ['8-person share'] },
+            { name: 'Netflix (Shared / 2 Mo)', duration: '2 Months (Shared)', price: 90, months: 2, features: ['Save K10'] },
+            { name: 'Netflix (Shared / 3 Mo)', duration: '3 Months (Shared)', price: 135, months: 3, features: ['Save K15'], popular: true },
+            { name: 'Netflix (Private Profile / 1 Mo)', duration: '1 Month (Private)', price: 100, months: 1, features: ['Pin-locked profile', '4-person share'] }
+        ];
+        const spotifyPlans = [
+            { name: 'Spotify (1 Mo)', duration: '1 Month', price: 50, months: 1, features: ['Ad-free, unlimited skips'] },
+            { name: 'Spotify (2 Mo)', duration: '2 Months', price: 90, months: 2, features: ['Save K10'] },
+            { name: 'Spotify (3 Mo)', duration: '3 Months', price: 135, months: 3, features: ['Save K15'], popular: true }
+        ];
+        const appleMusicPlans = [
+            { name: 'Apple Music (1 Mo)', duration: '1 Month', price: 50, months: 1, features: ['100+ million songs'] },
+            { name: 'Apple Music (2 Mo)', duration: '2 Months', price: 90, months: 2, features: ['Save K10'] },
+            { name: 'Apple Music (3 Mo)', duration: '3 Months', price: 135, months: 3, features: ['Save K15'], popular: true }
+        ];
+        const services = ref([
+            { name: '🎬 Netflix', plans: netflixPlans },
+            { name: '🎶 Spotify Premium', plans: spotifyPlans },
+            { name: '🎧 Apple Music', plans: appleMusicPlans }
+        ]);
+        const allPlans = computed(() => {
+            return services.value.reduce((acc, service) => acc.concat(service.plans), []);
+        });
+
+        const header = ref(null); 
+        const form = ref({ name: '', email: '', number: '', plan: '' });
+        const customers = ref([]);
+        const searchTerm = ref('');
+        const expenses = ref({}); 
+        const editingCustomer = ref(null), currentExpense = ref(null);
+        const showPlanAdvisor = ref(false), advisor = ref({ q1: 'Daily', q2: 'Very important', q3: 'Maybe', recommendation: '' });
+        const aiReminder = ref({ show: false, message: '', customer: null });
+        const businessInsights = ref('');
+        const geminiLoading = ref(false);
+        const authView = ref('signin');
+        const loginForm = ref({ username: '', password: '' });
+        const signupForm = ref({ username: '', password: '', confirm: '' });
+        let chartInstance = null;
+        let planChartInstance = null;
+        const feedbackMessage = ref('');
+        const showPaymentSteps = ref(false);
+        const paymentStep = ref(1);
+        const pendingPaymentDetails = ref(null);
+        const netflixEmail = ref('');
+        const netflixPassword = ref('');
+        const spotifyInfo = ref('');
+        const appleMusicInfo = ref('');
+
+        // --- Computed Properties ---
+        const totalRevenue = computed(() => customers.value.reduce((t, c) => t + (c.paid || 0), 0));
+        const totalExpenses = computed(() => Object.values(expenses.value).reduce((t, e) => t + e, 0));
+        const trueProfit = computed(() => totalRevenue.value - totalExpenses.value);
+        const dueSoonCount = computed(() => customers.value.filter(c => getDetailedStatus(c.due_date).text === 'Due Soon').length);
+        const overdueCount = computed(() => customers.value.filter(c => getDetailedStatus(c.due_date).text === 'Overdue').length);
+        const loyalCustomerCount = computed(() => customers.value.filter(c => (c.renewal_count || 0) >= 3).length);
+        const filteredCustomers = computed(() => {
+            const sorted = [...customers.value].sort((a,b) => new Date(a.due_date) - new Date(b.due_date));
+            if (!searchTerm.value) return sorted;
+            return sorted.filter(c =>
+                (c.name || '').toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+                (c.number || '').includes(searchTerm.value)
+            );
+        });
+
+        // --- API Helper Functions ---
+        
+        // Helper for PUBLIC (non-auth) endpoints
+        async function fetchPublic(endpoint, options = {}) {
+            const headers = { 'Content-Type': 'application/json', ...options.headers };
+            // Note: Public endpoints in your main.py are under /api/v1/public/...
+            const response = await fetch(`${API_URL}/public${endpoint}`, { ...options, headers });
+            if (!response.ok) {
+                const err = await response.json();
+                console.error("Public API Error:", err);
+                throw new Error(err.detail || 'Public API request failed');
+            }
+            if (response.status === 204) return null;
+            return response.json();
+        }
+
+        // Helper for ADMIN (auth-required) endpoints
+        async function fetchAdmin(endpoint, options = {}) {
+            const headers = {
+                'Authorization': `Bearer ${authToken.value}`,
+                'Content-Type': 'application/json',
+                ...options.headers,
+            };
+            // Note: Admin endpoints in your main.py are under /api/v1/admin/...
+            const response = await fetch(`${API_URL}/admin${endpoint}`, { ...options, headers });
+            if (response.status === 401) {
+                alert("Your session has expired. Please log in again.");
+                clearSession(); 
+                throw new Error('Unauthorized');
+            }
+            if (!response.ok) {
+                const err = await response.json();
+                console.error("API Error:", err);
+                throw new Error(err.detail || 'API request failed');
+            }
+            if (response.status === 204) return null;
+            return response.json();
+        }
+        
+        async function loadAllAdminData() {
+            try {
+                const [custData, expData, credData] = await Promise.all([
+                    fetchAdmin('/customers'),
+                    fetchAdmin('/expenses'),
+                    fetchAdmin('/credentials')
+                ]);
+
+                customers.value = custData;
+
+                const formattedExpenses = {};
+                for (const exp of expData) {
+                    formattedExpenses[exp.month_year] = (formattedExpenses[exp.month_year] || 0) + exp.amount;
+                }
+                expenses.value = formattedExpenses;
+
+                netflixEmail.value = credData.netflixEmail;
+                netflixPassword.value = credData.netflixPassword;
+                spotifyInfo.value = credData.spotifyInfo;
+                appleMusicInfo.value = credData.appleMusicInfo;
+
+                console.log("All admin data loaded.");
+            } catch (error) {
+                console.error("Failed to load admin data:", error);
+            }
+        }
+
+        // --- Auth Functions (Uses the correct /api/v1/auth/token) ---
+        function clearSession() {
+            authenticated.value = false;
+            authToken.value = null;
+            localStorage.removeItem('admin-token');
+            loginForm.value = { username: '', password: '' };
+            console.log("Session cleared.");
+        }
+
+        async function login() {
+            console.log("Attempting login...");
+            loginError.value = false;
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', loginForm.value.username);
+                formData.append('password', loginForm.value.password);
+
+                console.log("Sending login request to API...");
+                // Note: Auth token endpoint uses the API_URL root, not the helper function path
+                const response = await fetch(`${API_URL}/auth/token`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                console.log("Login response status:", response.status);
+
+                if (!response.ok) {
+                    console.error("Login failed! Status:", response.status);
+                    throw new Error('Login failed');
+                }
+
+                const data = await response.json();
+                console.log("Login successful, received token.");
+                authToken.value = data.access_token;
+                localStorage.setItem('admin-token', data.access_token);
+
+                authenticated.value = true;
+                console.log("Authenticated flag set to true.");
+
+                console.log("Loading admin data...");
+                await loadAllAdminData();
+                console.log("Admin data loaded.");
+
+                nextTick(() => {
+                    console.log("Rendering charts...");
+                    renderChart();
+                    renderPlanChart();
+                });
+            } catch (error) {
+                console.error("Login error caught:", error);
+                loginError.value = true;
+                clearSession(); 
+            }
+        }
+        
+        function logout() {
+            clearSession();
+            isAdmin.value = false; 
+            console.log("Logged out.");
+        }
+
+        // --- Implemented Page Functions ---
+        function handleSignup() { alert("Signup functionality is not enabled."); }
+        function handleForgot() { alert("Password reset functionality is not enabled."); }
+        
+        function selectPlan(plan) {
+            form.value.plan = plan.name;
+            document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleSubmit() {
+            const selectedPlan = allPlans.value.find(p => p.name === form.value.plan);
+            if (selectedPlan) {
+                pendingPaymentDetails.value = {
+                    name: form.value.name,
+                    plan: selectedPlan.name,
+                    price: selectedPlan.price
+                };
+                showPaymentSteps.value = true;
+                paymentStep.value = 1;
+            } else {
+                alert("Please select a valid plan.");
+            }
+        }
+
+        // --- B. FIX: Updated Public Registration Endpoint to match /api/v1/public/registrations ---
+        async function confirmPaymentSent() {
+            try {
+                const selectedPlan = allPlans.value.find(p => p.name === form.value.plan);
+                
+                const payload = {
+                    name: form.value.name,
+                    number: form.value.number,
+                    email: form.value.email || null,
+                    plan: form.value.plan,
+                    months: selectedPlan.months || 1, // Pass months for correct due_date calculation
+                };
+                
+                // CRITICAL FIX: Changed endpoint from /register to /registrations
+                await fetchPublic('/registrations', { 
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                alert('Thank you! We have received your registration and will activate your account once payment is confirmed.');
+                showPaymentSteps.value = false;
+                paymentStep.value = 1;
+                form.value = { name: '', email: '', number: '', plan: '' };
+                pendingPaymentDetails.value = null;
+            } catch (error) {
+                alert("There was an error submitting your registration. Please try again or contact us directly.");
+                console.error(error);
+            }
+        }
+        
+        async function handleFeedback() {
+            if (!feedbackMessage.value.trim()) return;
+            try {
+                await fetchPublic('/feedback', {
+                    method: 'POST',
+                    body: JSON.stringify({ message: feedbackMessage.value })
+                });
+                alert("Thank you for your feedback!");
+                feedbackMessage.value = '';
+            } catch (error) {
+                alert("Could not send feedback at this time.");
+                console.error(error);
+            }
+        }
+
+        // --- C. FIX: Updated Customer Payment Confirmation to match /confirm-payment and pass price ---
+        async function confirmCustomerPayment(customerToConfirm) {
+            const plan = allPlans.value.find(p => p.name === customerToConfirm.plan);
+            if (!plan) {
+                alert("Could not find plan price for this customer. Cannot confirm payment.");
+                return;
+            }
+            if (!confirm(`Confirm payment of K${plan.price} for ${customerToConfirm.name}? This will mark them as paid.`)) return;
+
+            try {
+                // CRITICAL FIX: Changed endpoint from /confirm to /confirm-payment and included plan_price in URL
+                const updatedCustomerResponse = await fetchAdmin(`/customers/${customerToConfirm.id}/confirm-payment?plan_price=${plan.price}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        // Although the backend doesn't currently use this body, we send it just in case
+                        netflixEmail: netflixEmail.value,
+                        netflixPassword: netflixPassword.value,
+                        spotifyInfo: spotifyInfo.value,
+                        appleMusicInfo: appleMusicInfo.value
+                    })
+                });
+                
+                // The API now returns a ConfirmPaymentResponse, which contains the customer and the simulation_message
+                const updatedCustomer = updatedCustomerResponse.customer;
+
+                // Update local data
+                const index = customers.value.findIndex(c => c.id === updatedCustomer.id);
+                if (index !== -1) customers.value[index] = updatedCustomer;
+                alert(`Payment confirmed. Customer data updated. Message simulation:\n${updatedCustomerResponse.simulation_message}`);
+            } catch (error) {
+                alert(`Failed to confirm payment: ${error.message}`);
+            }
+        }
+
+        async function saveCredentials() {
+            try {
+                await fetchAdmin('/credentials', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        netflixEmail: netflixEmail.value,
+                        netflixPassword: netflixPassword.value,
+                        spotifyInfo: spotifyInfo.value,
+                        appleMusicInfo: appleMusicInfo.value
+                    })
+                });
+                alert("Credentials saved successfully!");
+            } catch (error) {
+                alert(`Failed to save credentials: ${error.message}`);
+            }
+        }
+
+        async function renewSubscription(c) {
+             const plan = allPlans.value.find(p => p.name === c.plan);
+             if (!plan) {
+                alert("Could not find plan details for renewal.");
+                return;
+            }
+            if (!confirm(`Renew subscription for ${c.name}? This will set a new due date and mark as PENDING PAYMENT for K${plan.price}.`)) return;
+            try {
+                // CRITICAL FIX: Added months and price as query params as defined in your FastAPI
+                const updatedCustomer = await fetchAdmin(`/customers/${c.id}/renew?months=${plan.months}&price=${plan.price}`, { method: 'POST' });
+                const index = customers.value.findIndex(cust => cust.id === updatedCustomer.id);
+                if (index !== -1) customers.value[index] = updatedCustomer;
+                alert("Subscription renewed. Waiting for payment confirmation.");
+            } catch (error) {
+                alert(`Failed to renew subscription: ${error.message}`);
+            }
+        }
+
+        async function logExpense() {
+            if (!currentExpense.value || currentExpense.value <= 0) {
+                alert("Please enter a valid expense amount.");
+                return;
+            }
+            try {
+                const currentMonthYear = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+                const newExpense = await fetchAdmin('/expenses', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        amount: currentExpense.value,
+                        month_year: currentMonthYear
+                    })
+                });
+                // Update local state
+                expenses.value[newExpense.month_year] = (expenses.value[newExpense.month_year] || 0) + newExpense.amount;
+                currentExpense.value = null;
+                renderChart(); // Update chart
+            } catch (error) {
+                alert(`Failed to log expense: ${error.message}`);
+            }
+        }
+
+        function openEditModal(c) {
+            editingCustomer.value = JSON.parse(JSON.stringify(c)); // Deep copy
+        }
+
+        function closeEditModal() {
+            editingCustomer.value = null;
+        }
+
+        async function saveCustomerDetails() {
+            if (!editingCustomer.value) return;
+            try {
+                const payload = {
+                    name: editingCustomer.value.name,
+                    email: editingCustomer.value.email,
+                    number: editingCustomer.value.number,
+                    plan: editingCustomer.value.plan,
+                    notes: editingCustomer.value.notes,
+                    has_discount: editingCustomer.value.has_discount || false,
+                };
+                
+                // CRITICAL FIX: Changed from /customers/{id} to use the PUT method on the correct endpoint
+                const updatedCustomer = await fetchAdmin(`/customers/${editingCustomer.value.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                const index = customers.value.findIndex(c => c.id === updatedCustomer.id);
+                if (index !== -1) customers.value[index] = updatedCustomer;
+                closeEditModal();
+            } catch (error) {
+                alert(`Failed to save details: ${error.message}`);
+            }
+        }
+
+        function exportToCSV() {
+            alert("Export to CSV is coming soon!");
+        }
+
+        // --- AI Placeholders ---
+        // (These functions need to be updated to match the /api/v1/ai/... endpoints, but we'll use a placeholder for now)
+        async function getAIRecommendation() { 
+             try {
+                geminiLoading.value = true;
+                const response = await fetchAdmin('/ai/recommendation', {
+                    method: 'POST',
+                    body: JSON.stringify({ q1: advisor.value.q1, q2: advisor.value.q2, q3: advisor.value.q3 })
+                });
+                const data = await response.json();
+                advisor.value.recommendation = data.recommendation;
+            } catch (error) {
+                advisor.value.recommendation = `Error: ${error.message}`;
+            } finally {
+                geminiLoading.value = false;
+            }
+        }
+
+        async function generateAIReminder(customer) {
+            const plan = allPlans.value.find(p => p.name === customer.plan);
+            if (!plan) { alert("Plan details not found."); return; }
+            
+            try {
+                geminiLoading.value = true;
+                const response = await fetchAdmin('/ai/reminder', {
+                    method: 'POST',
+                    body: JSON.stringify({ name: customer.name, plan: customer.plan, dueDate: customer.due_date })
+                });
+                const data = await response.json();
+                aiReminder.value = { show: true, message: data.message, customer: customer };
+            } catch (error) {
+                alert(`AI generation failed: ${error.message}`);
+            } finally {
+                geminiLoading.value = false;
+            }
+        }
+        
+        async function generateBusinessInsights() {
+            try {
+                geminiLoading.value = true;
+                const response = await fetchAdmin('/ai/insights', {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        stats: {
+                            totalRevenue: totalRevenue.value,
+                            trueProfit: trueProfit.value,
+                            customerCount: customers.value.length,
+                            dueSoonCount: dueSoonCount.value,
+                            overdueCount: overdueCount.value,
+                            loyalCustomerCount: loyalCustomerCount.value
+                        },
+                        plans: allPlans.value.map(p => ({ name: p.name, count: customers.value.filter(c => c.plan === p.name).length }))
+                    })
+                });
+                const data = await response.json();
+                businessInsights.value = data.insights;
+            } catch (error) {
+                alert(`AI generation failed: ${error.message}`);
+            } finally {
+                geminiLoading.value = false;
+            }
+        }
+
+
+        // --- Page and Data Functions (No major changes here) ---
+        function showAdminLogin() {
+            isAdmin.value = true;
+        }
+
+        function formatDate(d) {
+            if (!d) return 'N/A';
+            try { return new Date(d).toLocaleDateString('en-GB'); }
+            catch (e) { console.error("Error formatting date:", d, e); return 'Invalid Date'; }
+        }
+
+        function getDetailedStatus(d) {
+            if (!d) return { text: 'N/A', class: 'bg-gray-500/20 text-gray-400' };
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dueDate = new Date(d);
+            dueDate.setHours(0, 0, 0, 0);
+            const threeDaysFromNow = new Date(today);
+            threeDaysFromNow.setDate(today.getDate() + 3);
+
+            if (dueDate < today) return { text: 'Overdue', class: 'bg-red-500/20 text-red-400' };
+            if (dueDate >= today && dueDate <= threeDaysFromNow) return { text: 'Due Soon', class: 'bg-yellow-500/20 text-yellow-400' };
+            return { text: 'Active', class: 'bg-green-500/20 text-green-400' };
+        }
+
+        function renderChart() {
+            if (chartInstance) chartInstance.destroy();
+            const el = document.getElementById('financialChart');
+            if (!el) return; 
+            const ctx = el.getContext('2d');
+            Chart.defaults.color = '#9ca3af';
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Revenue', 'Expenses', 'Profit'],
+                    datasets: [{
+                        label: 'Financials (in K)',
+                        data: [totalRevenue.value, totalExpenses.value, trueProfit.value],
+                        backgroundColor: ['#8A2BE2', '#F97316', '#22C55E'],
+                        tension: 0.1,
+                        fill: true,
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function renderPlanChart() {
+            if (planChartInstance) planChartInstance.destroy();
+            const el = document.getElementById('planChart');
+            if (!el) return; 
+            const ctx = el.getContext('2d');
+            const planCounts = { 'Netflix': 0, 'Spotify': 0, 'Apple Music': 0 };
+            customers.value.forEach(c => {
+                if (c.plan.includes('Netflix')) planCounts['Netflix']++;
+                else if (c.plan.includes('Spotify')) planCounts['Spotify']++;
+                else if (c.plan.includes('Apple Music')) planCounts['Apple Music']++;
+            });
+            
+            planChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(planCounts),
+                    datasets: [{
+                        data: Object.values(planCounts),
+                        backgroundColor: ['#E50914', '#1DB954', '#A2AA2D']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // --- onMounted ---
+        onMounted(async () => {
+            console.log("Component mounted. Checking for existing token...");
+            if (authToken.value) {
+                console.log("Token found:", authToken.value);
+                isAdmin.value = true; 
+                try {
+                    console.log("Validating token...");
+                    await fetch(`${API_URL}/auth/me`, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${authToken.value}` }
+                    }); 
+                    console.log("Token validation successful.");
+                    authenticated.value = true; 
+                    
+                    console.log("Loading admin data on mount...");
+                    await loadAllAdminData();
+                    console.log("Admin data loaded on mount.");
+                    nextTick(() => {
+                        console.log("Rendering charts on mount...");
+                        renderChart();
+                        renderPlanChart();
+                    });
+                } catch (error) {
+                    console.error("Token validation failed on mount:", error);
+                    clearSession(); 
+                }
+            } else {
+                console.log("No token found in localStorage.");
+            }
+            
+            // Sticky header and scroll observer logic
+            window.addEventListener('scroll',()=>{if(header.value)header.value.classList.toggle('sticky',window.scrollY>10);});
+            const obs=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting){n.target.classList.add('is-visible');obs.unobserve(n.target)}})},{threshold:.1});
+            document.querySelectorAll('.animate-on-scroll').forEach(el=>obs.observe(el));
+        });
+
+        // --- Return ---
+        return {
+            isAdmin, authenticated, loginError, myAirtel, myMtn, myEmail, services, allPlans, form, customers, searchTerm,
+            totalRevenue, trueProfit, dueSoonCount, overdueCount, loyalCustomerCount,
+            showAdminLogin, login, logout, selectPlan, handleSubmit, renewSubscription,
+            formatDate, getDetailedStatus, editingCustomer, openEditModal, closeEditModal,
+            saveCustomerDetails, currentExpense, logExpense, exportToCSV, filteredCustomers,
+            showPlanAdvisor, advisor, getAIRecommendation, geminiLoading, aiReminder,
+            generateAIReminder, copyToClipboard: () => alert("Copied!"), businessInsights, generateBusinessInsights,
+            authView, loginForm, signupForm, handleSignup, handleForgot,
+            showPaymentSteps, paymentStep, pendingPaymentDetails, confirmPaymentSent,
+            netflixEmail, netflixPassword, spotifyInfo, appleMusicInfo, saveCredentials,
+            confirmCustomerPayment, feedbackMessage, handleFeedback,
+            header 
+        };
+    }
+}).mount('#app');
+    </script>
+</body>
+</html>
