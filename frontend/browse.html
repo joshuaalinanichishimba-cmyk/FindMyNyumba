@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Student Housing - FindMyNyumba</title>
+
+    <!--
+      FIX: Original file stuffed inline JavaScript inside this Tailwind
+      <script src="..."> tag. Browsers run the external src and silently
+      drop the inline body, so the resolveImageUrl defined there never
+      ran. The function is now defined exactly once, at the bottom of
+      the page, alongside the other JS.
+    -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-
     <style>
-        /* ── Sidebar / nav transitions (unchanged) ─────────────────── */
         #filters-sidebar { transition: transform 0.3s ease, opacity 0.3s ease; }
-        #filters-sidebar.sidebar-open   { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
+        #filters-sidebar.sidebar-open  { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
         #filters-sidebar.sidebar-closed { transform: translateX(-100%); opacity: 0; visibility: hidden; pointer-events: none; }
         @media (min-width: 768px) {
             #filters-sidebar { transform: translateX(0) !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; position: relative !important; }
@@ -19,184 +24,24 @@
         }
         #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
         #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
-
-        /* ══════════════════════════════════════════════════════════════
-           LISTING CARD STYLES
-           (Replaces the old .listing-card rule entirely)
-        ══════════════════════════════════════════════════════════════ */
-
-        /* ── Card base ─────────────────────────────────────────────── */
-        .fmn-card {
-            position: relative;
-            background: #ffffff;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.07);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s ease;
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-        }
-        .fmn-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.04);
-        }
-        .fmn-card:active { transform: translateY(-2px); }
-
-        /* ── Image zone ────────────────────────────────────────────── */
-        .fmn-img-wrap {
-            position: relative;
-            height: 210px;
-            overflow: hidden;
-            background: #f0ece8;
-            flex-shrink: 0;
-        }
-        .fmn-img-wrap img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .fmn-card:hover .fmn-img-wrap img { transform: scale(1.04); }
-        .fmn-img-wrap::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.36) 0%, transparent 55%);
-            pointer-events: none;
-        }
-
-        /* ── Overlay badge areas ───────────────────────────────────── */
-        .fmn-top-left {
-            position: absolute; top: 12px; left: 12px; z-index: 2;
-            display: flex; gap: 5px; flex-wrap: wrap;
-        }
-
-        /* Favourite button (top-right, not in a wrapper div so it stays fixed) */
-        .fmn-fav-btn {
-            position: absolute; top: 12px; right: 12px; z-index: 2;
-            width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(8px);
-            border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: #bbb; font-size: 15px;
-            transition: color 0.2s, transform 0.2s;
-        }
-        .fmn-fav-btn:hover { transform: scale(1.15); color: #ea580c; }
-        .fmn-fav-btn.active { color: #ea580c; }
-
-        /* ── Badges ────────────────────────────────────────────────── */
-        .fmn-badge {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 4px 10px; border-radius: 999px;
-            font-size: 10.5px; font-weight: 700;
-            letter-spacing: 0.04em; text-transform: uppercase;
-            white-space: nowrap; line-height: 1;
-        }
-        .fmn-badge-type     { background: rgba(15,15,15,0.80); color: #fff; backdrop-filter: blur(6px); }
-        .fmn-badge-verified { background: rgba(22,163,74,0.90); color: #fff; backdrop-filter: blur(6px); }
-        .fmn-badge-new      { background: #ea580c; color: #fff; }
-        .fmn-badge-boosted  {
-            background: linear-gradient(90deg,#ea580c,#f97316); color:#fff;
-            animation: fmn-pulse 2.2s ease-in-out infinite;
-        }
-        @keyframes fmn-pulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(234,88,12,0.5); }
-            50%      { box-shadow: 0 0 0 5px rgba(234,88,12,0); }
-        }
-
-        /* ── Distance chip ─────────────────────────────────────────── */
-        .fmn-distance {
-            position: absolute; bottom: 12px; left: 12px; z-index: 2;
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(255,255,255,0.93); backdrop-filter: blur(8px);
-            padding: 4px 10px 4px 8px; border-radius: 999px;
-            font-size: 11.5px; font-weight: 700; color: #1a1a1a;
-        }
-        .fmn-distance i { color: #ea580c; font-size: 10px; }
-
-        /* ── Carousel dots ─────────────────────────────────────────── */
-        .fmn-dots {
-            position: absolute; bottom: 13px; right: 12px; z-index: 2;
-            display: flex; gap: 4px; align-items: center;
-        }
-        .fmn-dot {
-            width: 16px; height: 4px; border-radius: 2px;
-            background: rgba(255,255,255,0.50);
-        }
-        .fmn-dot.active { background: #fff; width: 20px; }
-
-        /* ── Card body ─────────────────────────────────────────────── */
-        .fmn-body { padding: 15px 16px 17px; display: flex; flex-direction: column; flex-grow: 1; }
-
-        /* Title + rating */
-        .fmn-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
-        .fmn-title {
-            font-size: 15px; font-weight: 800; color: #111; line-height: 1.3;
-            overflow: hidden; display: -webkit-box;
-            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-        }
-        .fmn-rating { display: inline-flex; align-items: center; gap: 3px; font-size: 12.5px; font-weight: 700; color: #111; white-space: nowrap; flex-shrink: 0; }
-        .fmn-rating i { color: #ea580c; font-size: 10.5px; }
-        .fmn-rating-count { color: #999; font-weight: 500; }
-
-        /* Location */
-        .fmn-location { display: flex; align-items: flex-start; gap: 5px; font-size: 12.5px; color: #666; font-weight: 500; margin-bottom: 10px; }
-        .fmn-location i { color: #ea580c; font-size: 10.5px; margin-top: 2px; flex-shrink: 0; }
-
-        /* Amenity pills */
-        .fmn-amenities { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
-        .fmn-pill { display: inline-flex; align-items: center; gap: 4px; background: #f5f4f1; color: #444; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-        .fmn-pill i { font-size: 10px; color: #ea580c; }
-
-        /* Divider */
-        .fmn-divider { height: 1px; background: #f0ece8; margin-bottom: 12px; }
-
-        /* Price + CTA footer */
-        .fmn-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-        .fmn-price { font-size: 20px; font-weight: 900; color: #111; letter-spacing: -0.5px; line-height: 1; }
-        .fmn-price-unit { font-size: 11px; color: #999; font-weight: 500; }
-        .fmn-owner { display: flex; align-items: center; gap: 3px; font-size: 11.5px; color: #666; font-weight: 500; margin-top: 2px; }
-        .fmn-owner-name { font-weight: 700; color: #222; }
-        .fmn-owner-check { color: #16a34a; font-size: 11px; }
-
-        /* CTA button */
-        .fmn-cta {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: #ea580c; color: #fff;
-            padding: 9px 20px; border-radius: 999px;
-            font-size: 13px; font-weight: 800; text-decoration: none;
-            transition: background 0.18s, transform 0.18s;
-            white-space: nowrap; flex-shrink: 0; border: none;
-        }
-        .fmn-cta:hover { background: #c2410c; transform: scale(1.03); color: #fff; text-decoration: none; }
-
-        /* Meta row (views + report + spots) */
-        .fmn-meta-row { display: flex; justify-content: space-between; align-items: center; }
-        .fmn-meta-actions { display: flex; align-items: center; gap: 8px; }
-        .fmn-views { font-size: 11px; color: #aaa; font-weight: 500; display: flex; align-items: center; gap: 4px; }
-        .fmn-views i { font-size: 10px; color: #ea580c; }
-        .fmn-report { font-size: 11px; color: #ccc; font-weight: 500; cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 3px; background: none; border: none; padding: 0; }
-        .fmn-report:hover { color: #ef4444; }
-        .fmn-spots { display: inline-flex; align-items: center; gap: 4px; background: #fff7ed; color: #ea580c; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; border: 1px solid #fed7aa; }
-        .fmn-spots-urgent { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
-
-        /* ── Skeleton loading cards ─────────────────────────────────── */
-        .fmn-skeleton { background: #ede9e4; border-radius: 20px; height: 380px; animation: fmn-shimmer 1.5s ease infinite; }
-        @keyframes fmn-shimmer { 0%,100% { opacity:1; } 50% { opacity:0.45; } }
+        .listing-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .listing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12); }
     </style>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 </head>
 <body class="bg-gray-50">
 
-    <!-- NAV ──────────────────────────────────────────────────────── -->
+    <!-- NAV -->
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
+
                 <a href="index.html" class="flex-shrink-0 flex items-center" style="text-decoration:none;">
                     <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;"
                          onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
                     <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
                 </a>
+
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold transition-colors text-sm">Home</a>
                     <a href="browse.html" class="text-[#ea580c] font-semibold text-sm">Browse</a>
@@ -207,21 +52,23 @@
                     <a id="nav-logout-desk" href="#" onclick="logout(); return false;" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors text-sm">Logout</a>
                     <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition-colors text-sm">Post Property</a>
                 </div>
+
                 <button id="mobile-nav-toggle" aria-label="Toggle navigation"
                         class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
                     <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
                 </button>
             </div>
         </div>
+
         <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
             <div class="flex flex-col space-y-1 pt-3">
-                <a href="index.html"          class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
-                <a href="browse.html"         class="px-3 py-3 rounded-xl text-[#ea580c] font-bold bg-orange-50 text-sm">Browse</a>
-                <a href="how-it-works.html"   class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
+                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
+                <a href="browse.html" class="px-3 py-3 rounded-xl text-[#ea580c] font-bold bg-orange-50 text-sm">Browse</a>
+                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
                 <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Dashboard</a>
-                <a id="nav-login-mob"    href="login.html"    class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
+                <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
                 <a id="nav-register-mob" href="register.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Register</a>
-                <a id="nav-logout-mob"   href="#" onclick="logout(); return false;" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
+                <a id="nav-logout-mob" href="#" onclick="logout(); return false;" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
                 <a href="register-landlord.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
             </div>
         </div>
@@ -231,7 +78,7 @@
 
     <div class="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Search bar row ──────────────────────────────────────── -->
+        <!-- Search bar row -->
         <div class="mt-6 mb-4 flex flex-col sm:flex-row gap-3">
             <div class="flex-1 relative">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
@@ -239,10 +86,12 @@
                        placeholder="Search by area, property name, university..."
                        class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm text-sm">
             </div>
+
             <button id="filter-toggle-btn" onclick="toggleSidebar()"
                     class="md:hidden flex items-center justify-center gap-2 px-5 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-bold shadow-sm hover:border-[#ea580c] hover:text-[#ea580c] transition-colors text-sm">
                 <i class="fas fa-sliders-h"></i> Filters
             </button>
+
             <div class="relative">
                 <select id="sort-filter" onchange="applyFilters()"
                         class="appearance-none pl-4 pr-10 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-semibold focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm cursor-pointer w-full sm:w-auto text-sm">
@@ -256,7 +105,7 @@
 
         <div class="flex flex-col md:flex-row gap-6">
 
-            <!-- Filter sidebar ──────────────────────────────────── -->
+            <!-- Filter sidebar -->
             <aside id="filters-sidebar"
                    class="sidebar-closed fixed md:relative top-0 left-0 md:top-auto md:left-auto
                           w-72 md:w-64 h-full md:h-auto bg-white
@@ -288,6 +137,7 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price Range (ZMW)</label>
                         <div class="space-y-2">
@@ -297,6 +147,7 @@
                                    class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none text-sm">
                         </div>
                     </div>
+
                     <button id="apply-filters"
                             class="w-full bg-[#ea580c] hover:bg-orange-700 text-white py-3 rounded-xl font-bold transition-colors shadow-sm text-sm">
                         <i class="fas fa-check mr-2"></i>Apply Filters
@@ -308,24 +159,19 @@
                 </div>
             </aside>
 
-            <!-- Listings grid ──────────────────────────────────── -->
+            <!-- Listings grid -->
             <main class="flex-1 min-w-0">
                 <div class="flex justify-between items-center mb-5">
                     <h1 class="text-lg md:text-xl font-black text-gray-800">Available Listings</h1>
                     <p id="results-count" class="text-sm text-gray-400 font-semibold"></p>
                 </div>
-                <!--
-                  The grid uses the same classes as before.
-                  Cards are injected by FMNCards.renderListings() via listing-cards.js.
-                -->
-                <div id="listings-container"
-                     class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
-                </div>
+
+                <div id="listings-container" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5"></div>
             </main>
         </div>
     </div>
 
-    <!-- Testimonials ─────────────────────────────────────────────── -->
+    <!-- Testimonials -->
     <section class="py-16 md:py-24 bg-white mt-16 border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -375,7 +221,7 @@
         </div>
     </section>
 
-    <!-- Footer ───────────────────────────────────────────────────── -->
+    <!-- Footer -->
     <footer class="bg-slate-900 text-slate-400 py-14 mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
@@ -393,65 +239,70 @@
                 <div>
                     <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="index.html"       class="hover:text-[#ea580c] transition-colors font-medium">Home</a></li>
-                        <li><a href="browse.html"      class="hover:text-[#ea580c] transition-colors font-medium">Browse Properties</a></li>
-                        <li><a href="how-it-works.html"class="hover:text-[#ea580c] transition-colors font-medium">How It Works</a></li>
-                        <li><a href="login.html"       class="hover:text-[#ea580c] transition-colors font-medium">Login</a></li>
-                        <li><a href="register.html"    class="hover:text-[#ea580c] transition-colors font-medium">Register</a></li>
+                        <li><a href="index.html" class="hover:text-[#ea580c] transition-colors font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors font-medium">Browse Properties</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] transition-colors font-medium">Login</a></li>
+                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors font-medium">Register</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">For Landlords</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="register-landlord.html" class="hover:text-[#ea580c] transition-colors font-medium">Register as Landlord</a></li>
-                        <li><a href="how-it-works.html"      class="hover:text-[#ea580c] transition-colors font-medium">Landlord Guide</a></li>
-                        <li><a href="help.html"              class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">Landlord Guide</a></li>
+                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Support</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="help.html"   class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
-                        <li><a href="terms.html"  class="hover:text-[#ea580c] transition-colors font-medium">Terms of Service</a></li>
-                        <li><a href="privacy.html"class="hover:text-[#ea580c] transition-colors font-medium">Privacy Policy</a></li>
-                        <li><a href="about.html"  class="hover:text-[#ea580c] transition-colors font-medium">About Us</a></li>
+                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] transition-colors font-medium">Terms of Service</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] transition-colors font-medium">Privacy Policy</a></li>
+                        <li><a href="about.html" class="hover:text-[#ea580c] transition-colors font-medium">About Us</a></li>
                     </ul>
                 </div>
             </div>
             <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
                 <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
                 <div class="flex gap-4">
-                    <a href="terms.html"  class="hover:text-white transition-colors">Terms</a>
-                    <a href="privacy.html"class="hover:text-white transition-colors">Privacy</a>
+                    <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
+                    <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!--
-      Load the card module BEFORE the main script so renderListings is
-      available when browse.html's DOMContentLoaded fires.
-    -->
-    <script src="listing-cards.js"></script>
-
     <script>
     'use strict';
 
-    /* ── Runtime config (auto-detects dev vs prod) ─────────────────── */
+    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+       FindMyNyumba runtime config
+
+       Auto-detects backend host so the same HTML works in dev (localhost)
+       AND production (Vercel ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Render) without code edits or build steps.
+       ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
     const FMN = (function () {
-        const host    = window.location.hostname;
+        const host = window.location.hostname;
         const isLocal = (host === 'localhost' || host === '127.0.0.1');
         const API_HOST = isLocal
             ? 'http://127.0.0.1:8000'
             : 'https://findmynyumba.onrender.com';
-        return { API_HOST, API_BASE: API_HOST + '/api/v1' };
+        return {
+            API_HOST,
+            API_BASE: API_HOST + '/api/v1',
+        };
     })();
-    const API_BASE         = FMN.API_BASE;
+    const API_BASE = FMN.API_BASE;
+    // Fallback backend host for environments where the primary Render app differs.
     const API_BASE_FALLBACK = FMN.API_HOST.includes('127.0.0.1')
         ? null
         : 'https://findmynyumba-backend.onrender.com/api/v1';
 
-    /* ── Image URL resolver ────────────────────────────────────────── */
+    /* Resolve any value stored as image_url to a usable absolute URL.
+       Backend now returns absolute URLs directly, but we keep this helper
+       so older rows / external image fields still work. */
     function resolveImageUrl(raw) {
         const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
         if (!raw) return FALLBACK;
@@ -461,85 +312,112 @@
         return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
     }
 
-    /* ── HTML-escape ───────────────────────────────────────────────── */
+    /* HTML-escape user-supplied text before injecting into innerHTML. */
     function esc(str) {
         if (str === null || str === undefined) return '';
         return String(str)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    /* ── Auth-aware nav ────────────────────────────────────────────── */
+    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Auth-aware nav ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
     (function initNav() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
         if (!token || !role) return;
-        const routes = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+
+        const routes = {
+            student:      'dashboard-student.html',
+            student_host: 'dashboard-student-host.html',
+            landlord:     'dashboard-landlord.html',
+            admin:        'admin.html',
+        };
         const dest = routes[role] || 'browse.html';
-        ['nav-dashboard-desk','nav-dashboard-mob'].forEach(id => { const el = document.getElementById(id); if (el) { el.href = dest; el.classList.remove('hidden'); } });
-        ['nav-login-desk','nav-register-desk','nav-login-mob','nav-register-mob'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
-        ['nav-logout-desk','nav-logout-mob'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
+
+        ['nav-dashboard-desk', 'nav-dashboard-mob'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.href = dest; el.classList.remove('hidden'); }
+        });
+        ['nav-login-desk', 'nav-register-desk', 'nav-login-mob', 'nav-register-mob'].forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
+        });
+        ['nav-logout-desk', 'nav-logout-mob'].forEach(id => {
+            document.getElementById(id)?.classList.remove('hidden');
+        });
     })();
 
     function logout() {
-        ['token','role','adminToken','adminRole','adminName'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+        ['token', 'role', 'adminToken', 'adminRole', 'adminName'].forEach(k => {
+            localStorage.removeItem(k);
+            sessionStorage.removeItem(k);
+        });
         window.location.reload();
     }
 
-    /* ── Mobile nav toggle ─────────────────────────────────────────── */
+    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Mobile nav toggle ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
     const mobileNavToggle = document.getElementById('mobile-nav-toggle');
     const mobileMenu      = document.getElementById('mobile-menu');
     const hamburgerIcon   = document.getElementById('hamburger-icon');
+
     mobileNavToggle.addEventListener('click', () => {
         const isOpen = mobileMenu.classList.contains('menu-open');
         mobileMenu.classList.toggle('menu-open', !isOpen);
         hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
     });
+
     mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
         mobileMenu.classList.remove('menu-open');
         hamburgerIcon.className = 'fas fa-bars text-xl';
     }));
 
-    /* ── Filter sidebar (mobile) ───────────────────────────────────── */
+    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Filter sidebar (mobile) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
     function toggleSidebar() {
         const sidebar = document.getElementById('filters-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         const isOpen  = sidebar.classList.contains('sidebar-open');
-        sidebar.classList.toggle('sidebar-open',  !isOpen);
-        sidebar.classList.toggle('sidebar-closed', isOpen);
+        sidebar.classList.toggle('sidebar-open',   !isOpen);
+        sidebar.classList.toggle('sidebar-closed',  isOpen);
         overlay.classList.toggle('hidden', isOpen);
         document.body.style.overflow = isOpen ? '' : 'hidden';
     }
+
     function closeSidebar() {
         document.getElementById('filters-sidebar').classList.remove('sidebar-open');
         document.getElementById('filters-sidebar').classList.add('sidebar-closed');
         document.getElementById('sidebar-overlay').classList.add('hidden');
         document.body.style.overflow = '';
     }
+
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
-    /* ── Fetch listings ────────────────────────────────────────────── */
+    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Fetch listings ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
     async function fetchListings(queryString = '') {
         const container = document.getElementById('listings-container');
-        const countEl   = document.getElementById('results-count');
-
-        /* Show skeleton placeholders while loading */
-        container.innerHTML = FMNCards.skeletonHTML();
-        if (countEl) countEl.textContent = '';
+        container.innerHTML = `
+            <div class="col-span-full text-center py-20">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-[#ea580c]"></i>
+                <p class="mt-4 text-gray-500 font-bold">Finding the best Nyumbas...</p>
+            </div>`;
+        document.getElementById('results-count').textContent = '';
 
         try {
             const primaryUrl = `${API_BASE}/properties${queryString}`;
             let res = await fetch(primaryUrl);
+
+            // If the backend host is wrong/moved, retry once with a known alternate Render app.
             if (!res.ok && API_BASE_FALLBACK) {
-                res = await fetch(`${API_BASE_FALLBACK}/properties${queryString}`);
+                const fallbackUrl = `${API_BASE_FALLBACK}/properties${queryString}`;
+                res = await fetch(fallbackUrl);
             }
+
             if (!res.ok) {
                 let detail = `Server error ${res.status}`;
                 try { const body = await res.json(); detail = body.detail || detail; } catch (_) {}
                 throw new Error(detail);
             }
+
             const data = await res.json();
-            FMNCards.renderListings(Array.isArray(data) ? data : []);
+            renderListings(Array.isArray(data) ? data : []);
         } catch (err) {
             container.innerHTML = `
                 <div class="col-span-full text-center py-16 bg-red-50 rounded-3xl border border-red-100 px-6">
@@ -554,29 +432,82 @@
         }
     }
 
-    /*
-      renderListings is now provided by listing-cards.js (window.FMNCards.renderListings).
-      It is called via FMNCards.renderListings(listings) from fetchListings() above.
-      If you ever need a quick inline call you can also write:
-        FMNCards.renderListings(myArray);
-    */
+    function renderListings(listings) {
+        const container = document.getElementById('listings-container');
+        const countEl   = document.getElementById('results-count');
 
-    /* ── Filters ───────────────────────────────────────────────────── */
+        const sortVal = document.getElementById('sort-filter')?.value || 'newest';
+        if (sortVal === 'price_asc')  listings.sort((a, b) => Number(a.price) - Number(b.price));
+        if (sortVal === 'price_desc') listings.sort((a, b) => Number(b.price) - Number(a.price));
+
+        if (!listings || !listings.length) {
+            countEl.textContent = '';
+            container.innerHTML = `
+                <div class="col-span-full text-center py-16 bg-gray-50 rounded-3xl border border-dashed border-gray-200 px-6">
+                    <i class="fas fa-search text-4xl text-gray-300 mb-4 block"></i>
+                    <p class="text-lg text-gray-500 font-black">No matching properties found.</p>
+                    <p class="text-gray-400 text-sm mt-2">Try adjusting your filters or search keywords.</p>
+                </div>`;
+            return;
+        }
+
+        countEl.textContent = `${listings.length} listing${listings.length !== 1 ? 's' : ''} found`;
+
+        container.innerHTML = listings.map(p => {
+            const price     = Number(p.price).toLocaleString();
+            const imgUrl    = resolveImageUrl(p.image_url);
+            const safeTitle = esc(p.title || '');
+            const safeLoc   = esc(p.location || '');
+
+            // FIX: original href was "listing?id=..." (missing .html ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ 404).
+            return `
+            <div class="listing-card group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                <div class="relative h-48 sm:h-52 bg-gray-100 overflow-hidden flex-shrink-0">
+                    <img src="${imgUrl}" loading="lazy"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         alt="${safeTitle}"
+                         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-black text-green-600 shadow-sm flex items-center gap-1 uppercase tracking-wide">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                    ${p.is_boosted ? `
+                    <div class="absolute top-3 right-3 bg-[#ea580c] text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
+                        <i class="fas fa-star"></i> Featured
+                    </div>` : ''}
+                </div>
+                <div class="p-4 md:p-5 flex flex-col flex-grow">
+                    <h3 class="font-black text-base text-gray-900 leading-snug mb-1 line-clamp-2" title="${safeTitle}">${safeTitle}</h3>
+                    <p class="text-[#ea580c] font-black text-lg mb-2">ZMW ${price}</p>
+                    <p class="text-gray-500 text-xs font-semibold flex items-start gap-1.5 mb-4 flex-grow">
+                        <i class="fas fa-map-marker-alt text-[#ea580c] mt-0.5 flex-shrink-0"></i>
+                        <span class="line-clamp-2">${safeLoc}</span>
+                    </p>
+                    <a href="listing.html?id=${encodeURIComponent(p.id)}"
+                       class="w-full inline-flex items-center justify-center bg-gray-900 text-white px-4 py-2.5 rounded-xl font-black hover:bg-[#ea580c] transition-colors text-sm">
+                        View Details <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
+                    </a>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Filters ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
     function applyFilters() {
         const uni     = document.getElementById('university-filter').value;
         const min     = document.getElementById('min-price').value.trim();
         const max     = document.getElementById('max-price').value.trim();
         const keyword = (document.getElementById('keyword-search')?.value || '').trim();
-        const params  = new URLSearchParams();
+
+        const params = new URLSearchParams();
         if (uni)     params.append('university', uni);
         if (min)     params.append('min_price',  min);
         if (max)     params.append('max_price',  max);
         if (keyword) params.append('q',          keyword);
+
         fetchListings(params.toString() ? `?${params}` : '');
         closeSidebar();
     }
 
-    /* ── Boot ──────────────────────────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const preQuery  = urlParams.get('q');
@@ -597,3 +528,5 @@
     </script>
 </body>
 </html>
+
+

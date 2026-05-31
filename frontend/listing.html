@@ -10,45 +10,35 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="icon" type="image/png" href="logo.png">
     <style>
-        * { box-sizing: border-box; }
-        img { max-width: 100%; height: auto; }
-        input, textarea, select { max-width: 100%; }
         #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
         #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
         #toast.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
 
-        /* ── Gallery image transition ── */
-        #main-image { transition: opacity 0.15s ease; }
-
-        /* ── Sticky CTA bar (mobile) ── */
-        @media (max-width: 1024px) {
-            .fmn-sticky-cta {
-                position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
-                background: #fff;
-                border-top: 1px solid #f0ece8;
-                padding: 12px 16px;
-                display: flex; gap: 10px; align-items: center;
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-            }
+        /* Mobile safety */
+        * { box-sizing: border-box; }
+        img { max-width: 100%; height: auto; }
+        input, textarea, select { max-width: 100%; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @media (max-width: 640px) {
+            .sm\:hidden-mobile { display: none !important; }
         }
-        @media (min-width: 1024px) { .fmn-sticky-cta { display: none; } }
     </style>
 </head>
-<body class="bg-gray-50 pb-24 lg:pb-6">
+<body class="bg-gray-50 pb-20">
 
     <!-- Toast -->
     <div id="toast" class="hide fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm shadow-2xl flex items-center gap-2 min-w-[260px] max-w-[90vw] justify-center"></div>
 
     <!-- Nav -->
-    <nav class="bg-white shadow-sm px-4 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-slate-100">
+    <nav class="bg-white shadow-sm px-4 py-2 flex justify-between items-center sticky top-0 z-40 border-b border-slate-100">
         <a href="index.html" class="flex items-center gap-2">
             <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;display:block;object-fit:contain;" onerror="this.style.display='none'">
         </a>
         <div class="flex gap-3 sm:gap-5 items-center">
-            <a href="browse.html"       class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors">Browse</a>
+            <a href="browse.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors">Browse</a>
             <a href="how-it-works.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors hidden sm:block">How It Works</a>
             <a id="nav-dashboard" href="login.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors hidden">Dashboard</a>
-            <a id="nav-login"     href="login.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors">Login</a>
+            <a id="nav-login" href="login.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors">Login</a>
         </div>
     </nav>
 
@@ -66,28 +56,31 @@
         <div class="lg:col-span-2 space-y-5">
 
             <!-- Property image -->
-            <div class="relative w-full h-64 sm:h-80 md:h-[420px] rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
+            <div class="relative w-full h-64 sm:h-80 md:h-[420px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm">
                 <img id="main-image"
-                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23f0ece8'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%23b0a89e'%3ELoading image...%3C/text%3E%3C/svg%3E"
+                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%239ca3af'%3ELoading image...%3C/text%3E%3C/svg%3E"
                      alt="Property"
-                     class="w-full h-full object-cover">
+                     class="w-full h-full object-cover transition-opacity duration-200">
+                <!-- Photo counter badge (shown when >1 photo) -->
                 <div id="photo-counter" class="hidden absolute bottom-3 right-3 bg-black/60 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
                     <i class="fas fa-images text-xs"></i>
                     <span id="photo-counter-text"></span>
                 </div>
                 <div id="boosted-badge" class="hidden absolute top-3 right-3 bg-[#ea580c] text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
-                    <i class="fas fa-bolt"></i> Featured
+                    <i class="fas fa-star"></i> Featured
                 </div>
             </div>
 
-            <!-- Photo gallery thumbnails -->
-            <div id="photo-gallery" class="hidden gap-2 overflow-x-auto pb-1 mt-2" style="display:none;"></div>
+            <!-- Photo gallery thumbnails (shown only when listing has >1 image) -->
+            <div id="photo-gallery" class="hidden gap-2 overflow-x-auto pb-1 mt-2" style="display:none;">
+                <!-- thumbnails injected by loadData() -->
+            </div>
 
             <!-- Details card -->
-            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div class="flex-1 min-w-0">
-                        <h2 id="prop-title" class="text-2xl md:text-3xl font-black text-gray-900 leading-tight">Loading...</h2>
+                        <h2 id="prop-title" class="text-2xl md:text-3xl font-black text-gray-800 leading-tight">Loading...</h2>
                         <p class="text-gray-500 mt-2 text-sm flex items-center gap-1.5">
                             <i class="fas fa-map-marker-alt text-[#ea580c] flex-shrink-0"></i>
                             <span id="prop-location-text">Loading location...</span>
@@ -103,14 +96,15 @@
                     <p id="prop-description" class="text-gray-600 leading-relaxed whitespace-pre-line text-sm">Loading details...</p>
                 </div>
                 <div class="mt-5 pt-4 border-t border-gray-100">
-                    <button onclick="openReportModal()" class="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5">
+                    <button onclick="openReportModal()"
+                        class="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5">
                         <i class="fas fa-flag"></i> Report this listing
                     </button>
                 </div>
             </div>
 
             <!-- Review card -->
-            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm">
                 <h4 class="text-xl font-bold text-gray-800 mb-5">Leave a Review</h4>
                 <div class="bg-gray-50 p-5 rounded-xl border border-gray-100">
                     <div class="flex gap-2 text-3xl mb-4" id="star-container">
@@ -130,20 +124,21 @@
             </div>
         </div>
 
-        <!-- Right: sidebar (desktop) -->
+        <!-- Right: sidebar -->
         <div class="space-y-5">
 
             <!-- Host card -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <div id="host-avatar"
                     class="w-16 h-16 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-xl mx-auto mb-3 font-black border-4 border-white shadow-md">&nbsp;</div>
-                <h3 id="host-name"  class="text-lg font-bold text-gray-800 mb-1">Loading...</h3>
+                <h3 id="host-name" class="text-lg font-bold text-gray-800 mb-1">Loading...</h3>
                 <div id="host-badge" class="text-xs text-gray-400 mb-4"></div>
                 <button id="msg-landlord-btn"
                     class="w-full py-3 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] shadow-md shadow-orange-200 transition-all flex items-center justify-center gap-2 text-sm">
                     <i class="fas fa-paper-plane"></i> Message Host
                 </button>
-                <button id="agreement-btn" onclick="openAgreement()"
+                <button id="agreement-btn"
+                    onclick="openAgreement()"
                     class="w-full mt-2 py-3 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:border-[#ea580c] hover:text-[#ea580c] transition-all flex items-center justify-center gap-2 text-sm">
                     <i class="fas fa-file-contract"></i> Generate Rental Agreement
                 </button>
@@ -171,18 +166,6 @@
         </div>
     </div>
 
-    <!-- Sticky CTA (mobile only) -->
-    <div class="fmn-sticky-cta">
-        <div class="flex-1 min-w-0">
-            <p id="sticky-price" class="text-lg font-black text-gray-900 leading-none"></p>
-            <p class="text-xs text-gray-400 font-medium">per month</p>
-        </div>
-        <button id="sticky-msg-btn"
-            class="flex-shrink-0 bg-[#ea580c] text-white font-black px-5 py-3 rounded-xl text-sm shadow-md shadow-orange-200 hover:bg-[#c2410c] transition-colors">
-            <i class="fas fa-paper-plane mr-1.5"></i>Message Host
-        </button>
-    </div>
-
     <!-- Message Modal -->
     <div id="message-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
@@ -200,7 +183,7 @@
             </div>
             <div class="p-5 bg-gray-50 flex gap-3 border-t border-gray-100">
                 <button id="modal-cancel-btn" class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition text-sm">Cancel</button>
-                <button id="modal-send-btn"   class="flex-1 px-4 py-2.5 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] shadow-md transition text-sm">Send Inquiry</button>
+                <button id="modal-send-btn" class="flex-1 px-4 py-2.5 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] shadow-md transition text-sm">Send Inquiry</button>
             </div>
         </div>
     </div>
@@ -217,14 +200,15 @@
             <div class="p-5 space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Reason</label>
-                    <select id="report-reason" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none bg-white text-sm text-gray-700">
+                    <select id="report-reason"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none bg-white text-sm text-gray-700">
                         <option value="">Select a reason...</option>
-                        <option>Scam or Fraud</option>
-                        <option>Misleading Photos</option>
-                        <option>Wrong Price</option>
-                        <option>Already Taken</option>
-                        <option>Inappropriate Content</option>
-                        <option>Other</option>
+                        <option value="Scam or Fraud">Scam or Fraud</option>
+                        <option value="Misleading Photos">Misleading Photos</option>
+                        <option value="Wrong Price">Wrong Price</option>
+                        <option value="Already Taken">Already Taken</option>
+                        <option value="Inappropriate Content">Inappropriate Content</option>
+                        <option value="Other">Other</option>
                     </select>
                 </div>
                 <div>
@@ -253,24 +237,24 @@
                 <div>
                     <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Quick Links</h4>
                     <ul class="space-y-1.5 text-xs">
-                        <li><a href="index.html"        class="hover:text-[#ea580c] font-medium">Home</a></li>
-                        <li><a href="browse.html"        class="hover:text-[#ea580c] font-medium">Browse</a></li>
-                        <li><a href="how-it-works.html"  class="hover:text-[#ea580c] font-medium">How It Works</a></li>
-                        <li><a href="login.html"         class="hover:text-[#ea580c] font-medium">Login</a></li>
+                        <li><a href="index.html" class="hover:text-[#ea580c] font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-[#ea580c] font-medium">Browse</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-[#ea580c] font-medium">Login</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Support</h4>
                     <ul class="space-y-1.5 text-xs">
-                        <li><a href="help.html"   class="hover:text-[#ea580c] font-medium">Help Center</a></li>
-                        <li><a href="terms.html"  class="hover:text-[#ea580c] font-medium">Terms</a></li>
-                        <li><a href="privacy.html"class="hover:text-[#ea580c] font-medium">Privacy</a></li>
+                        <li><a href="help.html" class="hover:text-[#ea580c] font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-[#ea580c] font-medium">Terms</a></li>
+                        <li><a href="privacy.html" class="hover:text-[#ea580c] font-medium">Privacy</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
                     <ul class="space-y-1.5 text-xs">
-                        <li><a href="register.html"          class="hover:text-[#ea580c] font-medium">As Student</a></li>
+                        <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
                         <li><a href="register-landlord.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
                     </ul>
                 </div>
@@ -278,8 +262,8 @@
             <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
                 <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
                 <div class="flex gap-4">
-                    <a href="terms.html"  class="hover:text-white transition">Terms</a>
-                    <a href="privacy.html"class="hover:text-white transition">Privacy</a>
+                    <a href="terms.html" class="hover:text-white transition">Terms</a>
+                    <a href="privacy.html" class="hover:text-white transition">Privacy</a>
                 </div>
             </div>
         </div>
@@ -288,14 +272,20 @@
 <script>
 'use strict';
 
+/* FindMyNyumba runtime config ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â auto-detects backend host */
 const FMN = (function () {
-    const host    = window.location.hostname;
+    const host = window.location.hostname;
     const isLocal = (host === 'localhost' || host === '127.0.0.1');
-    const API_HOST = isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com';
+    const API_HOST = isLocal
+        ? 'http://127.0.0.1:8000'
+        : 'https://findmynyumba.onrender.com';
     return { API_HOST, API_BASE: API_HOST + '/api/v1' };
 })();
-const API_BASE          = FMN.API_BASE;
-const API_BASE_FALLBACK = FMN.API_HOST.includes('127.0.0.1') ? null : 'https://findmynyumba-backend.onrender.com/api/v1';
+const API_BASE = FMN.API_BASE;
+// Fallback backend host for environments where the primary Render app differs.
+const API_BASE_FALLBACK = FMN.API_HOST.includes('127.0.0.1')
+    ? null
+    : 'https://findmynyumba-backend.onrender.com/api/v1';
 
 let currentProperty = null;
 let selectedRating  = 5;
@@ -305,7 +295,7 @@ let toastTimer;
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 const getRole  = () => localStorage.getItem('role')  || sessionStorage.getItem('role');
 
-/* Toast */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Toast ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-gray-800' };
@@ -316,17 +306,24 @@ function showToast(msg, type = 'success') {
     toastTimer = setTimeout(() => { t.classList.replace('show', 'hide'); }, 3500);
 }
 
-/* Auth nav */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Auth-aware nav ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 (function initNav() {
-    const token = getToken(), role = getRole();
+    const token = getToken();
+    const role  = getRole();
     if (!token || !role) return;
-    const routes = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+    /* FIX: original was missing .html suffix on every dashboard route */
+    const routes = {
+        student:      'dashboard-student.html',
+        student_host: 'dashboard-student-host.html',
+        landlord:     'dashboard-landlord.html',
+        admin:        'admin.html',
+    };
     const dash = document.getElementById('nav-dashboard');
     if (dash) { dash.href = routes[role] || 'browse.html'; dash.classList.remove('hidden'); }
     document.getElementById('nav-login')?.classList.add('hidden');
 })();
 
-/* Image resolver */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Image URL resolver ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 function resolveImageUrl(raw) {
     if (!raw) return null;
     const url = String(raw).trim();
@@ -334,95 +331,97 @@ function resolveImageUrl(raw) {
     return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
 }
 
-/* Modal helpers */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Modal helpers ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 function openModal(id)  { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
 function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
 
 function openReportModal() {
-    if (!getToken()) { showToast('Please log in to report a listing.', 'info'); setTimeout(() => window.location.href = 'login.html', 1800); return; }
+    /* FIX: original navigated to 'login' (no .html) */
+    if (!getToken()) {
+        showToast('Please log in to report a listing.', 'info');
+        setTimeout(() => window.location.href = 'login.html', 1800);
+        return;
+    }
     openModal('report-modal');
 }
 function closeReportModal() { closeModal('report-modal'); }
-window.openReportModal  = openReportModal;
-window.closeReportModal = closeReportModal;
 
-/* Map */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Map ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 function initMap(lat, lng, label) {
     if (leafletMap) { leafletMap.remove(); leafletMap = null; }
     leafletMap = L.map('property-map').setView([lat, lng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(leafletMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(leafletMap);
     L.marker([lat, lng]).addTo(leafletMap).bindPopup(label).openPopup();
     setTimeout(() => leafletMap.invalidateSize(), 400);
 }
 
-/* Gallery switcher */
-function switchMainImage(thumb, url, index, total) {
-    const mainImg = document.getElementById('main-image');
-    mainImg.style.opacity = '0';
-    setTimeout(() => { mainImg.src = url; mainImg.style.opacity = '1'; }, 150);
-    const ct = document.getElementById('photo-counter-text');
-    if (ct) ct.textContent = `${index + 1} / ${total}`;
-    document.querySelectorAll('#photo-gallery img').forEach(img => {
-        const active = img === thumb;
-        img.classList.toggle('border-[#ea580c]', active);
-        img.classList.toggle('shadow-md',        active);
-        img.classList.toggle('opacity-70',       !active);
-        img.classList.toggle('border-transparent', !active);
-    });
-}
-window.switchMainImage = switchMainImage;
-
-/* Load listing */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Load listing ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 async function loadData() {
     const id = new URLSearchParams(window.location.search).get('id');
     if (!id) { showToast('No listing ID in URL.', 'error'); return; }
 
     try {
-        let res = await fetch(`${API_BASE}/properties/${id}`);
-        if (!res.ok && API_BASE_FALLBACK) res = await fetch(`${API_BASE_FALLBACK}/properties/${id}`);
+        const primaryUrl = `${API_BASE}/properties/${id}`;
+        let res = await fetch(primaryUrl);
+        if (!res.ok && API_BASE_FALLBACK) {
+            const fallbackUrl = `${API_BASE_FALLBACK}/properties/${id}`;
+            res = await fetch(fallbackUrl);
+        }
         if (!res.ok) throw new Error(`${res.status}`);
+
         const data = await res.json();
         currentProperty = data;
 
+        /* FIX: original placeholders were the corrupted "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½" sequence */
         document.getElementById('prop-title').innerText         = data.title       || 'Untitled';
         document.getElementById('prop-location-text').innerText = data.location    || 'Location not specified';
         document.getElementById('prop-description').innerText   = data.description || 'No description provided.';
         document.getElementById('prop-price').innerText         = `ZMW ${Number(data.price).toLocaleString()}`;
         document.title = `${data.title || 'Property'} - FindMyNyumba`;
 
-        /* Sticky CTA price */
-        const sp = document.getElementById('sticky-price');
-        if (sp) sp.textContent = `K${Number(data.price).toLocaleString()}`;
-
         if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
 
-        /* Images */
+        /* Images — build gallery if multiple, else show single */
         const imgEl    = document.getElementById('main-image');
         const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80';
-        let allImages  = [];
+
+        // Normalise: prefer data.images array, fall back to data.image_url
+        let allImages = [];
         if (Array.isArray(data.images) && data.images.length > 0) {
             allImages = data.images.filter(Boolean).map(resolveImageUrl);
         } else if (data.image_url) {
             allImages = [resolveImageUrl(data.image_url)];
         }
+
         if (allImages.length === 0) {
             imgEl.src = FALLBACK;
         } else {
             imgEl.src = allImages[0];
             imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = FALLBACK; };
+
             if (allImages.length > 1) {
+                // Show photo counter badge
                 const counter = document.getElementById('photo-counter');
                 document.getElementById('photo-counter-text').textContent = `1 / ${allImages.length}`;
                 counter.classList.remove('hidden');
+
+                // Build thumbnail strip
                 const gallery = document.getElementById('photo-gallery');
                 gallery.removeAttribute('style');
                 gallery.style.display = 'flex';
                 gallery.innerHTML = allImages.map((url, i) => `
-                    <img src="${url}" data-index="${i}" alt="Photo ${i+1}" loading="lazy"
-                         class="flex-shrink-0 w-20 h-16 sm:w-24 sm:h-20 object-cover rounded-xl cursor-pointer border-2 transition-all duration-150 ${i === 0 ? 'border-[#ea580c] shadow-md' : 'border-transparent opacity-70 hover:opacity-100 hover:border-[#ea580c]'}"
-                         onclick="switchMainImage(this,'${url}',${i},${allImages.length})"
-                         onerror="this.style.display='none'">`
-                ).join('');
+                    <img
+                        src="${url}"
+                        data-index="${i}"
+                        alt="Photo ${i + 1}"
+                        loading="lazy"
+                        class="flex-shrink-0 w-20 h-16 sm:w-24 sm:h-18 object-cover rounded-xl cursor-pointer border-2 transition-all duration-150 ${i === 0 ? 'border-[#ea580c] shadow-md' : 'border-transparent opacity-70 hover:opacity-100 hover:border-[#ea580c]'}"
+                        onclick="switchMainImage(this, '${url}', ${i}, ${allImages.length})"
+                        onerror="this.style.display='none'"
+                    >
+                `).join('');
             }
         }
 
@@ -430,21 +429,17 @@ async function loadData() {
         const owner = data.owner;
         if (owner) {
             const name     = owner.full_name || 'Host';
-            const initials = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() || '?';
+            const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
             document.getElementById('host-avatar').innerText = initials;
             document.getElementById('host-name').innerText   = name;
-            const roleLabel = (owner.role || '').replace(/_/g,' ').toUpperCase();
+            const roleLabel = (owner.role || '').replace(/_/g, ' ').toUpperCase();
             const verBadge  = owner.verification_status === 'verified'
-                ? `<span class="inline-flex items-center gap-1 bg-green-50 text-green-600 text-xs font-bold px-2.5 py-1 rounded-full"><i class="fas fa-shield-halved text-xs"></i> Verified</span>`
+                ? `<span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full"><i class="fas fa-check-circle text-xs"></i> Verified</span>`
                 : `<span class="text-gray-400 text-xs">${roleLabel}</span>`;
             document.getElementById('host-badge').innerHTML = verBadge;
         }
 
-        /* Check for ?action=report in URL */
-        if (new URLSearchParams(window.location.search).get('action') === 'report') {
-            setTimeout(openReportModal, 600);
-        }
-
+        /* Map: default to Lusaka centre. Replace with real coords once geocoding is added. */
         initMap(-15.4167, 28.2833, data.title || 'Property');
 
     } catch (err) {
@@ -453,8 +448,32 @@ async function loadData() {
     }
 }
 
-/* Stars */
-function initStars() {
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Stars ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* ── Gallery switcher ──────────────────────────────────────────────────────── */
+function switchMainImage(thumb, url, index, total) {
+    const mainImg = document.getElementById('main-image');
+    // Fade swap
+    mainImg.style.opacity = '0';
+    setTimeout(() => {
+        mainImg.src = url;
+        mainImg.onerror = () => { mainImg.onerror = null; };
+        mainImg.style.opacity = '1';
+    }, 100);
+    // Update counter
+    const counterText = document.getElementById('photo-counter-text');
+    if (counterText) counterText.textContent = `${index + 1} / ${total}`;
+    // Update thumbnail active state
+    document.querySelectorAll('#photo-gallery img').forEach(img => {
+        const active = img === thumb;
+        img.classList.toggle('border-[#ea580c]', active);
+        img.classList.toggle('shadow-md', active);
+        img.classList.toggle('opacity-70', !active);
+        img.classList.toggle('border-transparent', !active);
+    });
+}
+window.switchMainImage = switchMainImage;
+
+
     const stars = Array.from(document.querySelectorAll('#star-container .fa-star'));
     stars.forEach((s, i) => {
         s.addEventListener('mouseover', () => stars.forEach((x, j) => x.style.color = j <= i ? '#ea580c' : '#d1d5db'));
@@ -463,32 +482,41 @@ function initStars() {
     });
 }
 
-/* Agreement */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Agreement ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* FIX: original read p.owner_role; the backend payload exposes p.owner.role */
 function openAgreement() {
     const p = currentProperty;
     if (!p) return;
-    const params = new URLSearchParams({ address: p.location || '', rent: p.price || '', type: p.owner?.role === 'student_host' ? 'student_host' : 'landlord' });
+    const ownerRole = p.owner?.role || '';
+    const params = new URLSearchParams({
+        address: p.location || '',
+        rent:    p.price    || '',
+        type:    ownerRole === 'student_host' ? 'student_host' : 'landlord',
+    });
     window.open('agreement.html?' + params.toString(), '_blank');
 }
 window.openAgreement = openAgreement;
 
-/* Boot */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Boot ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initStars();
-    document.getElementById('current-year').textContent = new Date().getFullYear();
 
-    /* Open message modal (desktop + sticky mobile) */
-    function triggerMessage() {
-        if (!getToken()) { showToast('Please log in to send a message.', 'info'); setTimeout(() => window.location.href = 'login.html', 1800); return; }
+    const yearEl = document.getElementById('current-year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    /* Message modal */
+    document.getElementById('msg-landlord-btn').addEventListener('click', () => {
+        if (!getToken()) {
+            showToast('Please log in to send a message.', 'info');
+            setTimeout(() => window.location.href = 'login.html', 1800);
+            return;
+        }
         if (!currentProperty) { showToast('Still loading...', 'info'); return; }
         document.getElementById('modal-prop-title').innerText = currentProperty.title || 'Property';
-        document.getElementById('modal-message-body').value   = '';
+        document.getElementById('modal-message-body').value = '';
         openModal('message-modal');
-    }
-    document.getElementById('msg-landlord-btn').addEventListener('click', triggerMessage);
-    document.getElementById('sticky-msg-btn')?.addEventListener('click', triggerMessage);
-
+    });
     document.getElementById('modal-close-btn').addEventListener('click',  () => closeModal('message-modal'));
     document.getElementById('modal-cancel-btn').addEventListener('click', () => closeModal('message-modal'));
     document.getElementById('message-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('message-modal'); });
@@ -506,10 +534,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${API_BASE}/messages/send`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ receiver_id: currentProperty.owner_id, property_id: currentProperty.id, content }),
+                body: JSON.stringify({
+                    receiver_id: currentProperty.owner_id,
+                    property_id: currentProperty.id,
+                    content,
+                }),
             });
             if (res.ok) { showToast('Message sent! The host will reply soon.', 'success'); closeModal('message-modal'); }
-            else { const d = await res.json().catch(()=>({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to send.', 'error'); }
+            else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to send.', 'error'); }
         } catch { showToast('Network error.', 'error'); }
         finally { btn.disabled = false; btn.innerHTML = 'Send Inquiry'; }
     });
@@ -530,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ rating: selectedRating, comment }),
             });
             if (res.ok) { showToast('Review posted!', 'success'); document.getElementById('review-comment').value = ''; }
-            else { const d = await res.json().catch(()=>({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to post review.', 'error'); }
+            else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to post review.', 'error'); }
         } catch { showToast('Network error.', 'error'); }
         finally { btn.disabled = false; btn.innerHTML = 'Post Review'; }
     });
@@ -557,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('report-reason').value = '';
                 document.getElementById('report-description').value = '';
             } else {
-                const d = await res.json().catch(()=>({}));
+                const d = await res.json().catch(() => ({}));
                 showToast(typeof d.detail === 'string' ? d.detail : 'Failed.', 'error');
             }
         } catch { showToast('Network error.', 'error'); }
@@ -567,3 +599,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
+
