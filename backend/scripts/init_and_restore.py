@@ -48,6 +48,13 @@ def restore_test_users():
         
         test_users = [
             {
+                "email": "joy@gmail.com",
+                "full_name": "Joy User",
+                "password": "Joy@2017",
+                "role": "student",
+                "phone_number": "+254700000001",
+            },
+            {
                 "email": "student@findmynyumba.com",
                 "full_name": "John Doe",
                 "password": "SecurePassword123!",
