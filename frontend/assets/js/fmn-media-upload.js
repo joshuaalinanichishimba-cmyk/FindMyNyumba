@@ -156,6 +156,20 @@
     this.drop.removeAttribute('aria-disabled'); this._showErrors([]); this._render();
   };
 
+  // Turn a FastAPI error body into a human message. 422 `detail` is an array
+  // of {loc, msg}; a plain string detail is used as-is.
+  FMNMediaUpload._errMsg = function(d, status){
+    if (d && typeof d.detail === 'string') return d.detail;
+    if (d && Array.isArray(d.detail) && d.detail.length){
+      return d.detail.map(function(e){
+        var field = Array.isArray(e.loc) ? e.loc[e.loc.length-1] : '';
+        var label = String(field).replace(/_/g,' ');
+        return (label ? (label.charAt(0).toUpperCase()+label.slice(1)+': ') : '') + (e.msg || 'invalid');
+      }).join('  •  ');
+    }
+    return 'Upload failed (' + status + ').';
+  };
+
   FMNMediaUpload.xhrUpload = function(o){
     return new Promise(function(resolve,reject){
       var xhr=new XMLHttpRequest();
@@ -164,7 +178,7 @@
       xhr.upload.onprogress=function(e){ if(e.lengthComputable&&o.onProgress) o.onProgress((e.loaded/e.total)*100); };
       xhr.onload=function(){ var d={}; try{ d=JSON.parse(xhr.responseText||'{}'); }catch(_){}
         if(xhr.status>=200&&xhr.status<300){ if(o.onProgress) o.onProgress(100); resolve(d); }
-        else reject(new Error(typeof d.detail==='string'?d.detail:'Upload failed ('+xhr.status+').')); };
+        else reject(new Error(FMNMediaUpload._errMsg(d, xhr.status))); };
       xhr.onerror=function(){ reject(new Error('Network error during upload.')); };
       xhr.send(o.formData);
     });
