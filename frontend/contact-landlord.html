@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,71 +7,65 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="logo.png">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
-        #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        #toast.hide { opacity: 0; transform: translateY(16px); pointer-events: none; }
-    </style>
 </head>
-<body class="bg-slate-50 flex flex-col min-h-screen">
+<body class="bg-gray-50 flex flex-col min-h-screen">
 
-    <!-- Toast -->
-    <div id="toast" class="hide fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm shadow-2xl flex items-center gap-2 min-w-[260px] max-w-[90vw] justify-center"></div>
-
-    <!-- NAV -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-slate-100">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="browse.html" class="flex items-center">
                 <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;display:block;object-fit:contain;"
-                     onerror="this.style.display='none';document.getElementById('logo-text').classList.remove('hidden')">
-                <span id="logo-text" class="hidden text-lg font-black text-[#ea580c]">FindMyNyumba</span>
+                     onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
+                <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
             </a>
-            <a href="browse.html" class="text-gray-600 font-bold hover:text-[#ea580c] transition-colors text-sm flex items-center gap-1.5">
+            <a href="browse.html" class="text-gray-600 font-bold hover:text-[#ea580c] transition-colors text-sm flex items-center gap-2">
                 <i class="fas fa-arrow-left text-xs"></i> Back to Browse
             </a>
         </div>
     </nav>
 
-    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 py-10">
-        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-100 max-w-2xl w-full">
+    <div id="toast"
+         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm
+                shadow-2xl flex items-center gap-2 min-w-[260px] justify-center transition-all duration-300
+                opacity-0 translate-y-4 pointer-events-none">
+    </div>
 
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-1">Contact Landlord</h2>
-            <p class="text-slate-500 text-sm mb-6 sm:mb-8 font-medium">Send a secure message directly to the property host.</p>
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 py-8">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-gray-100 max-w-2xl w-full">
 
-            <!-- Property preview card -->
-            <div class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-100 mb-6 sm:mb-8 flex flex-col sm:flex-row gap-4">
+            <h2 class="text-2xl sm:text-3xl font-black text-gray-900 mb-1">Contact Landlord</h2>
+            <p class="text-gray-500 text-sm mb-6 sm:mb-8">Send a secure message directly to the property manager.</p>
+
+            <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 mb-6 sm:mb-8 flex flex-col sm:flex-row gap-4 sm:gap-6">
                 <img id="prop-image"
-                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect width='100%25' height='100%25' fill='%23f0ece8'/%3E%3C/svg%3E"
-                     class="w-full sm:w-28 h-36 sm:h-28 object-cover rounded-xl shadow-sm flex-shrink-0 bg-slate-100"
+                     src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300"
+                     class="w-full sm:w-28 h-40 sm:h-28 object-cover rounded-xl shadow-sm flex-shrink-0"
                      alt="Property image"
-                     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&q=80'">
+                     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300'">
                 <div class="flex-1 min-w-0">
-                    <p class="font-bold text-slate-400 uppercase text-[10px] tracking-widest mb-3">Property Information</p>
+                    <p class="font-bold text-gray-500 uppercase text-[10px] tracking-widest mb-3">Property Information</p>
                     <div class="grid grid-cols-2 gap-x-4 gap-y-3">
                         <div class="min-w-0">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-0.5">Property</p>
-                            <p id="prop-title" class="font-bold text-slate-900 text-sm truncate">Loading...</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Property</p>
+                            <p id="prop-title" class="font-bold text-gray-900 text-sm truncate" title="">Loading...</p>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-0.5">Location</p>
-                            <p id="prop-location" class="font-bold text-slate-900 text-sm truncate">Loading...</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Location</p>
+                            <p id="prop-location" class="font-bold text-gray-900 text-sm truncate" title="">Loading...</p>
                         </div>
                         <div>
-                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-0.5">Price</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Price</p>
                             <p id="prop-price" class="font-black text-[#ea580c] text-sm">Loading...</p>
                         </div>
                         <div>
-                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-0.5">Available</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Available</p>
                             <p class="font-bold text-green-600 text-sm">Immediately</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Form error -->
-            <div id="form-error" class="hidden mb-5 p-3 bg-red-50 text-red-600 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2">
+            <div id="form-error"
+                 class="hidden mb-5 p-3 bg-red-50 text-red-600 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2">
                 <i class="fas fa-exclamation-circle flex-shrink-0"></i>
                 <span id="form-error-text"></span>
             </div>
@@ -82,81 +76,48 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Full Name <span class="text-red-400">*</span></label>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Full Name</label>
                         <input type="text" id="sender-name" required
-                               placeholder="Your full name"
-                               class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm font-medium bg-slate-50 focus:bg-white">
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Email / Phone <span class="text-red-400">*</span></label>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email / Phone</label>
                         <input type="text" id="sender-contact" required
-                               placeholder="+260 9XX XXX XXX or email"
-                               class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm font-medium bg-slate-50 focus:bg-white">
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Your Message <span class="text-red-400">*</span></label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Message</label>
                     <textarea id="message-body" rows="4" required
-                              placeholder="Hi, I am interested in this property. Is it still available?"
-                              class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow resize-none text-sm font-medium bg-slate-50 focus:bg-white">Hi, I am interested in this property and would like to ask a few questions.</textarea>
-                </div>
-
-                <!-- Trust note -->
-                <div class="flex items-start gap-3 bg-green-50 border border-green-100 rounded-xl p-3">
-                    <i class="fas fa-shield-halved text-green-500 mt-0.5 flex-shrink-0 text-sm"></i>
-                    <p class="text-xs text-slate-600 font-medium leading-relaxed">Your message is sent securely through the FindMyNyumba platform. The landlord cannot see your personal contact details until you choose to share them.</p>
+                              class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow resize-none text-sm"
+                              >Hi, I am interested in this property and would like to ask a few questions.</textarea>
                 </div>
 
                 <button type="submit" id="send-btn"
-                        class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-sm shadow-lg shadow-orange-200 hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 active:scale-[0.98]">
+                        class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-base sm:text-lg
+                               shadow-lg hover:bg-orange-700 transition-colors flex items-center justify-center gap-2">
                     <i class="fas fa-paper-plane"></i> Send Message
                 </button>
             </form>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 py-8 mt-6">
-        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
-            <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
-            <div class="flex gap-4">
-                <a href="terms.html"   class="hover:text-white transition-colors">Terms</a>
-                <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
-                <a href="help.html"    class="hover:text-white transition-colors">Help</a>
-            </div>
-        </div>
-    </footer>
-
     <script>
     'use strict';
 
+    /* FindMyNyumba runtime config - auto-detects backend host */
     const FMN = (function () {
-        const host    = window.location.hostname;
+        const host = window.location.hostname;
         const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
-        const API_HOST = isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com';
+        const API_HOST = isLocal
+            ? 'http://127.0.0.1:8000'
+            : 'https://findmynyumba.onrender.com';
         return { API_HOST, API_BASE: API_HOST + '/api/v1' };
     })();
     const API_BASE = FMN.API_BASE;
 
-    let toastTimer;
-    function showToast(msg, type = 'success') {
-        const t = document.getElementById('toast');
-        const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-gray-800' };
-        const icons  = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
-        t.className = `show fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm shadow-2xl flex items-center gap-2 min-w-[260px] max-w-[90vw] justify-center ${colors[type] || colors.info}`;
-        t.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => { t.classList.replace('show','hide'); }, 3500);
-    }
-
-    function showFormError(msg) {
-        document.getElementById('form-error-text').textContent = msg;
-        document.getElementById('form-error').classList.remove('hidden');
-        document.getElementById('form-error').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
-
+    /* Image URL resolver: handles full URLs, bare paths, and bare filenames. */
     function resolveImageUrl(raw) {
         if (!raw) return null;
         const url = String(raw).trim();
@@ -167,15 +128,36 @@
 
     function getToken() { return localStorage.getItem('token') || sessionStorage.getItem('token'); }
 
-    /* Load property info */
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm
+                       shadow-2xl flex items-center gap-2 min-w-[260px] justify-center transition-all duration-300
+                       ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        t.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+        t.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        setTimeout(() => {
+            t.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        }, 3500);
+    }
+
+    function showFormError(msg) {
+        document.getElementById('form-error-text').textContent = msg;
+        document.getElementById('form-error').classList.remove('hidden');
+    }
+    function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
+
+    /* ---- Load property info from public detail endpoint ---- */
     async function loadPropertyInfo() {
-        const propId = new URLSearchParams(window.location.search).get('id');
+        const urlParams = new URLSearchParams(window.location.search);
+        const propId = urlParams.get('id');
+
         if (!propId) {
             document.getElementById('prop-title').textContent    = 'Property not specified.';
-            document.getElementById('prop-location').textContent = '\u2014';
-            document.getElementById('prop-price').textContent    = '\u2014';
+            document.getElementById('prop-location').textContent = '—';
+            document.getElementById('prop-price').textContent    = '—';
             return;
         }
+
         document.getElementById('prop-id').value = propId;
 
         try {
@@ -185,27 +167,31 @@
 
             const titleEl    = document.getElementById('prop-title');
             const locationEl = document.getElementById('prop-location');
+
             titleEl.textContent    = data.title    || 'Unnamed Property';
             titleEl.title          = data.title    || '';
             locationEl.textContent = data.location || 'Unknown';
             locationEl.title       = data.location || '';
             document.getElementById('prop-price').textContent = 'ZMW ' + parseFloat(data.price).toLocaleString();
-            document.title = `Contact Host — ${data.title || 'Property'} | FindMyNyumba`;
 
-            const resolved = resolveImageUrl(data.image_url);
+            /* FIX: original used data.image_url verbatim; if backend returned a
+               relative path, the browser resolved it against the frontend host
+               (Vercel) and 404'd. Now goes through resolveImageUrl. */
+            const resolved = resolveImageUrl(data.cover_url || data.image_url);
             if (resolved) document.getElementById('prop-image').src = resolved;
+
             if (data.owner_id) document.getElementById('landlord-id').value = data.owner_id;
 
-        } catch (err) {
-            console.error('[contact-landlord] loadPropertyInfo:', err);
+        } catch (e) {
+            console.error('[contact-landlord] loadPropertyInfo:', e);
             document.getElementById('prop-title').textContent    = 'Could not load property.';
-            document.getElementById('prop-location').textContent = '\u2014';
-            document.getElementById('prop-price').textContent    = '\u2014';
+            document.getElementById('prop-location').textContent = '—';
+            document.getElementById('prop-price').textContent    = '—';
         }
     }
 
-    /* Form submit */
-    document.getElementById('contactForm').addEventListener('submit', async function (e) {
+    /* —— Form submit ————————————————————————————— */
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         hideFormError();
 
@@ -216,15 +202,13 @@
         const landlordId = document.getElementById('landlord-id').value;
         const token      = getToken();
 
-        if (!name || !contact) return showFormError('Please fill in your name and contact details.');
-        if (!body)             return showFormError('Please write a message before sending.');
-        if (!landlordId)       return showFormError('Could not identify the property owner. Please go back and try again.');
+        if (!name || !contact)  return showFormError('Please fill in your name and contact details.');
+        if (!body)              return showFormError('Please write a message before sending.');
+        if (!landlordId)        return showFormError('Could not identify the property owner. Please go back and try again.');
 
         if (!token) {
             showFormError('You must be logged in to send a message.');
-            setTimeout(() => {
-                window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
-            }, 1500);
+            setTimeout(() => { window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`; }, 1500);
             return;
         }
 
@@ -252,7 +236,7 @@
             showToast('Message sent! The landlord will be notified on their dashboard.', 'success');
             btn.innerHTML = '<i class="fas fa-check"></i> Message Sent';
 
-            setTimeout(() => { window.location.href = 'browse.html'; }, 2200);
+            setTimeout(() => { window.location.href = 'browse.html'; }, 2000);
 
         } catch (err) {
             console.error('[contact-landlord] send:', err);
@@ -262,10 +246,9 @@
         }
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        loadPropertyInfo();
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-    });
+    document.addEventListener('DOMContentLoaded', loadPropertyInfo);
     </script>
 </body>
 </html>
+
+
