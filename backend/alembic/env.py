@@ -18,6 +18,7 @@ from app.models.user import User                    # noqa: F401
 from app.models.listing import Listing              # noqa: F401
 from app.models.saved_listing import SavedListing   # noqa: F401
 from app.models.report import Report                # noqa: F401
+from app.models.listing_media import ListingMedia          # noqa: F401
 
 config = context.config
 

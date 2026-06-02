@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Student Host Dashboard - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/fmn-media-upload.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="logo.png">
     <style>
@@ -219,8 +220,8 @@
                         <textarea id="prop-desc" rows="4" required class="fmn-input resize-none"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Upload Images</label>
-                        <input type="file" id="prop-images" accept="image/jpeg,image/png,image/webp" multiple onchange="previewHostImages(this)" class="fmn-input">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Photos &amp; Videos</label>
+                        <div id="prop-media-uploader"></div>
                     </div>
                     <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-base hover:bg-[#c2410c] transition shadow-sm">
                         <i class="fas fa-upload mr-2"></i>Submit for Review
@@ -835,10 +836,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Upload (create) form
+    const propMediaUploader = document.getElementById('prop-media-uploader')
+        ? new FMNMediaUpload(document.getElementById('prop-media-uploader'))
+        : null;
+
     document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]'); const orig = btn.innerText;
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+        if (propMediaUploader && propMediaUploader.count() < 1) {
+            showToast('Add at least one photo or video.', 'error');
+            return;
+        }
+        const btn = e.target.querySelector('button[type="submit"]'); const orig = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading 0%';
         const fd = new FormData();
         fd.append('title',    document.getElementById('prop-title').value.trim());
         fd.append('price',    document.getElementById('prop-price').value);
@@ -846,16 +855,25 @@ document.addEventListener('DOMContentLoaded', () => {
         fd.append('description', document.getElementById('prop-desc').value.trim());
         fd.append('nearest_institution', document.getElementById('prop-university')?.value || '');
         fd.append('total_spots', document.getElementById('prop-spots')?.value || '1');
-        const imgs = document.getElementById('prop-images');
-        if (imgs?.files) for (const f of imgs.files) fd.append('images', f);
+        // Option B: send the new `media` field (photos + videos). `images` stays
+        // supported by the backend for older clients, but this form now uses media.
+        if (propMediaUploader) propMediaUploader.appendTo(fd);
         try {
-            const res = await fetch(`${API_BASE}/student-host/properties`, { method: 'POST', headers: { 'Authorization': `Bearer ${getToken()}` }, body: fd });
-            const data = await res.json();
-            if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Submission failed.');
+            await FMNMediaUpload.xhrUpload({
+                url: `${API_BASE}/student-host/properties`,
+                token: getToken(),
+                formData: fd,
+                onProgress: (pct) => {
+                    if (propMediaUploader) propMediaUploader.setOverallProgress(pct);
+                    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Uploading ${Math.round(pct)}%`;
+                }
+            });
             showToast('Bedspace submitted for review!');
-            e.target.reset(); _loadedTabs.delete('listings'); switchTab('listings');
+            e.target.reset();
+            if (propMediaUploader) propMediaUploader.reset();
+            _loadedTabs.delete('listings'); switchTab('listings');
         } catch (err) { showToast(err.message || 'Could not create listing.', 'error'); }
-        finally { btn.disabled = false; btn.innerText = orig; }
+        finally { btn.disabled = false; btn.innerHTML = orig; }
     });
 
     // Edit form
@@ -912,27 +930,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // â”€â”€ Image preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function previewHostImages(input) {
-    let prev = document.getElementById('host-img-preview');
-    if (!prev) {
-        prev = document.createElement('div');
-        prev.id = 'host-img-preview';
-        prev.className = 'mt-3 flex flex-wrap gap-2';
-        input.parentNode.appendChild(prev);
-    }
-    prev.innerHTML = '';
-    Array.from(input.files).forEach(f => {
-        if (f.size > 10 * 1024 * 1024) { showToast(f.name + ' exceeds 10MB.','error'); return; }
-        const r = new FileReader();
-        r.onload = e => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'w-16 h-16 object-cover rounded-xl border border-gray-200';
-            prev.appendChild(img);
-        };
-        r.readAsDataURL(f);
-    });
-}
 
 initDashboard();
 </script>

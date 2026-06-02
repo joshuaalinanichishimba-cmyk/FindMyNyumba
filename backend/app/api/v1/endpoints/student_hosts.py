@@ -28,6 +28,8 @@ from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
 from app.models.listing import Listing
+from app.models.listing_media import ListingMedia, MediaType
+from app.core import media_validation as mv
 from app.models.message import Message
 from app.models.user import User
 
@@ -142,6 +144,101 @@ async def _upload_to_cloudinary(f: UploadFile) -> str:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")
 
+
+def _cloudinary_upload_media(data: bytes, vm: "mv.ValidatedMedia") -> dict:
+    """Upload validated bytes to Cloudinary with the right resource_type.
+
+    Photos -> resource_type="image" (with a sane width cap).
+    Videos -> resource_type="video".
+    Returns the raw Cloudinary response dict.
+    """
+    resource_type = "image" if vm.media_type == MediaType.PHOTO else "video"
+    kwargs = dict(folder="findmynyumba/properties", resource_type=resource_type)
+    if resource_type == "image":
+        kwargs["transformation"] = [{"width": 1200, "crop": "limit", "quality": "auto"}]
+    try:
+        return cloudinary.uploader.upload(data, **kwargs)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Media upload failed: {e}")
+
+
+async def _process_media_uploads(
+    files: List[UploadFile],
+    listing_id: int,
+    db: Session,
+    *,
+    start_position: int = 0,
+    make_first_cover: bool = True,
+) -> List[ListingMedia]:
+    """Validate -> Cloudinary -> ListingMedia rows. Returns created rows.
+
+    Validation runs on ALL files first (count + per-file) so we fail before
+    uploading anything. Cover is assigned to the first created row only when
+    make_first_cover is True and the listing has no cover yet.
+    """
+    real = [f for f in files if f and f.filename]
+    if not real:
+        return []
+
+    existing = db.query(ListingMedia).filter(ListingMedia.listing_id == listing_id).count()
+    mv.validate_added_count(existing, len(real))
+
+    # Read + validate everything up front.
+    staged = []  # (validated_media, raw_bytes, filename)
+    for f in real:
+        data = await f.read()
+        vm = mv.validate_file(f.filename, data)   # raises MediaValidationError
+        staged.append((vm, data, f.filename))
+
+    listing_has_cover = (
+        db.query(ListingMedia)
+          .filter(ListingMedia.listing_id == listing_id, ListingMedia.is_cover.is_(True))
+          .count() > 0
+    )
+
+    created: List[ListingMedia] = []
+    pos = start_position + existing
+    for idx, (vm, data, fname) in enumerate(staged):
+        res = _cloudinary_upload_media(data, vm)
+        is_cover = make_first_cover and (not listing_has_cover) and idx == 0
+        row = ListingMedia(
+            listing_id=listing_id,
+            media_url=res.get("secure_url") or res.get("url"),
+            public_id=res.get("public_id"),
+            resource_type=res.get("resource_type"),
+            media_type=vm.media_type.value,
+            file_name=fname,
+            file_size=vm.size_bytes,
+            mime_type=vm.mime_type,
+            width=res.get("width"),
+            height=res.get("height"),
+            duration=res.get("duration"),
+            position=pos,
+            is_cover=is_cover,
+        )
+        db.add(row)
+        created.append(row)
+        pos += 1
+        if is_cover:
+            listing_has_cover = True
+    return created
+
+
+def _media_response(m: ListingMedia) -> dict:
+    return {
+        "id": m.id,
+        "listing_id": m.listing_id,
+        "media_url": m.media_url,
+        "media_type": m.media_type,
+        "public_id": m.public_id,
+        "width": m.width,
+        "height": m.height,
+        "duration": m.duration,
+        "position": m.position,
+        "is_cover": m.is_cover,
+    }
+
+
 def _listing_response(l: Listing, request: Request) -> dict:
     """Standard listing dict used across all host endpoints."""
     return {
@@ -157,6 +254,10 @@ def _listing_response(l: Listing, request: Request) -> dict:
         "total_spots":         l.total_spots or 1,
         "available_spots":     l.available_spots if l.available_spots is not None else (l.total_spots or 1),
         "image_url":           _absolute_image_url(l.image_url, request),
+        # NEW: full ordered gallery (photos+videos). Empty list for legacy listings.
+        "media":               [_media_response(m) for m in (l.media or [])],
+        # NEW: single best image to show on cards (cover -> first media -> image_url).
+        "cover_url":           _absolute_image_url(l.cover_url, request),
         "created_at":          l.created_at.isoformat() if l.created_at else None,
     }
 
@@ -221,11 +322,16 @@ async def create_host_listing(
     nearest_institution: Optional[str]  = Form(None, max_length=120),
     total_spots:         int            = Form(1, ge=1, le=50),
     images: Optional[List[UploadFile]]  = File(None),
+    media:  Optional[List[UploadFile]]  = File(None),
     host:   User    = Depends(require_student_host),
     db:     Session = Depends(get_db),
 ):
+    # Backward compatible: legacy `images` field still works (photos only,
+    # legacy validation). New `media` field accepts photos AND videos with
+    # magic-byte validation and is stored in ListingMedia. If both are sent,
+    # `media` wins; if only `images`, behaviour is unchanged from before.
     first_image_name = None
-    if images:
+    if images and not media:
         for img in images[:10]:
             if not img.filename:
                 continue
@@ -249,6 +355,21 @@ async def create_host_listing(
     db.add(listing)
     db.commit()
     db.refresh(listing)
+
+    # NEW media path: validate -> Cloudinary -> ListingMedia rows.
+    if media:
+        try:
+            created = await _process_media_uploads(media, listing.id, db, make_first_cover=True)
+        except mv.MediaValidationError as e:
+            db.delete(listing); db.commit()
+            raise HTTPException(status_code=400, detail=e.message)
+        # Mirror the cover URL into legacy image_url for old readers.
+        cover = next((m for m in created if m.is_cover), None) or (created[0] if created else None)
+        if cover and not listing.image_url:
+            listing.image_url = cover.media_url
+        db.commit()
+        db.refresh(listing)
+
     return {
         "status": "success",
         "message": "Bedspace submitted for review!",
@@ -269,6 +390,7 @@ async def edit_host_listing(
     nearest_institution: Optional[str]  = Form(None, max_length=120),
     total_spots:         int            = Form(1, ge=1, le=50),
     images: Optional[List[UploadFile]]  = File(None),
+    media:  Optional[List[UploadFile]]  = File(None),
     host:   User    = Depends(require_student_host),
     db:     Session = Depends(get_db),
 ):
@@ -295,8 +417,8 @@ async def edit_host_listing(
         # Increase available by the same delta
         listing.available_spots = (listing.available_spots or 0) + (total_spots - old_total)
 
-    # Handle new images (optional — keep existing if none uploaded)
-    if images:
+    # Legacy images path (photos only) — unchanged, used only when no `media`.
+    if images and not media:
         has_real_file = any(img.filename for img in images)
         if has_real_file:
             first_new = None
@@ -311,6 +433,20 @@ async def edit_host_listing(
 
     db.commit()
     db.refresh(listing)
+
+    # NEW media path: append validated photos/videos to the gallery.
+    if media:
+        try:
+            created = await _process_media_uploads(media, listing.id, db, make_first_cover=True)
+        except mv.MediaValidationError as e:
+            raise HTTPException(status_code=400, detail=e.message)
+        if not listing.image_url:
+            cover = next((m for m in created if m.is_cover), None) or (created[0] if created else None)
+            if cover:
+                listing.image_url = cover.media_url
+        db.commit()
+        db.refresh(listing)
+
     return {
         "status": "success",
         "message": "Listing updated successfully.",

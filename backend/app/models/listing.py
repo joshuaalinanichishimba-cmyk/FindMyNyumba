@@ -52,3 +52,21 @@ class Listing(Base):
     # Spot management — how many bedspaces in this listing
     total_spots     = Column(Integer, default=1, nullable=False)
     available_spots = Column(Integer, default=1, nullable=False)
+
+    # ── Multi-media (NEW) ─────────────────────────────────────────────────────
+    # Ordered photos/videos. selectin avoids N+1 by batch-loading media.
+    media = relationship(
+        "ListingMedia",
+        back_populates="listing",
+        cascade="all, delete-orphan",
+        order_by="ListingMedia.position",
+        lazy="selectin",
+    )
+
+    @property
+    def cover_url(self):
+        """Best single URL: flagged cover -> first media -> legacy image_url."""
+        if self.media:
+            cover = next((m for m in self.media if m.is_cover), None)
+            return (cover or self.media[0]).media_url
+        return self.image_url
