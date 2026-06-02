@@ -30,6 +30,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.models.listing import Listing
+from app.models.listing_media import ListingMedia
 from app.models.report import Report
 from app.models.user import User
 
@@ -70,6 +71,21 @@ def _absolute_image_url(raw: Optional[str], request: Request) -> Optional[str]:
     return f"{base}/static/uploads/properties/{raw}"
 
 
+def _media_response(m, request: Request) -> dict:
+    return {
+        "id": m.id,
+        "listing_id": m.listing_id,
+        "media_url": _absolute_image_url(m.media_url, request),
+        "media_type": m.media_type,
+        "public_id": m.public_id,
+        "width": m.width,
+        "height": m.height,
+        "duration": m.duration,
+        "position": m.position,
+        "is_cover": m.is_cover,
+    }
+
+
 def _listing_card(l: Listing, request: Request) -> dict:
     """Compact representation for browse and dashboard grids."""
     return {
@@ -79,6 +95,8 @@ def _listing_card(l: Listing, request: Request) -> dict:
         "location":   l.location,
         "is_boosted": l.is_boosted,
         "image_url":  _absolute_image_url(l.image_url, request),
+        "media":      [_media_response(m, request) for m in (l.media or [])],
+        "cover_url":  _absolute_image_url(l.cover_url, request),
         "created_at": l.created_at.isoformat() if l.created_at else None,
     }
 
@@ -165,6 +183,8 @@ def get_listing_detail(
         "price":       listing.price,
         "location":    listing.location,
         "image_url":   _absolute_image_url(listing.image_url, request),
+        "media":       [_media_response(m, request) for m in (listing.media or [])],
+        "cover_url":   _absolute_image_url(listing.cover_url, request),
         "is_boosted":  listing.is_boosted,
         "status":      listing.status,
         "owner_id":    listing.owner_id,
