@@ -198,10 +198,10 @@ def get_properties(request: Request, landlord: User = Depends(require_landlord),
 
 @router.post("/properties", status_code=201)
 async def create_property(
-    title:       str = Form(..., min_length=3, max_length=160),
+    title:       str = Form(..., min_length=2, max_length=160),
     price:       float = Form(..., ge=0),
     location:    str = Form(..., min_length=2, max_length=200),
-    description: str = Form(..., min_length=10, max_length=4000),
+    description: str = Form(..., min_length=5, max_length=4000),
     images:      Optional[List[UploadFile]] = File(None),
     media:       Optional[List[UploadFile]] = File(None),
     landlord:    User    = Depends(require_landlord),
@@ -248,10 +248,10 @@ async def create_property(
 @router.put("/properties/{listing_id}")
 async def update_property(
     listing_id:  int,
-    title:       str = Form(..., min_length=3, max_length=160),
+    title:       str = Form(..., min_length=2, max_length=160),
     price:       float = Form(..., ge=0),
     location:    str = Form(..., min_length=2, max_length=200),
-    description: str = Form(..., min_length=10, max_length=4000),
+    description: str = Form(..., min_length=5, max_length=4000),
     images:      Optional[List[UploadFile]] = File(None),
     media:       Optional[List[UploadFile]] = File(None),
     landlord:    User    = Depends(require_landlord),

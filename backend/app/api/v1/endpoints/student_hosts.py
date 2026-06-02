@@ -315,10 +315,10 @@ def get_host_listings(
 @router.post("/listings",   status_code=201)
 async def create_host_listing(
     request:             Request,
-    title:               str            = Form(..., min_length=3, max_length=160),
+    title:               str            = Form(..., min_length=2, max_length=160),
     price:               float          = Form(..., ge=0),
     location:            str            = Form(..., min_length=2, max_length=200),
-    description:         str            = Form(..., min_length=10, max_length=4000),
+    description:         str            = Form(..., min_length=5, max_length=4000),
     nearest_institution: Optional[str]  = Form(None, max_length=120),
     total_spots:         int            = Form(1, ge=1, le=50),
     images: Optional[List[UploadFile]]  = File(None),
@@ -383,10 +383,10 @@ async def create_host_listing(
 async def edit_host_listing(
     listing_id:          int,
     request:             Request,
-    title:               str            = Form(..., min_length=3, max_length=160),
+    title:               str            = Form(..., min_length=2, max_length=160),
     price:               float          = Form(..., ge=0),
     location:            str            = Form(..., min_length=2, max_length=200),
-    description:         str            = Form(..., min_length=10, max_length=4000),
+    description:         str            = Form(..., min_length=5, max_length=4000),
     nearest_institution: Optional[str]  = Form(None, max_length=120),
     total_spots:         int            = Form(1, ge=1, le=50),
     images: Optional[List[UploadFile]]  = File(None),
