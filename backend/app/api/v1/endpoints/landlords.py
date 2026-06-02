@@ -19,6 +19,8 @@ from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
 from app.models.listing import Listing
+from app.models.listing_media import ListingMedia, MediaType
+from app.core import media_validation as mv
 from app.models.message import Message
 from app.models.user import User
 
@@ -84,6 +86,63 @@ async def _upload_to_cloudinary(f: UploadFile) -> str:
         raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")
 
 
+def _cloudinary_upload_media(data: bytes, vm: "mv.ValidatedMedia") -> dict:
+    """Upload validated bytes with the right Cloudinary resource_type."""
+    resource_type = "image" if vm.media_type == MediaType.PHOTO else "video"
+    kwargs = dict(folder="findmynyumba/properties", resource_type=resource_type)
+    if resource_type == "image":
+        kwargs["transformation"] = [{"width": 1200, "crop": "limit", "quality": "auto"}]
+    try:
+        return cloudinary.uploader.upload(data, **kwargs)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Media upload failed: {e}")
+
+
+async def _process_media_uploads(files: List[UploadFile], listing_id: int, db: Session,
+                                 *, make_first_cover: bool = True) -> List[ListingMedia]:
+    """Validate ALL -> Cloudinary -> ListingMedia rows. Mirrors the student-host flow."""
+    real = [f for f in files if f and f.filename]
+    if not real:
+        return []
+    existing = db.query(ListingMedia).filter(ListingMedia.listing_id == listing_id).count()
+    mv.validate_added_count(existing, len(real))
+    staged = []
+    for f in real:
+        data = await f.read()
+        vm = mv.validate_file(f.filename, data)
+        staged.append((vm, data, f.filename))
+    has_cover = (db.query(ListingMedia)
+                   .filter(ListingMedia.listing_id == listing_id, ListingMedia.is_cover.is_(True))
+                   .count() > 0)
+    created: List[ListingMedia] = []
+    pos = existing
+    for idx, (vm, data, fname) in enumerate(staged):
+        res = _cloudinary_upload_media(data, vm)
+        is_cover = make_first_cover and (not has_cover) and idx == 0
+        row = ListingMedia(
+            listing_id=listing_id,
+            media_url=res.get("secure_url") or res.get("url"),
+            public_id=res.get("public_id"),
+            resource_type=res.get("resource_type"),
+            media_type=vm.media_type.value,
+            file_name=fname, file_size=vm.size_bytes, mime_type=vm.mime_type,
+            width=res.get("width"), height=res.get("height"), duration=res.get("duration"),
+            position=pos, is_cover=is_cover,
+        )
+        db.add(row); created.append(row); pos += 1
+        if is_cover: has_cover = True
+    return created
+
+
+def _media_response(m: ListingMedia) -> dict:
+    return {
+        "id": m.id, "listing_id": m.listing_id, "media_url": m.media_url,
+        "media_type": m.media_type, "public_id": m.public_id,
+        "width": m.width, "height": m.height, "duration": m.duration,
+        "position": m.position, "is_cover": m.is_cover,
+    }
+
+
 async def _save_doc_upload(f: UploadFile, dest_dir: Path, user_id: int, prefix: str = "") -> str:
     """Save verification documents to local disk (these don't need persistence)."""
     import secrets
@@ -129,6 +188,8 @@ def get_properties(request: Request, landlord: User = Depends(require_landlord),
             "status":     l.status,
             "is_boosted": l.is_boosted,
             "image_url":  _absolute_image_url(l.image_url, request),
+            "media":      [_media_response(m) for m in (l.media or [])],
+            "cover_url":  _absolute_image_url(l.cover_url, request),
             "created_at": l.created_at.isoformat() if l.created_at else None,
         }
         for l in listings
@@ -142,11 +203,14 @@ async def create_property(
     location:    str = Form(..., min_length=2, max_length=200),
     description: str = Form(..., min_length=10, max_length=4000),
     images:      Optional[List[UploadFile]] = File(None),
+    media:       Optional[List[UploadFile]] = File(None),
     landlord:    User    = Depends(require_landlord),
     db:          Session = Depends(get_db),
 ):
+    # Backward compatible: legacy `images` (photos only) still works and is used
+    # only when the new `media` field (photos + videos) is absent.
     first_image_url = None
-    if images:
+    if images and not media:
         for img in images[:10]:
             if not img.filename:
                 continue
@@ -159,13 +223,25 @@ async def create_property(
         description = description.strip(),
         price       = price,
         location    = location.strip(),
-        image_url   = first_image_url,  # Now a Cloudinary URL
+        image_url   = first_image_url,
         status      = "pending",
         owner_id    = landlord.id,
     )
     db.add(listing)
     db.commit()
     db.refresh(listing)
+
+    if media:
+        try:
+            created = await _process_media_uploads(media, listing.id, db, make_first_cover=True)
+        except mv.MediaValidationError as e:
+            db.delete(listing); db.commit()
+            raise HTTPException(status_code=400, detail=e.message)
+        cover = next((m for m in created if m.is_cover), None) or (created[0] if created else None)
+        if cover and not listing.image_url:
+            listing.image_url = cover.media_url
+        db.commit(); db.refresh(listing)
+
     return {"status": "success", "message": "Property submitted for review!", "id": listing.id}
 
 
@@ -177,6 +253,7 @@ async def update_property(
     location:    str = Form(..., min_length=2, max_length=200),
     description: str = Form(..., min_length=10, max_length=4000),
     images:      Optional[List[UploadFile]] = File(None),
+    media:       Optional[List[UploadFile]] = File(None),
     landlord:    User    = Depends(require_landlord),
     db:          Session = Depends(get_db),
 ):
@@ -189,16 +266,29 @@ async def update_property(
     listing.price       = price
     listing.location    = location.strip()
 
-    if images:
+    # Legacy images path (photos only) — used only when no `media` provided.
+    if images and not media:
         for img in images[:10]:
             if not img.filename:
                 continue
             url = await _upload_to_cloudinary(img)
             listing.image_url = url
-            break  # Use first uploaded image
+            break
 
     db.commit()
     db.refresh(listing)
+
+    if media:
+        try:
+            created = await _process_media_uploads(media, listing.id, db, make_first_cover=True)
+        except mv.MediaValidationError as e:
+            raise HTTPException(status_code=400, detail=e.message)
+        if not listing.image_url:
+            cover = next((m for m in created if m.is_cover), None) or (created[0] if created else None)
+            if cover:
+                listing.image_url = cover.media_url
+        db.commit(); db.refresh(listing)
+
     return {"status": "success", "message": "Property updated!", "id": listing.id}
 
 
@@ -215,6 +305,8 @@ def get_property(listing_id: int, request: Request, landlord: User = Depends(req
         "location":    listing.location,
         "status":      listing.status,
         "image_url":   _absolute_image_url(listing.image_url, request),
+        "media":       [_media_response(m) for m in (listing.media or [])],
+        "cover_url":   _absolute_image_url(listing.cover_url, request),
     }
 
 

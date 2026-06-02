@@ -1,0 +1,80 @@
+From 8a4af7e3c323518bd92eb66b1f9a8cd0e7be016c Mon Sep 17 00:00:00 2001
+From: "Joshua (local)" <dev@findmynyumba.local>
+Date: Tue, 2 Jun 2026 12:47:13 +0000
+Subject: [PATCH] fix(contact-landlord): clean corrupted UTF-8, add logo to nav
+
+- Remove mojibake + stray C1 control bytes (Windows-1252/UTF-8 corruption) from
+  comment banners and the user-facing em-dash fallbacks shown when a property
+  can't be loaded; fallbacks now display a clean em-dash.
+- Add the FindMyNyumba logo to the nav (img with graceful text fallback,
+  matching browse.html) in place of the plain text brand link.
+- Keep cover_url-first thumbnail logic from the media upgrade.
+logo.png already existed in the repo and is unchanged.
+---
+ frontend/contact-landlord.html | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/frontend/contact-landlord.html b/frontend/contact-landlord.html
+index e83a192..0e95298 100644
+--- a/frontend/contact-landlord.html
++++ b/frontend/contact-landlord.html
+@@ -12,7 +12,11 @@
+ 
+     <nav class="bg-white shadow-sm sticky top-0 z-50">
+         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+-            <a href="browse.html" class="text-xl font-black text-[#ea580c]">FindMyNyumba</a>
++            <a href="browse.html" class="flex items-center">
++                <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;display:block;object-fit:contain;"
++                     onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
++                <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
++            </a>
+             <a href="browse.html" class="text-gray-600 font-bold hover:text-[#ea580c] transition-colors text-sm flex items-center gap-2">
+                 <i class="fas fa-arrow-left text-xs"></i> Back to Browse
+             </a>
+@@ -102,7 +106,7 @@
+     <script>
+     'use strict';
+ 
+-    /* FindMyNyumba runtime config ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â auto-detects backend host */
++    /* FindMyNyumba runtime config - auto-detects backend host */
+     const FMN = (function () {
+         const host = window.location.hostname;
+         const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+@@ -142,15 +146,15 @@
+     }
+     function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
+ 
+-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Load property info from public detail endpoint ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
++    /* ---- Load property info from public detail endpoint ---- */
+     async function loadPropertyInfo() {
+         const urlParams = new URLSearchParams(window.location.search);
+         const propId = urlParams.get('id');
+ 
+         if (!propId) {
+             document.getElementById('prop-title').textContent    = 'Property not specified.';
+-            document.getElementById('prop-location').textContent = 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
+-            document.getElementById('prop-price').textContent    = 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
++            document.getElementById('prop-location').textContent = '—';
++            document.getElementById('prop-price').textContent    = '—';
+             return;
+         }
+ 
+@@ -181,12 +185,12 @@
+         } catch (e) {
+             console.error('[contact-landlord] loadPropertyInfo:', e);
+             document.getElementById('prop-title').textContent    = 'Could not load property.';
+-            document.getElementById('prop-location').textContent = 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
+-            document.getElementById('prop-price').textContent    = 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â';
++            document.getElementById('prop-location').textContent = '—';
++            document.getElementById('prop-price').textContent    = '—';
+         }
+     }
+ 
+-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Form submit ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
++    /* —— Form submit ————————————————————————————— */
+     document.getElementById('contactForm').addEventListener('submit', async function(e) {
+         e.preventDefault();
+         hideFormError();
+-- 
+2.43.0
+
