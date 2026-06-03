@@ -297,9 +297,16 @@
                         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-5">
                             <div class="bg-gradient-to-r from-orange-500 to-orange-600 h-20 relative">
                                 <div class="absolute -bottom-6 left-6">
-                                    <img id="profile-avatar-display"
-                                         src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
-                                         class="w-14 h-14 rounded-full border-4 border-white shadow-md object-cover">
+                                    <div class="relative w-14 h-14">
+                                        <img id="profile-avatar-display"
+                                             src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff"
+                                             class="w-14 h-14 rounded-full border-4 border-white shadow-md object-cover">
+                                        <label for="avatar-input" title="Change photo"
+                                               class="absolute -bottom-1 -right-1 w-6 h-6 bg-[#ea580c] text-white rounded-full flex items-center justify-center cursor-pointer shadow hover:bg-orange-700 transition text-[10px]">
+                                            <i class="fas fa-camera"></i>
+                                        </label>
+                                        <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="uploadAvatar(this)">
+                                    </div>
                                 </div>
                             </div>
                             <div class="pt-9 pb-5 px-6">
@@ -484,6 +491,31 @@ function showToast(msg, type = 'success') {
     el.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${esc(msg)}`;
     el.classList.remove('hidden');
     setTimeout(() => el.classList.add('hidden'), 3500);
+}
+
+// Profile photo upload -> POST /users/me/photo (works for any logged-in user)
+async function uploadAvatar(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('Please choose an image file.', 'error'); input.value = ''; return; }
+    const fd = new FormData();
+    fd.append('file', file);
+    showToast('Uploading photo...', 'info');
+    try {
+        const res = await fetch(`${API}/users/me/photo`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+            body: fd,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Upload failed.');
+        const url = data.avatar_url;
+        ['profile-avatar-display', 'header-avatar', 'mobile-avatar'].forEach(id => { const el = document.getElementById(id); if (el) el.src = url; });
+        if (window._currentUser) window._currentUser.avatar_url = url;
+        showToast('Photo updated!', 'success');
+    } catch (e) {
+        showToast(e.message || 'Upload failed.', 'error');
+    } finally { input.value = ''; }
 }
 
 // Logout

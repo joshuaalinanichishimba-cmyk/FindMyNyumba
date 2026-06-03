@@ -385,6 +385,17 @@
         <div id="view-profile" class="dashboard-view hidden-view">
             <h2 class="text-xl font-black mb-5 text-gray-900">Profile &amp; Settings</h2>
             <div class="max-w-xl space-y-5">
+                <div class="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div class="relative w-16 h-16 shrink-0">
+                        <img id="sh-avatar" src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff" class="w-16 h-16 rounded-full object-cover border border-gray-200">
+                        <label for="sh-avatar-input" title="Change photo" class="absolute -bottom-1 -right-1 w-7 h-7 bg-[#ea580c] text-white rounded-full flex items-center justify-center cursor-pointer shadow hover:bg-[#c2410c] transition text-xs"><i class="fas fa-camera"></i></label>
+                        <input type="file" id="sh-avatar-input" accept="image/*" class="hidden" onchange="uploadAvatar(this)">
+                    </div>
+                    <div>
+                        <p id="sh-prof-name" class="font-black text-gray-900">Profile Photo</p>
+                        <p class="text-xs text-gray-400">Tap the camera to upload your photo.</p>
+                    </div>
+                </div>
                 <div class="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-gray-100">
                     <h3 class="font-black text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
                         <i class="fas fa-user-cog text-[#ea580c]"></i> Account Details
@@ -769,7 +780,26 @@ async function loadVerification() {
 }
 
 // â”€â”€ Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function uploadAvatar(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('Please choose an image file.', 'error'); input.value = ''; return; }
+    const fd = new FormData(); fd.append('file', file);
+    showToast('Uploading photo...', 'success');
+    try {
+        const res = await fetch(`${API_BASE}/users/me/photo`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Upload failed.');
+        const av = document.getElementById('sh-avatar'); if (av) av.src = data.avatar_url;
+        if (_currentUser) _currentUser.avatar_url = data.avatar_url;
+        showToast('Photo updated!', 'success');
+    } catch (e) { showToast(e.message || 'Upload failed.', 'error'); }
+    finally { input.value = ''; }
+}
+
 function loadProfile() {
+    const _av = document.getElementById('sh-avatar');
+    if (_av && _currentUser && _currentUser.avatar_url) _av.src = _currentUser.avatar_url;
     if (!_currentUser) return;
     const el = (id) => document.getElementById(id);
     if (el('prof-name'))  el('prof-name').value  = _currentUser.full_name || '';
