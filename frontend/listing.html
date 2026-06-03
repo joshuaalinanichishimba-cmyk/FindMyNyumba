@@ -9,105 +9,215 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+                colors: { brand: { DEFAULT: '#ea580c', dark: '#c2410c' }, navy: { DEFAULT: '#0f172a', light: '#1e293b' } }
+            } }
+        };
+    </script>
     <style>
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
         #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
         #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
         #toast.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
-
-        /* Mobile safety */
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
         input, textarea, select { max-width: 100%; }
-        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        @media (max-width: 640px) {
-            .sm\:hidden-mobile { display: none !important; }
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-50 pb-20">
+<body class="bg-gray-50 text-navy pb-10">
 
     <!-- Toast -->
     <div id="toast" class="hide fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm shadow-2xl flex items-center gap-2 min-w-[260px] max-w-[90vw] justify-center"></div>
 
-    <!-- Nav -->
+    <!-- Nav (auth-aware ids preserved: nav-dashboard, nav-login) -->
     <nav class="bg-white shadow-sm px-4 py-2 flex justify-between items-center sticky top-0 z-40 border-b border-slate-100">
         <a href="index.html" class="flex items-center gap-2">
-            <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;display:block;object-fit:contain;" onerror="this.style.display='none'">
+            <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;display:block;object-fit:contain;" onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
+            <span id="logo-fallback" class="hidden text-lg font-extrabold">Find<span class="text-brand">My</span>Nyumba</span>
         </a>
         <div class="flex gap-3 sm:gap-5 items-center">
-            <a href="browse.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors">Browse</a>
-            <a href="how-it-works.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors hidden sm:block">How It Works</a>
-            <a id="nav-dashboard" href="login.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors hidden">Dashboard</a>
-            <a id="nav-login" href="login.html" class="text-sm font-semibold text-gray-600 hover:text-[#ea580c] transition-colors">Login</a>
+            <a href="browse.html" class="text-sm font-semibold text-gray-600 hover:text-brand transition-colors">Browse</a>
+            <a href="how-it-works.html" class="text-sm font-semibold text-gray-600 hover:text-brand transition-colors hidden sm:block">How It Works</a>
+            <a id="nav-dashboard" href="login.html" class="text-sm font-semibold text-gray-600 hover:text-brand transition-colors hidden">Dashboard</a>
+            <a id="nav-login" href="login.html" class="text-sm font-semibold text-gray-600 hover:text-brand transition-colors">Login</a>
         </div>
     </nav>
 
     <!-- Breadcrumb -->
-    <div class="max-w-6xl mx-auto px-4 pt-4 pb-1">
-        <a href="browse.html" class="text-sm text-slate-500 hover:text-[#ea580c] transition-colors font-medium inline-flex items-center gap-1">
-            <i class="fas fa-arrow-left text-xs"></i> Back to Browse
+    <div class="max-w-7xl mx-auto px-4 pt-4 pb-1">
+        <a href="browse.html" class="text-sm text-slate-500 hover:text-brand transition-colors font-semibold inline-flex items-center gap-1.5">
+            <i class="fas fa-chevron-left text-xs"></i> Back to Search Results
         </a>
     </div>
 
-    <!-- Main grid -->
-    <div class="max-w-6xl mx-auto px-4 pt-4 pb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main grid: 3 / 6 / 3 -->
+    <div class="max-w-7xl mx-auto px-4 pt-3 pb-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-        <!-- Left: main content -->
-        <div class="lg:col-span-2 space-y-5">
+        <!-- ===================== LEFT COLUMN ===================== -->
+        <aside class="lg:col-span-3 space-y-5 order-2 lg:order-1">
 
-            <!-- Property image -->
-            <div class="relative w-full h-64 sm:h-80 md:h-[420px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm">
-                <img id="main-image"
-                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%239ca3af'%3ELoading image...%3C/text%3E%3C/svg%3E"
-                     alt="Property"
-                     class="w-full h-full object-cover transition-opacity duration-200">
-                <video id="main-video" controls playsinline class="w-full h-full object-cover hidden bg-black"></video>
-                <button type="button" id="view-fullscreen" class="hidden absolute top-3 left-3 bg-black/55 text-white px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm items-center gap-1 hover:bg-[#ea580c] transition"><i class="fas fa-expand"></i> View</button>
-                <!-- Photo counter badge (shown when >1 photo) -->
-                <div id="photo-counter" class="hidden absolute bottom-3 right-3 bg-black/60 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
-                    <i class="fas fa-images text-xs"></i>
-                    <span id="photo-counter-text"></span>
+            <!-- SECTION 1: Property summary -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="relative">
+                    <img id="summary-image" src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600"
+                         class="w-full h-44 object-cover" alt="Property"
+                         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600'">
+                    <span id="summary-photo-count" class="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                        <i class="fas fa-camera text-[10px]"></i> 1/1
+                    </span>
                 </div>
-                <div id="boosted-badge" class="hidden absolute top-3 right-3 bg-[#ea580c] text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
-                    <i class="fas fa-star"></i> Featured
-                </div>
-            </div>
+                <div class="p-5">
+                    <!-- prop-title set by loadData -->
+                    <h1 id="prop-title" class="text-xl font-extrabold leading-snug">Loading...</h1>
+                    <!-- prop-price set by loadData ("ZMW x") -->
+                    <p id="prop-price" class="text-brand text-2xl font-extrabold mt-1">ZMW ...</p>
 
-            <!-- Photo gallery thumbnails (shown only when listing has >1 image) -->
-            <div id="photo-gallery" class="hidden gap-2 overflow-x-auto pb-1 mt-2" style="display:none;">
-                <!-- thumbnails injected by loadData() -->
-            </div>
-
-            <!-- Details card -->
-            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm">
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div class="flex-1 min-w-0">
-                        <h2 id="prop-title" class="text-2xl md:text-3xl font-black text-gray-800 leading-tight">Loading...</h2>
-                        <p class="text-gray-500 mt-2 text-sm flex items-center gap-1.5">
-                            <i class="fas fa-map-marker-alt text-[#ea580c] flex-shrink-0"></i>
+                    <ul class="mt-4 space-y-2.5 text-sm">
+                        <li class="flex items-start gap-2.5 text-gray-700">
+                            <i class="fas fa-location-dot text-gray-400 w-4 mt-0.5"></i>
+                            <!-- prop-location-text set by loadData -->
                             <span id="prop-location-text">Loading location...</span>
-                        </p>
-                    </div>
-                    <div class="flex-shrink-0 text-right">
-                        <span id="prop-price" class="text-2xl font-black text-[#ea580c]">ZMW ...</span>
-                        <div class="text-xs text-gray-400 font-medium mt-0.5">per month</div>
-                    </div>
-                </div>
-                <div class="mt-5 pt-5 border-t border-gray-100">
-                    <h4 class="text-lg font-bold text-gray-800 mb-2">Description</h4>
-                    <p id="prop-description" class="text-gray-600 leading-relaxed whitespace-pre-line text-sm">Loading details...</p>
-                </div>
-                <div class="mt-5 pt-4 border-t border-gray-100">
-                    <button onclick="openReportModal()"
-                        class="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5">
-                        <i class="fas fa-flag"></i> Report this listing
-                    </button>
+                        </li>
+                        <li class="flex items-start gap-2.5 text-gray-700">
+                            <i class="fas fa-graduation-cap text-gray-400 w-4 mt-0.5"></i>
+                            <span id="sm-distance">Distance not specified</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fas fa-calendar-check text-gray-400 w-4 mt-0.5"></i>
+                            <span id="sm-available" class="font-semibold text-green-600">Available Now</span>
+                        </li>
+                        <li class="flex items-start gap-2.5 text-gray-700">
+                            <i class="fas fa-venus-mars text-gray-400 w-4 mt-0.5"></i>
+                            <span id="sm-gender">Any gender</span>
+                        </li>
+                        <li class="flex items-start gap-2.5 text-gray-700">
+                            <i class="fas fa-clock text-gray-400 w-4 mt-0.5"></i>
+                            <span id="sm-posted">Recently posted</span>
+                        </li>
+                    </ul>
+                    <p id="prop-ref" class="mt-4 text-[11px] font-semibold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">ID: —</p>
                 </div>
             </div>
 
-            <!-- Review card -->
-            <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm">
+            <!-- SECTION 6: Property Highlights -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 class="font-extrabold text-base mb-4">Property Highlights</h3>
+                <div id="highlights-grid" class="grid grid-cols-3 gap-3"></div>
+            </div>
+
+            <!-- SECTION 7: Nearby Places (TODO: Requires Maps Backend for real distances) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 class="font-extrabold text-base mb-4">Nearby Places</h3>
+                <ul id="nearby-list" class="space-y-3 text-sm"></ul>
+                <button onclick="document.getElementById('map-card').scrollIntoView({behavior:'smooth'})"
+                        class="mt-4 w-full border-2 border-brand text-brand font-bold text-sm py-2.5 rounded-xl hover:bg-brand hover:text-white transition flex items-center justify-center gap-2">
+                    <i class="fas fa-map-location-dot"></i> View on Map
+                </button>
+            </div>
+
+            <!-- Map (existing Leaflet target #property-map preserved) -->
+            <div id="map-card" class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+                <div id="property-map" class="w-full h-[260px] rounded-xl z-0"></div>
+            </div>
+        </aside>
+
+        <!-- ===================== CENTER COLUMN ===================== -->
+        <section class="lg:col-span-6 space-y-5 order-1 lg:order-2">
+
+            <!-- SECTION 2: Media gallery (reuses FMNGallery + existing ids) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div id="gallery-stage" class="relative bg-gray-900 aspect-[4/3] select-none">
+                    <img id="main-image"
+                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='100%25' height='100%25' fill='%23111827'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%236b7280'%3ELoading...%3C/text%3E%3C/svg%3E"
+                         alt="Property" class="w-full h-full object-cover transition-opacity duration-200">
+                    <video id="main-video" controls playsinline class="w-full h-full object-cover hidden bg-black"></video>
+
+                    <!-- video badge (shown by loadData if videos exist) -->
+                    <span id="video-badge" class="hidden absolute top-3 left-3 bg-black/70 text-white text-xs font-semibold px-3 py-1.5 rounded-lg items-center gap-1.5">
+                        <i class="fas fa-video text-[11px]"></i> <span id="video-count">0</span> Videos
+                    </span>
+
+                    <!-- existing fullscreen trigger (loadData wires onclick -> FMNGallery lightbox) -->
+                    <button type="button" id="view-fullscreen"
+                            class="hidden absolute bottom-3 left-3 w-9 h-9 rounded-full bg-white/90 text-navy shadow items-center justify-center hover:bg-white transition" title="Fullscreen">
+                        <i class="fas fa-expand text-sm"></i>
+                    </button>
+
+                    <!-- favourite (cosmetic, local) -->
+                    <button id="fav-btn" onclick="toggleFav()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 text-gray-500 hover:text-red-500 shadow flex items-center justify-center transition" aria-label="Save">
+                        <i class="far fa-heart"></i>
+                    </button>
+
+                    <!-- featured badge (existing id) -->
+                    <div id="boosted-badge" class="hidden absolute top-14 right-3 bg-brand text-white px-3 py-1 rounded-full text-xs font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
+                        <i class="fas fa-star"></i> Featured
+                    </div>
+
+                    <!-- photo counter (existing ids) -->
+                    <div id="photo-counter" class="hidden absolute bottom-3 right-3 bg-black/70 text-white text-xs font-semibold px-2.5 py-1 rounded-lg backdrop-blur-sm flex items-center gap-1">
+                        <i class="fas fa-images text-[10px]"></i> <span id="photo-counter-text"></span>
+                    </div>
+
+                    <!-- prev / next (use existing switchMainMedia via galleryStep) -->
+                    <button onclick="galleryStep(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-navy shadow flex items-center justify-center hover:bg-white transition" aria-label="Previous"><i class="fas fa-chevron-left text-sm"></i></button>
+                    <button onclick="galleryStep(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-navy shadow flex items-center justify-center hover:bg-white transition" aria-label="Next"><i class="fas fa-chevron-right text-sm"></i></button>
+                </div>
+
+                <!-- thumbnail strip (existing id #photo-gallery, populated by loadData) -->
+                <div id="photo-gallery" class="hidden gap-2 p-3 overflow-x-auto no-scrollbar" style="display:none;"></div>
+            </div>
+
+            <!-- Tabs + content -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex border-b border-gray-100 overflow-x-auto no-scrollbar px-2">
+                    <button data-tab="about"     class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-brand text-brand">About Property</button>
+                    <button data-tab="details"   class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-navy">Details</button>
+                    <button data-tab="amenities" class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-navy">Amenities</button>
+                    <button data-tab="rules"     class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-navy">House Rules</button>
+                </div>
+                <div class="p-5">
+                    <!-- ABOUT (prop-description set by loadData) -->
+                    <div data-panel="about">
+                        <h4 class="font-bold text-gray-800 mb-2">Description</h4>
+                        <p id="prop-description" class="text-gray-600 leading-relaxed whitespace-pre-line text-sm">Loading details...</p>
+                        <div class="mt-5 pt-4 border-t border-gray-100">
+                            <button onclick="openReportModal()" class="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5">
+                                <i class="fas fa-flag"></i> Report this listing
+                            </button>
+                        </div>
+                    </div>
+                    <!-- DETAILS -->
+                    <div data-panel="details" class="hidden">
+                        <div id="details-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm"></div>
+                    </div>
+                    <!-- AMENITIES -->
+                    <div data-panel="amenities" class="hidden">
+                        <div id="amenities-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                    </div>
+                    <!-- HOUSE RULES (TODO: Requires backend support for house_rules) -->
+                    <div data-panel="rules" class="hidden">
+                        <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex items-center gap-3"><i class="fas fa-clock text-gray-400 w-4"></i> Curfew: <span class="font-semibold">10:00 PM</span></li>
+                            <li class="flex items-center gap-3"><i class="fas fa-ban text-gray-400 w-4"></i> No smoking indoors</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-paw text-gray-400 w-4"></i> No pets</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-calendar-day text-gray-400 w-4"></i> Minimum stay: <span class="font-semibold">6 Months</span></li>
+                        </ul>
+                    </div>
+                    <p class="mt-5 text-right text-[11px] text-gray-400"><span id="char-count">0</span> characters</p>
+                </div>
+            </div>
+
+            <!-- Review card (existing functionality preserved) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
                 <h4 class="text-xl font-bold text-gray-800 mb-5">Leave a Review</h4>
                 <div class="bg-gray-50 p-5 rounded-xl border border-gray-100">
                     <div class="flex gap-2 text-3xl mb-4" id="star-container">
@@ -118,93 +228,139 @@
                         <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
                     </div>
                     <textarea id="review-comment" placeholder="How was your experience with this property?" rows="3"
-                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none resize-none mb-3 text-sm"></textarea>
-                    <button id="post-review-btn"
-                        class="px-6 py-2.5 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] transition-all text-sm">
-                        Post Review
-                    </button>
+                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand outline-none resize-none mb-3 text-sm"></textarea>
+                    <button id="post-review-btn" class="px-6 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all text-sm">Post Review</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Right: sidebar -->
-        <div class="space-y-5">
-
-            <!-- Host card -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
-                <div id="host-avatar"
-                    class="w-16 h-16 bg-orange-100 text-[#ea580c] rounded-full flex items-center justify-center text-xl mx-auto mb-3 font-black border-4 border-white shadow-md">&nbsp;</div>
-                <h3 id="host-name" class="text-lg font-bold text-gray-800 mb-1">Loading...</h3>
-                <div id="host-badge" class="text-xs text-gray-400 mb-4"></div>
-                <button id="msg-landlord-btn"
-                    class="w-full py-3 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] shadow-md shadow-orange-200 transition-all flex items-center justify-center gap-2 text-sm">
-                    <i class="fas fa-paper-plane"></i> Message Host
-                </button>
-                <button id="agreement-btn"
-                    onclick="openAgreement()"
-                    class="w-full mt-2 py-3 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:border-[#ea580c] hover:text-[#ea580c] transition-all flex items-center justify-center gap-2 text-sm">
-                    <i class="fas fa-file-contract"></i> Generate Rental Agreement
-                </button>
+            <!-- SECTION 10: Similar properties (TODO: Requires Similar Listings Endpoint) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-extrabold text-base">Students Also Viewed</h3>
+                    <a href="browse.html" class="text-brand text-sm font-bold hover:underline">View all</a>
+                </div>
+                <div id="similar-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
             </div>
+        </section>
 
-            <!-- Map -->
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 h-[280px] md:h-[320px]">
-                <div id="property-map" class="w-full h-full rounded-xl z-0"></div>
-            </div>
+        <!-- ===================== RIGHT COLUMN ===================== -->
+        <aside class="lg:col-span-3 space-y-5 order-3">
 
-            <!-- Quick facts -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Quick Info</h4>
-                <div class="space-y-2 text-sm">
-                    <div class="flex items-center justify-between text-gray-600">
-                        <span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500 w-4"></i> Listed on Platform</span>
-                        <span class="font-semibold text-green-600">Active</span>
-                    </div>
-                    <div class="flex items-center justify-between text-gray-600">
-                        <span class="flex items-center gap-2"><i class="fas fa-calendar-alt text-[#ea580c] w-4"></i> Available</span>
-                        <span class="font-semibold">Now</span>
+            <!-- SECTION 3 + 4: Contact landlord (host ids preserved) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 lg:sticky lg:top-20">
+                <h3 class="font-extrabold text-base mb-4">Contact Landlord</h3>
+                <div class="flex flex-col items-center text-center">
+                    <div id="host-avatar" class="w-16 h-16 bg-orange-100 text-brand rounded-full flex items-center justify-center text-xl mb-3 font-black border-4 border-white shadow-md">&nbsp;</div>
+                    <h3 id="host-name" class="text-lg font-bold text-gray-800 mb-1">Loading...</h3>
+                    <!-- host-badge filled by loadData (Verified pill or role) -->
+                    <div id="host-badge" class="text-xs text-gray-400 mb-1"></div>
+                    <div class="flex items-center gap-1 text-xs mt-1 mb-1">
+                        <span class="text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
+                        <span id="landlord-rating" class="text-gray-500 font-semibold">(0)</span>
                     </div>
                 </div>
+
+                <!-- stats (TODO: backend member_since / active_listings / response_rate / response_time) -->
+                <div class="grid grid-cols-3 gap-2 my-4 text-center">
+                    <div><p class="text-[10px] uppercase font-bold text-gray-400">Member</p><p id="stat-member" class="text-sm font-extrabold">—</p></div>
+                    <div class="border-x border-gray-100"><p class="text-[10px] uppercase font-bold text-gray-400">Listings</p><p id="stat-listings" class="text-sm font-extrabold">—</p></div>
+                    <div><p class="text-[10px] uppercase font-bold text-gray-400">Response</p><p id="stat-response" class="text-sm font-extrabold">—</p></div>
+                </div>
+                <p id="stat-time" class="text-center text-xs text-gray-500 font-semibold mb-4"><i class="fas fa-bolt text-brand"></i> Usually replies quickly</p>
+
+                <!-- contact buttons -->
+                <div class="space-y-2.5">
+                    <a id="btn-call" href="#" onclick="return contactGuard('call')" class="flex items-center justify-center gap-2 w-full bg-brand hover:bg-brand-dark text-white font-bold text-sm py-3 rounded-xl transition"><i class="fas fa-phone"></i> Call Landlord</a>
+                    <a id="btn-wa" href="#" onclick="return contactGuard('wa')" class="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:brightness-95 text-white font-bold text-sm py-3 rounded-xl transition"><i class="fab fa-whatsapp text-base"></i> Chat on WhatsApp</a>
+                    <a id="btn-sms" href="#" onclick="return contactGuard('sms')" class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 rounded-xl transition"><i class="fas fa-envelope"></i> Send SMS</a>
+                    <!-- in-app messaging: existing working modal (#msg-landlord-btn handler preserved) -->
+                    <button id="msg-landlord-btn" class="flex items-center justify-center gap-2 w-full border-2 border-brand text-brand font-bold text-sm py-3 rounded-xl hover:bg-orange-50 transition"><i class="fas fa-comment-dots"></i> Message on FindMyNyumba</button>
+                    <!-- existing rental agreement generator -->
+                    <button id="agreement-btn" onclick="openAgreement()" class="flex items-center justify-center gap-2 w-full bg-white border-2 border-gray-200 text-gray-700 font-bold text-sm py-3 rounded-xl hover:border-brand hover:text-brand transition"><i class="fas fa-file-contract"></i> Generate Rental Agreement</button>
+                </div>
             </div>
-        </div>
+
+            <!-- SECTION 5a: Verification status (TODO: backend phone/NRC/property verification flags) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-extrabold text-base">Verification Status</h3>
+                    <i class="fas fa-shield-halved text-green-500 text-xl"></i>
+                </div>
+                <ul id="verification-list" class="space-y-3 text-sm"></ul>
+            </div>
+
+            <!-- SECTION 5b: Trust & Safety -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 class="font-extrabold text-base mb-2">Trust &amp; Safety</h3>
+                <p class="text-xs text-gray-500 mb-4">We verify landlords and properties to keep our community safe.</p>
+                <ul class="space-y-2.5 text-sm text-gray-700">
+                    <li class="flex items-center gap-2.5"><i class="fas fa-circle-xmark text-gray-400 w-4"></i> Never pay before viewing</li>
+                    <li class="flex items-center gap-2.5"><i class="fas fa-location-crosshairs text-gray-400 w-4"></i> Meet in a public place</li>
+                    <li class="flex items-center gap-2.5"><i class="fas fa-hand text-gray-400 w-4"></i> Trust your instincts</li>
+                </ul>
+                <div class="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-800 font-semibold">
+                    Never send money before physically inspecting a property.
+                </div>
+                <button onclick="openReportModal()" class="mt-4 w-full border-2 border-red-200 text-red-600 font-bold text-sm py-2.5 rounded-xl hover:bg-red-50 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-triangle-exclamation"></i> Report This Listing
+                </button>
+            </div>
+
+            <!-- SECTION 8: Request a viewing (TODO: Requires Viewing Request Backend) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h3 class="font-extrabold text-base mb-1">Request a Viewing</h3>
+                <p class="text-xs text-gray-500 mb-4">Pick a date and time to tour this property.</p>
+                <div class="space-y-3">
+                    <div><label class="block text-[11px] font-bold text-gray-400 uppercase mb-1.5">Date</label><input id="view-date" type="date" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand/40"></div>
+                    <div><label class="block text-[11px] font-bold text-gray-400 uppercase mb-1.5">Time</label><input id="view-time" type="time" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand/40"></div>
+                    <div><label class="block text-[11px] font-bold text-gray-400 uppercase mb-1.5">Notes</label><textarea id="view-notes" rows="2" placeholder="Anything the landlord should know?" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand/40 resize-none"></textarea></div>
+                    <button onclick="requestViewing()" class="w-full bg-navy hover:bg-navy-light text-white font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2"><i class="fas fa-calendar-plus"></i> Request Viewing</button>
+                </div>
+            </div>
+
+            <!-- Promote (TODO: Requires Subscription/Advertising System) -->
+            <div class="rounded-2xl shadow-sm border border-orange-100 p-5 bg-gradient-to-br from-orange-50 to-white">
+                <div class="flex items-center gap-2 mb-1"><h3 class="font-extrabold text-base">Promote This Listing</h3><span class="text-xl">🚀</span></div>
+                <p class="text-xs text-gray-500 mb-4">Landlords, get more visibility and attract serious students.</p>
+                <ul class="space-y-2 text-sm text-gray-700 mb-4">
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-brand text-xs"></i> Top placement in search</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-brand text-xs"></i> Featured &amp; Verified badges</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-brand text-xs"></i> More views &amp; inquiries</li>
+                </ul>
+                <button onclick="showToast('Promotions launching soon.','info')" class="w-full bg-brand hover:bg-brand-dark text-white font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2"><i class="fas fa-rocket"></i> Boost This Listing</button>
+            </div>
+        </aside>
     </div>
 
-    <!-- Message Modal -->
+    <!-- Message Modal (existing) -->
     <div id="message-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-800">Inquiry for <span id="modal-prop-title" class="text-[#ea580c]">Property</span></h3>
-                <button id="modal-close-btn" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h3 class="text-lg font-bold text-gray-800">Inquiry for <span id="modal-prop-title" class="text-brand">Property</span></h3>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Your Message</label>
-                <textarea id="modal-message-body" rows="5"
-                    placeholder="Hi, I'm interested in this property. Is it still available?"
-                    class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none resize-none text-sm text-gray-700"></textarea>
+                <textarea id="modal-message-body" rows="5" placeholder="Hi, I'm interested in this property. Is it still available?" class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand outline-none resize-none text-sm text-gray-700"></textarea>
             </div>
             <div class="p-5 bg-gray-50 flex gap-3 border-t border-gray-100">
                 <button id="modal-cancel-btn" class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition text-sm">Cancel</button>
-                <button id="modal-send-btn" class="flex-1 px-4 py-2.5 bg-[#ea580c] text-white font-bold rounded-xl hover:bg-[#c2410c] shadow-md transition text-sm">Send Inquiry</button>
+                <button id="modal-send-btn" class="flex-1 px-4 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark shadow-md transition text-sm">Send Inquiry</button>
             </div>
         </div>
     </div>
 
-    <!-- Report Modal -->
+    <!-- Report Modal (existing) -->
     <div id="report-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h3 class="text-lg font-bold text-gray-800">Report Listing</h3>
-                <button onclick="closeReportModal()" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-5 space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Reason</label>
-                    <select id="report-reason"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none bg-white text-sm text-gray-700">
+                    <select id="report-reason" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand outline-none bg-white text-sm text-gray-700">
                         <option value="">Select a reason...</option>
                         <option value="Scam or Fraud">Scam or Fraud</option>
                         <option value="Misleading Photos">Misleading Photos</option>
@@ -216,13 +372,12 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Details (optional)</label>
-                    <textarea id="report-description" rows="3" placeholder="Provide any additional details..."
-                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ea580c] outline-none resize-none text-sm text-gray-700"></textarea>
+                    <textarea id="report-description" rows="3" placeholder="Provide any additional details..." class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand outline-none resize-none text-sm text-gray-700"></textarea>
                 </div>
             </div>
             <div class="p-5 bg-gray-50 flex gap-3 border-t border-gray-100">
                 <button onclick="closeReportModal()" class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition text-sm">Cancel</button>
-                <button id="report-submit-btn" class="flex-1 px-4 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition text-sm">Submit Report</button>
+                <button id="report-submit-btn" class="flex-1 px-4 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-md transition text-sm">Submit Report</button>
             </div>
         </div>
     </div>
@@ -240,25 +395,25 @@
                 <div>
                     <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Quick Links</h4>
                     <ul class="space-y-1.5 text-xs">
-                        <li><a href="index.html" class="hover:text-[#ea580c] font-medium">Home</a></li>
-                        <li><a href="browse.html" class="hover:text-[#ea580c] font-medium">Browse</a></li>
-                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] font-medium">How It Works</a></li>
-                        <li><a href="login.html" class="hover:text-[#ea580c] font-medium">Login</a></li>
+                        <li><a href="index.html" class="hover:text-brand font-medium">Home</a></li>
+                        <li><a href="browse.html" class="hover:text-brand font-medium">Browse</a></li>
+                        <li><a href="how-it-works.html" class="hover:text-brand font-medium">How It Works</a></li>
+                        <li><a href="login.html" class="hover:text-brand font-medium">Login</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Support</h4>
                     <ul class="space-y-1.5 text-xs">
-                        <li><a href="help.html" class="hover:text-[#ea580c] font-medium">Help Center</a></li>
-                        <li><a href="terms.html" class="hover:text-[#ea580c] font-medium">Terms</a></li>
-                        <li><a href="privacy.html" class="hover:text-[#ea580c] font-medium">Privacy</a></li>
+                        <li><a href="help.html" class="hover:text-brand font-medium">Help Center</a></li>
+                        <li><a href="terms.html" class="hover:text-brand font-medium">Terms</a></li>
+                        <li><a href="privacy.html" class="hover:text-brand font-medium">Privacy</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
                     <ul class="space-y-1.5 text-xs">
-                        <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
-                        <li><a href="register-landlord.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
+                        <li><a href="register.html" class="hover:text-brand font-medium">As Student</a></li>
+                        <li><a href="register-landlord.html" class="hover:text-brand font-medium">As Landlord</a></li>
                     </ul>
                 </div>
             </div>
@@ -275,7 +430,7 @@
 <script>
 'use strict';
 
-/* FindMyNyumba runtime config ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â auto-detects backend host */
+/* FindMyNyumba runtime config - auto-detects backend host */
 const FMN = (function () {
     const host = window.location.hostname;
     const isLocal = (host === 'localhost' || host === '127.0.0.1');
@@ -285,7 +440,7 @@ const FMN = (function () {
     return { API_HOST, API_BASE: API_HOST + '/api/v1' };
 })();
 const API_BASE = FMN.API_BASE;
-// Fallback backend host for environments where the primary Render app differs.
+/* Fallback backend host for environments where the primary Render app differs. */
 const API_BASE_FALLBACK = FMN.API_HOST.includes('127.0.0.1')
     ? null
     : 'https://findmynyumba.onrender.com/api/v1';
@@ -294,11 +449,16 @@ let currentProperty = null;
 let selectedRating  = 5;
 let leafletMap      = null;
 let toastTimer;
+let LANDLORD_PHONE  = null;
 
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 const getRole  = () => localStorage.getItem('role')  || sessionStorage.getItem('role');
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Toast ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* ---- helpers ---- */
+const esc  = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const pick = (obj, keys, fb) => { for (const k of keys) { if (obj && obj[k] != null && obj[k] !== '') return obj[k]; } return fb; };
+
+/* ---- Toast ---- */
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-gray-800' };
@@ -309,12 +469,11 @@ function showToast(msg, type = 'success') {
     toastTimer = setTimeout(() => { t.classList.replace('show', 'hide'); }, 3500);
 }
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Auth-aware nav ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* ---- Auth-aware nav ---- */
 (function initNav() {
     const token = getToken();
     const role  = getRole();
     if (!token || !role) return;
-    /* FIX: original was missing .html suffix on every dashboard route */
     const routes = {
         student:      'dashboard-student.html',
         student_host: 'dashboard-student-host.html',
@@ -326,7 +485,7 @@ function showToast(msg, type = 'success') {
     document.getElementById('nav-login')?.classList.add('hidden');
 })();
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Image URL resolver ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* ---- Image URL resolver ---- */
 function resolveImageUrl(raw) {
     if (!raw) return null;
     const url = String(raw).trim();
@@ -334,12 +493,11 @@ function resolveImageUrl(raw) {
     return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
 }
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Modal helpers ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* ---- Modal helpers ---- */
 function openModal(id)  { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
 function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
 
 function openReportModal() {
-    /* FIX: original navigated to 'login' (no .html) */
     if (!getToken()) {
         showToast('Please log in to report a listing.', 'info');
         setTimeout(() => window.location.href = 'login.html', 1800);
@@ -349,7 +507,7 @@ function openReportModal() {
 }
 function closeReportModal() { closeModal('report-modal'); }
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Map ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* ---- Map ---- */
 function initMap(lat, lng, label) {
     if (leafletMap) { leafletMap.remove(); leafletMap = null; }
     leafletMap = L.map('property-map').setView([lat, lng], 15);
@@ -360,83 +518,348 @@ function initMap(lat, lng, label) {
     setTimeout(() => leafletMap.invalidateSize(), 400);
 }
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Load listing ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* Use real coords if backend sends them; else geocode the location text (free, OSM). */
+async function placeMap(data) {
+    const label = data.title || 'Property';
+    let lat = parseFloat(data.latitude  ?? data.lat);
+    let lng = parseFloat(data.longitude ?? data.lng);
+    if (!isFinite(lat) || !isFinite(lng)) {
+        const geo = await geocode(data.location);
+        if (geo) { lat = geo.lat; lng = geo.lng; }
+    }
+    if (!isFinite(lat) || !isFinite(lng)) { lat = -12.8024; lng = 28.2132; } /* Kitwe fallback */
+    initMap(lat, lng, label);
+}
+async function geocode(place) {
+    if (!place) return null;
+    try {
+        const q = encodeURIComponent(String(place) + ', Zambia');
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) return null;
+        const arr = await res.json();
+        if (Array.isArray(arr) && arr.length) return { lat: parseFloat(arr[0].lat), lng: parseFloat(arr[0].lon) };
+    } catch (_) {}
+    return null;
+}
+
+/* ---- Tabs ---- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('border-brand', 'text-brand'); b.classList.add('border-transparent', 'text-gray-500'); });
+        btn.classList.add('border-brand', 'text-brand'); btn.classList.remove('border-transparent', 'text-gray-500');
+        document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== btn.dataset.tab));
+    });
+});
+
+/* ---- Gallery step (reuses existing switchMainMedia) ---- */
+function galleryStep(d) {
+    const list = window._fmnItems || [];
+    if (!list.length) return;
+    switchMainMedia((_currentIdx + d + list.length) % list.length);
+}
+
+/* ---- Favourite (cosmetic, local) ---- */
+function toggleFav() {
+    const icon = document.querySelector('#fav-btn i');
+    const on = icon.classList.contains('fas');
+    icon.className = on ? 'far fa-heart' : 'fas fa-heart';
+    document.getElementById('fav-btn').classList.toggle('text-red-500', !on);
+    showToast(on ? 'Removed from saved' : 'Saved to favourites', 'success');
+}
+
+/* ---- Contact buttons (call/sms/whatsapp) ---- */
+function contactGuard(kind) {
+    if (!LANDLORD_PHONE) { showToast('Phone not available. Use in-app messaging instead.', 'info'); return false; }
+    const tel = LANDLORD_PHONE.replace(/[^\d+]/g, '');
+    if (kind === 'call') window.location.href = 'tel:' + tel;
+    if (kind === 'sms')  window.location.href = 'sms:' + tel;
+    if (kind === 'wa')   window.open('https://wa.me/' + tel.replace(/^\+/, ''), '_blank');
+    return false;
+}
+
+/* ---- Request viewing (TODO: Requires Viewing Request Backend) ---- */
+function requestViewing() {
+    if (!getToken()) { showToast('Please log in to request a viewing.', 'info'); setTimeout(() => window.location.href = 'login.html', 1800); return; }
+    const date = document.getElementById('view-date').value;
+    const time = document.getElementById('view-time').value;
+    if (!date || !time) { showToast('Please pick a date and time.', 'info'); return; }
+    /* TODO: Requires Viewing Request Backend -> POST /api/v1/viewings { property_id, date, time, notes } */
+    showToast(`Viewing requested for ${date} at ${time}. Awaiting confirmation.`, 'success');
+}
+
+/* ===== New-section renderers (graceful fallbacks; backend-optional) ===== */
+
+const HIGHLIGHT_DEFS = [
+    { key: ['furnished'],                 icon: 'fa-couch',         label: 'Furnished',   c: 'text-orange-500 bg-orange-50' },
+    { key: ['water', 'water_available'],  icon: 'fa-droplet',       label: 'Water',       c: 'text-blue-500 bg-blue-50' },
+    { key: ['electricity'],               icon: 'fa-bolt',          label: 'Electricity', c: 'text-yellow-500 bg-yellow-50' },
+    { key: ['wifi', 'internet'],          icon: 'fa-wifi',          label: 'WiFi',        c: 'text-emerald-500 bg-emerald-50' },
+    { key: ['parking'],                   icon: 'fa-car',           label: 'Parking',     c: 'text-purple-500 bg-purple-50' },
+    { key: ['security'],                  icon: 'fa-shield-halved', label: 'Security',    c: 'text-red-500 bg-red-50' },
+    { key: ['cctv'],                      icon: 'fa-video',         label: 'CCTV',        c: 'text-sky-500 bg-sky-50' },
+    { key: ['beds', 'beds_included'],     icon: 'fa-bed',           label: 'Beds',        c: 'text-indigo-500 bg-indigo-50' },
+    { key: ['kitchen'],                   icon: 'fa-utensils',      label: 'Kitchen',     c: 'text-pink-500 bg-pink-50' },
+];
+function deriveHighlights(data) {
+    const amenities = Array.isArray(data.amenities) ? data.amenities.map(a => String(a).toLowerCase()) : [];
+    const on = (keys) => keys.some(k => data[k] === true || data[k] === 'yes' || data[k] === 'Yes' || amenities.some(a => a.includes(k.replace('_', ' ')) || a.includes(k)));
+    let active = HIGHLIGHT_DEFS.filter(h => on(h.key));
+    if (active.length === 0) active = HIGHLIGHT_DEFS.slice(0, 6); /* TODO: backend amenity flags */
+    return active.slice(0, 9);
+}
+function renderHighlights(highlights) {
+    document.getElementById('highlights-grid').innerHTML = highlights.map(h => `
+        <div class="flex flex-col items-center gap-1.5 p-2">
+            <span class="w-11 h-11 rounded-xl flex items-center justify-center ${h.c}"><i class="fas ${h.icon}"></i></span>
+            <span class="text-[11px] font-semibold text-gray-600">${h.label}</span>
+        </div>`).join('');
+}
+function renderAmenities(highlights) {
+    document.getElementById('amenities-grid').innerHTML = highlights.map(h => `
+        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 text-sm">
+            <i class="fas ${h.icon} ${h.c.split(' ')[0]}"></i> <span class="font-semibold">${h.label}</span>
+        </div>`).join('');
+}
+function renderDetails(data) {
+    const items = [
+        ['Property Type', pick(data, ['property_type', 'type'], '—'), 'fa-house'],
+        ['Bedrooms',      pick(data, ['bedrooms'], '—'), 'fa-bed'],
+        ['Bathrooms',     pick(data, ['bathrooms'], '—'), 'fa-bath'],
+        ['Furnished',     pick(data, ['furnished'], 'Yes'), 'fa-couch'],
+        ['Water',         pick(data, ['water', 'water_available'], 'Yes'), 'fa-droplet'],
+        ['Electricity',   pick(data, ['electricity'], 'Yes'), 'fa-bolt'],
+        ['Deposit',       data.deposit != null ? 'K' + Number(data.deposit).toLocaleString() : '—', 'fa-wallet'],
+        ['Minimum Stay',  pick(data, ['minimum_stay', 'min_stay'], '6 Months'), 'fa-calendar-day'],
+    ];
+    document.getElementById('details-grid').innerHTML = items.map(([k, v, ic]) => `
+        <div class="flex items-center gap-3">
+            <i class="fas ${ic} text-gray-300 w-5"></i>
+            <div><p class="text-gray-400 text-xs">${k}</p><p class="font-semibold">${esc(v)}</p></div>
+        </div>`).join('');
+}
+function renderNearby(data) {
+    let places = Array.isArray(data.nearby) ? data.nearby : null;
+    if (!places || !places.length) {
+        /* placeholder until Maps backend provides real distances */
+        places = [
+            { name: 'University', dist: '1.2 km', icon: 'fa-graduation-cap' },
+            { name: 'Shopping Mall', dist: '2.8 km', icon: 'fa-bag-shopping' },
+            { name: 'Bus Stop', dist: '300 m', icon: 'fa-bus' },
+            { name: 'Hospital', dist: '1.5 km', icon: 'fa-hospital' },
+            { name: 'Market', dist: '900 m', icon: 'fa-store' },
+        ];
+    }
+    document.getElementById('nearby-list').innerHTML = places.map(p => `
+        <li class="flex items-center justify-between">
+            <span class="flex items-center gap-2.5 text-gray-700"><i class="fas ${p.icon || 'fa-location-dot'} text-gray-400 w-4"></i> ${esc(p.name)}</span>
+            <span class="text-gray-400 font-semibold">${esc(p.dist || p.distance || '')}</span>
+        </li>`).join('');
+}
+function renderVerification(data) {
+    const owner = data.owner || {};
+    const overall = owner.verification_status === 'verified';
+    /* TODO: backend per-type flags (phone_verified / nrc_verified / property_verified) */
+    const rows = [
+        { label: 'Phone Verified',    state: pick(owner, ['phone_verified'], overall) },
+        { label: 'NRC Verified',      state: pick(owner, ['nrc_verified'], overall) },
+        { label: 'Property Verified', state: pick(data, ['property_verified'], overall) },
+    ];
+    const badge = (s) => (s === true || s === 'verified')
+        ? { i: 'fa-circle-check', c: 'text-green-500', t: 'Verified' }
+        : (s === 'pending' ? { i: 'fa-clock', c: 'text-yellow-500', t: 'Pending' } : { i: 'fa-circle-xmark', c: 'text-red-400', t: 'Not verified' });
+    document.getElementById('verification-list').innerHTML = rows.map(r => {
+        const b = badge(r.state);
+        return `<li class="flex items-center justify-between">
+                    <span class="flex items-center gap-2.5 text-gray-700"><i class="fas ${b.i} ${b.c}"></i> ${r.label}</span>
+                    <span class="text-xs font-bold ${b.c}">${b.t}</span>
+                </li>`;
+    }).join('');
+}
+function renderStats(owner) {
+    owner = owner || {};
+    /* TODO: backend member_since / active_listings / response_rate / response_time / rating_count */
+    const ms = pick(owner, ['member_since', 'created_at'], null);
+    document.getElementById('stat-member').textContent   = ms ? (String(ms).match(/\d{4}/)?.[0] || ms) : '—';
+    document.getElementById('stat-listings').textContent = pick(owner, ['active_listings', 'listings_count'], '—');
+    const rr = pick(owner, ['response_rate'], null);
+    document.getElementById('stat-response').textContent = rr != null ? rr + '%' : '—';
+    const rt = pick(owner, ['response_time'], null);
+    if (rt) document.getElementById('stat-time').innerHTML = `<i class="fas fa-bolt text-brand"></i> Replies within ${esc(rt)}`;
+    const rc = pick(owner, ['rating_count', 'reviews_count'], 0);
+    document.getElementById('landlord-rating').textContent = `(${rc})`;
+}
+function formatPosted(raw) {
+    if (!raw) return 'Recently posted';
+    const d = new Date(raw); if (isNaN(d)) return 'Recently posted';
+    const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+    if (days <= 0) return 'Posted today';
+    if (days === 1) return 'Posted yesterday';
+    if (days < 30) return `Posted ${days} days ago`;
+    return 'Posted ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+async function loadSimilar(currentId) {
+    const grid = document.getElementById('similar-grid');
+    const card = (p, href) => {
+        const img = resolveImageUrl(pick(p, ['cover_url', 'image_url'], '')) || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400';
+        const price = p.price != null ? 'K' + Number(p.price).toLocaleString() : '—';
+        return `<a href="${href}" class="block rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition">
+                    <img src="${esc(img)}" class="w-full h-28 object-cover" alt="${esc(p.title || '')}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'">
+                    <div class="p-3">
+                        <p class="text-brand font-extrabold text-sm">${price}<span class="text-gray-400 font-medium text-xs"> /mo</span></p>
+                        <p class="font-bold text-sm truncate">${esc(p.title || 'Property')}</p>
+                        <p class="text-gray-400 text-xs truncate">${esc(p.location || '')}</p>
+                    </div>
+                </a>`;
+    };
+    try {
+        let res = await fetch(`${API_BASE}/properties`);
+        if (!res.ok && API_BASE_FALLBACK) res = await fetch(`${API_BASE_FALLBACK}/properties`);
+        if (!res.ok) throw new Error('list');
+        let list = await res.json();
+        if (!Array.isArray(list)) list = list.items || list.results || list.data || [];
+        list = list.filter(p => String(p.id) !== String(currentId)).slice(0, 3);
+        if (!list.length) throw new Error('empty');
+        grid.innerHTML = list.map(p => card(p, `listing.html?id=${encodeURIComponent(p.id)}`)).join('');
+    } catch {
+        /* TODO: Requires Similar Listings Endpoint */
+        const ph = [
+            { title: '1 Bedroom House', location: 'Riverside, Kitwe', price: 2000 },
+            { title: '2 Bedroom Flat',  location: 'Zambezi, Kitwe',  price: 2800 },
+            { title: 'Bedsitter',       location: 'Wusakile, Kitwe', price: 2200 },
+        ];
+        grid.innerHTML = ph.map(p => card(p, 'browse.html')).join('');
+    }
+}
+
+/* ---- Load listing ---- */
 async function loadData() {
     const id = new URLSearchParams(window.location.search).get('id');
-    if (!id) { document.getElementById('prop-title').innerText = 'Property not found'; document.getElementById('prop-location-text').innerText = 'No listing ID provided.'; document.getElementById('prop-description').innerText = 'Please go back and select a property from the browse page.'; document.getElementById('prop-price').innerText = ''; showToast('No listing ID in URL. Redirecting...', 'error'); setTimeout(() => window.location.href = 'browse.html', 2500); return; }
+    if (!id) {
+        document.getElementById('prop-title').innerText = 'Property not found';
+        document.getElementById('prop-location-text').innerText = 'No listing ID provided.';
+        document.getElementById('prop-description').innerText = 'Please go back and select a property from the browse page.';
+        document.getElementById('prop-price').innerText = '';
+        showToast('No listing ID in URL. Redirecting...', 'error');
+        setTimeout(() => window.location.href = 'browse.html', 2500);
+        return;
+    }
+    document.getElementById('prop-ref').textContent = 'ID: ' + id;
 
     try {
         const primaryUrl = `${API_BASE}/properties/${id}`;
         let res = await fetch(primaryUrl);
-        if (!res.ok && API_BASE_FALLBACK) {
-            const fallbackUrl = `${API_BASE_FALLBACK}/properties/${id}`;
-            res = await fetch(fallbackUrl);
-        }
+        if (!res.ok && API_BASE_FALLBACK) res = await fetch(`${API_BASE_FALLBACK}/properties/${id}`);
         if (!res.ok) throw new Error(`${res.status}`);
 
         const data = await res.json();
         currentProperty = data;
 
-        /* FIX: original placeholders were the corrupted "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½" sequence */
         document.getElementById('prop-title').innerText         = data.title       || 'Untitled';
         document.getElementById('prop-location-text').innerText = data.location    || 'Location not specified';
-        document.getElementById('prop-description').innerText   = data.description || 'No description provided.';
+        const desc = data.description || 'No description provided.';
+        document.getElementById('prop-description').innerText   = desc;
+        document.getElementById('char-count').textContent       = desc.length;
         document.getElementById('prop-price').innerText         = `ZMW ${Number(data.price).toLocaleString()}`;
         document.title = `${data.title || 'Property'} - FindMyNyumba`;
 
+        /* summary extras (placeholders where backend field absent) */
+        document.getElementById('sm-distance').textContent = pick(data, ['distance_from_campus', 'distance'], 'Distance not specified');
+        document.getElementById('sm-gender').textContent   = 'Gender: ' + pick(data, ['gender_preference', 'gender'], 'Any');
+        document.getElementById('sm-posted').textContent   = formatPosted(pick(data, ['created_at', 'date_posted', 'posted_at'], null));
+        const avail = String(pick(data, ['availability', 'status'], 'available'));
+        const availEl = document.getElementById('sm-available');
+        if (/reserv/i.test(avail))      { availEl.textContent = 'Reserved'; availEl.className = 'font-semibold text-yellow-600'; }
+        else if (/occup/i.test(avail))  { availEl.textContent = 'Occupied'; availEl.className = 'font-semibold text-red-600'; }
+        else                            { availEl.textContent = 'Available Now'; availEl.className = 'font-semibold text-green-600'; }
+
         if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
 
-        /* Images — build gallery if multiple, else show single */
+        /* Images / media — existing FMNGallery flow preserved */
         const imgEl    = document.getElementById('main-image');
         const vidEl    = document.getElementById('main-video');
         const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80';
 
-        // Media-aware: new media[] (photos+videos), fall back to images[]/image_url.
         const _g = FMNGallery.normalize(data, resolveImageUrl);
         window._fmnItems = _g.items;
 
-        function _showMain(it){
-            if(!it){ imgEl.src=FALLBACK; imgEl.classList.remove('hidden'); vidEl.classList.add('hidden'); return; }
-            if(it.type==='video'){ vidEl.src=it.url; vidEl.classList.remove('hidden'); imgEl.classList.add('hidden'); }
-            else { imgEl.src=it.url; imgEl.onerror=()=>{ imgEl.onerror=null; imgEl.src=FALLBACK; }; imgEl.classList.remove('hidden'); vidEl.classList.add('hidden'); vidEl.removeAttribute('src'); }
+        function _showMain(it) {
+            if (!it) { imgEl.src = FALLBACK; imgEl.classList.remove('hidden'); vidEl.classList.add('hidden'); return; }
+            if (it.type === 'video') { vidEl.src = it.url; vidEl.classList.remove('hidden'); imgEl.classList.add('hidden'); }
+            else { imgEl.src = it.url; imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = FALLBACK; }; imgEl.classList.remove('hidden'); vidEl.classList.add('hidden'); vidEl.removeAttribute('src'); }
         }
 
         const fsBtn = document.getElementById('view-fullscreen');
         if (_g.items.length) {
             _showMain(_g.items[0]);
             if (fsBtn) { fsBtn.classList.remove('hidden'); fsBtn.classList.add('flex'); fsBtn.onclick = () => FMNGallery.openLightbox(window._fmnItems, _currentIdx); }
+
+            /* summary thumbnail = first image */
+            const firstImg = _g.items.find(m => m.type !== 'video') || _g.items[0];
+            if (firstImg) document.getElementById('summary-image').src = firstImg.url;
+            document.getElementById('summary-photo-count').innerHTML = `<i class="fas fa-camera text-[10px]"></i> 1/${_g.items.filter(m => m.type !== 'video').length || _g.items.length}`;
+
+            /* video badge */
+            const vids = _g.items.filter(m => m.type === 'video').length;
+            if (vids > 0) { const vb = document.getElementById('video-badge'); vb.classList.remove('hidden'); vb.classList.add('flex'); document.getElementById('video-count').textContent = vids; }
+
             if (_g.items.length > 1) {
                 const counter = document.getElementById('photo-counter');
                 document.getElementById('photo-counter-text').textContent = `1 / ${_g.items.length}`;
                 counter.classList.remove('hidden');
                 const gallery = document.getElementById('photo-gallery');
-                gallery.removeAttribute('style'); gallery.style.display='flex';
-                gallery.innerHTML = _g.items.map((m,i)=>{
-                    const ring = i===0 ? 'border-[#ea580c] shadow-md' : 'border-transparent opacity-70 hover:opacity-100 hover:border-[#ea580c]';
-                    const inner = m.type==='video'
+                gallery.removeAttribute('style'); gallery.style.display = 'flex';
+                gallery.innerHTML = _g.items.map((m, i) => {
+                    const ring = i === 0 ? 'border-[#ea580c] shadow-md' : 'border-transparent opacity-70 hover:opacity-100 hover:border-[#ea580c]';
+                    const inner = m.type === 'video'
                         ? `<video src="${m.url}#t=0.1" muted playsinline preload="metadata" class="w-full h-full object-cover"></video><span class="absolute inset-0 flex items-center justify-center text-white text-sm pointer-events-none"><i class="fas fa-play"></i></span>`
-                        : `<img src="${m.url}" alt="Media ${i+1}" loading="lazy" class="w-full h-full object-cover" onerror="this.style.display='none'">`;
+                        : `<img src="${m.url}" alt="Media ${i + 1}" loading="lazy" class="w-full h-full object-cover" onerror="this.style.display='none'">`;
                     return `<button type="button" data-index="${i}" onclick="switchMainMedia(${i})" class="fmn-thumb relative flex-shrink-0 w-20 h-16 sm:w-24 sm:h-[4.5rem] rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-150 ${ring}">${inner}</button>`;
                 }).join('');
             }
-        } else { _showMain(null); }
+        } else {
+            _showMain(null);
+            document.getElementById('summary-image').src = FALLBACK;
+        }
 
-        /* Host card */
+        /* Host card (existing ids) */
         const owner = data.owner;
         if (owner) {
             const name     = owner.full_name || 'Host';
-            const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
-            document.getElementById('host-avatar').innerText = initials;
+            const photo    = resolveImageUrl(pick(owner, ['profile_photo', 'avatar', 'photo', 'photo_url', 'image_url'], ''));
+            const avatarEl = document.getElementById('host-avatar');
+            if (photo) {
+                avatarEl.innerHTML = `<img src="${esc(photo)}" alt="${esc(name)}" class="w-full h-full object-cover">`;
+                avatarEl.classList.add('overflow-hidden');
+                avatarEl.classList.remove('bg-orange-100');
+            } else {
+                avatarEl.innerText = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?';
+            }
             document.getElementById('host-name').innerText   = name;
             const roleLabel = (owner.role || '').replace(/_/g, ' ').toUpperCase();
             const verBadge  = owner.verification_status === 'verified'
-                ? `<span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full"><i class="fas fa-check-circle text-xs"></i> Verified</span>`
+                ? `<span class="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full"><i class="fas fa-check-circle text-xs"></i> Verified Landlord</span>`
                 : `<span class="text-gray-400 text-xs">${roleLabel}</span>`;
             document.getElementById('host-badge').innerHTML = verBadge;
+
+            /* phone for call/sms/whatsapp */
+            LANDLORD_PHONE = pick(owner, ['phone', 'phone_number'], pick(data, ['owner_phone', 'contact_phone'], null));
+        }
+        if (!LANDLORD_PHONE) {
+            ['btn-call', 'btn-wa', 'btn-sms'].forEach(bid => { const b = document.getElementById(bid); b.classList.add('opacity-60'); b.title = 'Phone not available - use in-app messaging'; });
         }
 
-        /* Map: default to Lusaka centre. Replace with real coords once geocoding is added. */
-        initMap(-15.4167, 28.2833, data.title || 'Property');
+        /* New mockup sections */
+        const highlights = deriveHighlights(data);
+        renderHighlights(highlights);
+        renderAmenities(highlights);
+        renderDetails(data);
+        renderNearby(data);
+        renderVerification(data);
+        renderStats(owner);
+        loadSimilar(id);
+
+        /* Map: real coords or geocoded from the location text */
+        placeMap(data);
 
     } catch (err) {
         showToast('Could not load property details. Please try again.', 'error');
@@ -444,22 +867,30 @@ async function loadData() {
     }
 }
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Stars ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
-/* ── Gallery switcher ──────────────────────────────────────────────────────── */
+/* ---- Gallery switcher (existing) ---- */
 let _currentIdx = 0;
-function switchMainMedia(index){
+function switchMainMedia(index) {
     const list = window._fmnItems || [];
-    const item = list[index]; if(!item) return;
+    const item = list[index]; if (!item) return;
     _currentIdx = index;
-    const mainImg=document.getElementById('main-image'); const mainVid=document.getElementById('main-video');
-    if(item.type==='video'){ mainImg.classList.add('hidden'); mainVid.src=item.url; mainVid.classList.remove('hidden'); }
-    else { if(mainVid.pause) mainVid.pause(); mainVid.classList.add('hidden'); mainVid.removeAttribute('src');
-           mainImg.style.opacity='0'; setTimeout(()=>{ mainImg.src=item.url; mainImg.onerror=()=>{mainImg.onerror=null;}; mainImg.classList.remove('hidden'); mainImg.style.opacity='1'; },100); }
-    const ct=document.getElementById('photo-counter-text'); if(ct) ct.textContent=`${index+1} / ${list.length}`;
-    document.querySelectorAll('#photo-gallery .fmn-thumb').forEach((el,i)=>{ const a=i===index; el.classList.toggle('border-[#ea580c]',a); el.classList.toggle('shadow-md',a); el.classList.toggle('opacity-70',!a); el.classList.toggle('border-transparent',!a); });
+    const mainImg = document.getElementById('main-image');
+    const mainVid = document.getElementById('main-video');
+    if (item.type === 'video') { mainImg.classList.add('hidden'); mainVid.src = item.url; mainVid.classList.remove('hidden'); }
+    else {
+        if (mainVid.pause) mainVid.pause(); mainVid.classList.add('hidden'); mainVid.removeAttribute('src');
+        mainImg.style.opacity = '0';
+        setTimeout(() => { mainImg.src = item.url; mainImg.onerror = () => { mainImg.onerror = null; }; mainImg.classList.remove('hidden'); mainImg.style.opacity = '1'; }, 100);
+    }
+    const ct = document.getElementById('photo-counter-text'); if (ct) ct.textContent = `${index + 1} / ${list.length}`;
+    document.querySelectorAll('#photo-gallery .fmn-thumb').forEach((el, i) => {
+        const a = i === index;
+        el.classList.toggle('border-[#ea580c]', a); el.classList.toggle('shadow-md', a);
+        el.classList.toggle('opacity-70', !a); el.classList.toggle('border-transparent', !a);
+    });
 }
 window.switchMainMedia = switchMainMedia;
 
+/* ---- Stars ---- */
 function initStars() {
     const stars = Array.from(document.querySelectorAll('#star-container .fa-star'));
     stars.forEach((s, i) => {
@@ -469,8 +900,7 @@ function initStars() {
     });
 }
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Agreement ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
-/* FIX: original read p.owner_role; the backend payload exposes p.owner.role */
+/* ---- Agreement (backend payload exposes p.owner.role) ---- */
 function openAgreement() {
     const p = currentProperty;
     if (!p) return;
@@ -484,7 +914,7 @@ function openAgreement() {
 }
 window.openAgreement = openAgreement;
 
-/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Boot ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+/* ---- Boot ---- */
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     initStars();
@@ -494,11 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* Message modal */
     document.getElementById('msg-landlord-btn').addEventListener('click', () => {
-        if (!getToken()) {
-            showToast('Please log in to send a message.', 'info');
-            setTimeout(() => window.location.href = 'login.html', 1800);
-            return;
-        }
+        if (!getToken()) { showToast('Please log in to send a message.', 'info'); setTimeout(() => window.location.href = 'login.html', 1800); return; }
         if (!currentProperty) { showToast('Still loading...', 'info'); return; }
         document.getElementById('modal-prop-title').innerText = currentProperty.title || 'Property';
         document.getElementById('modal-message-body').value = '';
@@ -521,11 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${API_BASE}/messages/send`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({
-                    receiver_id: currentProperty.owner_id,
-                    property_id: currentProperty.id,
-                    content,
-                }),
+                body: JSON.stringify({ receiver_id: currentProperty.owner_id, property_id: currentProperty.id, content }),
             });
             if (res.ok) { showToast('Message sent! The host will reply soon.', 'success'); closeModal('message-modal'); }
             else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to send.', 'error'); }
@@ -575,10 +997,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeReportModal();
                 document.getElementById('report-reason').value = '';
                 document.getElementById('report-description').value = '';
-            } else {
-                const d = await res.json().catch(() => ({}));
-                showToast(typeof d.detail === 'string' ? d.detail : 'Failed.', 'error');
-            }
+            } else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed.', 'error'); }
         } catch { showToast('Network error.', 'error'); }
         finally { btn.disabled = false; btn.innerHTML = 'Submit Report'; }
     });
@@ -586,6 +1005,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
-

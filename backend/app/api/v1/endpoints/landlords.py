@@ -399,6 +399,40 @@ def update_profile(payload: ProfileUpdate, landlord: User = Depends(require_land
     return {"status": "success", "message": "Profile updated successfully."}
 
 
+# ── Profile photo (avatar) ────────────────────────────────────────────────────
+async def _upload_avatar_to_cloudinary(f: UploadFile) -> str:
+    """Upload a profile photo to Cloudinary (square, face-aware crop)."""
+    mime = (f.content_type or "").lower()
+    if mime not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {mime}.")
+    data = await f.read()
+    if len(data) > MAX_IMAGE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=400, detail=f"File exceeds {MAX_IMAGE_SIZE_MB}MB limit.")
+    try:
+        result = cloudinary.uploader.upload(
+            data,
+            folder="findmynyumba/avatars",
+            resource_type="image",
+            transformation=[{"width": 400, "height": 400, "crop": "fill",
+                             "gravity": "face", "quality": "auto"}],
+        )
+        return result["secure_url"]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Photo upload failed: {str(e)}")
+
+
+@router.post("/profile/photo")
+async def upload_profile_photo(
+    file:     UploadFile = File(...),
+    landlord: User    = Depends(require_landlord),
+    db:       Session = Depends(get_db),
+):
+    url = await _upload_avatar_to_cloudinary(file)
+    landlord.avatar_url = url
+    db.commit()
+    return {"status": "success", "avatar_url": url}
+
+
 # ── Change Password ───────────────────────────────────────────────────────────
 class PasswordChange(BaseModel):
     current_password: str
