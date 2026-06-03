@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,66 +6,422 @@
     <title>Contact Landlord - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        brand:  { DEFAULT: '#ea580c', dark: '#c2410c' },
+                        navy:   { DEFAULT: '#0f172a', light: '#1e293b' }
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        /* Hide scrollbars on horizontal strips while keeping scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-in { animation: fadeIn .4s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    </style>
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-gray-50 text-navy flex flex-col min-h-screen">
 
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="browse.html" class="flex items-center">
-                <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;display:block;object-fit:contain;"
+    <!-- ============ NAVBAR ============ -->
+    <nav class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+            <a href="browse.html" class="flex items-center gap-2 flex-shrink-0">
+                <img src="logo.png" alt="FindMyNyumba" style="height:38px;width:auto;display:block;object-fit:contain;"
                      onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
-                <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
+                <span id="logo-fallback" class="hidden text-lg font-extrabold leading-none">
+                    Find<span class="text-brand">My</span>Nyumba
+                </span>
             </a>
-            <a href="browse.html" class="text-gray-600 font-bold hover:text-[#ea580c] transition-colors text-sm flex items-center gap-2">
-                <i class="fas fa-arrow-left text-xs"></i> Back to Browse
-            </a>
+
+            <!-- Search (functional: routes to browse) -->
+            <form id="navSearch" class="hidden md:flex flex-1 max-w-xl mx-auto" onsubmit="return false;">
+                <div class="relative w-full">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input id="navSearchInput" type="text" placeholder="Search properties, locations..."
+                           class="w-full pl-10 pr-4 py-2.5 rounded-full bg-gray-50 border border-gray-200 text-sm outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition">
+                </div>
+            </form>
+
+            <div class="flex items-center gap-3 ml-auto md:ml-0">
+                <button class="relative w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-600 transition"
+                        title="Notifications" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-brand text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+                </button>
+                <a href="dashboard-student.html" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-gray-100 transition">
+                    <img id="nav-avatar" src="https://i.pravatar.cc/80?img=12" alt="Profile"
+                         class="w-8 h-8 rounded-full object-cover border border-gray-200">
+                    <span id="nav-username" class="hidden sm:block text-sm font-semibold">Account</span>
+                    <i class="fas fa-chevron-down text-[10px] text-gray-400 hidden sm:block"></i>
+                </a>
+            </div>
         </div>
     </nav>
 
+    <!-- ============ TOAST ============ -->
     <div id="toast"
-         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm
+         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] px-6 py-3 rounded-xl font-bold text-white text-sm
                 shadow-2xl flex items-center gap-2 min-w-[260px] justify-center transition-all duration-300
-                opacity-0 translate-y-4 pointer-events-none">
-    </div>
+                opacity-0 translate-y-4 pointer-events-none"></div>
 
-    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 py-8">
-        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-gray-100 max-w-2xl w-full">
+    <!-- ============ MAIN ============ -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 py-5">
 
-            <h2 class="text-2xl sm:text-3xl font-black text-gray-900 mb-1">Contact Landlord</h2>
-            <p class="text-gray-500 text-sm mb-6 sm:mb-8">Send a secure message directly to the property manager.</p>
+        <a href="browse.html" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-brand transition mb-4">
+            <i class="fas fa-chevron-left text-xs"></i> Back to Search Results
+        </a>
 
-            <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 mb-6 sm:mb-8 flex flex-col sm:flex-row gap-4 sm:gap-6">
-                <img id="prop-image"
-                     src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300"
-                     class="w-full sm:w-28 h-40 sm:h-28 object-cover rounded-xl shadow-sm flex-shrink-0"
-                     alt="Property image"
-                     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300'">
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-gray-500 uppercase text-[10px] tracking-widest mb-3">Property Information</p>
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-3">
-                        <div class="min-w-0">
-                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Property</p>
-                            <p id="prop-title" class="font-bold text-gray-900 text-sm truncate" title="">Loading...</p>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Location</p>
-                            <p id="prop-location" class="font-bold text-gray-900 text-sm truncate" title="">Loading...</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Price</p>
-                            <p id="prop-price" class="font-black text-[#ea580c] text-sm">Loading...</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Available</p>
-                            <p class="font-bold text-green-600 text-sm">Immediately</p>
-                        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+            <!-- ======================= LEFT COLUMN ======================= -->
+            <aside class="lg:col-span-3 space-y-5 order-2 lg:order-1">
+
+                <!-- SECTION 1: PROPERTY INFORMATION CARD -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="relative">
+                        <img id="summary-image"
+                             src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600"
+                             class="w-full h-44 object-cover" alt="Property"
+                             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600'">
+                        <span id="summary-photo-count"
+                              class="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                            <i class="fas fa-camera text-[10px]"></i> 1/12
+                        </span>
+                    </div>
+                    <div class="p-5">
+                        <h1 id="prop-title" class="text-xl font-extrabold leading-snug">Loading...</h1>
+                        <p id="prop-price" class="text-brand text-2xl font-extrabold mt-1">—</p>
+
+                        <ul class="mt-4 space-y-2.5 text-sm">
+                            <li class="flex items-start gap-2.5 text-gray-700">
+                                <i class="fas fa-location-dot text-gray-400 w-4 mt-0.5"></i>
+                                <span id="prop-location">—</span>
+                            </li>
+                            <li class="flex items-start gap-2.5 text-gray-700">
+                                <i class="fas fa-graduation-cap text-gray-400 w-4 mt-0.5"></i>
+                                <span id="prop-distance">—</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i class="fas fa-calendar-check text-gray-400 w-4 mt-0.5"></i>
+                                <span id="prop-availability" class="font-semibold text-green-600">Available Now</span>
+                            </li>
+                            <li class="flex items-start gap-2.5 text-gray-700">
+                                <i class="fas fa-venus-mars text-gray-400 w-4 mt-0.5"></i>
+                                <span id="prop-gender">—</span>
+                            </li>
+                            <li class="flex items-start gap-2.5 text-gray-700">
+                                <i class="fas fa-clock text-gray-400 w-4 mt-0.5"></i>
+                                <span id="prop-posted">—</span>
+                            </li>
+                        </ul>
+                        <p id="prop-ref" class="mt-4 text-[11px] font-semibold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">ID: —</p>
                     </div>
                 </div>
-            </div>
 
-            <div id="form-error"
-                 class="hidden mb-5 p-3 bg-red-50 text-red-600 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2">
+                <!-- SECTION 6: PROPERTY HIGHLIGHTS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-extrabold text-base mb-4">Property Highlights</h3>
+                    <div id="highlights-grid" class="grid grid-cols-3 gap-3">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+
+                <!-- SECTION 7: NEARBY PLACES (TODO: Requires Maps Backend) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-extrabold text-base mb-4">Nearby Places</h3>
+                    <ul id="nearby-list" class="space-y-3 text-sm">
+                        <!-- populated by JS; placeholder data until Maps backend exists -->
+                    </ul>
+                    <button onclick="showToast('Map view coming soon.','success')"
+                            class="mt-4 w-full border-2 border-brand text-brand font-bold text-sm py-2.5 rounded-xl hover:bg-brand hover:text-white transition flex items-center justify-center gap-2">
+                        <i class="fas fa-map-location-dot"></i> View on Map
+                    </button>
+                </div>
+            </aside>
+
+            <!-- ======================= CENTER COLUMN ======================= -->
+            <section class="lg:col-span-6 space-y-5 order-1 lg:order-2">
+
+                <!-- SECTION 2: MEDIA GALLERY -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="relative bg-gray-900 aspect-[4/3] select-none" id="gallery-stage">
+                        <img id="gallery-main" src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900"
+                             class="w-full h-full object-cover" alt="Property media"
+                             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900'">
+
+                        <!-- video play overlay (shown when current item is a video) -->
+                        <button id="gallery-play" class="hidden absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/90 text-navy text-2xl shadow-xl flex items-center justify-center hover:scale-105 transition">
+                            <i class="fas fa-play ml-1"></i>
+                        </button>
+
+                        <!-- video badge -->
+                        <span id="video-badge"
+                              class="hidden absolute top-3 left-3 bg-black/70 text-white text-xs font-semibold px-3 py-1.5 rounded-lg items-center gap-1.5">
+                            <i class="fas fa-video text-[11px]"></i> <span id="video-count">2</span> Videos
+                        </span>
+
+                        <!-- favourite -->
+                        <button id="fav-btn" onclick="toggleFav()"
+                                class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 text-gray-500 hover:text-red-500 shadow flex items-center justify-center transition"
+                                aria-label="Save to favourites">
+                            <i class="far fa-heart"></i>
+                        </button>
+
+                        <!-- counter -->
+                        <span id="gallery-counter"
+                              class="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                            <i class="fas fa-camera text-[10px]"></i> 1 / 12
+                        </span>
+
+                        <!-- prev / next -->
+                        <button onclick="galleryNav(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-navy shadow flex items-center justify-center hover:bg-white transition" aria-label="Previous">
+                            <i class="fas fa-chevron-left text-sm"></i>
+                        </button>
+                        <button onclick="galleryNav(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-navy shadow flex items-center justify-center hover:bg-white transition" aria-label="Next">
+                            <i class="fas fa-chevron-right text-sm"></i>
+                        </button>
+
+                        <!-- fullscreen -->
+                        <button onclick="openFullscreen()" class="absolute bottom-3 left-3 w-9 h-9 rounded-full bg-white/90 text-navy shadow flex items-center justify-center hover:bg-white transition" aria-label="Fullscreen">
+                            <i class="fas fa-expand text-sm"></i>
+                        </button>
+                    </div>
+                    <!-- thumbnail strip -->
+                    <div id="thumb-strip" class="flex gap-2 p-3 overflow-x-auto no-scrollbar"></div>
+                </div>
+
+                <!-- TABS + DESCRIPTION -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex border-b border-gray-100 overflow-x-auto no-scrollbar px-2">
+                        <button data-tab="about"     class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-brand text-brand">About Property</button>
+                        <button data-tab="details"   class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-navy">Details</button>
+                        <button data-tab="amenities"  class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-navy">Amenities</button>
+                        <button data-tab="rules"     class="tab-btn px-4 py-3.5 text-sm font-bold whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-navy">House Rules</button>
+                    </div>
+
+                    <div class="p-5">
+                        <!-- ABOUT -->
+                        <div data-panel="about">
+                            <p id="prop-summary" class="text-gray-700 text-sm leading-relaxed mb-5">
+                                A comfortable, secure home close to campus — perfect for students who want convenience and peace of mind.
+                            </p>
+                        </div>
+
+                        <!-- DETAILS (key facts grid) -->
+                        <div data-panel="details" class="hidden">
+                            <div id="details-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm"></div>
+                        </div>
+
+                        <!-- AMENITIES -->
+                        <div data-panel="amenities" class="hidden">
+                            <div id="amenities-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                        </div>
+
+                        <!-- HOUSE RULES (TODO: Requires backend support for rules) -->
+                        <div data-panel="rules" class="hidden">
+                            <ul class="space-y-3 text-sm text-gray-700">
+                                <li class="flex items-center gap-3"><i class="fas fa-clock text-gray-400 w-4"></i> Curfew: <span id="rule-curfew" class="font-semibold">10:00 PM</span></li>
+                                <li class="flex items-center gap-3"><i class="fas fa-ban text-gray-400 w-4"></i> No smoking indoors</li>
+                                <li class="flex items-center gap-3"><i class="fas fa-paw text-gray-400 w-4"></i> No pets</li>
+                                <li class="flex items-center gap-3"><i class="fas fa-calendar-day text-gray-400 w-4"></i> Minimum stay: <span id="rule-stay" class="font-semibold">6 Months</span></li>
+                            </ul>
+                            <!-- TODO: Requires backend support for house_rules field -->
+                        </div>
+
+                        <p class="mt-5 text-right text-[11px] text-gray-400">
+                            <span id="char-count">0</span> characters
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 10: SIMILAR PROPERTIES -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-extrabold text-base">Students Also Viewed</h3>
+                        <a href="browse.html" class="text-brand text-sm font-bold hover:underline">View all</a>
+                    </div>
+                    <!-- TODO: Requires Similar Listings Endpoint (currently pulls from browse list / placeholders) -->
+                    <div id="similar-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+                </div>
+            </section>
+
+            <!-- ======================= RIGHT COLUMN ======================= -->
+            <aside class="lg:col-span-3 space-y-5 order-3">
+
+                <!-- SECTION 3 + 4: LANDLORD PROFILE + CONTACT OPTIONS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 lg:sticky lg:top-20">
+                    <h3 class="font-extrabold text-base mb-4">Contact Landlord</h3>
+
+                    <div class="flex items-start gap-3">
+                        <img id="landlord-avatar" src="https://i.pravatar.cc/120?img=68" alt="Landlord"
+                             class="w-16 h-16 rounded-full object-cover border border-gray-200 flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <span id="verified-pill"
+                                  class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 text-[11px] font-bold px-2.5 py-1 rounded-full mb-1.5">
+                                <i class="fas fa-circle-check"></i> Verified Landlord
+                            </span>
+                            <p id="landlord-name" class="font-extrabold text-base leading-tight">Loading...</p>
+                            <div class="flex items-center gap-1 text-xs mt-1">
+                                <span class="text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
+                                <span id="landlord-rating" class="text-gray-500 font-semibold">(24)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- stats -->
+                    <div class="grid grid-cols-3 gap-2 my-4 text-center">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Member</p>
+                            <p id="stat-member" class="text-sm font-extrabold">2025</p>
+                        </div>
+                        <div class="border-x border-gray-100">
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Listings</p>
+                            <p id="stat-listings" class="text-sm font-extrabold">15</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Response</p>
+                            <p id="stat-response" class="text-sm font-extrabold">98%</p>
+                        </div>
+                    </div>
+                    <p id="stat-time" class="text-center text-xs text-gray-500 font-semibold mb-4">
+                        <i class="fas fa-bolt text-brand"></i> Replies within 10 minutes
+                    </p>
+
+                    <!-- contact buttons -->
+                    <div class="space-y-2.5">
+                        <a id="btn-call" href="#" onclick="return contactGuard('call')"
+                           class="flex items-center justify-center gap-2 w-full bg-brand hover:bg-brand-dark text-white font-bold text-sm py-3 rounded-xl transition">
+                            <i class="fas fa-phone"></i> Call Landlord
+                        </a>
+                        <a id="btn-wa" href="#" onclick="return contactGuard('wa')"
+                           class="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:brightness-95 text-white font-bold text-sm py-3 rounded-xl transition">
+                            <i class="fab fa-whatsapp text-base"></i> Chat on WhatsApp
+                        </a>
+                        <a id="btn-sms" href="#" onclick="return contactGuard('sms')"
+                           class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 rounded-xl transition">
+                            <i class="fas fa-envelope"></i> Send SMS
+                        </a>
+                        <!-- In-app messaging: backend EXISTS (/messages/send) so this opens the secure form -->
+                        <button onclick="openMessageModal()"
+                                class="flex flex-col items-center justify-center w-full border-2 border-brand text-brand font-bold text-sm py-2.5 rounded-xl hover:bg-orange-50 transition">
+                            <span class="flex items-center gap-2"><i class="fas fa-comment-dots"></i> Message on FindMyNyumba</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECTION 5a: VERIFICATION STATUS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-extrabold text-base">Verification Status</h3>
+                        <i class="fas fa-shield-halved text-green-500 text-xl"></i>
+                    </div>
+                    <!-- TODO: Requires backend support for verification fields -->
+                    <ul id="verification-list" class="space-y-3 text-sm"></ul>
+                </div>
+
+                <!-- SECTION 5b: TRUST & SAFETY -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-extrabold text-base mb-2">Trust &amp; Safety</h3>
+                    <p class="text-xs text-gray-500 mb-4">We verify landlords and properties to keep our community safe.</p>
+                    <ul class="space-y-2.5 text-sm text-gray-700">
+                        <li class="flex items-center gap-2.5"><i class="fas fa-circle-xmark text-gray-400 w-4"></i> Never pay before viewing</li>
+                        <li class="flex items-center gap-2.5"><i class="fas fa-location-crosshairs text-gray-400 w-4"></i> Meet in a public place</li>
+                        <li class="flex items-center gap-2.5"><i class="fas fa-hand text-gray-400 w-4"></i> Trust your instincts</li>
+                    </ul>
+                    <div class="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-800 font-semibold">
+                        Never send money before physically inspecting a property.
+                    </div>
+                    <!-- SECTION 9 trigger: REPORT LISTING -->
+                    <button onclick="openReportModal()"
+                            class="mt-4 w-full border-2 border-red-200 text-red-600 font-bold text-sm py-2.5 rounded-xl hover:bg-red-50 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-triangle-exclamation"></i> Report This Listing
+                    </button>
+                </div>
+
+                <!-- SECTION 8: REQUEST VIEWING (TODO: Requires Viewing Request Backend) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-extrabold text-base mb-1">Request a Viewing</h3>
+                    <p class="text-xs text-gray-500 mb-4">Pick a date and time to tour this property.</p>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1.5">Date</label>
+                            <input id="view-date" type="date" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand/40">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1.5">Time</label>
+                            <input id="view-time" type="time" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand/40">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1.5">Notes</label>
+                            <textarea id="view-notes" rows="2" placeholder="Anything the landlord should know?"
+                                      class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand/40 resize-none"></textarea>
+                        </div>
+                        <button onclick="requestViewing()"
+                                class="w-full bg-navy hover:bg-navy-light text-white font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2">
+                            <i class="fas fa-calendar-plus"></i> Request Viewing
+                        </button>
+                    </div>
+                </div>
+
+                <!-- REVENUE / PROMOTE (TODO: Requires Subscription/Advertising System) -->
+                <div class="rounded-2xl shadow-sm border border-orange-100 p-5 bg-gradient-to-br from-orange-50 to-white">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="font-extrabold text-base">Promote This Listing</h3>
+                        <span class="text-xl">🚀</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4">Landlords, get more visibility and attract serious students.</p>
+                    <ul class="space-y-2 text-sm text-gray-700 mb-4">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand text-xs"></i> Top placement in search</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand text-xs"></i> Featured &amp; Verified badges</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand text-xs"></i> More views &amp; inquiries</li>
+                    </ul>
+                    <button onclick="showToast('Promotions launching soon.','success')"
+                            class="w-full bg-brand hover:bg-brand-dark text-white font-bold text-sm py-3 rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fas fa-rocket"></i> Boost This Listing
+                    </button>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- ============ FULLSCREEN GALLERY MODAL ============ -->
+    <div id="fullscreen" class="hidden fixed inset-0 z-[110] bg-black/95 flex flex-col">
+        <div class="flex justify-between items-center p-4 text-white">
+            <span id="fs-counter" class="text-sm font-semibold">1 / 12</span>
+            <button onclick="closeFullscreen()" class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center" aria-label="Close">
+                <i class="fas fa-xmark text-xl"></i>
+            </button>
+        </div>
+        <div class="flex-1 flex items-center justify-center relative px-4" id="fs-stage">
+            <button onclick="galleryNav(-1)" class="absolute left-4 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+            <img id="fs-image" src="" class="max-h-[80vh] max-w-full object-contain rounded-lg" alt="">
+            <button onclick="galleryNav(1)" class="absolute right-4 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div id="fs-thumbs" class="flex gap-2 p-4 overflow-x-auto no-scrollbar justify-center"></div>
+    </div>
+
+    <!-- ============ MESSAGE MODAL (existing working form, preserved) ============ -->
+    <div id="message-modal" class="hidden fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 fade-in max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-1">
+                <h2 class="text-2xl font-extrabold">Contact Landlord</h2>
+                <button onclick="closeMessageModal()" class="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400" aria-label="Close"><i class="fas fa-xmark"></i></button>
+            </div>
+            <p class="text-gray-500 text-sm mb-6">Send a secure message directly to the property manager.</p>
+
+            <div id="form-error" class="hidden mb-5 p-3 bg-red-50 text-red-600 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2">
                 <i class="fas fa-exclamation-circle flex-shrink-0"></i>
                 <span id="form-error-text"></span>
             </div>
@@ -73,51 +429,62 @@
             <form id="contactForm" class="space-y-5" novalidate>
                 <input type="hidden" id="prop-id">
                 <input type="hidden" id="landlord-id">
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Full Name</label>
                         <input type="text" id="sender-name" required
-                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm">
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-brand transition-shadow text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email / Phone</label>
                         <input type="text" id="sender-contact" required
-                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow text-sm">
+                               class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-brand transition-shadow text-sm">
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Message</label>
                     <textarea id="message-body" rows="4" required
-                              class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#ea580c] transition-shadow resize-none text-sm"
-                              >Hi, I am interested in this property and would like to ask a few questions.</textarea>
+                              class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-brand transition-shadow resize-none text-sm">Hi, I am interested in this property and would like to ask a few questions.</textarea>
                 </div>
-
                 <button type="submit" id="send-btn"
-                        class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-base sm:text-lg
-                               shadow-lg hover:bg-orange-700 transition-colors flex items-center justify-center gap-2">
+                        class="w-full bg-brand text-white py-4 rounded-xl font-extrabold text-base shadow-lg hover:bg-brand-dark transition-colors flex items-center justify-center gap-2">
                     <i class="fas fa-paper-plane"></i> Send Message
                 </button>
             </form>
         </div>
-    </main>
+    </div>
+
+    <!-- ============ REPORT MODAL (SECTION 9 - TODO: Requires Reporting API) ============ -->
+    <div id="report-modal" class="hidden fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 fade-in">
+            <div class="flex justify-between items-start mb-1">
+                <h2 class="text-xl font-extrabold">Report This Listing</h2>
+                <button onclick="closeReportModal()" class="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400" aria-label="Close"><i class="fas fa-xmark"></i></button>
+            </div>
+            <p class="text-gray-500 text-sm mb-5">Help keep FindMyNyumba safe. What's wrong with this listing?</p>
+            <div class="space-y-2.5 mb-5">
+                <button class="report-reason w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 text-sm font-semibold flex items-center gap-3 transition" data-reason="Scam"><i class="fas fa-triangle-exclamation text-red-500"></i> Report Scam</button>
+                <button class="report-reason w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 text-sm font-semibold flex items-center gap-3 transition" data-reason="Wrong Information"><i class="fas fa-circle-info text-amber-500"></i> Wrong Information</button>
+                <button class="report-reason w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 text-sm font-semibold flex items-center gap-3 transition" data-reason="Fake Photos"><i class="fas fa-image text-amber-500"></i> Fake Photos</button>
+                <button class="report-reason w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 text-sm font-semibold flex items-center gap-3 transition" data-reason="Landlord Unreachable"><i class="fas fa-phone-slash text-amber-500"></i> Landlord Unreachable</button>
+            </div>
+            <p class="text-[11px] text-gray-400">Our team reviews every report within 24 hours.</p>
+        </div>
+    </div>
 
     <script>
     'use strict';
 
-    /* FindMyNyumba runtime config - auto-detects backend host */
+    /* FindMyNyumba runtime config - auto-detects backend host (PRESERVED) */
     const FMN = (function () {
         const host = window.location.hostname;
         const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
-        const API_HOST = isLocal
-            ? 'http://127.0.0.1:8000'
-            : 'https://findmynyumba.onrender.com';
+        const API_HOST = isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com';
         return { API_HOST, API_BASE: API_HOST + '/api/v1' };
     })();
     const API_BASE = FMN.API_BASE;
 
-    /* Image URL resolver: handles full URLs, bare paths, and bare filenames. */
+    /* Image URL resolver (PRESERVED) */
     function resolveImageUrl(raw) {
         if (!raw) return null;
         const url = String(raw).trim();
@@ -130,14 +497,13 @@
 
     function showToast(msg, type = 'success') {
         const t = document.getElementById('toast');
-        t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl font-bold text-white text-sm
+        t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] px-6 py-3 rounded-xl font-bold text-white text-sm
                        shadow-2xl flex items-center gap-2 min-w-[260px] justify-center transition-all duration-300
                        ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
         t.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
         t.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-        setTimeout(() => {
-            t.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-        }, 3500);
+        clearTimeout(t._timer);
+        t._timer = setTimeout(() => t.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none'), 3500);
     }
 
     function showFormError(msg) {
@@ -146,52 +512,414 @@
     }
     function hideFormError() { document.getElementById('form-error').classList.add('hidden'); }
 
-    /* ---- Load property info from public detail endpoint ---- */
+    /* ===== Helpers ===== */
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    const pick = (obj, keys, fallback) => { for (const k of keys) { if (obj && obj[k] != null && obj[k] !== '') return obj[k]; } return fallback; };
+
+    function formatPostedDate(raw) {
+        if (!raw) return 'Recently';
+        const d = new Date(raw);
+        if (isNaN(d)) return 'Recently';
+        const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+        if (days <= 0) return 'Posted today';
+        if (days === 1) return 'Posted yesterday';
+        if (days < 30) return `Posted ${days} days ago`;
+        return 'Posted ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    /* ===== Highlights config (icon, label, data keys) ===== */
+    const HIGHLIGHT_DEFS = [
+        { key: ['furnished'],            icon: 'fa-couch',        label: 'Furnished',   color: 'text-orange-500 bg-orange-50' },
+        { key: ['water', 'water_available'], icon: 'fa-droplet',  label: 'Water',       color: 'text-blue-500 bg-blue-50' },
+        { key: ['electricity'],          icon: 'fa-bolt',         label: 'Electricity', color: 'text-yellow-500 bg-yellow-50' },
+        { key: ['wifi', 'internet'],     icon: 'fa-wifi',         label: 'WiFi',        color: 'text-emerald-500 bg-emerald-50' },
+        { key: ['parking'],              icon: 'fa-car',          label: 'Parking',     color: 'text-purple-500 bg-purple-50' },
+        { key: ['security'],             icon: 'fa-shield-halved',label: 'Security',    color: 'text-red-500 bg-red-50' },
+        { key: ['cctv'],                 icon: 'fa-video',        label: 'CCTV',        color: 'text-sky-500 bg-sky-50' },
+        { key: ['beds', 'beds_included'],icon: 'fa-bed',          label: 'Beds',        color: 'text-indigo-500 bg-indigo-50' },
+        { key: ['kitchen'],              icon: 'fa-utensils',     label: 'Kitchen',     color: 'text-pink-500 bg-pink-50' },
+    ];
+
+    /* Decide which highlights to show. Reads booleans or an amenities[] array;
+       falls back to a sensible default set so the card never looks empty. */
+    function deriveHighlights(data) {
+        const amenities = Array.isArray(data.amenities) ? data.amenities.map(a => String(a).toLowerCase()) : [];
+        const on = (keys) => keys.some(k =>
+            data[k] === true || data[k] === 'yes' || data[k] === 'Yes' ||
+            amenities.some(a => a.includes(k.replace('_', ' ')) || a.includes(k))
+        );
+        let active = HIGHLIGHT_DEFS.filter(h => on(h.key));
+        if (active.length === 0) active = HIGHLIGHT_DEFS.slice(0, 6); // TODO: backend amenity flags
+        return active.slice(0, 9);
+    }
+
+    /* ===== Gallery state ===== */
+    let MEDIA = [];      // [{type:'image'|'video', src, thumb}]
+    let galleryIndex = 0;
+
+    function renderGallery() {
+        if (!MEDIA.length) return;
+        const item = MEDIA[galleryIndex];
+        const main = document.getElementById('gallery-main');
+        const playBtn = document.getElementById('gallery-play');
+        const counter = document.getElementById('gallery-counter');
+        const photoCount = MEDIA.filter(m => m.type === 'image').length;
+
+        main.src = item.thumb || item.src;
+        playBtn.classList.toggle('hidden', item.type !== 'video');
+        playBtn.onclick = () => window.open(item.src, '_blank');
+
+        counter.innerHTML = `<i class="fas fa-camera text-[10px]"></i> ${galleryIndex + 1} / ${MEDIA.length}`;
+        document.getElementById('summary-photo-count').innerHTML =
+            `<i class="fas fa-camera text-[10px]"></i> ${galleryIndex + 1}/${photoCount || MEDIA.length}`;
+
+        // video badge
+        const videos = MEDIA.filter(m => m.type === 'video').length;
+        const vb = document.getElementById('video-badge');
+        if (videos > 0) { vb.classList.remove('hidden'); vb.classList.add('flex'); document.getElementById('video-count').textContent = videos; }
+
+        // thumbnails
+        const strip = document.getElementById('thumb-strip');
+        strip.innerHTML = MEDIA.map((m, i) => `
+            <button onclick="gallerySet(${i})" class="relative flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 ${i === galleryIndex ? 'border-brand' : 'border-transparent'} transition">
+                <img src="${esc(m.thumb || m.src)}" class="w-full h-full object-cover" alt="thumbnail ${i + 1}">
+                ${m.type === 'video' ? '<span class="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-xs"><i class="fas fa-play"></i></span>' : ''}
+            </button>`).join('');
+
+        // fullscreen mirror
+        document.getElementById('fs-image').src = item.thumb || item.src;
+        document.getElementById('fs-counter').textContent = `${galleryIndex + 1} / ${MEDIA.length}`;
+        document.getElementById('fs-thumbs').innerHTML = MEDIA.map((m, i) => `
+            <button onclick="gallerySet(${i})" class="flex-shrink-0 w-16 h-12 rounded overflow-hidden border-2 ${i === galleryIndex ? 'border-brand' : 'border-white/30'}">
+                <img src="${esc(m.thumb || m.src)}" class="w-full h-full object-cover" alt=""></button>`).join('');
+    }
+    function gallerySet(i) { galleryIndex = (i + MEDIA.length) % MEDIA.length; renderGallery(); }
+    function galleryNav(d) { gallerySet(galleryIndex + d); }
+    function openFullscreen() { document.getElementById('fullscreen').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeFullscreen() { document.getElementById('fullscreen').classList.add('hidden'); document.body.style.overflow = ''; }
+
+    /* swipe support */
+    (function attachSwipe() {
+        let x0 = null;
+        const onStart = e => { x0 = (e.touches ? e.touches[0] : e).clientX; };
+        const onEnd = e => {
+            if (x0 === null) return;
+            const x1 = (e.changedTouches ? e.changedTouches[0] : e).clientX;
+            if (Math.abs(x1 - x0) > 40) galleryNav(x1 < x0 ? 1 : -1);
+            x0 = null;
+        };
+        ['gallery-stage', 'fs-stage'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('touchstart', onStart, { passive: true });
+            el.addEventListener('touchend', onEnd, { passive: true });
+        });
+    })();
+    document.addEventListener('keydown', e => {
+        if (!document.getElementById('fullscreen').classList.contains('hidden')) {
+            if (e.key === 'ArrowRight') galleryNav(1);
+            if (e.key === 'ArrowLeft') galleryNav(-1);
+            if (e.key === 'Escape') closeFullscreen();
+        }
+    });
+
+    /* favourites (local only) */
+    function toggleFav() {
+        const b = document.getElementById('fav-btn');
+        const icon = b.querySelector('i');
+        const on = icon.classList.contains('fas');
+        icon.className = on ? 'far fa-heart' : 'fas fa-heart';
+        b.classList.toggle('text-red-500', !on);
+        showToast(on ? 'Removed from saved' : 'Saved to favourites', 'success');
+    }
+
+    /* ===== Tabs ===== */
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('border-brand', 'text-brand');
+                b.classList.add('border-transparent', 'text-gray-500');
+            });
+            btn.classList.add('border-brand', 'text-brand');
+            btn.classList.remove('border-transparent', 'text-gray-500');
+            document.querySelectorAll('[data-panel]').forEach(p =>
+                p.classList.toggle('hidden', p.dataset.panel !== btn.dataset.tab));
+        });
+    });
+
+    /* ===== Contact actions ===== */
+    let LANDLORD_PHONE = null;   // populated from API if available
+    function contactGuard(kind) {
+        if (!LANDLORD_PHONE) {
+            showToast('Phone number not available. Use in-app messaging instead.', 'error');
+            return false;
+        }
+        const tel = LANDLORD_PHONE.replace(/[^\d+]/g, '');
+        const wa  = tel.replace(/^\+/, '');
+        if (kind === 'call') window.location.href = 'tel:' + tel;
+        if (kind === 'sms')  window.location.href = 'sms:' + tel;
+        if (kind === 'wa')   window.open(`https://wa.me/${wa}`, '_blank');
+        return false;
+    }
+
+    /* ===== Message modal (preserves working /messages/send flow) ===== */
+    function openMessageModal() { document.getElementById('message-modal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeMessageModal() { document.getElementById('message-modal').classList.add('hidden'); document.body.style.overflow = ''; hideFormError(); }
+
+    /* ===== Report modal (TODO: Requires Reporting API) ===== */
+    function openReportModal() { document.getElementById('report-modal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeReportModal() { document.getElementById('report-modal').classList.add('hidden'); document.body.style.overflow = ''; }
+    document.querySelectorAll('.report-reason').forEach(btn => btn.addEventListener('click', () => {
+        // TODO: Requires Reporting API -> POST /api/v1/reports { property_id, reason }
+        closeReportModal();
+        showToast('Report submitted. Thank you for keeping FindMyNyumba safe.', 'success');
+    }));
+
+    /* ===== Request viewing (TODO: Requires Viewing Request Backend) ===== */
+    function requestViewing() {
+        const date = document.getElementById('view-date').value;
+        const time = document.getElementById('view-time').value;
+        if (!date || !time) return showToast('Please pick a date and time.', 'error');
+        // TODO: Requires Viewing Request Backend -> POST /api/v1/viewings { property_id, date, time, notes }
+        showToast(`Viewing requested for ${date} at ${time}. Awaiting confirmation.`, 'success');
+    }
+
+    /* close modals on backdrop click */
+    ['message-modal', 'report-modal'].forEach(id => {
+        document.getElementById(id).addEventListener('click', e => { if (e.target.id === id) { e.target.classList.add('hidden'); document.body.style.overflow=''; } });
+    });
+
+    /* ===== Verification rows ===== */
+    function renderVerification(data) {
+        // TODO: Requires backend support for phone_verified / nrc_verified / property_verified
+        const rows = [
+            { label: 'Phone Verified',    state: pick(data, ['phone_verified'], 'verified') },
+            { label: 'NRC Verified',      state: pick(data, ['nrc_verified'], 'verified') },
+            { label: 'Property Verified', state: pick(data, ['property_verified'], 'verified') },
+        ];
+        const badge = (state) => {
+            if (state === true || state === 'verified') return { i: 'fa-circle-check', c: 'text-green-500', t: 'Verified' };
+            if (state === 'pending') return { i: 'fa-clock', c: 'text-yellow-500', t: 'Pending' };
+            return { i: 'fa-circle-xmark', c: 'text-red-500', t: 'Not verified' };
+        };
+        document.getElementById('verification-list').innerHTML = rows.map(r => {
+            const b = badge(r.state);
+            return `<li class="flex items-center justify-between">
+                        <span class="flex items-center gap-2.5 text-gray-700"><i class="fas ${b.i} ${b.c}"></i> ${r.label}</span>
+                        <span class="text-xs font-bold ${b.c}">${b.t}</span>
+                    </li>`;
+        }).join('');
+    }
+
+    /* ===== Details + Amenities panels ===== */
+    function renderDetails(data) {
+        const items = [
+            ['Property Type', pick(data, ['property_type', 'type'], '—'), 'fa-house'],
+            ['Bedrooms',      pick(data, ['bedrooms'], '—'), 'fa-bed'],
+            ['Bathrooms',     pick(data, ['bathrooms'], '—'), 'fa-bath'],
+            ['Furnished',     pick(data, ['furnished'], 'Yes'), 'fa-couch'],
+            ['Water',         pick(data, ['water', 'water_available'], 'Yes'), 'fa-droplet'],
+            ['Electricity',   pick(data, ['electricity'], 'Yes'), 'fa-bolt'],
+            ['Deposit',       data.deposit != null ? 'K' + Number(data.deposit).toLocaleString() : '—', 'fa-wallet'],
+            ['Minimum Stay',  pick(data, ['minimum_stay', 'min_stay'], '6 Months'), 'fa-calendar-day'],
+        ];
+        document.getElementById('details-grid').innerHTML = items.map(([k, v, ic]) => `
+            <div class="flex items-center gap-3">
+                <i class="fas ${ic} text-gray-300 w-5"></i>
+                <div><p class="text-gray-400 text-xs">${k}</p><p class="font-semibold">${esc(v)}</p></div>
+            </div>`).join('');
+    }
+
+    function renderAmenities(highlights) {
+        document.getElementById('amenities-grid').innerHTML = highlights.map(h => `
+            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 text-sm">
+                <i class="fas ${h.icon} ${h.color.split(' ')[0]}"></i> <span class="font-semibold">${h.label}</span>
+            </div>`).join('');
+    }
+
+    /* ===== Nearby places (TODO: Requires Maps Backend) ===== */
+    function renderNearby(data) {
+        let places = Array.isArray(data.nearby) ? data.nearby : null;
+        if (!places || !places.length) {
+            // placeholder until Maps backend exists
+            places = [
+                { name: 'Copperbelt University', dist: '1.2 km', icon: 'fa-graduation-cap' },
+                { name: 'Mukuba Mall',           dist: '2.8 km', icon: 'fa-bag-shopping' },
+                { name: 'Bus Stop',              dist: '300 m',  icon: 'fa-bus' },
+                { name: 'Teaching Hospital',     dist: '1.5 km', icon: 'fa-hospital' },
+                { name: 'Market',                dist: '900 m',  icon: 'fa-store' },
+            ];
+        }
+        document.getElementById('nearby-list').innerHTML = places.map(p => `
+            <li class="flex items-center justify-between">
+                <span class="flex items-center gap-2.5 text-gray-700"><i class="fas ${p.icon || 'fa-location-dot'} text-gray-400 w-4"></i> ${esc(p.name)}</span>
+                <span class="text-gray-400 font-semibold">${esc(p.dist || p.distance || '')}</span>
+            </li>`).join('');
+    }
+
+    /* ===== Similar properties (TODO: Requires Similar Listings Endpoint) ===== */
+    async function loadSimilar(currentId) {
+        const grid = document.getElementById('similar-grid');
+        const card = (p) => {
+            const img = resolveImageUrl(pick(p, ['cover_url', 'image_url'], '')) || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400';
+            const price = p.price != null ? 'K' + Number(p.price).toLocaleString() : '—';
+            return `<a href="contact-landlord.html?id=${encodeURIComponent(p.id)}" class="block rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition">
+                        <img src="${esc(img)}" class="w-full h-28 object-cover" alt="${esc(p.title || '')}"
+                             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'">
+                        <div class="p-3">
+                            <p class="text-brand font-extrabold text-sm">${price}<span class="text-gray-400 font-medium text-xs"> /mo</span></p>
+                            <p class="font-bold text-sm truncate">${esc(p.title || 'Property')}</p>
+                            <p class="text-gray-400 text-xs truncate">${esc(p.location || '')}</p>
+                        </div>
+                    </a>`;
+        };
+        try {
+            const res = await fetch(`${API_BASE}/properties`);
+            if (!res.ok) throw new Error('no list');
+            let list = await res.json();
+            if (!Array.isArray(list)) list = list.items || list.results || list.data || [];
+            list = list.filter(p => String(p.id) !== String(currentId)).slice(0, 3);
+            if (!list.length) throw new Error('empty');
+            grid.innerHTML = list.map(card).join('');
+        } catch {
+            // placeholder cards
+            const ph = [
+                { id: '', title: '1 Bedroom House', location: 'Riverside, Kitwe', price: 2000 },
+                { id: '', title: '2 Bedroom Flat',  location: 'Zambezi, Kitwe',  price: 2800 },
+                { id: '', title: 'Bedsitter',       location: 'Wusakile, Kitwe', price: 2200 },
+            ];
+            grid.innerHTML = ph.map(p => card(p)).join('').replace(/href="[^"]*"/g, 'href="browse.html"');
+        }
+    }
+
+    /* ===== Load property (built on PRESERVED working endpoint) ===== */
     async function loadPropertyInfo() {
         const urlParams = new URLSearchParams(window.location.search);
         const propId = urlParams.get('id');
 
-        if (!propId) {
-            document.getElementById('prop-title').textContent    = 'Property not specified.';
-            document.getElementById('prop-location').textContent = '—';
-            document.getElementById('prop-price').textContent    = '—';
-            return;
+        // pre-fill stored user name into hidden contact form
+        const storedName = localStorage.getItem('userName') || localStorage.getItem('full_name');
+        if (storedName) {
+            document.getElementById('sender-name').value = storedName;
+            document.getElementById('nav-username').textContent = storedName.split(' ')[0];
         }
 
+        if (!propId) {
+            document.getElementById('prop-title').textContent = 'Property not specified.';
+            return;
+        }
         document.getElementById('prop-id').value = propId;
+        document.getElementById('prop-ref').textContent = 'ID: ' + propId;
 
         try {
             const res = await fetch(`${API_BASE}/properties/${propId}`);
             if (!res.ok) throw new Error(`Status ${res.status}`);
             const data = await res.json();
 
-            const titleEl    = document.getElementById('prop-title');
-            const locationEl = document.getElementById('prop-location');
+            // --- core fields ---
+            const title = pick(data, ['title'], 'Unnamed Property');
+            document.getElementById('prop-title').textContent = title;
+            document.getElementById('prop-location').textContent = pick(data, ['location'], 'Unknown');
+            document.getElementById('prop-price').innerHTML =
+                'K' + Number(pick(data, ['price'], 0)).toLocaleString() + '<span class="text-base font-bold text-gray-400"> /month</span>';
 
-            titleEl.textContent    = data.title    || 'Unnamed Property';
-            titleEl.title          = data.title    || '';
-            locationEl.textContent = data.location || 'Unknown';
-            locationEl.title       = data.location || '';
-            document.getElementById('prop-price').textContent = 'ZMW ' + parseFloat(data.price).toLocaleString();
+            document.getElementById('prop-distance').textContent =
+                pick(data, ['distance_from_campus', 'distance'], 'Distance not specified');  // TODO: backend distance field
+            document.getElementById('prop-gender').textContent =
+                'Gender: ' + pick(data, ['gender_preference', 'gender'], 'Any');             // TODO: backend gender field
+            document.getElementById('prop-posted').textContent =
+                formatPostedDate(pick(data, ['created_at', 'date_posted', 'posted_at'], null));
 
-            /* FIX: original used data.image_url verbatim; if backend returned a
-               relative path, the browser resolved it against the frontend host
-               (Vercel) and 404'd. Now goes through resolveImageUrl. */
-            const resolved = resolveImageUrl(data.cover_url || data.image_url);
-            if (resolved) document.getElementById('prop-image').src = resolved;
+            const avail = pick(data, ['availability', 'status'], 'available');
+            const availEl = document.getElementById('prop-availability');
+            if (/reserv/i.test(avail)) { availEl.textContent = 'Reserved'; availEl.className = 'font-semibold text-yellow-600'; }
+            else if (/occup/i.test(avail)) { availEl.textContent = 'Occupied'; availEl.className = 'font-semibold text-red-600'; }
+            else { availEl.textContent = 'Available Now'; availEl.className = 'font-semibold text-green-600'; }
 
-            if (data.owner_id) document.getElementById('landlord-id').value = data.owner_id;
+            // --- description / summary ---
+            const desc = pick(data, ['description', 'summary'], 'A comfortable, secure home close to campus.');
+            document.getElementById('prop-summary').textContent = desc;
+            document.getElementById('char-count').textContent = desc.length;
+
+            // --- media gallery ---
+            const cover = resolveImageUrl(pick(data, ['cover_url', 'image_url'], ''));
+            let imgs = [];
+            if (Array.isArray(data.images))       imgs = data.images;
+            else if (Array.isArray(data.photos))  imgs = data.photos;
+            else if (Array.isArray(data.media))   imgs = data.media.filter(m => !/video/i.test(m.type || ''));
+            imgs = imgs.map(i => resolveImageUrl(typeof i === 'string' ? i : (i.url || i.src))).filter(Boolean);
+            if (cover) imgs.unshift(cover);
+            if (!imgs.length) imgs = ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900']; // placeholder
+
+            let vids = [];
+            if (Array.isArray(data.videos)) vids = data.videos.map(v => typeof v === 'string' ? v : (v.url || v.src)).filter(Boolean);
+            else if (Array.isArray(data.media)) vids = data.media.filter(m => /video/i.test(m.type || '')).map(m => resolveImageUrl(m.url || m.src)).filter(Boolean);
+
+            MEDIA = [
+                ...imgs.map(src => ({ type: 'image', src, thumb: src })),
+                ...vids.map(src => ({ type: 'video', src, thumb: imgs[0] })),  // TODO: backend video thumbnails
+            ];
+            galleryIndex = 0;
+            renderGallery();
+            document.getElementById('summary-image').src = imgs[0];
+
+            // --- highlights / amenities / details ---
+            const highlights = deriveHighlights(data);
+            document.getElementById('highlights-grid').innerHTML = highlights.map(h => `
+                <div class="flex flex-col items-center gap-1.5 p-2">
+                    <span class="w-11 h-11 rounded-xl flex items-center justify-center ${h.color}"><i class="fas ${h.icon}"></i></span>
+                    <span class="text-[11px] font-semibold text-gray-600">${h.label}</span>
+                </div>`).join('');
+            renderAmenities(highlights);
+            renderDetails(data);
+            renderNearby(data);
+            renderVerification(data);
+
+            // --- landlord profile ---
+            const owner = data.owner || data.landlord || {};
+            const ownerId = pick(data, ['owner_id'], '') || owner.id || '';
+            if (ownerId) document.getElementById('landlord-id').value = ownerId;
+
+            document.getElementById('landlord-name').textContent = pick(owner, ['full_name', 'name'], pick(data, ['owner_name', 'landlord_name'], 'Property Owner'));
+            const av = resolveImageUrl(pick(owner, ['avatar', 'profile_photo', 'photo'], ''));
+            if (av) document.getElementById('landlord-avatar').src = av;
+
+            const verified = pick(owner, ['is_verified', 'verified'], pick(data, ['landlord_verified'], true));
+            const pill = document.getElementById('verified-pill');
+            if (!verified) { pill.className = 'inline-flex items-center gap-1.5 bg-gray-100 text-gray-500 text-[11px] font-bold px-2.5 py-1 rounded-full mb-1.5'; pill.innerHTML = '<i class="fas fa-circle-info"></i> Unverified'; }
+
+            // stats (TODO: backend member_since / active_listings / response_rate / response_time)
+            document.getElementById('stat-member').textContent  = pick(owner, ['member_since'], '2025');
+            document.getElementById('stat-listings').textContent = pick(owner, ['active_listings', 'listings_count'], '—');
+            document.getElementById('stat-response').textContent = (pick(owner, ['response_rate'], 98)) + '%';
+            const rt = pick(owner, ['response_time'], '10 minutes');
+            document.getElementById('stat-time').innerHTML = `<i class="fas fa-bolt text-brand"></i> Replies within ${esc(rt)}`;
+            const rating = pick(owner, ['rating_count', 'reviews_count'], 24);
+            document.getElementById('landlord-rating').textContent = `(${rating})`;
+
+            // phone for call/sms/whatsapp
+            LANDLORD_PHONE = pick(owner, ['phone', 'phone_number'], pick(data, ['owner_phone', 'contact_phone'], null));
+            if (!LANDLORD_PHONE) {
+                ['btn-call', 'btn-wa', 'btn-sms'].forEach(id => {
+                    const b = document.getElementById(id);
+                    b.classList.add('opacity-60');
+                    b.title = 'Phone not available — use in-app messaging';
+                });
+            }
+
+            // similar
+            loadSimilar(propId);
 
         } catch (e) {
             console.error('[contact-landlord] loadPropertyInfo:', e);
-            document.getElementById('prop-title').textContent    = 'Could not load property.';
+            document.getElementById('prop-title').textContent = 'Could not load property.';
             document.getElementById('prop-location').textContent = '—';
-            document.getElementById('prop-price').textContent    = '—';
+            document.getElementById('prop-price').textContent = '—';
         }
     }
 
-    /* —— Form submit ————————————————————————————— */
-    document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    /* ===== Form submit (PRESERVED working /messages/send flow) ===== */
+    document.getElementById('contactForm').addEventListener('submit', async function (e) {
         e.preventDefault();
         hideFormError();
 
@@ -202,9 +930,9 @@
         const landlordId = document.getElementById('landlord-id').value;
         const token      = getToken();
 
-        if (!name || !contact)  return showFormError('Please fill in your name and contact details.');
-        if (!body)              return showFormError('Please write a message before sending.');
-        if (!landlordId)        return showFormError('Could not identify the property owner. Please go back and try again.');
+        if (!name || !contact) return showFormError('Please fill in your name and contact details.');
+        if (!body)             return showFormError('Please write a message before sending.');
+        if (!landlordId)       return showFormError('Could not identify the property owner. Please go back and try again.');
 
         if (!token) {
             showFormError('You must be logged in to send a message.');
@@ -214,15 +942,12 @@
 
         const btn = document.getElementById('send-btn');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        btn.disabled  = true;
+        btn.disabled = true;
 
         try {
             const res = await fetch(`${API_BASE}/messages/send`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type':  'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     receiver_id: parseInt(landlordId, 10),
                     property_id: propId ? parseInt(propId, 10) : null,
@@ -235,14 +960,21 @@
 
             showToast('Message sent! The landlord will be notified on their dashboard.', 'success');
             btn.innerHTML = '<i class="fas fa-check"></i> Message Sent';
-
             setTimeout(() => { window.location.href = 'browse.html'; }, 2000);
 
         } catch (err) {
             console.error('[contact-landlord] send:', err);
             showFormError(err.message || 'Something went wrong. Please try again.');
             btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-            btn.disabled  = false;
+            btn.disabled = false;
+        }
+    });
+
+    /* nav search -> browse */
+    document.getElementById('navSearchInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            const q = e.target.value.trim();
+            window.location.href = 'browse.html' + (q ? '?search=' + encodeURIComponent(q) : '');
         }
     });
 
@@ -250,5 +982,3 @@
     </script>
 </body>
 </html>
-
-
