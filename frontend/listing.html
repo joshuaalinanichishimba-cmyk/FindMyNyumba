@@ -460,7 +460,7 @@ function switchMainMedia(index){
 }
 window.switchMainMedia = switchMainMedia;
 
-
+function initStars() {
     const stars = Array.from(document.querySelectorAll('#star-container .fa-star'));
     stars.forEach((s, i) => {
         s.addEventListener('mouseover', () => stars.forEach((x, j) => x.style.color = j <= i ? '#ea580c' : '#d1d5db'));
