@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -62,46 +62,53 @@
 
     <!-- Sidebar -->
     <aside id="sidebar" class="w-64 bg-white border-r border-gray-100 flex flex-col h-full shrink-0 shadow-xl lg:shadow-none lg:relative">
-        <div class="px-5 py-5 border-b border-gray-50 flex items-center justify-between">
-            <img src="logo.png" alt="FindMyNyumba" class="h-9 w-auto object-contain hidden lg:block"
-                 onerror="this.outerHTML='<span class=\'font-black text-[#ea580c]\'>FindMyNyumba</span>'">
-            <div class="hidden lg:block">
-                <span id="role-badge" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#ea580c] uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded-full">
-                    <i class="fas fa-graduation-cap text-[9px]"></i> Student Host
-                </span>
-            </div>
+        <div class="px-5 py-5 flex items-center justify-between">
+            <img src="logo.png" alt="FindMyNyumba" class="h-9 w-auto object-contain" onerror="this.style.display='none'">
             <button id="mobile-close-btn" class="lg:hidden w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100">
                 <i class="fas fa-times text-sm"></i>
             </button>
         </div>
 
-        <div class="lg:hidden px-5 py-2 border-b border-gray-50">
-            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#ea580c] uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded-full">
+        <div class="px-4 pb-3">
+            <span id="role-badge" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#ea580c] uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded-full">
                 <i class="fas fa-graduation-cap text-[9px]"></i> Student Host
             </span>
+            <button onclick="switchTab('upload')" class="mt-3 w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-sm py-2.5 rounded-xl shadow transition flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i> Post New Room / Space
+            </button>
         </div>
 
-        <nav class="flex-1 py-3 overflow-y-auto">
-            <button onclick="switchTab('overview')"     id="nav-overview"     class="nav-btn nav-active w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-700"><i class="fas fa-chart-pie w-4 text-center"></i> Overview</button>
-            <button onclick="switchTab('listings')"     id="nav-listings"     class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-building w-4 text-center"></i> My Listings</button>
-            <button onclick="switchTab('upload')"       id="nav-upload"       class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-plus-circle w-4 text-center"></i> Add Listing</button>
-            <button onclick="switchTab('inquiries')"    id="nav-inquiries"    class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600 relative">
-                <i class="fas fa-envelope w-4 text-center"></i> Inquiries
+        <nav class="flex-1 py-2 overflow-y-auto">
+            <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn nav-active w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-700"><i class="fas fa-chart-pie w-4 text-center"></i> Dashboard</button>
+            <button onclick="switchTab('listings')" id="nav-listings" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-building w-4 text-center"></i> My Listings</button>
+            <button onclick="switchTab('upload')" id="nav-upload" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-plus-circle w-4 text-center"></i> Post New Space</button>
+            <button onclick="switchTab('inquiries')" id="nav-inquiries" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600 relative">
+                <i class="fas fa-envelope w-4 text-center"></i> Messages
                 <span id="unread-badge" class="ml-auto bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
             </button>
             <button onclick="switchTab('verification')" id="nav-verification" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-shield-alt w-4 text-center"></i> Verification</button>
-            <button onclick="switchTab('payments')"     id="nav-payments"     class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-wallet w-4 text-center"></i> Monetization</button>
-            <button onclick="switchTab('profile')"      id="nav-profile"      class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-user-cog w-4 text-center"></i> Profile & Settings</button>
+            <button onclick="switchTab('payments')" id="nav-payments" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-wallet w-4 text-center"></i> Monetization</button>
+            <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-user-cog w-4 text-center"></i> Profile &amp; Settings</button>
         </nav>
 
+        <div class="mx-4 mb-3 p-4 rounded-xl bg-orange-50 border border-orange-100">
+            <p class="text-xs font-black text-[#ea580c] mb-2 flex items-center gap-1.5"><i class="fas fa-lightbulb"></i> Listing Tips</p>
+            <ul class="text-[11px] text-gray-600 space-y-1.5 leading-snug">
+                <li class="flex gap-1.5"><i class="fas fa-check text-green-500 mt-0.5"></i> Add clear, bright photos</li>
+                <li class="flex gap-1.5"><i class="fas fa-check text-green-500 mt-0.5"></i> Write an honest description</li>
+                <li class="flex gap-1.5"><i class="fas fa-check text-green-500 mt-0.5"></i> Get verified to build trust</li>
+            </ul>
+        </div>
+
+        <div class="mx-4 mb-3 p-4 rounded-xl bg-slate-900 text-white">
+            <p class="font-black text-sm mb-1">Student Host?</p>
+            <p class="text-[11px] text-slate-300 mb-3 leading-snug">Learn how to earn by sharing your space with fellow students.</p>
+            <a href="how-it-works.html" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition"><i class="fas fa-book-open"></i> Check Guide</a>
+        </div>
+
         <div class="p-4 border-t border-gray-100 space-y-1">
-            <a href="browse.html"
-               class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-orange-50 hover:text-[#ea580c] font-semibold rounded-xl transition text-sm">
-                <i class="fas fa-search w-4 text-center"></i> Browse Listings
-            </a>
-            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 font-semibold rounded-xl transition text-sm">
-                <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
-            </button>
+            <a href="browse.html" class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-orange-50 hover:text-[#ea580c] font-semibold rounded-xl transition text-sm"><i class="fas fa-search w-4 text-center"></i> Browse Listings</a>
+            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 font-semibold rounded-xl transition text-sm"><i class="fas fa-sign-out-alt w-4 text-center"></i> Logout</button>
         </div>
     </aside>
 
@@ -110,32 +117,75 @@
 
         <!-- Overview -->
         <div id="view-overview" class="dashboard-view">
-            <h2 class="text-xl font-black mb-5 text-gray-900">Dashboard Overview</h2>
-            <div id="verification-alert" class="hidden mb-5 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-xl shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
-                        <h3 class="font-bold text-yellow-800">Action Required: Account Not Verified</h3>
+            <h2 class="text-2xl font-extrabold text-slate-900">Dashboard Overview</h2>
+            <p class="text-slate-400 font-medium text-sm mt-1 mb-6">Welcome back! Here's what's happening with your account.</p>
+
+            <!-- Verification alert -->
+            <div id="verification-alert" class="hidden mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-triangle-exclamation text-amber-500 text-xl mt-0.5"></i>
+                    <div>
+                        <h3 class="font-extrabold text-amber-900 text-[15px]">Action Required: Account Not Verified</h3>
+                        <p class="text-amber-700 text-sm font-medium mt-0.5">Please verify your account to unlock all features.</p>
                     </div>
-                    <button onclick="switchTab('verification')" class="sm:ml-auto bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-600 transition shrink-0">Verify Now</button>
+                </div>
+                <button onclick="switchTab('verification')" class="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">Verify Now <i class="fas fa-arrow-right text-xs"></i></button>
+            </div>
+
+            <!-- Stat cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-10 h-10 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg"><i class="fas fa-building"></i></span>
+                        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wide">Active</span>
+                    </div>
+                    <div id="stat-active" class="text-3xl font-black text-slate-900 leading-none">0</div>
+                    <p class="text-[12px] text-slate-400 font-medium mt-1.5">Active listings</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fas fa-clock"></i></span>
+                        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wide">Pending</span>
+                    </div>
+                    <div id="stat-pending" class="text-3xl font-black text-slate-900 leading-none">0</div>
+                    <p class="text-[12px] text-slate-400 font-medium mt-1.5">Pending listings</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fas fa-eye"></i></span>
+                        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wide">Views</span>
+                    </div>
+                    <div id="stat-views" class="text-3xl font-black text-slate-900 leading-none">0</div>
+                    <p class="text-[12px] text-slate-400 font-medium mt-1.5">Total views</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg"><i class="fas fa-comment-dots"></i></span>
+                        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wide">Inquiries</span>
+                    </div>
+                    <div id="stat-inquiries" class="text-3xl font-black text-slate-900 leading-none">0</div>
+                    <p class="text-[12px] text-slate-400 font-medium mt-1.5">Total inquiries</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm border-t-4 border-t-[#ea580c]">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Active</p>
-                    <div id="stat-active" class="text-3xl font-black text-gray-900">...</div>
+
+            <!-- Let's get started -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col sm:flex-row items-center gap-5">
+                <div class="w-32 h-24 flex items-center justify-center flex-shrink-0">
+          <svg viewBox="0 0 120 96" class="w-full h-full" aria-hidden="true">
+            <circle cx="60" cy="52" r="46" fill="#eff6ff"/>
+            <rect x="86" y="40" width="6" height="22" fill="#16a34a"/>
+            <circle cx="89" cy="34" r="12" fill="#22c55e"/>
+            <rect x="30" y="50" width="46" height="34" rx="2" fill="#fde7d3"/>
+            <path d="M26 52 L53 32 L80 52 Z" fill="#ea580c"/>
+            <rect x="48" y="64" width="12" height="20" fill="#c2410c"/>
+            <rect x="63" y="58" width="10" height="9" fill="#fb923c"/>
+            <rect x="20" y="84" width="80" height="5" rx="2" fill="#cbd5e1"/>
+          </svg>
                 </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm border-t-4 border-t-blue-500">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Pending</p>
-                    <div id="stat-pending" class="text-3xl font-black text-gray-900">...</div>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm border-t-4 border-t-green-500">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Views</p>
-                    <div id="stat-views" class="text-3xl font-black text-green-600">...</div>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm border-t-4 border-t-purple-500">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Inquiries</p>
-                    <div id="stat-inquiries" class="text-3xl font-black text-purple-600">...</div>
+                <div class="flex-1 text-center sm:text-left">
+                    <h3 class="font-extrabold text-slate-900 text-lg mb-1">Let's get started</h3>
+                    <p class="text-slate-500 text-sm font-medium mb-4">Add a new property to start receiving inquiries and grow your listings.</p>
+                    <button onclick="switchTab('upload')" class="bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold px-6 py-3 rounded-xl shadow transition inline-flex items-center gap-2"><i class="fas fa-plus"></i> Add New Property</button>
                 </div>
             </div>
         </div>
@@ -167,66 +217,165 @@
         </div>
 
         <!-- Add Listing -->
+        <!-- Post a Room / Space -->
         <div id="view-upload" class="dashboard-view hidden-view">
-            <h2 class="text-xl font-black mb-5 text-gray-900">Publish New Accommodation</h2>
-            <div class="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-gray-100 max-w-3xl">
-                <form id="uploadForm" class="space-y-5">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Bedspace / Room Title</label>
-                            <input type="text" id="prop-title" required class="fmn-input">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Price per Month (ZMW)</label>
-                            <input type="number" id="prop-price" required min="0" class="fmn-input">
+            <h2 class="text-xl font-black text-gray-900">Post a Room / Space</h2>
+            <p class="text-xs text-gray-400 mt-0.5 mb-5">Share your space and find a great roommate.</p>
+
+            <div class="hidden md:flex items-center gap-2 mb-5 text-[11px] font-bold">
+                <span class="flex items-center gap-1.5 text-[#ea580c]"><span class="w-5 h-5 rounded-full bg-[#ea580c] text-white flex items-center justify-center text-[10px]">1</span> Basic Info</span>
+                <span class="flex-1 h-px bg-gray-200"></span>
+                <span class="flex items-center gap-1.5 text-gray-400"><span class="w-5 h-5 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-[10px]">2</span> About Space</span>
+                <span class="flex-1 h-px bg-gray-200"></span>
+                <span class="flex items-center gap-1.5 text-gray-400"><span class="w-5 h-5 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-[10px]">3</span> Amenities</span>
+                <span class="flex-1 h-px bg-gray-200"></span>
+                <span class="flex items-center gap-1.5 text-gray-400"><span class="w-5 h-5 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-[10px]">4</span> Photos</span>
+                <span class="flex-1 h-px bg-gray-200"></span>
+                <span class="flex items-center gap-1.5 text-gray-400"><span class="w-5 h-5 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-[10px]">5</span> Publish</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <form id="uploadForm" class="lg:col-span-2 space-y-5">
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-circle-info text-[#ea580c]"></i> Basic Information</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Listing Title</label>
+                                <input type="text" id="prop-title" required placeholder="e.g. Male Roommate Needed in Buchi" class="fmn-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Monthly Contribution (ZMW)</label>
+                                <input type="number" id="prop-price" required min="0" placeholder="800" class="fmn-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nearest Institution</label>
+                                <select id="prop-university" required class="fmn-input">
+                                    <option value="UNZA">University of Zambia (UNZA)</option>
+                        <option value="CBU">Copperbelt University (CBU)</option>
+                        <option value="MU">Mulungushi University</option>
+                        <option value="KNU">Kwame Nkrumah University</option>
+                        <option value="LMMU">Levy Mwanawasa Medical University</option>
+                        <option value="MUKUBA">Mukuba University</option>
+                        <option value="CHALU">Chalimbana University</option>
+                        <option value="ZAOU">Zambian Open University</option>
+                        <option value="EDEN">Eden University</option>
+                        <option value="LAMU">Lusaka Apex Medical University</option>
+                        <option value="CAVENDISH">Cavendish University</option>
+                        <option value="TAU">Texila American University</option>
+                        <option value="EHC">Evelyn Hone College</option>
+                        <option value="NIPA">NIPA</option>
+                        <option value="RUSANGU">Rusangu University</option>
+                        <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Location / Area</label>
+                                <input type="text" id="prop-location" required placeholder="e.g. Buchi, Kitwe" class="fmn-input">
+                            </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nearest Institution</label>
-                            <select id="prop-university" required class="fmn-input">
-                                <option value="UNZA">University of Zambia (UNZA)</option>
-                                <option value="CBU">Copperbelt University (CBU)</option>
-                                <option value="MU">Mulungushi University</option>
-                                <option value="KNU">Kwame Nkrumah University</option>
-                                <option value="LMMU">Levy Mwanawasa Medical University</option>
-                                <option value="MUKUBA">Mukuba University</option>
-                                <option value="CHALU">Chalimbana University</option>
-                                <option value="ZAOU">Zambian Open University</option>
-                                <option value="EDEN">Eden University</option>
-                                <option value="LAMU">Lusaka Apex Medical University</option>
-                                <option value="CAVENDISH">Cavendish University</option>
-                                <option value="TAU">Texila American University</option>
-                                <option value="EHC">Evelyn Hone College</option>
-                                <option value="NIPA">NIPA</option>
-                                <option value="RUSANGU">Rusangu University</option>
-                                <option value="Other">Other</option>
-                            </select>
+
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-house-user text-[#ea580c]"></i> About the Space</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Bedspaces</label>
+                                <input type="number" id="prop-spots" value="1" min="1" max="50" required class="fmn-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Gender Preference <span class="text-gray-300 normal-case">(soon)</span></label>
+                                <select class="fmn-input" disabled><option>Any</option><option>Male</option><option>Female</option></select>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Location / Area</label>
-                            <input type="text" id="prop-location" required class="fmn-input">
+                        <div class="mt-4">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
+                            <textarea id="prop-desc" rows="4" required placeholder="Describe the space, the roommates, the neighbourhood..." class="fmn-input resize-none"></textarea>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Bedspaces</label>
-                            <input type="number" id="prop-spots" value="1" min="1" max="50" required class="fmn-input">
-                            <p class="text-[11px] text-gray-400 mt-1">How many spots are you offering?</p>
+
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-list-check text-[#ea580c]"></i> Amenities &amp; House Rules</h3>
+                        <p class="text-[11px] text-gray-400 mb-4">Visual for now &mdash; saving these to a listing needs a small backend update.</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-wifi text-gray-400"></i> <span class="font-semibold text-gray-700">WiFi</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-droplet text-gray-400"></i> <span class="font-semibold text-gray-700">Water</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-bolt text-gray-400"></i> <span class="font-semibold text-gray-700">Electricity</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-utensils text-gray-400"></i> <span class="font-semibold text-gray-700">Kitchen</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-bed text-gray-400"></i> <span class="font-semibold text-gray-700">Furnished</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-shield-halved text-gray-400"></i> <span class="font-semibold text-gray-700">Security</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-car text-gray-400"></i> <span class="font-semibold text-gray-700">Parking</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-tv text-gray-400"></i> <span class="font-semibold text-gray-700">TV / Lounge</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-temperature-half text-gray-400"></i> <span class="font-semibold text-gray-700">Hot Water</span>
+                    </label>
+                    
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
-                        <textarea id="prop-desc" rows="4" required class="fmn-input resize-none"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Photos &amp; Videos</label>
+
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-images text-[#ea580c]"></i> Photos &amp; Videos</h3>
+                        <p class="text-[11px] text-gray-400 mb-4">Add up to 20 photos and videos. The first photo becomes your cover.</p>
                         <div id="prop-media-uploader"></div>
                     </div>
-                    <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-base hover:bg-[#c2410c] transition shadow-sm">
-                        <i class="fas fa-upload mr-2"></i>Submit for Review
-                    </button>
+
+                    <button type="submit" class="w-full bg-[#ea580c] text-white py-4 rounded-xl font-black text-base hover:bg-[#c2410c] transition shadow-sm"><i class="fas fa-upload mr-2"></i> Review &amp; Publish Listing</button>
                 </form>
+
+                <div class="space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="px-4 pt-4 pb-2 text-[11px] font-black text-gray-400 uppercase tracking-wide">Live Preview</div>
+                        <div class="px-4 pb-4">
+                            <div class="rounded-xl overflow-hidden border border-gray-100">
+                                <div class="h-32 bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center text-orange-300"><i class="fas fa-image text-3xl"></i></div>
+                                <div class="p-3">
+                                    <p id="preview-title" class="font-black text-gray-900 text-sm">Your listing title</p>
+                                    <p id="preview-location" class="text-[11px] text-gray-400">Location</p>
+                                    <p id="preview-price" class="text-[#ea580c] font-black mt-1">ZMW &mdash;</p>
+                                    <span class="inline-block mt-1 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Available Now</span>
+                                    <p id="preview-uni" class="text-[11px] text-gray-500 mt-2">Near campus</p>
+                                    <p id="preview-desc" class="text-[11px] text-gray-400 mt-1">Your description will appear here.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                        <p class="font-black text-sm text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-shield-halved text-green-500"></i> Student Host Verified</p>
+                        <p class="text-[11px] text-gray-500">Verified hosts get more responses. <button type="button" onclick="switchTab('verification')" class="text-[#ea580c] font-bold underline">Verify now</button>.</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                        <p class="font-black text-sm text-gray-900 mb-2 flex items-center gap-2"><i class="fas fa-lightbulb text-[#ea580c]"></i> Tips to Get More Roommates</p>
+                        <ul class="text-[11px] text-gray-500 space-y-1.5">
+                            <li class="flex gap-1.5"><i class="fas fa-check text-green-500 mt-0.5"></i> Use natural daylight photos</li>
+                            <li class="flex gap-1.5"><i class="fas fa-check text-green-500 mt-0.5"></i> Be clear about house rules</li>
+                            <li class="flex gap-1.5"><i class="fas fa-check text-green-500 mt-0.5"></i> Reply to messages quickly</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl shadow-sm border border-orange-100 p-4 bg-gradient-to-br from-orange-50 to-white">
+                        <p class="font-black text-sm text-gray-900 mb-1 flex items-center gap-2">Boost Your Listing <span>&#128640;</span></p>
+                        <p class="text-[11px] text-gray-500 mb-3">Get seen first and attract serious students.</p>
+                        <button type="button" onclick="switchTab('payments')" class="w-full bg-[#ea580c] text-white text-xs font-bold py-2.5 rounded-lg hover:bg-[#c2410c] transition">Boost This Listing</button>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                        <p class="font-black text-sm text-gray-900 mb-1">Need Help?</p>
+                        <p class="text-[11px] text-gray-500">Our team is here for you. <a href="help.html" class="text-[#ea580c] font-bold underline">Contact Support</a>.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -965,6 +1114,27 @@ initDashboard();
 </script>
 <script>
 document.addEventListener("error", function(e){ if(e.target.tagName==="IMG") e.target.src="https://placehold.co/600x400/0A1128/FFFFFF?text=Image+Not+Found"; }, true);
+
+// --- Live preview for Post a Room/Space (additive) ---
+(function () {
+    function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+    function upd() {
+        var g = function (id) { var el = document.getElementById(id); return el ? el.value : ''; };
+        setText('preview-title', g('prop-title') || 'Your listing title');
+        var p = g('prop-price');
+        setText('preview-price', p ? ('ZMW ' + Number(p).toLocaleString()) : 'ZMW \u2014');
+        setText('preview-location', g('prop-location') || 'Location');
+        var u = g('prop-university');
+        setText('preview-uni', u ? ('Near ' + u) : 'Near campus');
+        setText('preview-desc', g('prop-desc') || 'Your description will appear here.');
+    }
+    ['prop-title', 'prop-price', 'prop-location', 'prop-university', 'prop-desc'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) { el.addEventListener('input', upd); el.addEventListener('change', upd); }
+    });
+    document.addEventListener('DOMContentLoaded', upd);
+    setTimeout(upd, 400);
+})();
 </script>
 </body>
 </html>
