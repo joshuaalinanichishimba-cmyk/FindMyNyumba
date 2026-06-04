@@ -144,7 +144,7 @@
         <div class="sb-group-label px-3 mb-2">Trust &amp; Safety</div>
         <div class="sb-link" id="nav-verifications" onclick="showTab('verifications')"><i class="fas fa-user-shield"></i>Verification Queue</div>
         <div class="sb-link" id="nav-trust" onclick="showTab('trust')"><i class="fas fa-flag"></i>Reports &amp; Complaints</div>
-        <div class="sb-link" id="nav-fraud" onclick="showTab('fraud')"><i class="fas fa-shield-halved"></i>Fraud Center<span class="sb-soon">SOON</span></div>
+        <div class="sb-link" id="nav-fraud" onclick="showTab('fraud')"><i class="fas fa-shield-halved"></i>Fraud Center</div>
       </div>
 
       <div class="space-y-1">
@@ -624,6 +624,8 @@ function showTab(name){
   if (name === 'listings')      loadListings();
   if (name === 'verifications') loadVerifications();
   if (name === 'trust')         loadReports();
+  if (name === 'fraud')         loadFraud();
+  if (name === 'revenue')       loadRevenue();
   if (name === 'analytics')     loadAnalytics();
   if (name === 'system')        loadSystemHealth();
 }
@@ -668,18 +670,22 @@ async function loadDashboard(){
   const landlords = _users.filter(u => u.role === 'landlord' || u.role === 'student_host').length;
   const activeL   = _listings.filter(l => l.status === 'active').length;
   const pendingL  = stats.pending_listings ?? _listings.filter(l => l.status === 'pending').length;
-  const verifiedL = _listings.filter(l => l.is_verified === true || l.verified === true).length;
+  const boostedL  = _listings.filter(l => l.is_boosted === true).length;
+  // /admin/reports returns ALL reports; the real "open" figure is the pending subset
+  const pendingReports = stats.pending_reports
+    ?? (Array.isArray(reports) ? reports.filter(r => r.status === 'pending').length : 0);
+  _reportsCount = pendingReports;
 
-  // KPI cards: real values; 'live' badge where derived from data, 'preview' where no backend
+  // KPI cards — every tile is a real, live figure (from /admin/stats or derived from /admin data)
   const kpis = [
-    { label:'Total Listings',  val: stats.total_listings ?? _listings.length, icon:'fa-building',        color:'orange', live:true },
-    { label:'Active Listings', val: activeL,                                   icon:'fa-circle-check',    color:'green',  live:true },
-    { label:'Total Students',  val: stats.total_students ?? students,          icon:'fa-graduation-cap',  color:'blue',   live:true },
-    { label:'Total Landlords', val: stats.total_landlords ?? landlords,        icon:'fa-key',             color:'purple', live:true },
-    { label:'Pending Verifs',  val: stats.pending_verifs ?? 0,                 icon:'fa-user-shield',     color:'amber',  live:true },
-    { label:'Open Reports',    val: _reportsCount,                             icon:'fa-flag',            color:'red',    live:true },
-    { label:'Verified Listings',val: verifiedL,                                icon:'fa-shield-halved',   color:'teal',   live:true },
-    { label:'Monthly Revenue', val: stats.monthly_revenue ?? '—',             icon:'fa-coins',           color:'slate',  live:false },
+    { label:'Total Listings',   val: stats.total_listings ?? _listings.length, icon:'fa-building',       color:'orange', live:true },
+    { label:'Active Listings',  val: activeL,                                   icon:'fa-circle-check',   color:'green',  live:true },
+    { label:'Pending Review',   val: pendingL,                                  icon:'fa-clock',          color:'amber',  live:true },
+    { label:'Total Students',   val: stats.total_students ?? students,          icon:'fa-graduation-cap', color:'blue',   live:true },
+    { label:'Total Landlords',  val: stats.total_landlords ?? landlords,        icon:'fa-key',            color:'purple', live:true },
+    { label:'Pending Verifs',   val: stats.pending_verifs ?? 0,                 icon:'fa-user-shield',    color:'teal',   live:true },
+    { label:'Open Reports',     val: pendingReports,                            icon:'fa-flag',           color:'red',    live:true },
+    { label:'Boosted Listings', val: boostedL,                                  icon:'fa-rocket',         color:'orange', live:true },
   ];
 
   const colorMap = {
@@ -939,44 +945,99 @@ async function loadReports(){
     const res = await fetch(`${API}/admin/reports`);
     if (!res.ok) throw new Error();
     const reports = await res.json();
-    _reportsCount = reports.length;
+    // pending first, then by recency (backend already returns newest-first)
+    const order = { pending:0, reviewed:1, dismissed:2 };
+    reports.sort((a,b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
+    _reportsCount = reports.filter(r => r.status === 'pending').length;
     renderTrustKpis(reports);
-    if (!reports.length) { el.innerHTML = `<div class="px-5 py-12 text-center text-slate-400"><i class="fas fa-circle-check text-3xl text-emerald-400 mb-3 block"></i>No open reports — all clear.</div>`; return; }
+    if (!reports.length) { el.innerHTML = `<div class="px-5 py-12 text-center text-slate-400"><i class="fas fa-circle-check text-3xl text-emerald-400 mb-3 block"></i>No reports — all clear.</div>`; return; }
+    const statusPill = { pending:'bg-orange-50 text-orange-600', reviewed:'bg-blue-50 text-blue-600', dismissed:'bg-slate-100 text-slate-500' };
     el.innerHTML = reports.map(r => `
       <div class="px-5 py-4 hover:bg-slate-50 transition">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="font-extrabold text-slate-900 text-sm">Report #${esc(r.id)}</span>
-              <span class="pill bg-orange-50 text-orange-600">${esc(r.status)}</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-extrabold text-slate-900 text-sm">${esc(r.listing_title || ('Listing #' + r.listing_id))}</span>
+              <span class="pill ${statusPill[r.status] || 'bg-slate-100 text-slate-500'}">${esc(r.status)}</span>
             </div>
-            <div class="text-[11.5px] text-slate-400 mt-1">Listing ${esc(r.listing_id)} · Reporter ${esc(r.reporter_id)}</div>
+            <div class="text-[11.5px] text-slate-400 mt-1">Report #${esc(r.id)} · by ${esc(r.reporter_name || ('User ' + r.reporter_id))}${r.reporter_email ? ' · ' + esc(r.reporter_email) : ''}</div>
             <div class="mt-2 text-[13.5px] text-slate-700"><span class="font-bold">Reason:</span> ${esc(r.reason)}</div>
             ${r.description ? `<div class="mt-1 text-[13px] text-slate-500">${esc(r.description)}</div>` : ''}
           </div>
-          <button onclick="dismissReport(${r.id})" class="btn btn-ghost px-3 py-1.5 text-[12px] flex-shrink-0">Dismiss</button>
+          ${r.status === 'pending'
+            ? `<button onclick="dismissReport(${r.id})" class="btn btn-ghost px-3 py-1.5 text-[12px] flex-shrink-0">Dismiss</button>`
+            : `<span class="text-[11px] font-semibold text-slate-300 flex-shrink-0 self-center">closed</span>`}
         </div>
       </div>`).join('');
   } catch { el.innerHTML = errorBlock('Failed to load reports.'); }
 }
 
 function renderTrustKpis(reports){
+  const pending = reports.filter(r => r.status === 'pending');
+  const suspended = _users.filter(u => u.is_active === false).length;
   const kpis = [
-    { label:'Open Reports',     val:reports.length, icon:'fa-flag', color:'red', live:true },
-    { label:'Listings Reported',val:new Set(reports.map(r=>r.listing_id)).size, icon:'fa-building', color:'amber', live:true },
-    { label:'Blocked Accounts', val:'—', icon:'fa-user-lock', color:'slate', live:false },
-    { label:'Open Investigations',val:'—', icon:'fa-magnifying-glass', color:'slate', live:false },
+    { label:'Open Reports',       val:pending.length, icon:'fa-flag', color:'red' },
+    { label:'Listings Reported',  val:new Set(pending.map(r=>r.listing_id)).size, icon:'fa-building', color:'amber' },
+    { label:'Suspended Accounts', val:suspended, icon:'fa-user-lock', color:'purple' },
+    { label:'Total Reports',      val:reports.length, icon:'fa-clock-rotate-left', color:'slate' },
   ];
-  const cmap = { red:['bg-red-50','text-red-600'], amber:['bg-amber-50','text-amber-600'], slate:['bg-slate-100','text-slate-500'] };
+  const cmap = { red:['bg-red-50','text-red-600'], amber:['bg-amber-50','text-amber-600'], purple:['bg-purple-50','text-purple-600'], slate:['bg-slate-100','text-slate-500'] };
   document.getElementById('trust-kpis').innerHTML = kpis.map(k => {
     const [bg,tx]=cmap[k.color];
-    const badge = k.live ? `<span class="pill bg-emerald-50 text-emerald-600">Live</span>` : `<span class="pill bg-amber-50 text-amber-700">Preview</span>`;
-    return `<div class="kpi"><div class="flex items-start justify-between mb-3"><span class="ico-box ${bg} ${tx}"><i class="fas ${k.icon}"></i></span>${badge}</div>
+    return `<div class="kpi"><div class="flex items-start justify-between mb-3"><span class="ico-box ${bg} ${tx}"><i class="fas ${k.icon}"></i></span><span class="pill bg-emerald-50 text-emerald-600">Live</span></div>
       <div class="text-[24px] font-extrabold text-slate-900 tabnum">${k.val}</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${k.label}</div></div>`;
   }).join('');
 }
 
 async function dismissReport(id){ const res = await fetch(`${API}/admin/reports/${id}/dismiss`, { method:'PATCH' }); if (res.ok) { showToast('Report dismissed.'); loadReports(); } }
+
+/* ====================================================================
+   FRAUD — real "most-reported listings" risk panel
+   Derived by joining /admin/reports to /admin/all-listings (no new backend).
+==================================================================== */
+async function loadFraud(){
+  const tbody = document.getElementById('fraud-reported'); if (!tbody) return;
+  tbody.innerHTML = skeletonRows(4, 6);
+  try {
+    const [reports, listings] = await Promise.all([
+      fetch(`${API}/admin/reports`).then(r => r.ok ? r.json() : []).catch(() => []),
+      _listings.length ? Promise.resolve(_listings) : fetch(`${API}/admin/all-listings`).then(r => r.ok ? r.json() : []).catch(() => []),
+    ]);
+    _listings = listings;
+    const lmap = {}; listings.forEach(l => { lmap[l.id] = l; });
+    const agg = {};
+    reports.forEach(r => {
+      if (r.listing_id == null) return;
+      const a = agg[r.listing_id] || (agg[r.listing_id] = { total:0, open:0, title:r.listing_title });
+      a.total++; if (r.status === 'pending') a.open++;
+    });
+    let rows = Object.keys(agg).map(id => {
+      const a = agg[id], l = lmap[id] || {};
+      return { id, total:a.total, open:a.open, title:a.title || l.title || ('Listing #' + id), location:l.location || '—', owner:l.owner_id ?? '—' };
+    }).sort((x,y) => y.total - x.total || y.open - x.open);
+    if (!rows.length){ tbody.innerHTML = emptyRow(6,'No reported listings — nothing flagged. 🎉'); return; }
+    const risk = n => n >= 4 ? ['Critical','bg-red-50 text-red-600'] : n === 3 ? ['High','bg-orange-50 text-orange-600'] : n === 2 ? ['Medium','bg-amber-50 text-amber-600'] : ['Low','bg-slate-100 text-slate-500'];
+    tbody.innerHTML = rows.map(r => {
+      const [label,cls] = risk(r.total);
+      return `<tr class="hover:bg-slate-50">
+        <td class="data-td font-bold text-slate-900 max-w-[200px]"><span class="block truncate">${esc(r.title)}</span></td>
+        <td class="data-td text-slate-500 hidden md:table-cell">${esc(r.location)}</td>
+        <td class="data-td text-slate-500 hidden lg:table-cell">#${esc(r.owner)}</td>
+        <td class="data-td"><span class="font-extrabold tabnum text-slate-900">${r.total}</span> <span class="text-[11px] text-slate-400">(${r.open} open)</span></td>
+        <td class="data-td"><span class="pill ${cls}">${label}</span></td>
+        <td class="data-td"><button onclick="deleteListing(${r.id}, '${esc((r.title||'').replace(/'/g,''))}')" class="btn bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1.5 text-[12px]">Remove</button></td>
+      </tr>`;
+    }).join('');
+  } catch { tbody.innerHTML = errorRow(6,'Failed to load fraud data.'); }
+}
+
+/* ---------- revenue: only the boosted-listings count is real ---------- */
+function loadRevenue(){
+  const el = document.getElementById('rev-boosted'); if (!el) return;
+  const fill = ls => countUp(el, ls.filter(l => l.is_boosted === true).length);
+  if (_listings.length) fill(_listings);
+  else fetch(`${API}/admin/all-listings`).then(r => r.ok ? r.json() : []).then(ls => { _listings = ls; fill(ls); }).catch(() => {});
+}
 
 /* ====================================================================
    ANALYTICS
@@ -1125,9 +1186,11 @@ function ghostCard(title, sub, icon){
 function buildPreviewSections(){
   // Revenue
   document.getElementById('tab-revenue').innerHTML =
-    previewBanner('connect a payments / mobile-money backend to populate this')
+    previewBanner('monetary totals need a payments / mobile-money backend')
     + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
-        ${ghostKpi('Revenue Today','fa-coins')}${ghostKpi('Revenue This Month','fa-calendar')}${ghostKpi('Revenue This Year','fa-chart-line')}${ghostKpi('Featured Listings','fa-star')}
+        ${ghostKpi('Revenue Today','fa-coins')}${ghostKpi('Revenue This Month','fa-calendar')}${ghostKpi('Revenue This Year','fa-chart-line')}
+        <div class="kpi"><div class="flex items-start justify-between mb-3"><span class="ico-box bg-orange-50 text-orange-600"><i class="fas fa-rocket"></i></span><span class="pill bg-emerald-50 text-emerald-600">Live</span></div>
+          <div class="text-[24px] font-extrabold text-slate-900 tabnum" id="rev-boosted">—</div><div class="text-[12px] font-semibold text-slate-400 mt-1">Boosted Listings</div></div>
        </div>
        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         ${ghostCard('Revenue by Source','Featured listings, boosts, verification fees, reservation deposits — once payments are live, this chart fills automatically.','fa-chart-pie')}
@@ -1142,13 +1205,25 @@ function buildPreviewSections(){
        </div>
        ${ghostCard('Secured Deposit Flow','Students place a deposit held in escrow, released to the landlord only after a successful move-in. Refunds and disputes are managed here.','fa-vault')}`;
 
-  // Fraud
+  // Fraud — real "most-reported" risk table (derived) + preview for NRC/phone dedup
   document.getElementById('tab-fraud').innerHTML =
-    previewBanner('risk scoring not yet computed server-side')
-    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
-        ${ghostKpi('High-Risk Accounts','fa-triangle-exclamation')}${ghostKpi('Duplicate NRCs','fa-id-card')}${ghostKpi('Multiple Numbers','fa-phone')}${ghostKpi('Flagged Listings','fa-flag')}
-       </div>
-       ${ghostCard('Fraud Scoring Engine','Accounts will be scored Low / Medium / High / Critical based on duplicate NRCs, repeated phone numbers, and report frequency.','fa-shield-halved')}`;
+    `<div class="card overflow-hidden mb-5">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-[15px]">Most-Reported Listings <span class="pill bg-emerald-50 text-emerald-600 align-middle">Live</span></h3>
+            <p class="text-[12px] text-slate-400 font-medium">Risk scored by number of reports received</p>
+          </div>
+          <button class="btn btn-ghost" onclick="loadFraud()"><i class="fas fa-rotate"></i>Refresh</button>
+        </div>
+        <div class="overflow-x-auto"><table class="w-full"><thead><tr>
+          <th class="data-th">Listing</th><th class="data-th hidden md:table-cell">Location</th>
+          <th class="data-th hidden lg:table-cell">Owner</th><th class="data-th">Reports</th><th class="data-th">Risk</th><th class="data-th">Action</th>
+        </tr></thead><tbody id="fraud-reported"></tbody></table></div>
+     </div>`
+    + previewBanner('NRC / phone duplicate detection needs id_number & phone_number exposed in /admin/users')
+    + `<div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5">
+        ${ghostKpi('Duplicate NRCs','fa-id-card')}${ghostKpi('Repeated Numbers','fa-phone')}${ghostKpi('Multi-Account Signals','fa-fingerprint')}
+       </div>`;
 
   // Support
   document.getElementById('tab-support').innerHTML =
