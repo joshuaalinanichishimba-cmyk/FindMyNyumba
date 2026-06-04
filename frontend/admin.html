@@ -115,11 +115,14 @@
     class="fixed lg:static inset-y-0 left-0 z-40 w-[260px] flex flex-col -translate-x-full lg:translate-x-0">
 
     <!-- brand -->
-    <div class="px-5 h-[68px] flex items-center gap-3 border-b border-white/5 flex-shrink-0">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-orange-900/40">N</div>
-      <div class="leading-tight">
-        <div class="text-white font-extrabold text-[15px]">FindMyNyumba</div>
-        <div class="text-[10px] text-slate-400 font-semibold tracking-wide">ADMIN CONSOLE</div>
+    <div class="px-4 h-[68px] flex items-center border-b border-white/5 flex-shrink-0">
+      <div class="bg-white rounded-xl px-3 h-11 w-full flex items-center justify-center shadow-sm">
+        <img src="logo.png" alt="FindMyNyumba" class="max-h-7 w-auto object-contain"
+             onerror="this.style.display='none';document.getElementById('brand-fallback').style.display='flex'">
+        <div id="brand-fallback" style="display:none" class="items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-extrabold text-sm">N</span>
+          <span class="font-extrabold text-slate-900 text-[14px]">FindMyNyumba</span>
+        </div>
       </div>
     </div>
 
