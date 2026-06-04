@@ -1,216 +1,257 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - FindMyNyumba</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="logo.png">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
-        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — FindMyNyumba</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+  body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0f172a 100%); }
+  .card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+  .card-hover:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -18px rgba(15,23,42,.25); }
+  #mobile-menu { transition: max-height .3s ease, opacity .3s ease; max-height:0; opacity:0; overflow:hidden; }
+  #mobile-menu.menu-open { max-height:520px; opacity:1; }
+</style>
 </head>
-<body class="bg-white">
+<body class="bg-white text-slate-800">
 
-    <!-- NAV -->
-    <nav class="bg-white shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <a href="index.html" class="flex items-center h-16 overflow-visible">
-                    <div class="bg-white rounded-lg p-1">
-                        <img src="logo.png" alt="FindMyNyumba" class="h-12 w-auto object-contain mix-blend-multiply brightness-[1.1] contrast-[1.4]" onerror="this.style.display='none'">
-                    </div>
-                </a>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Home</a>
-                    <a href="browse.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Browse</a>
-                    <a href="how-it-works.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">How It Works</a>
-                    <a href="login.html" class="text-gray-600 hover:text-[#ea580c] font-semibold text-sm">Login</a>
-                    <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm">Post Property</a>
-                </div>
-                <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100">
-                    <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
-            <div class="flex flex-col space-y-1 pt-3">
-                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
-                <a href="browse.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Browse</a>
-                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
-                <a href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
-                <a href="register-landlord.html" class="mt-2 w-full text-center bg-[#ea580c] text-white px-4 py-3 rounded-xl font-bold text-sm">Post Property</a>
-            </div>
-        </div>
-    </nav>
+<!-- ===================== NAV ===================== -->
+<nav class="bg-white/95 backdrop-blur shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="index.html" class="flex items-center" style="text-decoration:none;">
+        <img src="logo.png" alt="FindMyNyumba" style="height:42px;width:auto;object-fit:contain;display:block;"
+             onerror="this.style.display='none';document.getElementById('logo-fallback-nav').classList.remove('hidden');">
+        <span id="logo-fallback-nav" class="hidden text-xl font-extrabold text-[#0f172a]">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
+      </a>
+      <div class="hidden md:flex items-center gap-7">
+        <a href="index.html" class="text-slate-600 hover:text-[#ea580c] font-bold text-sm transition-colors">Home</a>
+        <a href="browse.html" class="text-slate-600 hover:text-[#ea580c] font-bold text-sm transition-colors">Browse</a>
+        <a href="how-it-works.html" class="text-slate-600 hover:text-[#ea580c] font-bold text-sm transition-colors">How It Works</a>
+        <a id="nav-dashboard-desk" href="#" class="hidden text-slate-600 hover:text-[#ea580c] font-bold text-sm transition-colors">Dashboard</a>
+        <a id="nav-login-desk" href="login.html" class="text-slate-600 hover:text-[#ea580c] font-bold text-sm transition-colors">Login</a>
+        <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-slate-600 hover:text-red-500 font-bold text-sm transition-colors">Logout</a>
+        <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors text-sm shadow-sm shadow-orange-200">Post Property</a>
+      </div>
+      <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors">
+        <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="md:hidden bg-white border-t border-slate-100 px-4 pb-4">
+    <div class="flex flex-col gap-1 pt-3">
+      <a href="index.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Home</a>
+      <a href="browse.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Browse</a>
+      <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">How It Works</a>
+      <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Dashboard</a>
+      <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Login</a>
+      <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-xl text-red-600 font-bold hover:bg-red-50 text-sm">Logout</a>
+      <a href="register-landlord.html" class="mt-2 text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
+    </div>
+  </div>
+</nav>
 
-    <!-- HERO -->
-    <div class="pt-16 bg-gradient-to-br from-slate-900 to-slate-800 overflow-hidden relative">
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-10 left-10 w-64 h-64 bg-[#ea580c] rounded-full filter blur-3xl"></div>
-            <div class="absolute bottom-0 right-20 w-80 h-80 bg-orange-400 rounded-full filter blur-3xl"></div>
-        </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center relative z-10">
-            <h1 class="text-4xl md:text-6xl font-black text-white mb-6">Built for Zambian Students</h1>
-            <p class="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed">
-                We started FindMyNyumba because finding affordable, safe student housing in Zambia was too hard. We're changing that.
-            </p>
-        </div>
+<!-- ===================== HERO ===================== -->
+<section class="hero-gradient relative pt-16 overflow-hidden">
+  <!-- decorative illustration (right) -->
+  <div class="hidden md:block absolute top-16 right-0 bottom-0 w-[42%] pointer-events-none">
+    <img src="data:image/jpeg;base64,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" alt="Students looking at a home" class="absolute inset-0 w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/40 to-transparent"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="max-w-xl py-20 lg:py-28">
+      <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6">Built for <span class="text-[#ea580c]">Zambian Students</span></h1>
+      <p class="text-slate-300 text-lg md:text-xl max-w-lg font-medium leading-relaxed">
+        We started FindMyNyumba because finding affordable, safe student housing in Zambia was too hard. We're changing that.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MISSION ===================== -->
+<section class="py-16 lg:py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <span class="inline-block bg-orange-50 border border-orange-100 text-[#ea580c] text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider">Our Mission</span>
+    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-4 mb-6">Making Student Housing Accessible</h2>
+    <div class="max-w-3xl space-y-4 mb-12">
+      <p class="text-slate-500 font-medium leading-relaxed">Every Zambian student deserves a safe, clean, and affordable place to call home while they pursue their education. Too many students spend weeks searching for accommodation, fall victim to scams, or end up in unsuitable housing.</p>
+      <p class="text-slate-500 font-medium leading-relaxed">FindMyNyumba was built to solve this problem — a trusted, transparent platform that connects verified students with verified landlords, making the process simple, fast, and safe.</p>
+      <p class="text-slate-500 font-medium leading-relaxed">We also empower student hosts — fellow students who want to help by offering affordable bedspaces — creating a community-first approach to student housing.</p>
     </div>
 
-    <!-- MISSION -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <span class="bg-orange-100 text-[#ea580c] text-xs font-black px-4 py-2 rounded-full uppercase tracking-wider">Our Mission</span>
-                    <h2 class="text-3xl md:text-4xl font-black text-slate-900 mt-4 mb-6">Making Student Housing Accessible</h2>
-                    <p class="text-slate-500 font-medium leading-relaxed mb-4">Every Zambian student deserves a safe, clean, and affordable place to call home while they pursue their education. Too many students spend weeks searching for accommodation, fall victim to scams, or end up in unsuitable housing.</p>
-                    <p class="text-slate-500 font-medium leading-relaxed mb-4">FindMyNyumba was built to solve this problem — a trusted, transparent platform that connects verified students with verified landlords, making the process simple, fast, and safe.</p>
-                    <p class="text-slate-500 font-medium leading-relaxed">We also empower student hosts — fellow students who want to help by offering affordable bedspaces — creating a community-first approach to student housing.</p>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
-                        <div class="text-3xl font-black text-[#ea580c] mb-1">500+</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Listings</div>
-                    </div>
-                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
-                        <div class="text-3xl font-black text-[#ea580c] mb-1">2,000+</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Students</div>
-                    </div>
-                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
-                        <div class="text-3xl font-black text-[#ea580c] mb-1">200+</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Landlords</div>
-                    </div>
-                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
-                        <div class="text-3xl font-black text-[#ea580c] mb-1">6+</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Universities</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+        <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-house"></i></div>
+        <div class="text-2xl font-extrabold text-[#ea580c]">500+</div>
+        <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Listings</div>
+        <p class="text-[11px] text-slate-400 font-medium mt-1">Active and verified properties</p>
+      </div>
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+        <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-graduation-cap"></i></div>
+        <div class="text-2xl font-extrabold text-[#ea580c]">2,000+</div>
+        <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Students</div>
+        <p class="text-[11px] text-slate-400 font-medium mt-1">Students helped find their home</p>
+      </div>
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+        <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-key"></i></div>
+        <div class="text-2xl font-extrabold text-[#ea580c]">200+</div>
+        <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Landlords</div>
+        <p class="text-[11px] text-slate-400 font-medium mt-1">Verified and trusted landlords</p>
+      </div>
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
+        <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-building-columns"></i></div>
+        <div class="text-2xl font-extrabold text-[#ea580c]">6+</div>
+        <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Universities</div>
+        <p class="text-[11px] text-slate-400 font-medium mt-1">Covered across Zambia</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- VALUES -->
-    <section class="py-20 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14">
-                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">Our Values</h2>
-                <p class="text-slate-500 font-medium max-w-xl mx-auto">The principles that guide everything we build and every decision we make.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
-                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
-    <i class="fas fa-shield-alt"></i>
-</div>
-                    <h3 class="font-black text-slate-900 mb-2">Trust & Safety</h3>
-                    <p class="text-slate-500 text-sm font-medium">We verify every landlord and listing to protect our users from scams and fraud.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
-                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
-                        <i class="fas fa-hands-helping"></i>
-                    </div>
-                    <h3 class="font-black text-slate-900 mb-2">Community First</h3>
-                    <p class="text-slate-500 text-sm font-medium">We build features that serve our community of students and landlords, not just ourselves.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
-                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <h3 class="font-black text-slate-900 mb-2">Transparency</h3>
-                    <p class="text-slate-500 text-sm font-medium">No hidden fees. No surprises. Clear pricing, clear policies, clear communication.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
-                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-[#ea580c] text-2xl mx-auto mb-4">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3 class="font-black text-slate-900 mb-2">Speed & Simplicity</h3>
-                    <p class="text-slate-500 text-sm font-medium">Finding a home should be fast and simple. We eliminate unnecessary complexity.</p>
-                </div>
-            </div>
+<!-- ===================== VALUES ===================== -->
+<section class="py-16 lg:py-20 bg-slate-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3">Our Values</h2>
+      <p class="text-slate-500 font-medium max-w-xl mx-auto">The principles that guide everything we build and every decision we make.</p>
+    </div>
+    <div class="space-y-4">
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl flex-shrink-0"><i class="fas fa-shield-halved"></i></div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-slate-900 text-base mb-0.5">Trust &amp; Safety</h3>
+          <p class="text-slate-500 text-sm font-medium">We verify every landlord and listing to protect our users from scams and fraud.</p>
         </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="py-20 bg-[#ea580c]">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-5xl font-black text-white mb-4">Join Our Community</h2>
-            <p class="text-orange-100 text-lg font-medium mb-10">Be part of Zambia's fastest-growing student housing platform.</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="browse.html" class="bg-white text-[#ea580c] font-black px-8 py-4 rounded-2xl hover:bg-orange-50 transition-colors text-sm shadow-lg">
-                    <i class="fas fa-search mr-2"></i>Browse Properties
-                </a>
-                <a href="register.html" class="bg-slate-900 text-white font-black px-8 py-4 rounded-2xl hover:bg-slate-800 transition-colors text-sm shadow-lg">
-                    <i class="fas fa-user-plus mr-2"></i>Create Free Account
-                </a>
-            </div>
+        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0"><i class="fas fa-check text-sm"></i></div>
+      </div>
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl flex-shrink-0"><i class="fas fa-hands-helping"></i></div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-slate-900 text-base mb-0.5">Community First</h3>
+          <p class="text-slate-500 text-sm font-medium">We build features that serve our community of students and landlords, not just ourselves.</p>
         </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="bg-slate-900 text-slate-400 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-                <div class="col-span-2 md:col-span-1">
-                    <div class="bg-white rounded-xl p-2 inline-block mb-4">
-                        <img src="logo.png" alt="FindMyNyumba" class="h-10 w-auto object-contain mix-blend-multiply" onerror="this.style.display='none'">
-                    </div>
-                    <p class="text-sm font-medium text-slate-400">Zambia's trusted student housing platform.</p>
-                </div>
-                <div>
-                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Quick Links</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="index.html" class="hover:text-[#ea580c] font-medium">Home</a></li>
-                        <li><a href="browse.html" class="hover:text-[#ea580c] font-medium">Browse</a></li>
-                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] font-medium">How It Works</a></li>
-                        <li><a href="login.html" class="hover:text-[#ea580c] font-medium">Login</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Support</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="help.html" class="hover:text-[#ea580c] font-medium">Help Center</a></li>
-                        <li><a href="terms.html" class="hover:text-[#ea580c] font-medium">Terms</a></li>
-                        <li><a href="privacy.html" class="hover:text-[#ea580c] font-medium">Privacy</a></li>
-                        <li><a href="about.html" class="hover:text-[#ea580c] font-medium">About Us</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
-                        <li><a href="register-landlord.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
-    <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
-    <div class="flex gap-4">
-                    <a href="terms.html" class="hover:text-white">Terms</a>
-                    <a href="privacy.html" class="hover:text-white">Privacy</a>
-                </div>
-            </div>
+        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0"><i class="fas fa-check text-sm"></i></div>
+      </div>
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl flex-shrink-0"><i class="fas fa-eye"></i></div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-slate-900 text-base mb-0.5">Transparency</h3>
+          <p class="text-slate-500 text-sm font-medium">No hidden fees. No surprises. Clear pricing, clear policies, clear communication.</p>
         </div>
-    </footer>
+        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0"><i class="fas fa-check text-sm"></i></div>
+      </div>
+      <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-xl flex-shrink-0"><i class="fas fa-bolt"></i></div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-slate-900 text-base mb-0.5">Speed &amp; Simplicity</h3>
+          <p class="text-slate-500 text-sm font-medium">Finding a home should be fast and simple. We eliminate unnecessary complexity.</p>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0"><i class="fas fa-check text-sm"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script>
-        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        mobileNavToggle.addEventListener('click', () => {
-            const isOpen = mobileMenu.classList.contains('menu-open');
-            mobileMenu.classList.toggle('menu-open', !isOpen);
-            hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
-        });
-    </script>
-    <script>
-    document.getElementById('current-year').textContent = new Date().getFullYear();
+<!-- ===================== CTA ===================== -->
+<section class="bg-white py-14">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-[#0f172a] rounded-3xl p-8 md:p-10 text-center">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-3">Join Our Community</h2>
+      <p class="text-slate-400 text-base md:text-lg font-medium mb-8">Be part of Zambia's fastest-growing student housing platform.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="browse.html" class="bg-[#ea580c] hover:bg-orange-700 text-white font-bold px-8 py-4 rounded-2xl transition-colors text-sm shadow-lg shadow-orange-900/30 flex items-center justify-center gap-2">
+          <i class="fas fa-search"></i> Browse Properties
+        </a>
+        <a href="register.html" class="bg-white/10 hover:bg-white/15 text-white font-bold px-8 py-4 rounded-2xl transition-colors text-sm border border-white/15 flex items-center justify-center gap-2">
+          <i class="fas fa-user-plus"></i> Create Free Account
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="bg-slate-900 text-slate-400 py-14">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+      <div class="col-span-2 md:col-span-1">
+        <div style="display:inline-block;margin-bottom:1rem;background:#f8fafc;border-radius:12px;padding:8px 16px;">
+          <img src="logo.png" alt="FindMyNyumba" style="height:42px;width:auto;object-fit:contain;display:block;">
+        </div>
+        <p class="text-sm font-medium text-slate-400 max-w-xs">Zambia's trusted student housing platform.</p>
+        <div class="flex gap-3 mt-4">
+          <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Quick Links</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="index.html" class="hover:text-[#ea580c] font-medium">Home</a></li>
+          <li><a href="browse.html" class="hover:text-[#ea580c] font-medium">Browse</a></li>
+          <li><a href="how-it-works.html" class="hover:text-[#ea580c] font-medium">How It Works</a></li>
+          <li><a href="login.html" class="hover:text-[#ea580c] font-medium">Login</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Support</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="help.html" class="hover:text-[#ea580c] font-medium">Help Center</a></li>
+          <li><a href="terms.html" class="hover:text-[#ea580c] font-medium">Terms</a></li>
+          <li><a href="privacy.html" class="hover:text-[#ea580c] font-medium">Privacy</a></li>
+          <li><a href="about.html" class="hover:text-[#ea580c] font-medium">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-black text-white text-xs uppercase tracking-wider mb-3">Register</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="register.html" class="hover:text-[#ea580c] font-medium">As Student</a></li>
+          <li><a href="register-landlord.html" class="hover:text-[#ea580c] font-medium">As Landlord</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+      <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
+      <div class="flex gap-4">
+        <a href="terms.html" class="hover:text-white">Terms</a>
+        <a href="privacy.html" class="hover:text-white">Privacy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function initNav() {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
+    if (!token || !role) return;
+    const routes = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html', admin:'admin.html' };
+    ['nav-dashboard-desk','nav-dashboard-mob'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.href = routes[role] || 'browse.html'; el.classList.remove('hidden'); }
+    });
+    ['nav-login-desk','nav-login-mob'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    ['nav-logout-desk','nav-logout-mob'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
+  })();
+  function logout() {
+    ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    window.location.replace('index.html');
+  }
+  const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const hamburgerIcon = document.getElementById('hamburger-icon');
+  mobileNavToggle.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.contains('menu-open');
+    mobileMenu.classList.toggle('menu-open', !isOpen);
+    hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+  });
+  document.getElementById('current-year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
-
-
