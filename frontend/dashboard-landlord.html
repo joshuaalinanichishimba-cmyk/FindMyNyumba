@@ -84,50 +84,46 @@
                       w-64 bg-white border-r border-slate-100 shadow-xl md:shadow-none
                       flex flex-col z-40 md:z-20 h-full top-0 left-0">
 
-            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <img src="logo.png" alt="FindMyNyumba" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Landlord Portal</div>
+            <!-- drawer header -->
+            <div class="bg-gradient-to-br from-[#ea580c] to-[#c2410c] px-5 pt-5 pb-6 shrink-0">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-white font-extrabold text-base">FindMy<span class="text-orange-200">Nyumba</span></span>
+                    <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/80 hover:bg-white/10 transition"><i class="fas fa-times"></i></button>
                 </div>
-                <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
-                    <i class="fas fa-times text-sm"></i>
-                </button>
+                <p class="text-orange-100 text-[10px] font-black uppercase tracking-widest mb-3">Landlord Portal</p>
+                <div class="flex items-center gap-3">
+                    <img id="drawer-avatar" src="https://ui-avatars.com/api/?name=L&background=ffffff&color=ea580c" class="w-12 h-12 rounded-full border-2 border-white/70 object-cover">
+                    <div class="min-w-0">
+                        <p id="drawer-name" class="text-white font-extrabold text-sm truncate">Landlord</p>
+                        <p id="drawer-email" class="text-orange-100 text-[11px] font-medium truncate">landlord@example.com</p>
+                    </div>
+                </div>
             </div>
 
-            <nav class="flex-1 py-3 px-2 overflow-y-auto space-y-0.5">
-                <button id="nav-overview" onclick="switchTab('overview')"
-                    class="nav-link nav-link-active w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-[#ea580c]">
-                    <i class="fas fa-chart-bar w-4 text-center"></i> Overview
-                </button>
-                <button id="nav-properties" onclick="switchTab('properties')"
-                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
-                    <i class="fas fa-building w-4 text-center"></i> My Properties
-                </button>
-                <button id="nav-messages" onclick="switchTab('messages')"
-                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
-                    <i class="fas fa-comments w-4 text-center"></i> Messages
-                    <span id="unread-badge" class="hidden ml-auto bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-full"></span>
-                </button>
-                <button id="nav-profile" onclick="switchTab('profile')"
-                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
-                    <i class="fas fa-user w-4 text-center"></i> Profile
-                </button>
-                <button id="nav-settings" onclick="switchTab('settings')"
-                    class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]">
-                    <i class="fas fa-cog w-4 text-center"></i> Settings
-                </button>
+            <nav class="flex-1 py-4 px-3 overflow-y-auto">
+                <p class="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Main Menu</p>
+                <div class="space-y-1">
+                    <button id="nav-overview" onclick="switchTab('overview')" class="nav-link nav-link-active w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-[#ea580c]"><i class="fas fa-table-columns w-4 text-center"></i> Overview <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
+                    <button id="nav-properties" onclick="switchTab('properties')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-building w-4 text-center"></i> My Properties <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
+                    <button id="nav-messages" onclick="switchTab('messages')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-comments w-4 text-center"></i> Messages <span id="unread-badge" class="hidden ml-auto bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-full"></span><i class="fas fa-chevron-right ml-2 text-xs text-slate-300"></i></button>
+                    <button id="nav-profile" onclick="switchTab('profile')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-user w-4 text-center"></i> Profile <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
+                    <button id="nav-settings" onclick="switchTab('settings')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-cog w-4 text-center"></i> Settings <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
+                </div>
+
+                <p class="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest mt-5 mb-2">More</p>
+                <div class="space-y-1">
+                    <a href="browse.html" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-[#ea580c] font-semibold transition text-sm"><i class="fas fa-search w-4 text-center"></i> Browse Listings</a>
+                    <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-semibold transition text-sm"><i class="fas fa-sign-out-alt w-4 text-center"></i> Logout</button>
+                </div>
+
+                <div class="mt-5 mx-1 bg-[#0f172a] rounded-2xl p-4 relative overflow-hidden">
+                    <i class="fas fa-city absolute -right-3 -bottom-3 text-white/5 text-7xl"></i>
+                    <p class="text-white font-extrabold text-sm mb-1 relative">Grow your real estate business</p>
+                    <p class="text-slate-400 text-[11px] font-medium mb-3 relative leading-snug">List more properties and reach thousands of potential tenants.</p>
+                    <button onclick="switchTab('properties')" class="relative bg-[#ea580c] hover:bg-orange-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition">Learn More</button>
+                </div>
             </nav>
-
-            <div class="px-2 pb-4 border-t border-slate-100 pt-2 shrink-0 space-y-0.5">
-                <a href="browse.html"
-                   class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-orange-50 hover:text-[#ea580c] font-semibold transition text-sm">
-                    <i class="fas fa-search w-4 text-center"></i> Browse Listings
-                </a>
-                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-semibold transition text-sm">
-                    <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
-                </button>
-            </div>
-        </aside>
+                </aside>
 
         <!-- MAIN CONTENT -->
         <main class="flex-1 flex flex-col overflow-hidden">
@@ -146,44 +142,70 @@
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-24 md:pb-8">
 
                 <!-- OVERVIEW -->
                 <div id="overview-section" class="dashboard-section">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                            <div class="stat-icon bg-orange-50 text-[#ea580c]"><i class="fas fa-building"></i></div>
-                            <div>
-                                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-0.5">My Properties</p>
-                                <h3 id="stat-properties" class="text-2xl font-black text-slate-900">
-                                    <i class="fas fa-spinner fa-spin text-slate-300 text-xl"></i>
-                                </h3>
-                            </div>
+                    <!-- welcome banner -->
+                    <div class="rounded-3xl overflow-hidden relative mb-5" style="background:linear-gradient(135deg,#0f172a,#1e293b);">
+                        <div class="absolute inset-y-0 right-0 w-1/2 hidden sm:block">
+                            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs><linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#243244"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs>
+              <rect width="400" height="300" fill="url(#dusk)"/>
+              <circle cx="320" cy="64" r="34" fill="#fb923c" opacity="0.22"/>
+              <circle cx="44" cy="150" r="36" fill="#0b1220"/><circle cx="372" cy="156" r="30" fill="#0b1220"/>
+              <path d="M104 154 L205 86 L306 154 Z" fill="#1b2735"/>
+              <rect x="120" y="152" width="170" height="112" fill="#2a3a4d"/>
+              <rect x="150" y="182" width="34" height="34" fill="#fb923c"/>
+              <rect x="226" y="182" width="34" height="34" fill="#fdba74"/>
+              <rect x="190" y="204" width="32" height="60" fill="#0f172a"/>
+              <rect x="0" y="262" width="400" height="40" fill="#0b1220"/>
+            </svg>
+                            <div class="absolute inset-0" style="background:linear-gradient(90deg,#0f172a 14%,rgba(15,23,42,.35) 64%,transparent);"></div>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                            <div class="stat-icon bg-orange-50 text-[#ea580c]"><i class="fas fa-envelope"></i></div>
-                            <div>
-                                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-0.5">Unread Messages</p>
-                                <h3 id="stat-messages" class="text-2xl font-black text-[#ea580c]">
-                                    <i class="fas fa-spinner fa-spin text-orange-300 text-xl"></i>
-                                </h3>
-                            </div>
-                        </div>
-                        <div class="bg-[#ea580c] p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer hover:bg-orange-700 transition"
-                             onclick="switchTab('properties')">
-                            <div class="stat-icon bg-white/20 text-white"><i class="fas fa-plus"></i></div>
-                            <div>
-                                <p class="text-orange-200 text-xs font-bold uppercase tracking-wider mb-0.5">Quick Action</p>
-                                <h3 class="text-sm font-black text-white">Add New Property</h3>
-                            </div>
+                        <div class="relative p-6">
+                            <p class="text-slate-300 font-semibold text-sm">Welcome back,</p>
+                            <h2 class="text-2xl font-extrabold text-white mt-0.5"><span id="welcome-name">Landlord</span> &#128075;</h2>
+                            <p class="text-slate-400 text-sm font-medium mt-1 max-w-xs">Here's what's happening with your properties today.</p>
+                            <div class="w-12 h-1 bg-[#ea580c] rounded-full mt-3"></div>
                         </div>
                     </div>
 
-                    <h3 class="text-xs font-black mb-3 text-slate-400 uppercase tracking-widest">My Latest Properties</h3>
+                    <!-- stat cards -->
+                    <div class="grid grid-cols-2 gap-4 mb-5">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                            <div class="w-10 h-10 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center mb-3"><i class="fas fa-building"></i></div>
+                            <p class="text-slate-500 text-sm font-bold">My Properties</p>
+                            <h3 id="stat-properties" class="text-3xl font-black text-slate-900 leading-none mt-1"><i class="fas fa-spinner fa-spin text-slate-300 text-xl"></i></h3>
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">Total Properties</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3"><i class="fas fa-envelope"></i></div>
+                            <p class="text-slate-500 text-sm font-bold">Unread Messages</p>
+                            <h3 id="stat-messages" class="text-3xl font-black text-slate-900 leading-none mt-1"><i class="fas fa-spinner fa-spin text-orange-300 text-xl"></i></h3>
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">New Messages</p>
+                        </div>
+                    </div>
+
+                    <!-- quick action -->
+                    <button onclick="switchTab('properties')" class="w-full text-left rounded-2xl p-5 mb-6 flex items-center gap-4 shadow-lg shadow-orange-200 transition hover:opacity-95" style="background:linear-gradient(135deg,#ea580c,#c2410c);">
+                        <span class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center text-xl"><i class="fas fa-plus"></i></span>
+                        <span class="flex-1">
+                            <span class="block text-orange-100 text-[11px] font-bold uppercase tracking-wider">Quick Action</span>
+                            <span class="block text-white font-extrabold text-lg">Add New Property</span>
+                        </span>
+                        <i class="fas fa-arrow-right text-white text-lg"></i>
+                    </button>
+
+                    <!-- latest properties -->
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-extrabold text-slate-900">My Latest Properties</h3>
+                        <button onclick="switchTab('properties')" class="text-xs font-bold text-[#ea580c]">View all</button>
+                    </div>
                     <div id="overview-properties" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
-                <!-- MY PROPERTIES -->
+                                <!-- MY PROPERTIES -->
                 <div id="properties-section" class="dashboard-section hidden">
                     <div id="properties-header" class="flex items-center justify-between mb-5">
                         <h2 class="text-base font-black text-slate-900">My Properties</h2>
@@ -915,6 +937,10 @@ async function initDashboard() {
         set('profile-avatar-display', avatarSrc);
         set('profile-name-display', user.full_name || 'Landlord');
         set('profile-email-display', user.email || '');
+        set('welcome-name', user.full_name || 'Landlord');
+        set('drawer-name', user.full_name || 'Landlord');
+        set('drawer-email', user.email || '');
+        set('drawer-avatar', avatarSrc);
     } catch { /* non-fatal */ }
     loadOverviewStats();
 }
@@ -1633,5 +1659,14 @@ const FMN_LOGO = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1B
     l.rel = 'icon'; l.type = 'image/jpeg'; l.href = FMN_LOGO; document.head.appendChild(l);
 })();
 </script>
+
+<!-- mobile bottom nav -->
+<nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-100 flex items-center justify-around px-2 py-2" style="box-shadow:0 -4px 20px -8px rgba(15,23,42,.15);">
+    <button onclick="switchTab('overview')" class="flex flex-col items-center gap-0.5 text-[#ea580c] px-3"><i class="fas fa-home text-lg"></i><span class="text-[10px] font-bold">Home</span></button>
+    <button onclick="switchTab('properties')" class="flex flex-col items-center gap-0.5 text-slate-400 px-3"><i class="fas fa-building text-lg"></i><span class="text-[10px] font-bold">Properties</span></button>
+    <button onclick="switchTab('properties')" class="w-14 h-14 -mt-6 rounded-full bg-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-300 border-4 border-white"><i class="fas fa-plus text-lg"></i></button>
+    <button onclick="switchTab('messages')" class="flex flex-col items-center gap-0.5 text-slate-400 px-3"><i class="fas fa-comments text-lg"></i><span class="text-[10px] font-bold">Messages</span></button>
+    <button onclick="switchTab('profile')" class="flex flex-col items-center gap-0.5 text-slate-400 px-3"><i class="fas fa-user text-lg"></i><span class="text-[10px] font-bold">Profile</span></button>
+</nav>
 </body>
 </html>
