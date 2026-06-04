@@ -1,815 +1,1207 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - FindMyNyumba</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="logo.png">
-    <style>
-        :root { --orange: #ea580c; --orange-dark: #c2410c; --orange-light: #fff7ed; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-        img { max-width: 100%; height: auto; }
-        input, textarea, select { max-width: 100%; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · FindMyNyumba</title>
 
-        .tab-section { display: none; }
-        .tab-section.active { display: block; }
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="logo.png">
 
-        #sidebar { transition: transform 0.3s ease; }
+<style>
+  :root{
+    --orange:#ea580c; --orange-dark:#c2410c; --orange-light:#fff7ed;
+    --navy:#0f172a; --navy-2:#1e293b; --navy-3:#334155;
+    --green:#16a34a; --bg:#f8fafc;
+  }
+  *{box-sizing:border-box;}
+  html,body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;}
+  body{background:var(--bg);}
+  img{max-width:100%;height:auto;}
+  .tabnum{font-variant-numeric:tabular-nums;}
 
-        .sidebar-link { position: relative; border-left: 3px solid transparent; transition: all 0.15s; }
-        .sidebar-link.active { background: var(--orange-light) !important; color: var(--orange) !important; border-left-color: var(--orange); font-weight: 700; }
-        .sidebar-link:hover:not(.active) { background: #f9fafb; }
+  .tab-section{display:none; animation:fade .35s ease;}
+  .tab-section.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
-        .stat-card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  /* ---- sidebar ---- */
+  #sidebar{transition:transform .3s ease; background:var(--navy);}
+  .sb-group-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#64748b;font-weight:700;}
+  .sb-link{
+    display:flex;align-items:center;gap:11px;padding:9px 14px;border-radius:10px;
+    font-size:13.5px;font-weight:600;color:#cbd5e1;cursor:pointer;
+    transition:all .15s; position:relative;
+  }
+  .sb-link i{width:18px;text-align:center;font-size:14px;color:#94a3b8;transition:color .15s;}
+  .sb-link:hover{background:rgba(255,255,255,.05);color:#fff;}
+  .sb-link:hover i{color:#cbd5e1;}
+  .sb-link.active{background:linear-gradient(90deg,var(--orange),var(--orange-dark));color:#fff;box-shadow:0 6px 18px -6px rgba(234,88,12,.7);}
+  .sb-link.active i{color:#fff;}
+  .sb-soon{margin-left:auto;font-size:8.5px;font-weight:800;letter-spacing:.04em;
+    background:rgba(148,163,184,.18);color:#94a3b8;padding:2px 6px;border-radius:99px;}
+  .sb-link.active .sb-soon{background:rgba(255,255,255,.22);color:#fff;}
 
-        #growth-chart, #analytics-growth-chart { display: flex; align-items: flex-end; gap: 6px; height: 9rem; padding: 0 4px; }
+  /* ---- cards ---- */
+  .card{background:#fff;border:1px solid #eef2f7;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);}
+  .kpi{background:#fff;border:1px solid #eef2f7;border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:transform .18s, box-shadow .18s;}
+  .kpi:hover{transform:translateY(-2px);box-shadow:0 12px 28px -14px rgba(15,23,42,.25);}
+  .ico-box{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;}
 
-        .fmn-input { width:100%; padding:10px 13px; border:1.5px solid #e5e7eb; border-radius:10px; outline:none; font-size:14px; transition:border-color 0.15s; }
-        .fmn-input:focus { border-color:var(--orange); }
+  .pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;letter-spacing:.02em;}
+  .preview-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:6px 12px;border-radius:99px;}
 
-        ::-webkit-scrollbar { width:5px; }
-        ::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:10px; }
+  .fmn-input{width:100%;padding:9px 13px;border:1.5px solid #e5e7eb;border-radius:11px;outline:none;font-size:13.5px;transition:border-color .15s, box-shadow .15s;background:#fff;}
+  .fmn-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(234,88,12,.12);}
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spin { animation: spin 0.8s linear infinite; }
-    </style>
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:700;border-radius:11px;cursor:pointer;transition:all .15s;border:none;font-size:13px;}
+  .btn-pri{background:var(--orange);color:#fff;padding:9px 16px;}
+  .btn-pri:hover{background:var(--orange-dark);}
+  .btn-ghost{background:#fff;color:#334155;border:1.5px solid #e5e7eb;padding:9px 16px;}
+  .btn-ghost:hover{background:#f8fafc;border-color:#cbd5e1;}
+
+  .data-th{padding:11px 18px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;text-align:left;background:#fafbfc;}
+  .data-td{padding:13px 18px;font-size:13.5px;border-bottom:1px solid #f1f5f9;}
+
+  ::-webkit-scrollbar{width:7px;height:7px;}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .spin{animation:spin .8s linear infinite;}
+
+  .skeleton{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 37%,#f1f5f9 63%);background-size:400% 100%;animation:sk 1.3s ease infinite;border-radius:8px;}
+  @keyframes sk{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+</style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen text-slate-800">
 
 <!--
-  JWT auto-attach interceptor.
-
-  FIX: original read sessionStorage.adminToken only. login.html stores under
-  localStorage.token / sessionStorage.token, so admins coming through the
-  unified login were silently unauthenticated. We now look in both places.
+  JWT auto-attach interceptor (unchanged from working version).
+  Reads token from sessionStorage.adminToken, localStorage.token, or
+  sessionStorage.token so admins arriving via the unified login are authed.
 -->
 <script>
 (function () {
-    const _fetch = window.fetch;
-    window.fetch = function (resource, config) {
-        if (typeof resource === 'string' && resource.includes('/api/v1/')) {
-            config = config || {};
-            config.headers = config.headers || {};
-            const hasAuth = config.headers['Authorization'] || config.headers['authorization'];
-            if (!hasAuth) {
-                const token =
-                    sessionStorage.getItem('adminToken') ||
-                    localStorage.getItem('token') ||
-                    sessionStorage.getItem('token');
-                if (token) config.headers['Authorization'] = 'Bearer ' + token;
-            }
-        }
-        return _fetch(resource, config);
-    };
+  const _fetch = window.fetch;
+  window.fetch = function (resource, config) {
+    if (typeof resource === 'string' && resource.includes('/api/v1/')) {
+      config = config || {};
+      config.headers = config.headers || {};
+      const hasAuth = config.headers['Authorization'] || config.headers['authorization'];
+      if (!hasAuth) {
+        const token =
+          sessionStorage.getItem('adminToken') ||
+          localStorage.getItem('token') ||
+          sessionStorage.getItem('token');
+        if (token) config.headers['Authorization'] = 'Bearer ' + token;
+      }
+    }
+    return _fetch(resource, config);
+  };
 })();
 </script>
 
-<div id="overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden" onclick="closeSidebar()"></div>
+<div id="overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden lg:hidden" onclick="closeSidebar()"></div>
 
 <div class="flex h-screen overflow-hidden">
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-100 shadow-sm flex flex-col -translate-x-full lg:translate-x-0">
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside id="sidebar"
+    class="fixed lg:static inset-y-0 left-0 z-40 w-[260px] flex flex-col -translate-x-full lg:translate-x-0">
 
-        <div class="px-5 py-5 border-b border-slate-100 flex items-center gap-3">
-            <img src="logo.png" alt="FindMyNyumba" class="h-9 w-auto object-contain"
-                 onerror="this.style.display='none'">
+    <!-- brand -->
+    <div class="px-5 h-[68px] flex items-center gap-3 border-b border-white/5 flex-shrink-0">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-orange-900/40">N</div>
+      <div class="leading-tight">
+        <div class="text-white font-extrabold text-[15px]">FindMyNyumba</div>
+        <div class="text-[10px] text-slate-400 font-semibold tracking-wide">ADMIN CONSOLE</div>
+      </div>
+    </div>
+
+    <!-- nav -->
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+
+      <div class="space-y-1">
+        <div class="sb-link active" id="nav-dashboard" onclick="showTab('dashboard')"><i class="fas fa-gauge-high"></i>Dashboard</div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="sb-group-label px-3 mb-2">Management</div>
+        <div class="sb-link" id="nav-users" onclick="showTab('users')"><i class="fas fa-users"></i>Users</div>
+        <div class="sb-link" id="nav-listings" onclick="showTab('listings')"><i class="fas fa-building"></i>Listings</div>
+        <div class="sb-link" id="nav-institutions" onclick="showTab('institutions')"><i class="fas fa-graduation-cap"></i>Institutions<span class="sb-soon">SOON</span></div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="sb-group-label px-3 mb-2">Trust &amp; Safety</div>
+        <div class="sb-link" id="nav-verifications" onclick="showTab('verifications')"><i class="fas fa-user-shield"></i>Verification Queue</div>
+        <div class="sb-link" id="nav-trust" onclick="showTab('trust')"><i class="fas fa-flag"></i>Reports &amp; Complaints</div>
+        <div class="sb-link" id="nav-fraud" onclick="showTab('fraud')"><i class="fas fa-shield-halved"></i>Fraud Center<span class="sb-soon">SOON</span></div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="sb-group-label px-3 mb-2">Financial</div>
+        <div class="sb-link" id="nav-revenue" onclick="showTab('revenue')"><i class="fas fa-coins"></i>Revenue<span class="sb-soon">SOON</span></div>
+        <div class="sb-link" id="nav-escrow" onclick="showTab('escrow')"><i class="fas fa-vault"></i>Escrow<span class="sb-soon">SOON</span></div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="sb-group-label px-3 mb-2">Analytics</div>
+        <div class="sb-link" id="nav-analytics" onclick="showTab('analytics')"><i class="fas fa-chart-line"></i>Growth &amp; Demand</div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="sb-group-label px-3 mb-2">System</div>
+        <div class="sb-link" id="nav-announcements" onclick="showTab('announcements')"><i class="fas fa-bullhorn"></i>Announcements</div>
+        <div class="sb-link" id="nav-support" onclick="showTab('support')"><i class="fas fa-headset"></i>Support<span class="sb-soon">SOON</span></div>
+        <div class="sb-link" id="nav-system" onclick="showTab('system')"><i class="fas fa-heart-pulse"></i>System Health</div>
+        <div class="sb-link" id="nav-settings" onclick="showTab('settings')"><i class="fas fa-gear"></i>Settings</div>
+      </div>
+    </nav>
+
+    <!-- footer / logout -->
+    <div class="px-3 py-3 border-t border-white/5 flex-shrink-0">
+      <div class="sb-link" onclick="logout()"><i class="fas fa-right-from-bracket"></i>Sign out</div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- TOPBAR -->
+    <header class="h-[68px] bg-white border-b border-slate-100 flex items-center gap-3 px-4 sm:px-6 flex-shrink-0 z-20">
+      <button class="lg:hidden w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-600" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+      <div class="hidden sm:block">
+        <h1 id="page-title" class="text-[19px] font-extrabold text-slate-900 leading-none">Dashboard</h1>
+        <p id="page-sub" class="text-[12px] text-slate-400 font-medium mt-1">Welcome back — here's what's happening today</p>
+      </div>
+
+      <div class="flex-1 max-w-md mx-auto hidden md:block">
+        <div class="relative">
+          <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
+          <input id="global-search" class="fmn-input pl-10" placeholder="Search users, listings, reports…"
+                 oninput="globalSearch(this.value)">
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 ml-auto">
+        <button class="relative w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-500" onclick="showTab('trust')" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span id="notif-dot" class="hidden absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full ring-2 ring-white"></span>
+        </button>
+
+        <div class="relative">
+          <button onclick="toggleProfileMenu()" class="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-100 transition">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center font-bold text-sm shadow-sm" id="admin-avatar">A</div>
+            <div class="text-left hidden sm:block leading-tight">
+              <div id="admin-name-display" class="text-[13px] font-bold text-slate-800">Admin</div>
+              <div class="text-[10px] text-slate-400 font-semibold">Super Admin</div>
+            </div>
+            <i class="fas fa-chevron-down text-[10px] text-slate-400 hidden sm:block"></i>
+          </button>
+          <div id="profile-menu" class="hidden absolute right-0 mt-2 w-52 card p-1.5 z-50">
+            <button onclick="showTab('settings');toggleProfileMenu()" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-semibold text-slate-700 flex items-center gap-3"><i class="fas fa-gear text-slate-400 w-4"></i>Settings</button>
+            <button onclick="showChangePassword();toggleProfileMenu()" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-50 text-sm font-semibold text-slate-700 flex items-center gap-3"><i class="fas fa-key text-slate-400 w-4"></i>Change password</button>
+            <div class="h-px bg-slate-100 my-1"></div>
+            <button onclick="logout()" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-red-50 text-sm font-semibold text-red-600 flex items-center gap-3"><i class="fas fa-right-from-bracket w-4"></i>Sign out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SCROLL AREA -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6">
+      <!-- ============================================================
+           DASHBOARD OVERVIEW
+      ============================================================= -->
+      <section id="tab-dashboard" class="tab-section active">
+        <!-- KPI GRID -->
+        <div id="kpi-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5"></div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-5">
+          <!-- growth chart -->
+          <div class="card p-5 xl:col-span-2">
+            <div class="flex items-center justify-between mb-1">
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-[15px]">Platform Growth</h3>
+                <p class="text-[12px] text-slate-400 font-medium">New users vs new listings, last 6 months</p>
+              </div>
+              <div class="flex items-center gap-3 text-[11px] font-bold">
+                <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-sm bg-orange-500"></span>Users</span>
+                <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-sm bg-slate-300"></span>Listings</span>
+              </div>
+            </div>
+            <div class="h-[230px] mt-3"><canvas id="growthChart"></canvas></div>
+          </div>
+
+          <!-- listings by status donut -->
+          <div class="card p-5">
+            <h3 class="font-extrabold text-slate-900 text-[15px]">Listings by Status</h3>
+            <p class="text-[12px] text-slate-400 font-medium">Live breakdown</p>
+            <div class="h-[180px] mt-3 relative"><canvas id="statusChart"></canvas></div>
+            <div id="status-legend" class="grid grid-cols-3 gap-2 mt-3 text-center"></div>
+          </div>
         </div>
 
-        <div class="px-5 py-2.5 border-b border-slate-50">
-            <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#ea580c] uppercase tracking-widest bg-orange-50 px-2.5 py-1 rounded-full">
-                <i class="fas fa-shield-alt text-[9px]"></i> Admin Panel
-            </span>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <!-- recent listings -->
+          <div class="card xl:col-span-2 overflow-hidden">
+            <div class="px-5 py-4 flex items-center justify-between border-b border-slate-100">
+              <h3 class="font-extrabold text-slate-900 text-[15px]">Recent Listings</h3>
+              <button onclick="showTab('listings')" class="text-[12px] font-bold text-orange-600 hover:text-orange-700">View all →</button>
+            </div>
+            <div id="recent-listings" class="divide-y divide-slate-50"></div>
+          </div>
+
+          <!-- quick actions -->
+          <div class="card p-5">
+            <h3 class="font-extrabold text-slate-900 text-[15px] mb-4">Quick Actions</h3>
+            <div class="space-y-2">
+              <button onclick="showTab('verifications')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
+                <span class="ico-box bg-orange-50 text-orange-600 group-hover:bg-orange-100"><i class="fas fa-user-shield"></i></span>
+                <span><span class="block text-[13.5px] font-bold text-slate-800">Verification Queue</span><span class="block text-[11px] text-slate-400" id="qa-verif">— pending</span></span>
+              </button>
+              <button onclick="showTab('listings')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
+                <span class="ico-box bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100"><i class="fas fa-circle-check"></i></span>
+                <span><span class="block text-[13.5px] font-bold text-slate-800">Approve Listings</span><span class="block text-[11px] text-slate-400" id="qa-listings">— pending</span></span>
+              </button>
+              <button onclick="showTab('trust')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
+                <span class="ico-box bg-red-50 text-red-600 group-hover:bg-red-100"><i class="fas fa-flag"></i></span>
+                <span><span class="block text-[13.5px] font-bold text-slate-800">Review Reports</span><span class="block text-[11px] text-slate-400" id="qa-reports">— open</span></span>
+              </button>
+              <button onclick="showTab('announcements')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
+                <span class="ico-box bg-blue-50 text-blue-600 group-hover:bg-blue-100"><i class="fas fa-bullhorn"></i></span>
+                <span><span class="block text-[13.5px] font-bold text-slate-800">Send Announcement</span><span class="block text-[11px] text-slate-400">Broadcast to users</span></span>
+              </button>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <nav class="flex flex-col flex-1 overflow-y-auto py-2 px-3 gap-0.5">
-            <a id="nav-dashboard"     class="sidebar-link active flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('dashboard')"><i class="fas fa-chart-pie w-5 text-center"></i> Dashboard</a>
-            <a id="nav-users"         class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('users')"><i class="fas fa-users w-5 text-center"></i> Users</a>
-            <a id="nav-listings"      class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('listings')"><i class="fas fa-building w-5 text-center"></i> Listings</a>
-            <a id="nav-verifications" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('verifications')"><i class="fas fa-shield-alt w-5 text-center"></i> Verifications</a>
-            <a id="nav-reports"       class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('reports')"><i class="fas fa-flag w-5 text-center"></i> Reports</a>
-            <a id="nav-analytics"     class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('analytics')"><i class="fas fa-chart-bar w-5 text-center"></i> Analytics</a>
-            <a id="nav-announcements" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('announcements')"><i class="fas fa-bullhorn w-5 text-center"></i> Announcements</a>
-            <a id="nav-settings"      class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 font-semibold hover:bg-orange-50 hover:text-[#ea580c] transition cursor-pointer text-sm" onclick="showTab('settings')"><i class="fas fa-cog w-5 text-center"></i> Settings</a>
-        </nav>
-
-        <div class="p-3 border-t border-slate-100 space-y-1">
-            <button onclick="showChangePassword()"
-                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50 font-semibold transition text-sm">
-                <i class="fas fa-key w-5 text-center"></i> Change Password
-            </button>
-            <button onclick="logout()"
-                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-semibold transition text-sm">
-                <i class="fas fa-sign-out-alt w-5 text-center"></i> Logout
-            </button>
+      <!-- ============================================================
+           USERS
+      ============================================================= -->
+      <section id="tab-users" class="tab-section">
+        <div class="card overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
+            <div class="mr-auto">
+              <h3 class="font-extrabold text-slate-900 text-[15px]">Users <span id="user-count-badge" class="ml-1 text-[12px] font-semibold text-slate-400"></span></h3>
+              <p class="text-[12px] text-slate-400 font-medium">Students, landlords &amp; staff</p>
+            </div>
+            <select id="user-role-filter" class="fmn-input w-auto" onchange="renderUsers()">
+              <option value="">All roles</option>
+              <option value="student">Students</option>
+              <option value="landlord">Landlords</option>
+              <option value="student_host">Student hosts</option>
+              <option value="admin">Admins</option>
+            </select>
+            <div class="relative">
+              <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+              <input id="user-search" class="fmn-input pl-9 w-44" placeholder="Search…" oninput="renderUsers()">
+            </div>
+            <button class="btn btn-ghost" onclick="exportCSV('users')"><i class="fas fa-file-csv"></i>Export</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full"><thead><tr>
+              <th class="data-th">Name</th><th class="data-th hidden md:table-cell">Email</th>
+              <th class="data-th">Role</th><th class="data-th hidden sm:table-cell">Status</th><th class="data-th">Action</th>
+            </tr></thead><tbody id="users-table"></tbody></table>
+          </div>
         </div>
-    </aside>
+      </section>
 
-    <!-- MAIN -->
-    <main class="flex-1 overflow-y-auto flex flex-col">
-
-        <header class="bg-white border-b border-slate-100 px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition">
-                    <i class="fas fa-bars text-slate-600"></i>
-                </button>
-                <h1 id="page-title" class="text-base font-black text-slate-900 uppercase tracking-wide">Dashboard</h1>
+      <!-- ============================================================
+           LISTINGS
+      ============================================================= -->
+      <section id="tab-listings" class="tab-section">
+        <div class="card overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
+            <div class="mr-auto">
+              <h3 class="font-extrabold text-slate-900 text-[15px]">Listings <span id="listing-count-badge" class="ml-1 text-[12px] font-semibold text-slate-400"></span></h3>
+              <p class="text-[12px] text-slate-400 font-medium">Manage every property on the platform</p>
             </div>
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 bg-[#ea580c] rounded-xl flex items-center justify-center text-white text-sm font-black">A</div>
-                <div class="hidden sm:block">
-                    <p id="admin-name-display" class="text-sm font-bold text-slate-800 leading-tight">Admin</p>
-                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Administrator</p>
-                </div>
+            <select id="listing-status-filter" class="fmn-input w-auto" onchange="renderListings()">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <div class="relative">
+              <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+              <input id="listing-search" class="fmn-input pl-9 w-44" placeholder="Search…" oninput="renderListings()">
             </div>
-        </header>
-
-        <div class="p-4 md:p-8 flex-1">
-
-            <!-- DASHBOARD TAB -->
-            <div id="tab-dashboard" class="tab-section active">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
-                    <div class="stat-card border-t-4 border-t-[#ea580c]">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Total Users</div>
-                        <div id="stat-users" class="text-3xl font-black text-slate-900">&mdash;Â</div>
-                    </div>
-                    <div class="stat-card border-t-4 border-t-blue-500">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Listings</div>
-                        <div id="stat-listings" class="text-3xl font-black text-slate-900">&mdash;Â</div>
-                    </div>
-                    <div class="stat-card border-t-4 border-t-green-500">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Messages</div>
-                        <div id="stat-messages" class="text-3xl font-black text-slate-900">&mdash;Â</div>
-                    </div>
-                    <div class="stat-card border-t-4 border-t-orange-400">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Pending Reviews</div>
-                        <div id="stat-reports" class="text-3xl font-black text-[#ea580c]">&mdash;Â</div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-                    <h3 class="font-black text-slate-900 mb-0.5">Platform Growth</h3>
-                    <p class="text-xs text-slate-400 mb-4">Users and listings over the past 6 months</p>
-                    <div class="flex items-center gap-4 mb-3">
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-[#ea580c] rounded inline-block"></span>Users</span>
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-slate-300 rounded inline-block"></span>Listings</span>
-                    </div>
-                    <div id="growth-chart"></div>
-                </div>
-            </div>
-
-            <!-- USERS TAB -->
-            <div id="tab-users" class="tab-section">
-                <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                        <h3 class="font-black text-slate-900">All Users</h3>
-                        <span id="user-count-badge" class="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full">Loading...</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" style="min-width:560px">
-                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide border-b border-slate-100">
-                                <tr>
-                                    <th class="text-left px-5 py-3 font-bold">Name</th>
-                                    <th class="text-left px-5 py-3 font-bold hidden md:table-cell">Email</th>
-                                    <th class="text-left px-5 py-3 font-bold">Role</th>
-                                    <th class="text-left px-5 py-3 font-bold hidden sm:table-cell">Status</th>
-                                    <th class="text-left px-5 py-3 font-bold">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-table" class="divide-y divide-slate-50">
-                                <tr><td colspan="5" class="text-center py-10 text-slate-400">Loading...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- LISTINGS TAB -->
-            <div id="tab-listings" class="tab-section">
-                <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-                    <div class="p-5 border-b border-slate-100">
-                        <h3 class="font-black text-slate-900">All Listings</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" style="min-width:520px">
-                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide border-b border-slate-100">
-                                <tr>
-                                    <th class="text-left px-5 py-3 font-bold">Title</th>
-                                    <th class="text-left px-5 py-3 font-bold hidden md:table-cell">Location</th>
-                                    <th class="text-left px-5 py-3 font-bold">Status</th>
-                                    <th class="text-left px-5 py-3 font-bold">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="listings-table" class="divide-y divide-slate-50">
-                                <tr><td colspan="4" class="text-center py-10 text-slate-400">Loading...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VERIFICATIONS TAB -->
-            <div id="tab-verifications" class="tab-section">
-                <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-                    <div class="p-5 border-b border-slate-100">
-                        <h3 class="font-black text-slate-900">Verification Queue</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Landlords and student hosts awaiting identity verification.</p>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" style="min-width:580px">
-                            <thead class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wide border-b border-slate-100">
-                                <tr>
-                                    <th class="text-left px-5 py-3 font-bold">User</th>
-                                    <th class="text-left px-5 py-3 font-bold">Role</th>
-                                    <th class="text-left px-5 py-3 font-bold hidden md:table-cell">Documents</th>
-                                    <th class="text-left px-5 py-3 font-bold">Status</th>
-                                    <th class="text-left px-5 py-3 font-bold">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="verify-table-body" class="divide-y divide-slate-50">
-                                <tr><td colspan="5" class="text-center py-10 text-slate-400">Loading...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- REPORTS TAB -->
-            <div id="tab-reports" class="tab-section">
-                <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-                    <div class="p-5 border-b border-slate-100">
-                        <h3 class="font-black text-slate-900">Reported Listings</h3>
-                    </div>
-                    <div id="reports-list" class="divide-y divide-slate-100">
-                        <div class="text-center py-10 text-slate-400">Loading...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ANALYTICS TAB -->
-            <div id="tab-analytics" class="tab-section">
-                <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-                    <h3 class="font-black text-slate-900 mb-0.5">Growth Analytics</h3>
-                    <p class="text-xs text-slate-400 mb-4">Platform growth over the past 6 months</p>
-                    <div class="flex items-center gap-4 mb-3">
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-[#ea580c] rounded inline-block"></span>Users</span>
-                        <span class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold"><span class="w-3 h-3 bg-slate-300 rounded inline-block"></span>Listings</span>
-                    </div>
-                    <div id="analytics-growth-chart"></div>
-                </div>
-            </div>
-
-            <!-- ANNOUNCEMENTS TAB -->
-            <div id="tab-announcements" class="tab-section">
-                <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-2xl">
-                    <h3 class="font-black text-slate-900 mb-5">Broadcast Announcement</h3>
-                    <div id="announce-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100 flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i> Announcement sent successfully!
-                    </div>
-                    <div id="announce-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100"></div>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Title</label>
-                            <input type="text" id="announce-title" placeholder="e.g. Scheduled maintenance on Sunday" class="fmn-input">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Message</label>
-                            <textarea id="announce-body" rows="4" placeholder="Message to broadcast to users..." class="fmn-input resize-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Target Audience</label>
-                            <select id="announce-target" class="fmn-input">
-                                <option value="all">All Users</option>
-                                <option value="student">Students Only</option>
-                                <option value="landlord">Landlords Only</option>
-                                <option value="student_host">Student Hosts Only</option>
-                            </select>
-                        </div>
-                        <button onclick="sendAnnouncement()" class="bg-[#ea580c] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#c2410c] transition text-sm">
-                            <i class="fas fa-bullhorn mr-2"></i>Send Announcement
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SETTINGS TAB -->
-            <div id="tab-settings" class="tab-section">
-                <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm max-w-2xl">
-                    <h3 class="font-black text-slate-900 mb-5">Platform Settings</h3>
-                    <div id="settings-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-sm font-semibold rounded-xl border border-green-100 flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i> Settings saved successfully.
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Platform Name</label>
-                            <input type="text" id="setting-name" value="FindMyNyumba" class="fmn-input">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Support Email</label>
-                            <input type="email" id="setting-email" placeholder="support@findmynyumba.com" class="fmn-input">
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <div>
-                                <div class="font-bold text-sm text-slate-800">Require Listing Approval</div>
-                                <div class="text-xs text-slate-400 mt-0.5">New listings must be reviewed before going live</div>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="setting-approval" checked class="sr-only peer">
-                                <div class="w-10 h-5 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#ea580c]"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <div>
-                                <div class="font-bold text-sm text-slate-800">Maintenance Mode</div>
-                                <div class="text-xs text-slate-400 mt-0.5">Show maintenance notice to all users</div>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="setting-maintenance" class="sr-only peer">
-                                <div class="w-10 h-5 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#ea580c]"></div>
-                            </label>
-                        </div>
-                        <button onclick="saveSettings()" class="bg-[#ea580c] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#c2410c] transition text-sm">
-                            Save Settings
-                        </button>
-                    </div>
-                </div>
-            </div>
-
+            <button class="btn btn-ghost" onclick="exportCSV('listings')"><i class="fas fa-file-csv"></i>Export</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full"><thead><tr>
+              <th class="data-th">Title</th><th class="data-th hidden md:table-cell">Location</th>
+              <th class="data-th hidden lg:table-cell">Price</th><th class="data-th">Status</th><th class="data-th">Actions</th>
+            </tr></thead><tbody id="listings-table"></tbody></table>
+          </div>
         </div>
+      </section>
+
+      <!-- ============================================================
+           VERIFICATION QUEUE
+      ============================================================= -->
+      <section id="tab-verifications" class="tab-section">
+        <div class="card overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100">
+            <h3 class="font-extrabold text-slate-900 text-[15px]">Verification Queue</h3>
+            <p class="text-[12px] text-slate-400 font-medium">Review submitted documents and approve or reject identity / property verification</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full"><thead><tr>
+              <th class="data-th">Applicant</th><th class="data-th">Type</th>
+              <th class="data-th hidden md:table-cell">Documents</th><th class="data-th">Status</th><th class="data-th">Action</th>
+            </tr></thead><tbody id="verify-table-body"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TRUST & SAFETY — Reports & Complaints (LIVE)
+      ============================================================= -->
+      <section id="tab-trust" class="tab-section">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5" id="trust-kpis"></div>
+        <div class="card overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="font-extrabold text-slate-900 text-[15px]">Reports &amp; Complaints</h3>
+              <p class="text-[12px] text-slate-400 font-medium">User-submitted reports against listings</p>
+            </div>
+            <button class="btn btn-ghost" onclick="loadReports()"><i class="fas fa-rotate"></i>Refresh</button>
+          </div>
+          <div id="reports-list" class="divide-y divide-slate-50"></div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           FRAUD CENTER (PREVIEW)
+      ============================================================= -->
+      <section id="tab-fraud" class="tab-section"></section>
+
+      <!-- ============================================================
+           REVENUE (PREVIEW)
+      ============================================================= -->
+      <section id="tab-revenue" class="tab-section"></section>
+
+      <!-- ============================================================
+           ESCROW (PREVIEW)
+      ============================================================= -->
+      <section id="tab-escrow" class="tab-section"></section>
+
+      <!-- ============================================================
+           INSTITUTIONS (PREVIEW)
+      ============================================================= -->
+      <section id="tab-institutions" class="tab-section"></section>
+
+      <!-- ============================================================
+           SUPPORT (PREVIEW)
+      ============================================================= -->
+      <section id="tab-support" class="tab-section"></section>
+
+      <!-- ============================================================
+           ANALYTICS — Growth (LIVE) + Demand (PREVIEW)
+      ============================================================= -->
+      <section id="tab-analytics" class="tab-section">
+        <div class="card p-5 mb-5">
+          <h3 class="font-extrabold text-slate-900 text-[15px]">Growth Analytics</h3>
+          <p class="text-[12px] text-slate-400 font-medium">New users and listings over time</p>
+          <div class="h-[280px] mt-4"><canvas id="analyticsChart"></canvas></div>
+        </div>
+        <div id="demand-preview"></div>
+      </section>
+
+      <!-- ============================================================
+           ANNOUNCEMENTS (LIVE)
+      ============================================================= -->
+      <section id="tab-announcements" class="tab-section">
+        <div class="max-w-2xl">
+          <div class="card p-6">
+            <h3 class="font-extrabold text-slate-900 text-[15px] mb-1">Broadcast Announcement</h3>
+            <p class="text-[12px] text-slate-400 font-medium mb-5">Send a notification to a group of users.</p>
+
+            <div id="announce-error" class="hidden mb-4 text-sm font-semibold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3"></div>
+            <div id="announce-success" class="hidden mb-4 text-sm font-semibold text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3"><i class="fas fa-check-circle mr-1.5"></i>Announcement sent successfully.</div>
+
+            <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Audience</label>
+            <select id="announce-target" class="fmn-input mb-4">
+              <option value="all">All users</option>
+              <option value="student">Students only</option>
+              <option value="landlord">Landlords only</option>
+            </select>
+            <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Title</label>
+            <input id="announce-title" class="fmn-input mb-4" placeholder="e.g. New verification requirements">
+            <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Message</label>
+            <textarea id="announce-body" rows="5" class="fmn-input mb-5" placeholder="Write your announcement…"></textarea>
+            <button class="btn btn-pri" onclick="sendAnnouncement()"><i class="fas fa-paper-plane"></i>Send announcement</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SYSTEM HEALTH (semi-live: pings API)
+      ============================================================= -->
+      <section id="tab-system" class="tab-section">
+        <div class="card overflow-hidden max-w-3xl">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="font-extrabold text-slate-900 text-[15px]">System Health</h3>
+              <p class="text-[12px] text-slate-400 font-medium">Live service status</p>
+            </div>
+            <button class="btn btn-ghost" onclick="loadSystemHealth()"><i class="fas fa-rotate"></i>Re-check</button>
+          </div>
+          <div id="system-list" class="divide-y divide-slate-50"></div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SETTINGS (LIVE)
+      ============================================================= -->
+      <section id="tab-settings" class="tab-section">
+        <div class="max-w-2xl">
+          <div class="card p-6">
+            <h3 class="font-extrabold text-slate-900 text-[15px] mb-1">Platform Settings</h3>
+            <p class="text-[12px] text-slate-400 font-medium mb-5">Global configuration for FindMyNyumba.</p>
+            <div id="settings-success" class="hidden mb-4 text-sm font-semibold text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3"><i class="fas fa-check-circle mr-1.5"></i>Settings saved.</div>
+
+            <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Platform name</label>
+            <input id="setting-name" class="fmn-input mb-4" value="FindMyNyumba">
+            <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Support email</label>
+            <input id="setting-email" class="fmn-input mb-5" placeholder="support@findmynyumba.com">
+
+            <label class="flex items-center justify-between p-4 rounded-xl border border-slate-100 mb-3 cursor-pointer hover:bg-slate-50">
+              <span><span class="block text-[13.5px] font-bold text-slate-800">Require listing approval</span><span class="block text-[11px] text-slate-400">New listings need admin review before going live</span></span>
+              <input type="checkbox" id="setting-approval" class="w-5 h-5 accent-orange-600">
+            </label>
+            <label class="flex items-center justify-between p-4 rounded-xl border border-slate-100 mb-5 cursor-pointer hover:bg-slate-50">
+              <span><span class="block text-[13.5px] font-bold text-slate-800">Maintenance mode</span><span class="block text-[11px] text-slate-400">Temporarily take the platform offline for users</span></span>
+              <input type="checkbox" id="setting-maintenance" class="w-5 h-5 accent-orange-600">
+            </label>
+            <button class="btn btn-pri" onclick="saveSettings()"><i class="fas fa-floppy-disk"></i>Save settings</button>
+          </div>
+
+          <div class="card p-6 mt-4">
+            <h3 class="font-extrabold text-slate-900 text-[15px] mb-1">Security</h3>
+            <p class="text-[12px] text-slate-400 font-medium mb-4">Update your admin password.</p>
+            <button class="btn btn-ghost" onclick="showChangePassword()"><i class="fas fa-key"></i>Change password</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== MODALS ===================== -->
+      <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+        <div class="card w-full max-w-md p-6">
+          <h3 id="modal-title" class="font-extrabold text-slate-900 text-lg mb-2"></h3>
+          <p id="modal-body" class="text-sm text-slate-500 mb-6"></p>
+          <div class="flex gap-3 justify-end">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button id="modal-confirm-btn" class="btn btn-pri">Confirm</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="change-pwd-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+        <div class="card w-full max-w-md p-6">
+          <h3 class="font-extrabold text-slate-900 text-lg mb-4">Change Password</h3>
+          <div id="cpwd-error" class="hidden mb-3 text-sm font-semibold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3"></div>
+          <div id="cpwd-success" class="hidden mb-3 text-sm font-semibold text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3"><i class="fas fa-check-circle mr-1.5"></i>Password updated.</div>
+          <input type="password" id="cpwd-old" class="fmn-input mb-3" placeholder="Current password">
+          <input type="password" id="cpwd-new" class="fmn-input mb-3" placeholder="New password">
+          <input type="password" id="cpwd-confirm" class="fmn-input mb-5" placeholder="Confirm new password">
+          <div class="flex gap-3 justify-end">
+            <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
+            <button id="cpwd-btn" class="btn btn-pri" onclick="submitChangePassword()">Update</button>
+          </div>
+        </div>
+      </div>
     </main>
-</div>
-
-<!-- Confirm Modal -->
-<div id="confirm-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-        <h3 id="modal-title" class="font-black text-slate-900 mb-2 text-base">Confirm Action</h3>
-        <p id="modal-body" class="text-sm text-slate-500 mb-6">Are you sure you want to proceed?</p>
-        <div class="flex gap-3">
-            <button onclick="closeModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 hover:bg-slate-50 transition">Cancel</button>
-            <button id="modal-confirm-btn" class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-black hover:bg-red-700 transition">Confirm</button>
-        </div>
-    </div>
-</div>
-
-<!-- Change Password Modal -->
-<div id="change-pwd-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="font-black text-slate-900 text-base">Change Password</h3>
-            <button onclick="closeChangePassword()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100">
-                <i class="fas fa-times text-sm"></i>
-            </button>
-        </div>
-        <p class="text-xs text-slate-400 mb-5">Minimum 8 characters with uppercase, lowercase, number &amp; symbol.</p>
-        <div id="cpwd-error"   class="hidden mb-4 p-3 bg-red-50 text-red-600 text-xs font-semibold rounded-xl border border-red-100"></div>
-        <div id="cpwd-success" class="hidden mb-4 p-3 bg-green-50 text-green-700 text-xs font-semibold rounded-xl border border-green-100 flex items-center gap-2"><i class="fas fa-check-circle"></i> Password changed successfully.</div>
-        <div class="space-y-3 mb-5">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Current Password</label>
-                <input id="cpwd-old" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="fmn-input">
-            </div>
-            <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">New Password</label>
-                <input id="cpwd-new" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="fmn-input">
-            </div>
-            <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Confirm New Password</label>
-                <input id="cpwd-confirm" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" class="fmn-input">
-            </div>
-        </div>
-        <div class="flex gap-3">
-            <button onclick="closeChangePassword()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-700 hover:bg-slate-50 transition">Cancel</button>
-            <button onclick="submitChangePassword()" id="cpwd-btn" class="flex-1 px-4 py-2.5 rounded-xl bg-[#ea580c] text-white text-sm font-black hover:bg-[#c2410c] transition">Update</button>
-        </div>
-    </div>
+  </div>
 </div>
 
 <script>
 'use strict';
 
-/* FindMyNyumba runtime config &mdash;Â auto-detects backend host */
+/* ---------- runtime config: auto-detect backend host ---------- */
 const FMN = (function () {
-    const host = window.location.hostname;
-    const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
-    const API_HOST = isLocal
-        ? 'http://127.0.0.1:8000'
-        : 'https://findmynyumba.onrender.com';
-    return { API_HOST, API_BASE: API_HOST + '/api/v1' };
+  const host = window.location.hostname;
+  const isLocal = (host === 'localhost' || host === '127.0.0.1' || host === '');
+  const API_HOST = isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com';
+  return { API_HOST, API_BASE: API_HOST + '/api/v1' };
 })();
 const API = FMN.API_BASE;
 
 let modalCallback = null;
+let _users = [];        // cache of loaded users (for filter + export + KPIs)
+let _listings = [];     // cache of loaded listings
+let _reportsCount = 0;
+const charts = {};      // Chart.js instances by id
 
-function esc(str) {
-    if (str === null || str === undefined) return '&mdash;Â';
-    return String(str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+function esc(str){
+  if (str === null || str === undefined) return '—';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtK(n){ // kwacha-style currency, no fabricated values — only used where a real number is passed
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return 'K' + Number(n).toLocaleString();
 }
 
-/*
-   Auth check.
-   FIX: original required adminToken/adminRole only and bounced everyone else
-   to a non-existent admin-login.html. We now accept either the admin-specific
-   keys OR the unified token+role keys, then verify the role server-side via
-   /auth/me. If the server says you're not admin, you go back to login.html.
-*/
+/* ---------- auth gate (unchanged logic) ---------- */
 window.addEventListener('DOMContentLoaded', async () => {
-    const adminToken = sessionStorage.getItem('adminToken');
-    const adminRole  = sessionStorage.getItem('adminRole');
-    const stdToken   = localStorage.getItem('token')  || sessionStorage.getItem('token');
-    const stdRole    = localStorage.getItem('role')   || sessionStorage.getItem('role');
+  const adminToken = sessionStorage.getItem('adminToken');
+  const stdToken   = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (!(adminToken || stdToken)) { window.location.replace('login.html'); return; }
 
-    const haveToken = adminToken || stdToken;
-    if (!haveToken) {
-        window.location.replace('login.html');
-        return;
+  try {
+    const res = await fetch(`${API}/auth/me`);
+    if (res.status === 401 || res.status === 403) { logout(); return; }
+    if (!res.ok) throw new Error();
+    const me = await res.json();
+    if (me.role !== 'admin') {
+      ['adminToken','adminRole','adminName'].forEach(k => sessionStorage.removeItem(k));
+      const fallback = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html' }[me.role] || 'login.html';
+      window.location.replace(fallback); return;
     }
+    if (!sessionStorage.getItem('adminName')) sessionStorage.setItem('adminName', me.full_name || 'Admin');
+  } catch { logout(); return; }
 
-    // Verify role with the server before showing admin UI.
-    try {
-        const res = await fetch(`${API}/auth/me`);
-        if (res.status === 401 || res.status === 403) { logout(); return; }
-        if (!res.ok) throw new Error();
-        const me = await res.json();
-        if (me.role !== 'admin') {
-            // Wrong role &mdash;Â clear admin keys and bounce to the right dashboard.
-            ['adminToken', 'adminRole', 'adminName'].forEach(k => sessionStorage.removeItem(k));
-            const fallback = {
-                student:      'dashboard-student.html',
-                student_host: 'dashboard-student-host.html',
-                landlord:     'dashboard-landlord.html',
-            }[me.role] || 'login.html';
-            window.location.replace(fallback);
-            return;
-        }
-        // Refresh admin name for the header (even if user came in via standard login).
-        if (!sessionStorage.getItem('adminName')) {
-            sessionStorage.setItem('adminName', me.full_name || 'Admin');
-        }
-    } catch {
-        logout();
-        return;
-    }
+  const name = sessionStorage.getItem('adminName') || 'Admin';
+  const nameEl = document.getElementById('admin-name-display');
+  const avatarEl = document.getElementById('admin-avatar');
+  if (nameEl) nameEl.textContent = name;
+  if (avatarEl) avatarEl.textContent = (name.trim()[0] || 'A').toUpperCase();
 
-    const name = sessionStorage.getItem('adminName') || 'Admin';
-    const nameEl = document.getElementById('admin-name-display');
-    if (nameEl) nameEl.textContent = name;
-    loadDashboard();
+  buildPreviewSections();
+  loadDashboard();
 });
 
-function logout() {
-    // Clear BOTH conventions so the next login starts fresh.
-    ['adminToken', 'adminRole', 'adminName', 'token', 'role'].forEach(k => {
-        sessionStorage.removeItem(k);
-        localStorage.removeItem(k);
+function logout(){
+  ['adminToken','adminRole','adminName','token','role'].forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
+  window.location.replace('login.html');
+}
+
+/* ---------- navigation ---------- */
+const TAB_META = {
+  dashboard:   ['Dashboard',          "Welcome back — here's what's happening today"],
+  users:       ['Users',              'Manage students, landlords and staff'],
+  listings:    ['Listings',           'Every property on the platform'],
+  verifications:['Verification Queue','Review submitted documents'],
+  trust:       ['Trust & Safety',     'Reports, complaints and moderation'],
+  fraud:       ['Fraud Center',       'Risk scoring and investigations'],
+  revenue:     ['Revenue',            'Earnings and financial performance'],
+  escrow:      ['Escrow',             'Secured deposit transactions'],
+  institutions:['Institutions',       'Universities and colleges'],
+  support:     ['Support',            'Tickets and customer care'],
+  analytics:   ['Analytics',          'Growth and student demand'],
+  announcements:['Announcements',     'Broadcast messages to users'],
+  system:      ['System Health',      'Live infrastructure status'],
+  settings:    ['Settings',           'Platform configuration'],
+};
+
+function showTab(name){
+  document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name)?.classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
+  const meta = TAB_META[name] || [name, ''];
+  document.getElementById('page-title').textContent = meta[0];
+  document.getElementById('page-sub').textContent = meta[1];
+  document.querySelector('main').scrollTop = 0;
+  closeSidebar();
+
+  if (name === 'users')         loadUsers();
+  if (name === 'listings')      loadListings();
+  if (name === 'verifications') loadVerifications();
+  if (name === 'trust')         loadReports();
+  if (name === 'analytics')     loadAnalytics();
+  if (name === 'system')        loadSystemHealth();
+}
+
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('overlay').classList.toggle('hidden'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('overlay').classList.add('hidden'); }
+function toggleProfileMenu(){ document.getElementById('profile-menu').classList.toggle('hidden'); }
+document.addEventListener('click', e => {
+  const menu = document.getElementById('profile-menu');
+  if (menu && !menu.classList.contains('hidden') && !e.target.closest('#profile-menu') && !e.target.closest('button[onclick="toggleProfileMenu()"]')) menu.classList.add('hidden');
+});
+
+/* ---------- count-up animation ---------- */
+function countUp(el, target){
+  if (target === '—' || target === null || target === undefined || isNaN(Number(target))) { el.textContent = target ?? '—'; return; }
+  target = Number(target); const dur = 700; const start = performance.now();
+  (function step(now){
+    const p = Math.min((now - start) / dur, 1);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString();
+    if (p < 1) requestAnimationFrame(step);
+  })(start);
+}
+
+/* ====================================================================
+   DASHBOARD — real data from /admin/stats + derived from users/listings
+==================================================================== */
+async function loadDashboard(){
+  // pull everything we can in parallel; derive KPIs that the stats endpoint may not return
+  const [stats, users, listings, reports, growth] = await Promise.all([
+    fetch(`${API}/admin/stats`).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+    fetch(`${API}/admin/users`).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`${API}/admin/all-listings`).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`${API}/admin/reports`).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`${API}/admin/analytics/growth`).then(r => r.ok ? r.json() : null).catch(() => null),
+  ]);
+
+  _users = Array.isArray(users) ? users : [];
+  _listings = Array.isArray(listings) ? listings : [];
+  _reportsCount = Array.isArray(reports) ? reports.length : 0;
+
+  const students  = _users.filter(u => u.role === 'student').length;
+  const landlords = _users.filter(u => u.role === 'landlord' || u.role === 'student_host').length;
+  const activeL   = _listings.filter(l => l.status === 'active').length;
+  const pendingL  = stats.pending_listings ?? _listings.filter(l => l.status === 'pending').length;
+  const verifiedL = _listings.filter(l => l.is_verified === true || l.verified === true).length;
+
+  // KPI cards: real values; 'live' badge where derived from data, 'preview' where no backend
+  const kpis = [
+    { label:'Total Listings',  val: stats.total_listings ?? _listings.length, icon:'fa-building',        color:'orange', live:true },
+    { label:'Active Listings', val: activeL,                                   icon:'fa-circle-check',    color:'green',  live:true },
+    { label:'Total Students',  val: stats.total_students ?? students,          icon:'fa-graduation-cap',  color:'blue',   live:true },
+    { label:'Total Landlords', val: stats.total_landlords ?? landlords,        icon:'fa-key',             color:'purple', live:true },
+    { label:'Pending Verifs',  val: stats.pending_verifs ?? 0,                 icon:'fa-user-shield',     color:'amber',  live:true },
+    { label:'Open Reports',    val: _reportsCount,                             icon:'fa-flag',            color:'red',    live:true },
+    { label:'Verified Listings',val: verifiedL,                                icon:'fa-shield-halved',   color:'teal',   live:true },
+    { label:'Monthly Revenue', val: stats.monthly_revenue ?? '—',             icon:'fa-coins',           color:'slate',  live:false },
+  ];
+
+  const colorMap = {
+    orange:['bg-orange-50','text-orange-600'], green:['bg-emerald-50','text-emerald-600'],
+    blue:['bg-blue-50','text-blue-600'], purple:['bg-purple-50','text-purple-600'],
+    amber:['bg-amber-50','text-amber-600'], red:['bg-red-50','text-red-600'],
+    teal:['bg-teal-50','text-teal-600'], slate:['bg-slate-100','text-slate-500'],
+  };
+  const grid = document.getElementById('kpi-grid');
+  grid.innerHTML = kpis.map((k,i) => {
+    const [bg,tx] = colorMap[k.color];
+    const badge = k.live
+      ? `<span class="pill bg-emerald-50 text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Live</span>`
+      : `<span class="pill bg-amber-50 text-amber-700">Preview</span>`;
+    return `<div class="kpi">
+      <div class="flex items-start justify-between mb-3">
+        <span class="ico-box ${bg} ${tx}"><i class="fas ${k.icon}"></i></span>${badge}
+      </div>
+      <div class="text-[26px] font-extrabold text-slate-900 tabnum leading-none" id="kpi-${i}">${k.val === '—' ? '—' : '0'}</div>
+      <div class="text-[12px] font-semibold text-slate-400 mt-1.5">${k.label}</div>
+    </div>`;
+  }).join('');
+  kpis.forEach((k,i) => countUp(document.getElementById('kpi-' + i), k.val));
+
+  // quick-action counts
+  document.getElementById('qa-verif').textContent    = (stats.pending_verifs ?? 0) + ' pending';
+  document.getElementById('qa-listings').textContent = pendingL + ' pending';
+  document.getElementById('qa-reports').textContent  = _reportsCount + ' open';
+  document.getElementById('notif-dot').classList.toggle('hidden', _reportsCount === 0);
+
+  // charts
+  renderGrowthChart(growth, 'growthChart');
+  renderStatusDonut(activeL, pendingL, _listings.filter(l => l.status === 'rejected').length);
+
+  // recent listings (latest 5)
+  const rl = document.getElementById('recent-listings');
+  const recent = _listings.slice(0, 5);
+  rl.innerHTML = recent.length ? recent.map(l => `
+    <div class="px-5 py-3.5 flex items-center gap-3 hover:bg-slate-50 transition">
+      <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fas fa-house"></i></div>
+      <div class="min-w-0 flex-1">
+        <div class="font-bold text-slate-800 text-[13.5px] truncate">${esc(l.title)}</div>
+        <div class="text-[11.5px] text-slate-400 truncate">${esc(l.location)}</div>
+      </div>
+      ${statusBadge(l.status)}
+    </div>`).join('')
+    : `<div class="px-5 py-10 text-center text-slate-400 text-sm">No listings yet.</div>`;
+}
+
+/* ---------- charts ---------- */
+function destroyChart(id){ if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderGrowthChart(data, canvasId){
+  const ctx = document.getElementById(canvasId); if (!ctx || !window.Chart) return;
+  destroyChart(canvasId);
+  const months = data?.months || ['—'];
+  const users  = data?.users  || [0];
+  const listings = data?.listings || [0];
+  charts[canvasId] = new Chart(ctx, {
+    type:'line',
+    data:{ labels: months, datasets:[
+      { label:'Users', data:users, borderColor:'#ea580c', backgroundColor:'rgba(234,88,12,.12)', borderWidth:2.5, tension:.4, fill:true, pointRadius:0, pointHoverRadius:5 },
+      { label:'Listings', data:listings, borderColor:'#cbd5e1', backgroundColor:'rgba(203,213,225,.15)', borderWidth:2.5, tension:.4, fill:true, pointRadius:0, pointHoverRadius:5 },
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#0f172a',padding:10,cornerRadius:8} },
+      scales:{ x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}},
+               y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:11}},beginAtZero:true} } }
+  });
+}
+
+function renderStatusDonut(active, pending, rejected){
+  const ctx = document.getElementById('statusChart'); if (!ctx || !window.Chart) return;
+  destroyChart('statusChart');
+  const vals = [active, pending, rejected]; const total = vals.reduce((a,b)=>a+b,0) || 1;
+  charts['statusChart'] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:['Active','Pending','Rejected'], datasets:[{ data:vals, backgroundColor:['#16a34a','#f59e0b','#ef4444'], borderWidth:0, cutout:'70%' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0f172a',padding:10,cornerRadius:8}} }
+  });
+  const legend = [['Active',active,'#16a34a'],['Pending',pending,'#f59e0b'],['Rejected',rejected,'#ef4444']];
+  document.getElementById('status-legend').innerHTML = legend.map(([l,v,c]) =>
+    `<div><div class="text-[18px] font-extrabold tabnum" style="color:${c}">${v}</div><div class="text-[10.5px] font-semibold text-slate-400">${l}</div></div>`).join('');
+}
+
+/* ====================================================================
+   USERS
+==================================================================== */
+function statusBadge(s){
+  const map = { active:['bg-emerald-50','text-emerald-600'], pending:['bg-amber-50','text-amber-600'], rejected:['bg-red-50','text-red-600'] };
+  const [bg,tx] = map[s] || ['bg-slate-100','text-slate-500'];
+  return `<span class="pill ${bg} ${tx}">${esc(s) || 'unknown'}</span>`;
+}
+function roleBadge(r){
+  const map = { admin:['bg-red-50','text-red-600'], landlord:['bg-blue-50','text-blue-600'], student_host:['bg-purple-50','text-purple-600'], student:['bg-emerald-50','text-emerald-600'] };
+  const [bg,tx] = map[r] || ['bg-slate-100','text-slate-500'];
+  return `<span class="pill ${bg} ${tx}">${esc(r)}</span>`;
+}
+
+async function loadUsers(){
+  const tbody = document.getElementById('users-table');
+  tbody.innerHTML = skeletonRows(5, 5);
+  try {
+    const res = await fetch(`${API}/admin/users`);
+    if (!res.ok) throw new Error();
+    _users = await res.json();
+    renderUsers();
+  } catch { tbody.innerHTML = errorRow(5,'Failed to load users.'); }
+}
+
+function renderUsers(){
+  const tbody = document.getElementById('users-table');
+  const q = (document.getElementById('user-search')?.value || '').toLowerCase().trim();
+  const roleF = document.getElementById('user-role-filter')?.value || '';
+  let rows = _users.filter(u => {
+    const matchQ = !q || (u.full_name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q);
+    const matchR = !roleF || u.role === roleF;
+    return matchQ && matchR;
+  });
+  document.getElementById('user-count-badge').textContent = `${rows.length} of ${_users.length}`;
+  if (!rows.length) { tbody.innerHTML = emptyRow(5,'No users match your filters.'); return; }
+  tbody.innerHTML = rows.map(u => `
+    <tr class="hover:bg-slate-50">
+      <td class="data-td font-bold text-slate-900">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-[11px] font-bold text-slate-600 flex-shrink-0">${esc((u.full_name||'?')[0])}</div>
+          <span class="truncate">${esc(u.full_name)}</span>
+        </div>
+      </td>
+      <td class="data-td text-slate-500 hidden md:table-cell">${esc(u.email)}</td>
+      <td class="data-td">${roleBadge(u.role)}</td>
+      <td class="data-td hidden sm:table-cell">
+        <span class="pill ${u.is_active !== false ? 'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-600'}">${u.is_active !== false ? 'Active':'Suspended'}</span>
+      </td>
+      <td class="data-td">
+        <button onclick="toggleSuspend(${u.id}, '${esc(u.email)}', ${u.is_active})"
+          class="btn ${u.is_active !== false ? 'bg-red-50 text-red-600 hover:bg-red-100':'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'} px-3 py-1.5 text-[12px]">
+          ${u.is_active !== false ? 'Suspend':'Reinstate'}
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+function toggleSuspend(userId, email, isActive){
+  showModal(isActive ? 'Suspend User':'Reinstate User',
+    isActive ? `Suspend ${email}? They won't be able to log in.` : `Reinstate ${email}? They will regain access.`,
+    async () => { await fetch(`${API}/admin/users/${userId}/suspend`, { method:'POST' }); loadUsers(); });
+}
+
+/* ====================================================================
+   LISTINGS
+==================================================================== */
+async function loadListings(){
+  const tbody = document.getElementById('listings-table');
+  tbody.innerHTML = skeletonRows(5, 5);
+  try {
+    const res = await fetch(`${API}/admin/all-listings`);
+    if (!res.ok) throw new Error();
+    _listings = await res.json();
+    renderListings();
+  } catch { tbody.innerHTML = errorRow(5,'Failed to load listings.'); }
+}
+
+function renderListings(){
+  const tbody = document.getElementById('listings-table');
+  const q = (document.getElementById('listing-search')?.value || '').toLowerCase().trim();
+  const statusF = document.getElementById('listing-status-filter')?.value || '';
+  let rows = _listings.filter(l => {
+    const matchQ = !q || (l.title||'').toLowerCase().includes(q) || (l.location||'').toLowerCase().includes(q);
+    const matchS = !statusF || l.status === statusF;
+    return matchQ && matchS;
+  });
+  document.getElementById('listing-count-badge').textContent = `${rows.length} of ${_listings.length}`;
+  if (!rows.length) { tbody.innerHTML = emptyRow(5,'No listings match your filters.'); return; }
+  tbody.innerHTML = rows.map(l => `
+    <tr class="hover:bg-slate-50">
+      <td class="data-td font-bold text-slate-900 max-w-[220px]"><span class="block truncate">${esc(l.title)}</span></td>
+      <td class="data-td text-slate-500 hidden md:table-cell">${esc(l.location)}</td>
+      <td class="data-td text-slate-700 font-semibold tabnum hidden lg:table-cell">${l.price != null ? fmtK(l.price) : '—'}</td>
+      <td class="data-td">${statusBadge(l.status)}</td>
+      <td class="data-td">
+        <div class="flex flex-wrap gap-1.5">
+          ${l.status === 'pending' ? `
+            <button onclick="approveListing(${l.id})" class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-2.5 py-1.5 text-[12px]">Approve</button>
+            <button onclick="rejectListing(${l.id})"  class="btn bg-amber-50 text-amber-600 hover:bg-amber-100 px-2.5 py-1.5 text-[12px]">Reject</button>` : ''}
+          <button onclick="deleteListing(${l.id}, '${esc((l.title||'').replace(/'/g,''))}')" class="btn bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1.5 text-[12px]">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+async function approveListing(id){ const res = await fetch(`${API}/admin/listings/${id}/approve`, { method:'PATCH' }); if (res.ok) { showToast('Listing approved.'); loadListings(); } }
+async function rejectListing(id){ const res = await fetch(`${API}/admin/listings/${id}/reject`, { method:'PATCH' }); if (res.ok) { showToast('Listing rejected.'); loadListings(); } }
+function deleteListing(id, title){
+  showModal('Delete Listing', `Permanently delete "${title}"? This cannot be undone.`, async () => {
+    await fetch(`${API}/admin/listings/${id}`, { method:'DELETE' }); showToast('Listing deleted.'); loadListings();
+  });
+}
+
+/* ====================================================================
+   VERIFICATIONS
+==================================================================== */
+async function loadVerifications(){
+  const tbody = document.getElementById('verify-table-body'); if (!tbody) return;
+  tbody.innerHTML = skeletonRows(3, 5);
+  try {
+    const res = await fetch(`${API}/admin/verifications`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (!data || !data.length) { tbody.innerHTML = emptyRow(5,'No pending verifications. 🎉'); return; }
+    tbody.innerHTML = data.map(v => `
+      <tr class="hover:bg-slate-50">
+        <td class="data-td">
+          <div class="font-bold text-slate-900">${esc(v.full_name)}</div>
+          <div class="text-[11px] text-slate-400">${esc(v.email)}</div>
+        </td>
+        <td class="data-td">${roleBadge(v.role)}</td>
+        <td class="data-td hidden md:table-cell">
+          ${v.documents && v.documents.length
+            ? v.documents.map(d => `<a href="${esc(d.url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-[12px] font-bold text-orange-600 hover:underline mr-3"><i class="fas fa-file-lines"></i>${esc(d.label)}</a>`).join('')
+            : '<span class="text-[12px] text-slate-400 italic">No documents</span>'}
+        </td>
+        <td class="data-td"><span class="pill bg-amber-50 text-amber-600">Pending Review</span></td>
+        <td class="data-td">
+          <div class="flex gap-1.5">
+            <button onclick="approveVerification(${v.id})" class="btn btn-pri px-3 py-1.5 text-[12px]">Approve</button>
+            <button onclick="rejectVerification(${v.id})" class="btn bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 text-[12px]">Reject</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch { tbody.innerHTML = errorRow(5,'Failed to load verifications.'); }
+}
+
+async function approveVerification(userId){
+  showModal('Approve Verification', 'Approve this user as verified? They will receive a verified badge.', async () => {
+    const res = await fetch(`${API}/admin/verifications/${userId}/approve`, { method:'POST' });
+    if (res.ok) { showToast('Verification approved.'); loadVerifications(); }
+  });
+}
+async function rejectVerification(userId){
+  const reason = window.prompt('Rejection reason (optional — shown to user):') ?? '';
+  showModal('Reject Verification', 'Reject this verification? The user will be notified.', async () => {
+    const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reason: reason.trim() || null })
     });
-    window.location.replace('login.html');
+    if (res.ok) { showToast('Verification rejected.'); loadVerifications(); } else showToast('Failed to reject.','error');
+  });
 }
 
-function showChangePassword() {
-    ['cpwd-old','cpwd-new','cpwd-confirm'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('cpwd-error').classList.add('hidden');
-    document.getElementById('cpwd-success').classList.add('hidden');
-    document.getElementById('change-pwd-modal').classList.remove('hidden');
-}
-function closeChangePassword() { document.getElementById('change-pwd-modal').classList.add('hidden'); }
-
-async function submitChangePassword() {
-    const oldPwd  = document.getElementById('cpwd-old').value;
-    const newPwd  = document.getElementById('cpwd-new').value;
-    const confirm = document.getElementById('cpwd-confirm').value;
-    const errEl   = document.getElementById('cpwd-error');
-    const sucEl   = document.getElementById('cpwd-success');
-    const btn     = document.getElementById('cpwd-btn');
-    errEl.classList.add('hidden'); sucEl.classList.add('hidden');
-    if (!oldPwd || !newPwd || !confirm) { errEl.textContent = 'All fields are required.'; errEl.classList.remove('hidden'); return; }
-    const PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
-    if (!PWD_RE.test(newPwd)) { errEl.textContent = 'Password must be 8+ characters with uppercase, lowercase, number, and symbol.'; errEl.classList.remove('hidden'); return; }
-    if (newPwd !== confirm) { errEl.textContent = 'New passwords do not match.'; errEl.classList.remove('hidden'); return; }
-    btn.disabled = true; btn.textContent = 'Updating&hellip;';
-    try {
-        const res  = await fetch(`${API}/admin/change-password`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ old_password: oldPwd, new_password: newPwd, confirm_password: confirm }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.detail || 'Failed to update password.');
-        sucEl.classList.remove('hidden');
-        ['cpwd-old','cpwd-new','cpwd-confirm'].forEach(id => document.getElementById(id).value = '');
-        setTimeout(closeChangePassword, 1800);
-    } catch (err) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
-    finally { btn.disabled = false; btn.textContent = 'Update'; }
-}
-
-function showTab(name) {
-    document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
-    const tab = document.getElementById('tab-' + name);
-    const nav = document.getElementById('nav-' + name);
-    if (tab) tab.classList.add('active');
-    if (nav) nav.classList.add('active');
-    const titles = { dashboard: 'Dashboard', users: 'Users', listings: 'Listings', verifications: 'Verifications', reports: 'Reports', analytics: 'Analytics', announcements: 'Announcements', settings: 'Settings' };
-    const titleEl = document.getElementById('page-title');
-    if (titleEl) titleEl.textContent = titles[name] || name;
-    closeSidebar();
-    if (name === 'users')         loadUsers();
-    if (name === 'listings')      loadListings();
-    if (name === 'reports')       loadReports();
-    if (name === 'verifications') loadVerifications();
-    if (name === 'analytics')     loadAnalytics();
-}
-
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('-translate-x-full');
-    document.getElementById('overlay').classList.toggle('hidden');
-}
-function closeSidebar() {
-    document.getElementById('sidebar').classList.add('-translate-x-full');
-    document.getElementById('overlay').classList.add('hidden');
-}
-
-async function loadDashboard() {
-    try {
-        const res  = await fetch(`${API}/admin/stats`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        document.getElementById('stat-users').textContent    = data.total_users    ?? '&mdash;Â';
-        document.getElementById('stat-listings').textContent = data.total_listings ?? '&mdash;Â';
-        document.getElementById('stat-messages').textContent = data.total_messages ?? '&mdash;Â';
-        document.getElementById('stat-reports').textContent  = (data.pending_listings ?? 0) + (data.pending_verifs ?? 0);
-    } catch { /* stats fail silently */ }
-    try {
-        const res  = await fetch(`${API}/admin/analytics/growth`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        renderGrowthChart(data, 'growth-chart');
-    } catch { /* chart fails silently */ }
-}
-
-function renderGrowthChart(data, containerId) {
-    const container = document.getElementById(containerId);
-    if (!container || !data?.months || !data?.users) return;
-    const maxVal = Math.max(...data.users, ...(data.listings || []), 1);
-    container.innerHTML = data.months.map((month, i) => {
-        const uH = Math.round(((data.users[i] || 0) / maxVal) * 100);
-        const lH = Math.round(((data.listings?.[i] || 0) / maxVal) * 100);
-        return `<div class="flex flex-col items-center gap-1 flex-1 min-w-0">
-            <div class="w-full flex items-end gap-0.5 justify-center" style="height:100%">
-                <div class="flex-1 bg-[#ea580c] rounded-t transition-all" style="height:${uH}%" title="Users: ${data.users[i]}"></div>
-                <div class="flex-1 bg-slate-200 rounded-t transition-all" style="height:${lH}%" title="Listings: ${data.listings?.[i] || 0}"></div>
+/* ====================================================================
+   TRUST & SAFETY — reports
+==================================================================== */
+async function loadReports(){
+  const el = document.getElementById('reports-list');
+  el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
+  try {
+    const res = await fetch(`${API}/admin/reports`);
+    if (!res.ok) throw new Error();
+    const reports = await res.json();
+    _reportsCount = reports.length;
+    renderTrustKpis(reports);
+    if (!reports.length) { el.innerHTML = `<div class="px-5 py-12 text-center text-slate-400"><i class="fas fa-circle-check text-3xl text-emerald-400 mb-3 block"></i>No open reports — all clear.</div>`; return; }
+    el.innerHTML = reports.map(r => `
+      <div class="px-5 py-4 hover:bg-slate-50 transition">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-slate-900 text-sm">Report #${esc(r.id)}</span>
+              <span class="pill bg-orange-50 text-orange-600">${esc(r.status)}</span>
             </div>
-            <div class="text-[9px] text-slate-400 font-medium truncate w-full text-center">${esc(month)}</div>
-        </div>`;
-    }).join('');
+            <div class="text-[11.5px] text-slate-400 mt-1">Listing ${esc(r.listing_id)} · Reporter ${esc(r.reporter_id)}</div>
+            <div class="mt-2 text-[13.5px] text-slate-700"><span class="font-bold">Reason:</span> ${esc(r.reason)}</div>
+            ${r.description ? `<div class="mt-1 text-[13px] text-slate-500">${esc(r.description)}</div>` : ''}
+          </div>
+          <button onclick="dismissReport(${r.id})" class="btn btn-ghost px-3 py-1.5 text-[12px] flex-shrink-0">Dismiss</button>
+        </div>
+      </div>`).join('');
+  } catch { el.innerHTML = errorBlock('Failed to load reports.'); }
 }
 
-async function loadUsers() {
-    const tbody = document.getElementById('users-table');
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</td></tr>';
-    try {
-        const res   = await fetch(`${API}/admin/users`);
-        if (!res.ok) throw new Error('Server error');
-        const users = await res.json();
-        document.getElementById('user-count-badge').textContent = `${users.length} users`;
-        if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400">No users found.</td></tr>'; return; }
-        const roleBadge = r => {
-            const map = { admin: 'bg-red-100 text-red-700', landlord: 'bg-blue-100 text-blue-700', student_host: 'bg-purple-100 text-purple-700', student: 'bg-green-100 text-green-700' };
-            return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${map[r] || 'bg-slate-100 text-slate-600'}">${esc(r)}</span>`;
-        };
-        tbody.innerHTML = users.map(u => `
-            <tr class="hover:bg-slate-50 border-b border-slate-50">
-                <td class="px-5 py-3 font-semibold text-slate-900 text-sm">${esc(u.full_name)}</td>
-                <td class="px-5 py-3 text-slate-500 text-sm hidden md:table-cell">${esc(u.email)}</td>
-                <td class="px-5 py-3">${roleBadge(u.role)}</td>
-                <td class="px-5 py-3 hidden sm:table-cell">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.is_active !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                        ${u.is_active !== false ? 'Active' : 'Suspended'}
-                    </span>
-                </td>
-                <td class="px-5 py-3">
-                    <button onclick="toggleSuspend(${u.id}, '${esc(u.email)}', ${u.is_active})"
-                        class="text-xs font-bold px-3 py-1.5 rounded-lg ${u.is_active !== false ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100'} transition">
-                        ${u.is_active !== false ? 'Suspend' : 'Reinstate'}
-                    </button>
-                </td>
-            </tr>`).join('');
-    } catch { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400 text-sm">Failed to load users.</td></tr>'; }
+function renderTrustKpis(reports){
+  const kpis = [
+    { label:'Open Reports',     val:reports.length, icon:'fa-flag', color:'red', live:true },
+    { label:'Listings Reported',val:new Set(reports.map(r=>r.listing_id)).size, icon:'fa-building', color:'amber', live:true },
+    { label:'Blocked Accounts', val:'—', icon:'fa-user-lock', color:'slate', live:false },
+    { label:'Open Investigations',val:'—', icon:'fa-magnifying-glass', color:'slate', live:false },
+  ];
+  const cmap = { red:['bg-red-50','text-red-600'], amber:['bg-amber-50','text-amber-600'], slate:['bg-slate-100','text-slate-500'] };
+  document.getElementById('trust-kpis').innerHTML = kpis.map(k => {
+    const [bg,tx]=cmap[k.color];
+    const badge = k.live ? `<span class="pill bg-emerald-50 text-emerald-600">Live</span>` : `<span class="pill bg-amber-50 text-amber-700">Preview</span>`;
+    return `<div class="kpi"><div class="flex items-start justify-between mb-3"><span class="ico-box ${bg} ${tx}"><i class="fas ${k.icon}"></i></span>${badge}</div>
+      <div class="text-[24px] font-extrabold text-slate-900 tabnum">${k.val}</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${k.label}</div></div>`;
+  }).join('');
 }
 
-function toggleSuspend(userId, email, isActive) {
-    showModal(
-        isActive ? 'Suspend User' : 'Reinstate User',
-        isActive ? `Suspend ${email}? They won't be able to log in.` : `Reinstate ${email}? They will regain access.`,
-        async () => {
-            await fetch(`${API}/admin/users/${userId}/suspend`, { method: 'POST' });
-            loadUsers();
-        }
-    );
+async function dismissReport(id){ const res = await fetch(`${API}/admin/reports/${id}/dismiss`, { method:'PATCH' }); if (res.ok) { showToast('Report dismissed.'); loadReports(); } }
+
+/* ====================================================================
+   ANALYTICS
+==================================================================== */
+async function loadAnalytics(){
+  try {
+    const res = await fetch(`${API}/admin/analytics/growth`);
+    const data = res.ok ? await res.json() : null;
+    renderGrowthChart(data, 'analyticsChart');
+  } catch {}
 }
 
-async function loadListings() {
-    const tbody = document.getElementById('listings-table');
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</td></tr>';
-    try {
-        const res      = await fetch(`${API}/admin/all-listings`);
-        if (!res.ok) throw new Error();
-        const listings = await res.json();
-        if (!listings.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400">No listings found.</td></tr>'; return; }
-        const statusBadge = s => {
-            const map = { active: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', rejected: 'bg-red-100 text-red-700' };
-            return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${map[s] || 'bg-slate-100 text-slate-600'}">${esc(s) || 'unknown'}</span>`;
-        };
-        tbody.innerHTML = listings.map(l => `
-            <tr class="hover:bg-slate-50 border-b border-slate-50">
-                <td class="px-5 py-3 font-semibold text-slate-900 text-sm max-w-[160px] truncate">${esc(l.title)}</td>
-                <td class="px-5 py-3 text-slate-500 text-sm hidden md:table-cell">${esc(l.location)}</td>
-                <td class="px-5 py-3">${statusBadge(l.status)}</td>
-                <td class="px-5 py-3">
-                    <div class="flex flex-wrap gap-1">
-                        ${l.status === 'pending' ? `
-                        <button onclick="approveListing(${l.id})" class="text-xs font-bold px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition">Approve</button>
-                        <button onclick="rejectListing(${l.id})"  class="text-xs font-bold px-2 py-1 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition">Reject</button>
-                        ` : ''}
-                        <button onclick="deleteListing(${l.id}, '${esc(l.title)}')" class="text-xs font-bold px-2 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">Delete</button>
-                    </div>
-                </td>
-            </tr>`).join('');
-    } catch { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-400 text-sm">Failed to load listings.</td></tr>'; }
+/* ====================================================================
+   SYSTEM HEALTH — pings the real API; rest labelled preview
+==================================================================== */
+async function loadSystemHealth(){
+  const el = document.getElementById('system-list');
+  el.innerHTML = `<div class="px-5 py-8 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Checking services…</div>`;
+  let apiUp = false, t0 = performance.now(), ms = 0;
+  try { const r = await fetch(`${API}/auth/me`); apiUp = r.ok || r.status === 401 || r.status === 403; ms = Math.round(performance.now() - t0); }
+  catch { apiUp = false; }
+
+  const services = [
+    { name:'API (Render)', icon:'fa-server', state: apiUp ? 'ok':'crit', note: apiUp ? `Responding in ${ms}ms` : 'Unreachable', live:true },
+    { name:'Database (Supabase)', icon:'fa-database', state: apiUp ? 'ok':'warn', note: apiUp ? 'Reachable via API' : 'Cannot confirm', live:true },
+    { name:'Image Storage (Cloudinary)', icon:'fa-images', state:'preview', note:'Status endpoint not wired yet', live:false },
+    { name:'Email Service', icon:'fa-envelope', state:'preview', note:'Status endpoint not wired yet', live:false },
+    { name:'SMS Service', icon:'fa-comment-sms', state:'preview', note:'Status endpoint not wired yet', live:false },
+    { name:'Mobile Money', icon:'fa-mobile-screen', state:'preview', note:'Integration not built yet', live:false },
+  ];
+  const dot = { ok:['bg-emerald-500','Operational','text-emerald-600 bg-emerald-50'], warn:['bg-amber-500','Warning','text-amber-600 bg-amber-50'], crit:['bg-red-500','Critical','text-red-600 bg-red-50'], preview:['bg-slate-300','Preview','text-slate-500 bg-slate-100'] };
+  el.innerHTML = services.map(s => {
+    const [d,label,pill] = dot[s.state];
+    return `<div class="px-5 py-4 flex items-center gap-4 hover:bg-slate-50">
+      <span class="ico-box bg-slate-100 text-slate-500"><i class="fas ${s.icon}"></i></span>
+      <div class="flex-1 min-w-0"><div class="font-bold text-slate-800 text-[13.5px]">${s.name}</div><div class="text-[11.5px] text-slate-400">${s.note}</div></div>
+      <span class="pill ${pill}"><span class="w-1.5 h-1.5 rounded-full ${d}"></span>${label}</span>
+    </div>`;
+  }).join('');
 }
 
-async function approveListing(id) { const res = await fetch(`${API}/admin/listings/${id}/approve`, { method: 'PATCH' }); if (res.ok) loadListings(); }
-async function rejectListing(id)  { const res = await fetch(`${API}/admin/listings/${id}/reject`,  { method: 'PATCH' }); if (res.ok) loadListings(); }
-function deleteListing(id, title) {
-    showModal('Delete Listing', `Permanently delete "${title}"? This cannot be undone.`, async () => {
-        await fetch(`${API}/admin/listings/${id}`, { method: 'DELETE' });
-        loadListings();
-    });
+/* ====================================================================
+   ANNOUNCEMENTS / SETTINGS / PASSWORD  (live)
+==================================================================== */
+async function sendAnnouncement(){
+  const title = document.getElementById('announce-title').value.trim();
+  const body  = document.getElementById('announce-body').value.trim();
+  const target = document.getElementById('announce-target').value;
+  const errEl = document.getElementById('announce-error'), sucEl = document.getElementById('announce-success');
+  errEl.classList.add('hidden'); sucEl.classList.add('hidden');
+  if (!title || !body) { errEl.textContent='Title and message are required.'; errEl.classList.remove('hidden'); return; }
+  try {
+    const res = await fetch(`${API}/admin/announcements`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, body, target }) });
+    if (!res.ok) throw new Error();
+    sucEl.classList.remove('hidden');
+    document.getElementById('announce-title').value=''; document.getElementById('announce-body').value='';
+  } catch { errEl.textContent='Failed to send announcement. Try again.'; errEl.classList.remove('hidden'); }
 }
 
-async function loadVerifications() {
-    const tbody = document.getElementById('verify-table-body');
-    if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</td></tr>';
-    try {
-        const res  = await fetch(`${API}/admin/verifications`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 italic">No pending verifications.</td></tr>'; return; }
-        tbody.innerHTML = data.map(v => `
-            <tr class="hover:bg-slate-50 border-b border-slate-50">
-                <td class="px-5 py-3 text-sm">
-                    <div class="font-semibold text-slate-900">${esc(v.full_name)}</div>
-                    <div class="text-[10px] text-slate-400">${esc(v.email)}</div>
-                </td>
-                <td class="px-5 py-3">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600">${esc(v.role)}</span>
-                </td>
-                <td class="px-5 py-3 hidden md:table-cell">
-                    ${v.documents && v.documents.length
-                        ? v.documents.map(d => `<a href="${esc(d.url)}" target="_blank" class="inline-flex items-center gap-1 text-xs font-bold text-orange-500 hover:underline mr-2"><i class="fas fa-file-alt"></i>${esc(d.label)}</a>`).join('')
-                        : '<span class="text-xs text-slate-400 italic">No docs</span>'}
-                </td>
-                <td class="px-5 py-3">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-600">Pending Review</span>
-                </td>
-                <td class="px-5 py-3">
-                    <div class="flex gap-1.5 flex-wrap">
-                        <button onclick="approveVerification(${v.id})" class="bg-green-500 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-green-600 transition uppercase">Approve</button>
-                        <button onclick="rejectVerification(${v.id})"  class="bg-red-50 text-red-600 px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-red-100 transition uppercase">Reject</button>
-                    </div>
-                </td>
-            </tr>`).join('');
-    } catch { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400 text-sm">Failed to load verifications.</td></tr>'; }
+async function saveSettings(){
+  try {
+    const res = await fetch(`${API}/admin/settings/update`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+      platform_name: document.getElementById('setting-name').value.trim(),
+      support_email: document.getElementById('setting-email').value.trim(),
+      require_approval: document.getElementById('setting-approval').checked,
+      maintenance_mode: document.getElementById('setting-maintenance').checked,
+    }) });
+    if (!res.ok) throw new Error();
+    const el = document.getElementById('settings-success'); el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 3000);
+  } catch { showToast('Failed to save settings.','error'); }
 }
 
-async function approveVerification(userId) {
-    showModal('Approve Verification', 'Approve this user as verified? They will receive a verified badge.', async () => {
-        const res = await fetch(`${API}/admin/verifications/${userId}/approve`, { method: 'POST' });
-        if (res.ok) loadVerifications();
-    });
+function showChangePassword(){
+  ['cpwd-old','cpwd-new','cpwd-confirm'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('cpwd-error').classList.add('hidden');
+  document.getElementById('cpwd-success').classList.add('hidden');
+  document.getElementById('change-pwd-modal').classList.remove('hidden');
 }
-async function rejectVerification(userId) {
-    const reason = window.prompt("Rejection reason (optional &mdash;Â shown to user):") ?? "";
-    showModal("Reject Verification", "Reject this verification? The user will be notified.", async () => {
-        const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reason: reason.trim() || null }),
-        });
-        if (res.ok) { showToast("Verification rejected.", "success"); loadVerifications(); }
-        else showToast("Failed to reject.", "error");
-    });
+function closeChangePassword(){ document.getElementById('change-pwd-modal').classList.add('hidden'); }
+
+async function submitChangePassword(){
+  const oldPwd=document.getElementById('cpwd-old').value, newPwd=document.getElementById('cpwd-new').value, confirm=document.getElementById('cpwd-confirm').value;
+  const errEl=document.getElementById('cpwd-error'), sucEl=document.getElementById('cpwd-success'), btn=document.getElementById('cpwd-btn');
+  errEl.classList.add('hidden'); sucEl.classList.add('hidden');
+  if (!oldPwd||!newPwd||!confirm){ errEl.textContent='All fields are required.'; errEl.classList.remove('hidden'); return; }
+  const PWD_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+  if (!PWD_RE.test(newPwd)){ errEl.textContent='Password must be 8+ characters with uppercase, lowercase, number, and symbol.'; errEl.classList.remove('hidden'); return; }
+  if (newPwd!==confirm){ errEl.textContent='New passwords do not match.'; errEl.classList.remove('hidden'); return; }
+  btn.disabled=true; btn.textContent='Updating…';
+  try {
+    const res = await fetch(`${API}/admin/change-password`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ old_password:oldPwd, new_password:newPwd, confirm_password:confirm }) });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok) throw new Error(data.detail || 'Failed to update password.');
+    sucEl.classList.remove('hidden');
+    ['cpwd-old','cpwd-new','cpwd-confirm'].forEach(id => document.getElementById(id).value='');
+    setTimeout(closeChangePassword, 1600);
+  } catch(err){ errEl.textContent=err.message; errEl.classList.remove('hidden'); }
+  finally { btn.disabled=false; btn.textContent='Update'; }
 }
 
-async function loadAnalytics() {
-    try {
-        const res  = await fetch(`${API}/admin/analytics/growth`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        renderGrowthChart(data, 'analytics-growth-chart');
-    } catch { /* fail silently */ }
+/* ====================================================================
+   GLOBAL SEARCH + CSV EXPORT
+==================================================================== */
+function globalSearch(q){
+  q = (q||'').trim(); if (!q) return;
+  // jump to the most relevant tab and filter
+  const ql = q.toLowerCase();
+  const hitsUser = _users.some(u => (u.full_name||'').toLowerCase().includes(ql) || (u.email||'').toLowerCase().includes(ql));
+  if (hitsUser) { showTab('users'); setTimeout(() => { document.getElementById('user-search').value = q; renderUsers(); }, 50); return; }
+  showTab('listings'); setTimeout(() => { document.getElementById('listing-search').value = q; renderListings(); }, 50);
 }
 
-async function loadReports() {
-    const el = document.getElementById('reports-list');
-    el.innerHTML = '<div class="text-center py-10 text-slate-400"><i class="fas fa-circle-notch spin mr-2"></i>Loading...</div>';
-    try {
-        const res     = await fetch(`${API}/admin/reports`);
-        if (!res.ok) throw new Error();
-        const reports = await res.json();
-        if (!reports.length) { el.innerHTML = '<div class="text-center py-10 text-slate-400">No reports found.</div>'; return; }
-        el.innerHTML = reports.map(r => `
-            <div class="p-5 hover:bg-slate-50 transition">
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                        <div class="font-bold text-slate-900 text-sm">Report #${r.id}</div>
-                        <div class="text-xs text-slate-400 mt-0.5">Listing: ${esc(r.listing_id)} &middot; Reporter: ${esc(r.reporter_id)}</div>
-                        <div class="mt-2 text-sm text-slate-700"><span class="font-semibold">Reason:</span> ${esc(r.reason)}</div>
-                        ${r.description ? `<div class="mt-1 text-sm text-slate-500">${esc(r.description)}</div>` : ''}
-                    </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <span class="bg-orange-50 text-orange-600 text-[10px] font-bold px-2 py-0.5 rounded-full">${esc(r.status)}</span>
-                        <button onclick="dismissReport(${r.id})" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition uppercase">Dismiss</button>
-                    </div>
-                </div>
-            </div>`).join('');
-    } catch { el.innerHTML = '<div class="text-center py-10 text-red-400 text-sm">Failed to load reports.</div>'; }
+function exportCSV(kind){
+  let rows, headers, name;
+  if (kind === 'users'){
+    headers=['ID','Name','Email','Role','Active'];
+    rows=_users.map(u => [u.id, u.full_name, u.email, u.role, u.is_active !== false]);
+    name='findmynyumba_users.csv';
+  } else {
+    headers=['ID','Title','Location','Price','Status'];
+    rows=_listings.map(l => [l.id, l.title, l.location, l.price ?? '', l.status]);
+    name='findmynyumba_listings.csv';
+  }
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  URL.revokeObjectURL(a.href); showToast(`Exported ${rows.length} rows.`);
 }
 
-async function dismissReport(reportId) {
-    const res = await fetch(`${API}/admin/reports/${reportId}/dismiss`, { method: 'PATCH' });
-    if (res.ok) loadReports();
+/* ====================================================================
+   PREVIEW SECTIONS (Revenue / Escrow / Fraud / Support / Institutions / Demand)
+   — full UI, clearly marked as not-yet-connected to a backend.
+==================================================================== */
+function previewBanner(text){
+  return `<div class="preview-badge mb-5"><i class="fas fa-flask"></i>Preview · ${text}</div>`;
+}
+function ghostKpi(label, icon){
+  return `<div class="kpi opacity-90"><div class="flex items-start justify-between mb-3"><span class="ico-box bg-slate-100 text-slate-400"><i class="fas ${icon}"></i></span><span class="pill bg-amber-50 text-amber-700">Preview</span></div>
+    <div class="text-[24px] font-extrabold text-slate-300 tabnum">—</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${label}</div></div>`;
+}
+function ghostCard(title, sub, icon){
+  return `<div class="card p-6 text-center"><span class="ico-box bg-slate-100 text-slate-400 mx-auto mb-3"><i class="fas ${icon}"></i></span>
+    <div class="font-extrabold text-slate-700 text-[14px]">${title}</div><div class="text-[12px] text-slate-400 mt-1 max-w-xs mx-auto">${sub}</div></div>`;
 }
 
-async function sendAnnouncement() {
-    const title  = document.getElementById('announce-title').value.trim();
-    const body   = document.getElementById('announce-body').value.trim();
-    const target = document.getElementById('announce-target').value;
-    const errEl  = document.getElementById('announce-error');
-    const sucEl  = document.getElementById('announce-success');
-    errEl.classList.add('hidden'); sucEl.classList.add('hidden');
-    if (!title || !body) { errEl.textContent = 'Title and message are required.'; errEl.classList.remove('hidden'); return; }
-    try {
-        const res = await fetch(`${API}/admin/announcements`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, body, target }),
-        });
-        if (!res.ok) throw new Error();
-        sucEl.classList.remove('hidden');
-        document.getElementById('announce-title').value = '';
-        document.getElementById('announce-body').value  = '';
-    } catch { errEl.textContent = 'Failed to send announcement. Try again.'; errEl.classList.remove('hidden'); }
+function buildPreviewSections(){
+  // Revenue
+  document.getElementById('tab-revenue').innerHTML =
+    previewBanner('connect a payments / mobile-money backend to populate this')
+    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+        ${ghostKpi('Revenue Today','fa-coins')}${ghostKpi('Revenue This Month','fa-calendar')}${ghostKpi('Revenue This Year','fa-chart-line')}${ghostKpi('Featured Listings','fa-star')}
+       </div>
+       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        ${ghostCard('Revenue by Source','Featured listings, boosts, verification fees, reservation deposits — once payments are live, this chart fills automatically.','fa-chart-pie')}
+        ${ghostCard('Revenue by Province','Earnings split across Copperbelt, Lusaka, and other provinces.','fa-map-location-dot')}
+       </div>`;
+
+  // Escrow
+  document.getElementById('tab-escrow').innerHTML =
+    previewBanner('escrow module designed, awaiting build')
+    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+        ${ghostKpi('Active Transactions','fa-arrows-rotate')}${ghostKpi('Pending Deposits','fa-hourglass-half')}${ghostKpi('Released Payments','fa-circle-check')}${ghostKpi('Dispute Cases','fa-scale-balanced')}
+       </div>
+       ${ghostCard('Secured Deposit Flow','Students place a deposit held in escrow, released to the landlord only after a successful move-in. Refunds and disputes are managed here.','fa-vault')}`;
+
+  // Fraud
+  document.getElementById('tab-fraud').innerHTML =
+    previewBanner('risk scoring not yet computed server-side')
+    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+        ${ghostKpi('High-Risk Accounts','fa-triangle-exclamation')}${ghostKpi('Duplicate NRCs','fa-id-card')}${ghostKpi('Multiple Numbers','fa-phone')}${ghostKpi('Flagged Listings','fa-flag')}
+       </div>
+       ${ghostCard('Fraud Scoring Engine','Accounts will be scored Low / Medium / High / Critical based on duplicate NRCs, repeated phone numbers, and report frequency.','fa-shield-halved')}`;
+
+  // Support
+  document.getElementById('tab-support').innerHTML =
+    previewBanner('ticketing backend not connected')
+    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+        ${ghostKpi('Open Tickets','fa-envelope-open')}${ghostKpi('Resolved','fa-circle-check')}${ghostKpi('Avg Response','fa-clock')}${ghostKpi('Satisfaction','fa-face-smile')}
+       </div>
+       ${ghostCard('Support Center','Categorised tickets — scam reports, technical issues, verification, payments and listings — with response-time tracking.','fa-headset')}`;
+
+  // Institutions
+  document.getElementById('tab-institutions').innerHTML =
+    previewBanner('institutions table not yet exposed by the API')
+    + ghostCard('Institutions & Locations','Manage the list of universities, colleges and neighbourhoods students search near.','fa-graduation-cap');
+
+  // Demand (inside analytics)
+  document.getElementById('demand-preview').innerHTML =
+    previewBanner('demand heatmap needs search-event tracking')
+    + `<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        ${ghostCard('Demand Heatmap','Most-searched areas across Kitwe, Lusaka, Ndola, Kabwe and Livingstone.','fa-fire')}
+        ${ghostCard('University Trends','Most-searched institutions and average price by area.','fa-arrow-trend-up')}
+       </div>`;
 }
 
-async function saveSettings() {
-    try {
-        const res = await fetch(`${API}/admin/settings/update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                platform_name:    document.getElementById('setting-name').value.trim(),
-                support_email:    document.getElementById('setting-email').value.trim(),
-                require_approval: document.getElementById('setting-approval').checked,
-                maintenance_mode: document.getElementById('setting-maintenance').checked,
-            }),
-        });
-        if (!res.ok) throw new Error();
-        const el = document.getElementById('settings-success');
-        el.classList.remove('hidden');
-        setTimeout(() => el.classList.add('hidden'), 3000);
-    } catch { /* fail silently */ }
+/* ====================================================================
+   SHARED UI HELPERS
+==================================================================== */
+function skeletonRows(rows, cols){
+  let out='';
+  for (let i=0;i<rows;i++){ out+='<tr>'; for (let c=0;c<cols;c++){ out+=`<td class="data-td"><div class="skeleton h-4 ${c===0?'w-32':'w-20'}"></div></td>`; } out+='</tr>'; }
+  return out;
 }
+function emptyRow(cols, msg){ return `<tr><td colspan="${cols}" class="px-5 py-12 text-center text-slate-400 text-sm">${msg}</td></tr>`; }
+function errorRow(cols, msg){ return `<tr><td colspan="${cols}" class="px-5 py-12 text-center text-red-400 text-sm"><i class="fas fa-triangle-exclamation mr-1.5"></i>${msg}</td></tr>`; }
+function errorBlock(msg){ return `<div class="px-5 py-12 text-center text-red-400 text-sm"><i class="fas fa-triangle-exclamation mr-1.5"></i>${msg}</div>`; }
 
-function showModal(title, body, cb) {
-    document.getElementById('modal-title').textContent = title;
-    document.getElementById('modal-body').textContent  = body;
-    modalCallback = cb;
-    document.getElementById('confirm-modal').classList.remove('hidden');
-    document.getElementById('modal-confirm-btn').onclick = async () => {
-        if (modalCallback) await modalCallback();
-        closeModal();
-    };
+function showModal(title, body, cb){
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = body;
+  modalCallback = cb;
+  document.getElementById('confirm-modal').classList.remove('hidden');
+  document.getElementById('modal-confirm-btn').onclick = async () => { if (modalCallback) await modalCallback(); closeModal(); };
 }
-function closeModal() { document.getElementById('confirm-modal').classList.add('hidden'); modalCallback = null; }
+function closeModal(){ document.getElementById('confirm-modal').classList.add('hidden'); modalCallback = null; }
 
-function showToast(msg, type = 'success') {
-    const old = document.getElementById('fmn-toast'); if (old) old.remove();
-    const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-    const icon  = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-    const t = document.createElement('div');
-    t.id = 'fmn-toast';
-    t.className = `fixed bottom-6 right-6 z-[9999] flex items-center gap-2 px-5 py-4 rounded-xl shadow-2xl font-bold text-sm text-white ${color} transition-all duration-300 opacity-0 translate-y-2`;
-    t.innerHTML = `<i class="fas ${icon}"></i>${msg}`;
-    document.body.appendChild(t);
-    requestAnimationFrame(() => t.classList.remove('opacity-0','translate-y-2'));
-    setTimeout(() => { t.classList.add('opacity-0','translate-y-2'); setTimeout(() => t.remove(), 300); }, 3500);
+function showToast(msg, type='success'){
+  const old = document.getElementById('fmn-toast'); if (old) old.remove();
+  const color = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+  const icon  = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+  const t = document.createElement('div');
+  t.id = 'fmn-toast';
+  t.className = `fixed bottom-6 right-6 z-[9999] flex items-center gap-2.5 px-5 py-3.5 rounded-2xl shadow-2xl font-bold text-sm text-white ${color} transition-all duration-300 opacity-0 translate-y-2`;
+  t.innerHTML = `<i class="fas ${icon}"></i>${msg}`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.remove('opacity-0','translate-y-2'));
+  setTimeout(() => { t.classList.add('opacity-0','translate-y-2'); setTimeout(() => t.remove(), 300); }, 3200);
 }
 </script>
 </body>
 </html>
-
-
