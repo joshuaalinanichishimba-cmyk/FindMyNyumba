@@ -17,7 +17,26 @@
   .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -16px rgba(15,23,42,.2); }
   #mobile-menu { transition: max-height .3s ease, opacity .3s ease; max-height:0; opacity:0; overflow:hidden; }
   #mobile-menu.menu-open { max-height:520px; opacity:1; }
+  /* Responsive-nav fallback: applies instantly so the menu is never broken before the Tailwind CDN finishes compiling on a fresh load */
+  .nav-desktop { display:none; }
+  .nav-hamburger { display:inline-flex; }
+  @media (min-width:768px){
+    .nav-desktop { display:flex; }
+    .nav-hamburger { display:none; }
+    #mobile-menu { display:none !important; }
+  }
 </style>
+<style>html.fmn-pending body{visibility:hidden!important}</style>
+<script>
+  /* Anti-flash: hide the page until the Tailwind CDN has compiled its styles, with a safety timer so it always reveals even if the CDN is slow or blocked. */
+  document.documentElement.classList.add('fmn-pending');
+  (function () {
+    function reveal(){ document.documentElement.classList.remove('fmn-pending'); }
+    document.addEventListener('DOMContentLoaded', function(){ requestAnimationFrame(function(){ requestAnimationFrame(reveal); }); });
+    window.addEventListener('load', reveal);
+    setTimeout(reveal, 2500);
+  })();
+</script>
 </head>
 <body class="bg-white text-slate-800">
 
@@ -82,7 +101,7 @@
         <span id="logo-fallback-nav" class="hidden text-xl font-extrabold text-[#0f172a]">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
       </a>
 
-      <div class="hidden md:flex items-center gap-7">
+      <div class="nav-desktop hidden md:flex items-center gap-7">
         <a href="index.html" class="text-[#ea580c] font-bold text-sm relative after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-[#ea580c] after:rounded-full">Home</a>
         <a href="browse.html" class="text-slate-600 hover:text-[#ea580c] font-bold text-sm transition-colors">Listings</a>
         <a href="#areas" class="text-slate-600 hover:text-[#ea580c] font-bold text-sm transition-colors">Areas</a>
@@ -94,7 +113,7 @@
         <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors text-sm shadow-sm shadow-orange-200">List Your Property</a>
       </div>
 
-      <button id="mobile-nav-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors">
+      <button id="mobile-nav-toggle" class="nav-hamburger md:hidden items-center justify-center w-10 h-10 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors">
         <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
       </button>
     </div>
