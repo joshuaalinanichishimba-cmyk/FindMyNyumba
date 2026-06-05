@@ -166,6 +166,15 @@ def get_listing_detail(
         raise HTTPException(status_code=404, detail="Listing not found.")
 
     owner = db.query(User).filter(User.id == listing.owner_id).first()
+
+    # Fire-and-forget view tracking — never let it break the public page.
+    try:
+        from app.models.listing_event import ListingEvent
+        db.add(ListingEvent(listing_id=listing.id, kind="view"))
+        db.commit()
+    except Exception:
+        db.rollback()
+
     owner_data = None
     if owner:
         owner_data = {

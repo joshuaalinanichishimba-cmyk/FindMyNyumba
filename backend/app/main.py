@@ -27,6 +27,7 @@ from app.models.admin_models import (               # noqa: F401
     Transaction, Escrow, Institution, Notification,
     AuditLog, AdminNote, RolePermission,
 )
+from app.models.listing_event import ListingEvent   # noqa: F401
 
 # ── Create any missing DB tables (idempotent — safe to run on every startup) ──
 Base.metadata.create_all(bind=engine)

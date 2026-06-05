@@ -26,6 +26,7 @@ import csv
 import io
 import json
 from datetime import datetime, timezone, date
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -40,6 +41,8 @@ from app.models.user import User
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.message import Message
+from app.models.saved_listing import SavedListing
+from app.models.listing_event import ListingEvent
 from app.models.admin_models import (
     Transaction, Escrow, Institution, Notification, AuditLog, AdminNote,
     RolePermission,
@@ -116,6 +119,47 @@ def compute_risk(user: User, db: Session) -> tuple[int, str]:
 
 TXN_SOURCE_KEYS = ["verification_fee", "featured", "boost", "escrow_deposit", "viewing_fee"]
 
+_VERIFY_DIR = Path("static/uploads/verification")
+
+
+def _user_documents(user_id: int, request: Request, verification_status: str | None) -> list:
+    """
+    Surface a landlord's uploaded verification files (same on-disk pattern as
+    admin.py's verification queue: {user_id}_doc1_* and {user_id}_doc2_*).
+    Returns the shape the listing/user detail document panel expects.
+    """
+    docs = []
+    if not _VERIFY_DIR.exists():
+        return docs
+    base = str(request.base_url).rstrip("/")
+    mapping = [("doc1", "nrc_front"), ("doc2", "ownership")]
+    for tag, doc_type in mapping:
+        found = sorted(_VERIFY_DIR.glob(f"{user_id}_{tag}_*"))
+        if found:
+            docs.append({
+                "doc_type": doc_type,
+                "url": f"{base}/static/uploads/verification/{found[-1].name}",
+                "status": verification_status or "pending",
+            })
+    return docs
+
+
+def _listing_engagement(listing_id: int, db: Session) -> dict:
+    """Real engagement: views from events, contacts from messages, saves from SavedListing."""
+    views = db.query(ListingEvent).filter(
+        ListingEvent.listing_id == listing_id, ListingEvent.kind == "view").count()
+    try:
+        contacts = (db.query(Message.sender_id)
+                    .filter(Message.property_id == listing_id)
+                    .distinct().count())
+    except Exception:
+        contacts = 0
+    try:
+        saves = db.query(SavedListing).filter(SavedListing.listing_id == listing_id).count()
+    except Exception:
+        saves = 0
+    return {"views": views, "contacts": contacts, "saves": saves}
+
 
 # ── Request bodies ───────────────────────────────────────────────────────────────
 class ReasonBody(BaseModel):
@@ -169,6 +213,9 @@ def admin_listing_detail(listing_id: int, request: Request,
             note_authors[n.author_id] = u.full_name if u else "admin"
 
     risk_score, risk_band = (compute_risk(owner, db) if owner else (None, None))
+    engagement = _listing_engagement(listing_id, db)
+    owner_docs = (_user_documents(owner.id, request, owner.verification_status)
+                  if owner else [])
 
     return {
         "id": listing.id,
@@ -195,13 +242,15 @@ def admin_listing_detail(listing_id: int, request: Request,
             "phone_verified": bool(owner.phone_number),
         } if owner else {}),
         "analytics": {
-            "views": None, "contacts": None, "saves": None,
-            "reports": len(reports), "conversion": None,
+            "views": engagement["views"], "contacts": engagement["contacts"],
+            "saves": engagement["saves"], "reports": len(reports),
+            "conversion": (round(engagement["contacts"] / engagement["views"] * 100, 1)
+                           if engagement["views"] else None),
         },
         "media": [
             {"url": m.media_url, "kind": m.media_type} for m in (listing.media or [])
         ],
-        "documents": [],                 # wire to a verification_documents table later
+        "documents": owner_docs,
         "timeline": [
             {"text": f"Listing created", "ts": _iso(listing.created_at), "kind": "create"},
         ],
@@ -285,7 +334,8 @@ def admin_add_note(listing_id: int, body: NoteBody, request: Request,
 #  USER DETAIL  (drill into one student / landlord / staff member)
 # ══════════════════════════════════════════════════════════════════════════════
 @router.get("/admin/users/{user_id}")
-def admin_user_detail(user_id: int, admin: User = Depends(require_admin),
+def admin_user_detail(user_id: int, request: Request,
+                      admin: User = Depends(require_admin),
                       db: Session = Depends(get_db)):
     u = db.query(User).filter(User.id == user_id).first()
     if not u:
@@ -333,6 +383,7 @@ def admin_user_detail(user_id: int, admin: User = Depends(require_admin),
         },
         "risk_score": risk_score,
         "risk_band": risk_band,
+        "documents": _user_documents(u.id, request, u.verification_status),
         "listings": [
             {"id": l.id, "title": l.title, "status": l.status,
              "price": l.price, "location": l.location} for l in listing_rows
@@ -560,6 +611,94 @@ def admin_conversations(admin: User = Depends(require_admin), db: Session = Depe
         if not m.is_read:
             convos[key]["unread"] += 1
     return list(convos.values())
+
+
+def _msg_dict(m, admin_id):
+    return {
+        "id": m.id, "sender_id": m.sender_id, "receiver_id": m.receiver_id,
+        "content": m.content, "is_read": m.is_read,
+        "mine": (m.sender_id == admin_id),
+        "created_at": _iso(m.created_at),
+    }
+
+
+@router.get("/admin/conversations/{conv_id}/messages")
+def admin_conversation_thread(conv_id: str, admin: User = Depends(require_admin),
+                              db: Session = Depends(get_db)):
+    """Read a thread for a 'a-b' user pair (from the Support inbox)."""
+    try:
+        a, b = (int(x) for x in conv_id.split("-", 1))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Bad conversation id.")
+    msgs = (db.query(Message)
+            .filter(((Message.sender_id == a) & (Message.receiver_id == b)) |
+                    ((Message.sender_id == b) & (Message.receiver_id == a)))
+            .order_by(Message.created_at.asc()).all())
+    names = {}
+    for uid in (a, b):
+        u = db.query(User).filter(User.id == uid).first()
+        names[uid] = u.full_name if u else f"User {uid}"
+    return {"participants": names, "messages": [_msg_dict(m, admin.id) for m in msgs]}
+
+
+@router.get("/admin/messages/{user_id}")
+def admin_thread_with_user(user_id: int, admin: User = Depends(require_admin),
+                           db: Session = Depends(get_db)):
+    """The admin's own thread with one user (for the 'Message user' panel)."""
+    u = db.query(User).filter(User.id == user_id).first()
+    if not u:
+        raise HTTPException(status_code=404, detail="User not found.")
+    msgs = (db.query(Message)
+            .filter(((Message.sender_id == admin.id) & (Message.receiver_id == user_id)) |
+                    ((Message.sender_id == user_id) & (Message.receiver_id == admin.id)))
+            .order_by(Message.created_at.asc()).all())
+    # mark messages from the user as read
+    for m in msgs:
+        if m.receiver_id == admin.id and not m.is_read:
+            m.is_read = True
+    db.commit()
+    return {"user": {"id": u.id, "full_name": u.full_name, "email": u.email},
+            "messages": [_msg_dict(m, admin.id) for m in msgs]}
+
+
+class SendMessageBody(BaseModel):
+    receiver_id: int
+    content: str
+
+
+@router.post("/admin/messages", status_code=201)
+def admin_send_message(body: SendMessageBody, request: Request,
+                       admin: User = Depends(require_admin),
+                       db: Session = Depends(get_db)):
+    content = (body.content or "").strip()
+    if not content:
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+    target = db.query(User).filter(User.id == body.receiver_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Recipient not found.")
+    msg = Message(sender_id=admin.id, receiver_id=body.receiver_id,
+                  content=content, is_read=False)
+    db.add(msg)
+    # notify the recipient in-app
+    db.add(Notification(user_id=body.receiver_id, type="message",
+                        title="Message from FindMyNyumba", body=content[:140]))
+    db.commit()
+    write_audit(db, request, admin, "message.send", "user", body.receiver_id)
+    return {"status": "success", "id": msg.id}
+
+
+@router.get("/admin/risk/landlords")
+def admin_risk_landlords(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    """Computed risk for every landlord / student-host, highest first."""
+    owners = (db.query(User)
+              .filter(User.role.in_(["landlord", "student_host"])).all())
+    out = []
+    for u in owners:
+        score, band = compute_risk(u, db)
+        out.append({"id": u.id, "full_name": u.full_name, "email": u.email,
+                    "risk_score": score, "risk_band": band})
+    out.sort(key=lambda x: x["risk_score"], reverse=True)
+    return out
 
 
 # ══════════════════════════════════════════════════════════════════════════════
