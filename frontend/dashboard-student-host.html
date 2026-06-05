@@ -35,6 +35,18 @@
 
         .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tbl-scroll table { min-width: 520px; }
+        @media (max-width: 640px) {
+            .tbl-scroll table { min-width: 0; }
+            .resp-table thead { display: none; }
+            .resp-table tbody, .resp-table tr, .resp-table td { display: block; width: 100%; }
+            .resp-table tr { border: 1px solid #f1f5f9; border-radius: 14px; margin: 10px; padding: 4px 0; }
+            .resp-table td { padding: 8px 16px !important; display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 0; }
+            .resp-table td::before { content: attr(data-label); font-weight: 800; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; flex-shrink: 0; }
+            .resp-table td[data-label="Property"] { display: block; }
+            .resp-table td[data-label="Property"]::before { display: block; margin-bottom: 6px; }
+            .resp-table td[data-label="Actions"] { justify-content: flex-start; }
+            .resp-table td[data-label="Actions"]::before { align-self: center; }
+        }
 
         .fmn-input { width:100%; padding:10px 13px; border:1.5px solid #e5e7eb; border-radius:10px; outline:none; font-size:14px; transition:border-color 0.15s; background:#fafafa; }
         .fmn-input:focus { border-color:var(--orange); background:#fff; }
@@ -198,8 +210,8 @@
                     <i class="fas fa-plus"></i> Add New Listing
                 </button>
             </div>
-            <div class="tbl-scroll bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-                <table class="w-full text-left">
+            <div class="tbl-scroll bg-white rounded-2xl shadow-sm border border-gray-100">
+                <table class="w-full text-left resp-table">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr class="text-xs font-bold uppercase text-gray-400 tracking-wide">
                             <th class="px-5 py-3">Property</th>
@@ -279,12 +291,34 @@
                         <h3 class="text-sm font-black text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-house-user text-[#ea580c]"></i> About the Space</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Type of Space</label>
+                                <select id="prop-type" class="fmn-input">
+                                    <option value="">Select…</option>
+                                    <option value="bedspace">Bedspace</option>
+                                    <option value="squatting">Squatting</option>
+                                    <option value="room">Single Room</option>
+                                    <option value="self-contained">Self-Contained</option>
+                                    <option value="shared">Shared Room</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Gender Allowed</label>
+                                <select id="prop-gender" class="fmn-input">
+                                    <option value="mixed">Mixed / Any</option>
+                                    <option value="male">Male only</option>
+                                    <option value="female">Female only</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Total Bedspaces</label>
                                 <input type="number" id="prop-spots" value="1" min="1" max="50" required class="fmn-input">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Gender Preference <span class="text-gray-300 normal-case">(soon)</span></label>
-                                <select class="fmn-input" disabled><option>Any</option><option>Male</option><option>Female</option></select>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Availability</label>
+                                <select id="prop-availability" class="fmn-input">
+                                    <option value="immediate">Available now</option>
+                                    <option value="coming-soon">Coming soon</option>
+                                </select>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -293,38 +327,160 @@
                         </div>
                     </div>
 
+                    <!-- 📍 Exact Location -->
                     <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="text-sm font-black text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-list-check text-[#ea580c]"></i> Amenities &amp; House Rules</h3>
-                        <p class="text-[11px] text-gray-400 mb-4">Visual for now &mdash; saving these to a listing needs a small backend update.</p>
+                        <h3 class="text-sm font-black text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-location-dot text-[#ea580c]"></i> Exact Location</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Campus Area / Hostel Name</label>
+                                <input type="text" id="prop-campus-area" placeholder="e.g. Buchi, near CBU gate" class="fmn-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Distance from Campus</label>
+                                <input type="text" id="prop-distance" placeholder="e.g. 5 min walk / 1.2 km" class="fmn-input">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nearby Landmarks</label>
+                                <input type="text" id="prop-landmarks" placeholder="e.g. opposite Shoprite, near the main gate" class="fmn-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🏡 Room Details -->
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-bed text-[#ea580c]"></i> Room Details</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Bed Type</label>
+                                <select id="prop-bedtype" class="fmn-input">
+                                    <option value="">Select…</option><option value="bunk">Bunk bed</option>
+                                    <option value="single">Single bed</option><option value="double">Double bed</option>
+                                    <option value="mattress">Mattress only</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Room Size</label>
+                                <select id="prop-roomsize" class="fmn-input">
+                                    <option value="">Select…</option><option value="small">Small</option>
+                                    <option value="medium">Medium</option><option value="large">Large</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">People Sharing the Room</label>
+                                <input type="number" id="prop-sharing" min="1" max="20" placeholder="e.g. 2" class="fmn-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Furniture Included</label>
+                                <input type="text" id="prop-furniture" placeholder="e.g. table, wardrobe, chair" class="fmn-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-list-check text-[#ea580c]"></i> Facilities Available</h3>
+                        <p class="text-[11px] text-gray-400 mb-4">Tick everything the space offers.</p>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
                             <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-wifi text-gray-400"></i> <span class="font-semibold text-gray-700">WiFi</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-droplet text-gray-400"></i> <span class="font-semibold text-gray-700">Water</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-bolt text-gray-400"></i> <span class="font-semibold text-gray-700">Electricity</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-utensils text-gray-400"></i> <span class="font-semibold text-gray-700">Kitchen</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-bed text-gray-400"></i> <span class="font-semibold text-gray-700">Furnished</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-shield-halved text-gray-400"></i> <span class="font-semibold text-gray-700">Security</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-car text-gray-400"></i> <span class="font-semibold text-gray-700">Parking</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-tv text-gray-400"></i> <span class="font-semibold text-gray-700">TV / Lounge</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
-                        <input type="checkbox" class="accent-[#ea580c]"> <i class="fas fa-temperature-half text-gray-400"></i> <span class="font-semibold text-gray-700">Hot Water</span>
-                    </label>
-                    
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="WiFi"> <i class="fas fa-wifi text-gray-400"></i> <span class="font-semibold text-gray-700">WiFi</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="Water"> <i class="fas fa-droplet text-gray-400"></i> <span class="font-semibold text-gray-700">Water</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="Electricity"> <i class="fas fa-bolt text-gray-400"></i> <span class="font-semibold text-gray-700">Electricity</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="Kitchen"> <i class="fas fa-utensils text-gray-400"></i> <span class="font-semibold text-gray-700">Kitchen</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="Furnished"> <i class="fas fa-bed text-gray-400"></i> <span class="font-semibold text-gray-700">Furnished</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="Security"> <i class="fas fa-shield-halved text-gray-400"></i> <span class="font-semibold text-gray-700">Security</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="Parking"> <i class="fas fa-car text-gray-400"></i> <span class="font-semibold text-gray-700">Parking</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="TV/Lounge"> <i class="fas fa-tv text-gray-400"></i> <span class="font-semibold text-gray-700">TV / Lounge</span></label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-100 bg-gray-50 cursor-pointer hover:border-orange-200">
+                                <input type="checkbox" class="sh-amenity accent-[#ea580c]" value="Hot Water"> <i class="fas fa-temperature-half text-gray-400"></i> <span class="font-semibold text-gray-700">Hot Water</span></label>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Bathroom Type</label>
+                                <select id="prop-bathroom" class="fmn-input">
+                                    <option value="">Select…</option><option value="shared">Shared</option><option value="private">Private</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Security</label>
+                                <select id="prop-security" class="fmn-input">
+                                    <option value="">Select…</option><option value="guard">Guard</option><option value="gate">Gated</option><option value="none">None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 💰 Payment Transparency -->
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-money-bill-wave text-[#ea580c]"></i> Payment Transparency</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Payment Terms</label>
+                                <select id="prop-payment-terms" class="fmn-input">
+                                    <option value="">Select…</option><option value="monthly">Per month</option>
+                                    <option value="semester">Per semester</option><option value="academic-year">Academic year</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Deposit Required?</label>
+                                <select id="prop-deposit" class="fmn-input">
+                                    <option value="no">No deposit</option><option value="yes">Deposit required</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Extra Fees</label>
+                                <input type="text" id="prop-extra-fees" placeholder="e.g. electricity, water, cleaning" class="fmn-input">
+                            </div>
+                        </div>
+                        <label class="flex items-center gap-2 mt-3 text-sm font-semibold text-gray-700"><input type="checkbox" id="prop-no-hidden" class="accent-[#ea580c]"> No hidden fees</label>
+                    </div>
+
+                    <!-- ⚠️ Rules & House Conditions -->
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-clipboard-list text-[#ea580c]"></i> Rules &amp; House Conditions</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Curfew</label>
+                                <input type="text" id="prop-curfew" placeholder="e.g. Gate closes 22:00 / None" class="fmn-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Guest Policy</label>
+                                <input type="text" id="prop-guests" placeholder="e.g. No overnight guests" class="fmn-input">
+                            </div>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-4 text-sm font-semibold text-gray-700">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="sh-rule accent-[#ea580c]" value="No smoking"> No smoking</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="sh-rule accent-[#ea580c]" value="No cooking in room"> No cooking in room</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="sh-rule accent-[#ea580c]" value="Quiet hours"> Quiet hours</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="sh-rule accent-[#ea580c]" value="Keep shared areas clean"> Cleaning rota</label>
+                        </div>
+                    </div>
+
+                    <!-- 📩 Contact & Verify -->
+                    <div class="bg-white p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-black text-gray-900 mb-1 flex items-center gap-2"><i class="fas fa-headset text-[#ea580c]"></i> Contact &amp; Verify</h3>
+                        <p class="text-[11px] text-gray-400 mb-4">Students reach you in-app, or via the number below if you allow it.</p>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">WhatsApp / Call Number</label>
+                            <input type="tel" id="prop-contact-phone" placeholder="+260…" class="fmn-input">
+                        </div>
+                        <div class="flex flex-wrap gap-4 mt-3 text-sm font-semibold text-gray-700">
+                            <label class="flex items-center gap-2"><input type="checkbox" id="prop-allow-call" class="accent-[#ea580c]" checked> <i class="fas fa-phone text-emerald-500"></i> Allow calls</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="prop-allow-whatsapp" class="accent-[#ea580c]" checked> <i class="fab fa-whatsapp text-green-500"></i> Allow WhatsApp</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="prop-allow-sms" class="accent-[#ea580c]"> <i class="fas fa-comment-sms text-blue-500"></i> Allow SMS</label>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Auto-reply Message <span class="text-gray-300 normal-case">(optional)</span></label>
+                            <input type="text" id="prop-autoreply" placeholder="e.g. Hi! Thanks for your interest — I usually reply within an hour." class="fmn-input">
+                        </div>
+                        <div id="sh-number-verify" class="mt-3 flex items-start gap-2 text-xs bg-amber-50 border border-amber-100 rounded-xl p-3 text-amber-700">
+                            <i class="fas fa-shield-halved mt-0.5"></i>
+                            <span>Verify this number so students can trust it. <button type="button" onclick="switchTab('verification')" class="font-bold underline">Verify now</button>.</span>
                         </div>
                     </div>
 
@@ -743,14 +899,14 @@ async function loadListings() {
             const spots = `${p.available_spots ?? p.total_spots ?? 1}/${p.total_spots ?? 1}`;
             const safeTitle = (p.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
             return `<tr class="hover:bg-slate-50 transition border-b border-gray-50">
-                <td class="px-5 py-4"><div class="flex items-center">${img}<div><p class="font-bold text-gray-900 text-sm">${p.title}</p><p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-map-marker-alt mr-1"></i>${p.location}</p></div></div></td>
-                <td class="px-5 py-4 font-bold text-sm text-gray-700">ZMW ${Number(p.price).toLocaleString()}</td>
-                <td class="px-5 py-4">
+                <td data-label="Property" class="px-5 py-4"><div class="flex items-center">${img}<div><p class="font-bold text-gray-900 text-sm">${p.title}</p><p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-map-marker-alt mr-1"></i>${p.location}</p></div></div></td>
+                <td data-label="Price" class="px-5 py-4 font-bold text-sm text-gray-700">ZMW ${Number(p.price).toLocaleString()}</td>
+                <td data-label="Spots" class="px-5 py-4">
                     <span class="text-xs font-bold text-gray-600">${spots} spots</span>
                     <button onclick="toggleAvailability(${p.id}, '${avail}')" class="ml-2 ${availBtnClass} text-white text-[10px] font-black px-2 py-0.5 rounded-lg inline-flex items-center gap-1 transition" title="Toggle availability"><i class="fas ${availIcon}"></i>${availLabel}</button>
                 </td>
-                <td class="px-5 py-4"><span class="px-2 py-0.5 ${badge} text-[10px] font-black rounded-lg uppercase">${p.status || 'pending'}</span>${p.is_boosted ? '<span class="ml-2 badge-boosted px-2 py-0.5 text-[10px] font-black rounded-lg uppercase"><i class="fas fa-bolt mr-1"></i>Boosted</span>' : ''}</td>
-                <td class="px-5 py-4">
+                <td data-label="Status" class="px-5 py-4"><span class="px-2 py-0.5 ${badge} text-[10px] font-black rounded-lg uppercase">${p.status || 'pending'}</span>${p.is_boosted ? '<span class="ml-2 badge-boosted px-2 py-0.5 text-[10px] font-black rounded-lg uppercase"><i class="fas fa-bolt mr-1"></i>Boosted</span>' : ''}</td>
+                <td data-label="Actions" class="px-5 py-4">
                     <div class="flex items-center gap-1">
                         <button onclick='openEditModal(${JSON.stringify(p).replace(/'/g,"&#39;")})' class="text-blue-500 hover:text-blue-700 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 transition" title="Edit"><i class="fas fa-pen text-sm"></i></button>
                         <button onclick="deleteProperty(${p.id}, '${safeTitle}', this)" class="text-red-500 hover:text-red-700 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 transition" title="Delete"><i class="fas fa-trash text-sm"></i></button>
@@ -953,6 +1109,7 @@ function loadProfile() {
     const el = (id) => document.getElementById(id);
     if (el('prof-name'))  el('prof-name').value  = _currentUser.full_name || '';
     if (el('prof-phone')) el('prof-phone').value = _currentUser.phone     || '';
+    if (el('prop-contact-phone') && !el('prop-contact-phone').value) el('prop-contact-phone').value = _currentUser.phone || '';
     if (el('prof-email')) el('prof-email').value = _currentUser.email     || '';
 }
 
@@ -1034,6 +1191,42 @@ document.addEventListener('DOMContentLoaded', () => {
         fd.append('description', document.getElementById('prop-desc').value.trim());
         fd.append('nearest_institution', document.getElementById('prop-university')?.value || '');
         fd.append('total_spots', document.getElementById('prop-spots')?.value || '1');
+
+        // ── 12-section structured fields → one JSON `details` field ──
+        const _v = id => (document.getElementById(id)?.value || '').trim();
+        const _checked = sel => Array.from(document.querySelectorAll(sel)).filter(c => c.checked).map(c => c.value);
+        const contactPhone = _v('prop-contact-phone');
+        const details = {
+            type: _v('prop-type'), gender: _v('prop-gender'), availability: _v('prop-availability'),
+            campus_area: _v('prop-campus-area'), distance: _v('prop-distance'), landmarks: _v('prop-landmarks'),
+            bed_type: _v('prop-bedtype'), room_size: _v('prop-roomsize'), sharing: _v('prop-sharing'), furniture: _v('prop-furniture'),
+            facilities: _checked('.sh-amenity'), bathroom: _v('prop-bathroom'), security: _v('prop-security'),
+            payment_terms: _v('prop-payment-terms'), deposit: _v('prop-deposit'), extra_fees: _v('prop-extra-fees'),
+            no_hidden_fees: document.getElementById('prop-no-hidden')?.checked || false,
+            curfew: _v('prop-curfew'), guest_policy: _v('prop-guests'), rules: _checked('.sh-rule'),
+            contact: {
+                phone: contactPhone,
+                call: document.getElementById('prop-allow-call')?.checked || false,
+                whatsapp: document.getElementById('prop-allow-whatsapp')?.checked || false,
+                sms: document.getElementById('prop-allow-sms')?.checked || false,
+                auto_reply: _v('prop-autoreply')
+            }
+        };
+        fd.append('details', JSON.stringify(details));
+        if (details.type) fd.append('listing_type', details.type);
+        fd.append('availability_status', details.availability === 'coming-soon' ? 'coming-soon' : 'available');
+
+        // Save the WhatsApp/Call number to the host's profile so the public
+        // listing's Call/WhatsApp/SMS buttons have a number (best-effort).
+        try {
+            if (contactPhone && typeof _currentUser !== 'undefined' && contactPhone !== (_currentUser?.phone || '')) {
+                fetch(`${API_BASE}/student-host/profile`, {
+                    method: 'PUT', headers: authHeaders(true),
+                    body: JSON.stringify({ full_name: _currentUser?.full_name || '', phone: contactPhone })
+                }).then(() => { if (_currentUser) _currentUser.phone = contactPhone; }).catch(() => {});
+            }
+        } catch {}
+
         // Option B: send the new `media` field (photos + videos). `images` stays
         // supported by the backend for older clients, but this form now uses media.
         if (propMediaUploader) propMediaUploader.appendTo(fd);
