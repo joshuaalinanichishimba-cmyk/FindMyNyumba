@@ -39,6 +39,7 @@ from app.core.database import get_db
 from app.models.user import User
 from app.models.listing import Listing
 from app.models.report import Report
+from app.models.message import Message
 from app.models.admin_models import (
     Transaction, Escrow, Institution, Notification, AuditLog, AdminNote,
     RolePermission,
@@ -290,10 +291,14 @@ def admin_user_detail(user_id: int, admin: User = Depends(require_admin),
     if not u:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    listings = db.query(Listing).filter(Listing.owner_id == user_id).all()
-    active = sum(1 for l in listings if l.status == "active")
-    suspended = sum(1 for l in listings if l.status == "suspended")
-    listing_ids = [l.id for l in listings]
+    # Select only legacy columns so this endpoint works even if the
+    # listing_type/lat/long migration hasn't run yet (avoids a 500).
+    listing_rows = (db.query(Listing.id, Listing.title, Listing.status,
+                             Listing.price, Listing.location)
+                    .filter(Listing.owner_id == user_id).all())
+    active = sum(1 for l in listing_rows if l.status == "active")
+    suspended = sum(1 for l in listing_rows if l.status == "suspended")
+    listing_ids = [l.id for l in listing_rows]
     reports_against = (db.query(Report).filter(Report.listing_id.in_(listing_ids)).count()
                        if listing_ids else 0)
     risk_score, risk_band = compute_risk(u, db)
@@ -316,7 +321,7 @@ def admin_user_detail(user_id: int, admin: User = Depends(require_admin),
         "created_at": _iso(u.created_at),
         "last_login": _iso(u.last_login),
         "stats": {
-            "listings": len(listings),
+            "listings": len(listing_rows),
             "active_listings": active,
             "suspended_listings": suspended,
             "reports_against": reports_against,
@@ -330,7 +335,7 @@ def admin_user_detail(user_id: int, admin: User = Depends(require_admin),
         "risk_band": risk_band,
         "listings": [
             {"id": l.id, "title": l.title, "status": l.status,
-             "price": l.price, "location": l.location} for l in listings
+             "price": l.price, "location": l.location} for l in listing_rows
         ],
     }
 
@@ -520,9 +525,41 @@ def admin_delete_institution(inst_id: int, request: Request,
 # ══════════════════════════════════════════════════════════════════════════════
 @router.get("/admin/conversations")
 def admin_conversations(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
-    # TODO: build from app.models.message.Message once its columns are confirmed.
-    # Returning [] makes the Support panel show its clean "waiting" state.
-    return []
+    """Group the messages table into conversations (one per user-pair)."""
+    msgs = db.query(Message).order_by(Message.created_at.desc()).all()
+    name_cache, role_cache = {}, {}
+
+    def info(uid):
+        if uid not in name_cache:
+            u = db.query(User).filter(User.id == uid).first()
+            name_cache[uid] = (u.full_name if u else f"User {uid}")
+            role_cache[uid] = (u.role if u else None)
+        return name_cache[uid], role_cache[uid]
+
+    convos: dict = {}
+    for m in msgs:                       # newest-first, so first seen per pair is latest
+        key = tuple(sorted([m.sender_id, m.receiver_id]))
+        if key not in convos:
+            a_name, a_role = info(key[0])
+            b_name, b_role = info(key[1])
+            roles = {a_role, b_role}
+            if "admin" in roles:
+                kind = "student_support"
+            elif "student" in roles and ("landlord" in roles or "student_host" in roles):
+                kind = "student_landlord"
+            else:
+                kind = "student_landlord"
+            convos[key] = {
+                "id": f"{key[0]}-{key[1]}",
+                "kind": kind,
+                "participant_name": f"{a_name} ↔ {b_name}",
+                "last_message": m.content,
+                "last_at": m.created_at.strftime("%b %d") if m.created_at else "",
+                "unread": 0,
+            }
+        if not m.is_read:
+            convos[key]["unread"] += 1
+    return list(convos.values())
 
 
 # ══════════════════════════════════════════════════════════════════════════════
