@@ -137,7 +137,7 @@
         <div class="sb-group-label px-3 mb-2">Management</div>
         <div class="sb-link" id="nav-users" onclick="showTab('users')"><i class="fas fa-users"></i>Users</div>
         <div class="sb-link" id="nav-listings" onclick="showTab('listings')"><i class="fas fa-building"></i>Listings</div>
-        <div class="sb-link" id="nav-institutions" onclick="showTab('institutions')"><i class="fas fa-graduation-cap"></i>Institutions<span class="sb-soon">SOON</span></div>
+        <div class="sb-link" id="nav-institutions" onclick="showTab('institutions')"><i class="fas fa-graduation-cap"></i>Institutions</div>
       </div>
 
       <div class="space-y-1">
@@ -149,8 +149,9 @@
 
       <div class="space-y-1">
         <div class="sb-group-label px-3 mb-2">Financial</div>
-        <div class="sb-link" id="nav-revenue" onclick="showTab('revenue')"><i class="fas fa-coins"></i>Revenue<span class="sb-soon">SOON</span></div>
-        <div class="sb-link" id="nav-escrow" onclick="showTab('escrow')"><i class="fas fa-vault"></i>Escrow<span class="sb-soon">SOON</span></div>
+        <div class="sb-link" id="nav-revenue" onclick="showTab('revenue')"><i class="fas fa-coins"></i>Revenue</div>
+        <div class="sb-link" id="nav-transactions" onclick="showTab('transactions')"><i class="fas fa-receipt"></i>Transactions</div>
+        <div class="sb-link" id="nav-escrow" onclick="showTab('escrow')"><i class="fas fa-vault"></i>Escrow</div>
       </div>
 
       <div class="space-y-1">
@@ -161,7 +162,7 @@
       <div class="space-y-1">
         <div class="sb-group-label px-3 mb-2">System</div>
         <div class="sb-link" id="nav-announcements" onclick="showTab('announcements')"><i class="fas fa-bullhorn"></i>Announcements</div>
-        <div class="sb-link" id="nav-support" onclick="showTab('support')"><i class="fas fa-headset"></i>Support<span class="sb-soon">SOON</span></div>
+        <div class="sb-link" id="nav-support" onclick="showTab('support')"><i class="fas fa-headset"></i>Support</div>
         <div class="sb-link" id="nav-system" onclick="showTab('system')"><i class="fas fa-heart-pulse"></i>System Health</div>
         <div class="sb-link" id="nav-settings" onclick="showTab('settings')"><i class="fas fa-gear"></i>Settings</div>
       </div>
@@ -194,10 +195,19 @@
       </div>
 
       <div class="flex items-center gap-2 ml-auto">
-        <button class="relative w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-500" onclick="showTab('trust')" title="Notifications">
-          <i class="fas fa-bell"></i>
-          <span id="notif-dot" class="hidden absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full ring-2 ring-white"></span>
-        </button>
+        <div class="relative">
+          <button class="relative w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-500" onclick="toggleNotifMenu()" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span id="notif-dot" class="hidden absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full ring-2 ring-white"></span>
+          </button>
+          <div id="notif-menu" class="hidden absolute right-0 mt-2 w-[340px] card p-0 z-50 overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <span class="font-extrabold text-slate-900 text-[13.5px]">Notifications</span>
+              <button onclick="markAllNotifsRead()" class="text-[11px] font-bold text-orange-600 hover:text-orange-700">Mark all read</button>
+            </div>
+            <div id="notif-list" class="max-h-[360px] overflow-y-auto"></div>
+          </div>
+        </div>
 
         <div class="relative">
           <button onclick="toggleProfileMenu()" class="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-100 transition">
@@ -411,6 +421,11 @@
       <section id="tab-support" class="tab-section"></section>
 
       <!-- ============================================================
+           TRANSACTIONS
+      ============================================================= -->
+      <section id="tab-transactions" class="tab-section"></section>
+
+      <!-- ============================================================
            ANALYTICS — Growth (LIVE) + Demand (PREVIEW)
       ============================================================= -->
       <section id="tab-analytics" class="tab-section">
@@ -525,6 +540,20 @@
           </div>
         </div>
       </div>
+
+      <!-- ===================== LISTING DETAIL SLIDE-OVER ===================== -->
+      <div id="listing-detail" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/50" onclick="closeListingDetail()"></div>
+        <aside id="ld-panel" class="absolute right-0 inset-y-0 w-full max-w-[940px] bg-[#f8fafc] shadow-2xl overflow-y-auto translate-x-full transition-transform duration-300">
+          <div id="ld-content"></div>
+        </aside>
+      </div>
+
+      <!-- ===================== IMAGE LIGHTBOX ===================== -->
+      <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-slate-900/90 flex items-center justify-center p-4" onclick="closeLightbox()">
+        <button class="absolute top-5 right-5 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white text-xl" onclick="closeLightbox()"><i class="fas fa-xmark"></i></button>
+        <img id="lightbox-img" src="" alt="" class="max-h-[88vh] max-w-[92vw] rounded-xl object-contain">
+      </div>
     </main>
   </div>
 </div>
@@ -582,7 +611,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (nameEl) nameEl.textContent = name;
   if (avatarEl) avatarEl.textContent = (name.trim()[0] || 'A').toUpperCase();
 
-  buildPreviewSections();
+  buildModuleSections();
+  loadNotifications();
   loadDashboard();
 });
 
@@ -600,9 +630,10 @@ const TAB_META = {
   trust:       ['Trust & Safety',     'Reports, complaints and moderation'],
   fraud:       ['Fraud Center',       'Risk scoring and investigations'],
   revenue:     ['Revenue',            'Earnings and financial performance'],
+  transactions:['Transactions',       'Every payment across the platform'],
   escrow:      ['Escrow',             'Secured deposit transactions'],
   institutions:['Institutions',       'Universities and colleges'],
-  support:     ['Support',            'Tickets and customer care'],
+  support:     ['Support',            'Messages and customer care'],
   analytics:   ['Analytics',          'Growth and student demand'],
   announcements:['Announcements',     'Broadcast messages to users'],
   system:      ['System Health',      'Live infrastructure status'],
@@ -624,10 +655,15 @@ function showTab(name){
   if (name === 'listings')      loadListings();
   if (name === 'verifications') loadVerifications();
   if (name === 'trust')         loadReports();
-  if (name === 'fraud')         loadFraud();
+  if (name === 'fraud')         { loadFraud(); loadFraudExtras(); }
   if (name === 'revenue')       loadRevenue();
-  if (name === 'analytics')     loadAnalytics();
+  if (name === 'transactions')  loadTransactions();
+  if (name === 'escrow')        loadEscrow();
+  if (name === 'institutions')  loadInstitutions();
+  if (name === 'support')       loadSupport();
+  if (name === 'analytics')     { loadAnalytics(); loadSearchGeo(); }
   if (name === 'system')        loadSystemHealth();
+  if (name === 'settings')      loadRoles();
 }
 
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('overlay').classList.toggle('hidden'); }
@@ -724,7 +760,7 @@ async function loadDashboard(){
   const rl = document.getElementById('recent-listings');
   const recent = _listings.slice(0, 5);
   rl.innerHTML = recent.length ? recent.map(l => `
-    <div class="px-5 py-3.5 flex items-center gap-3 hover:bg-slate-50 transition">
+    <div class="px-5 py-3.5 flex items-center gap-3 hover:bg-slate-50 transition cursor-pointer" onclick="openListingDetail(${l.id})">
       <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fas fa-house"></i></div>
       <div class="min-w-0 flex-1">
         <div class="font-bold text-slate-800 text-[13.5px] truncate">${esc(l.title)}</div>
@@ -862,12 +898,13 @@ function renderListings(){
   if (!rows.length) { tbody.innerHTML = emptyRow(5,'No listings match your filters.'); return; }
   tbody.innerHTML = rows.map(l => `
     <tr class="hover:bg-slate-50">
-      <td class="data-td font-bold text-slate-900 max-w-[220px]"><span class="block truncate">${esc(l.title)}</span></td>
+      <td class="data-td font-bold text-slate-900 max-w-[220px]"><button onclick="openListingDetail(${l.id})" class="block truncate text-left hover:text-orange-600">${esc(l.title)}</button></td>
       <td class="data-td text-slate-500 hidden md:table-cell">${esc(l.location)}</td>
       <td class="data-td text-slate-700 font-semibold tabnum hidden lg:table-cell">${l.price != null ? fmtK(l.price) : '—'}</td>
       <td class="data-td">${statusBadge(l.status)}</td>
       <td class="data-td">
         <div class="flex flex-wrap gap-1.5">
+          <button onclick="openListingDetail(${l.id})" class="btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 text-[12px]">View</button>
           ${l.status === 'pending' ? `
             <button onclick="approveListing(${l.id})" class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-2.5 py-1.5 text-[12px]">Approve</button>
             <button onclick="rejectListing(${l.id})"  class="btn bg-amber-50 text-amber-600 hover:bg-amber-100 px-2.5 py-1.5 text-[12px]">Reject</button>` : ''}
@@ -1031,12 +1068,50 @@ async function loadFraud(){
   } catch { tbody.innerHTML = errorRow(6,'Failed to load fraud data.'); }
 }
 
-/* ---------- revenue: only the boosted-listings count is real ---------- */
-function loadRevenue(){
-  const el = document.getElementById('rev-boosted'); if (!el) return;
-  const fill = ls => countUp(el, ls.filter(l => l.is_boosted === true).length);
-  if (_listings.length) fill(_listings);
-  else fetch(`${API}/admin/all-listings`).then(r => r.ok ? r.json() : []).then(ls => { _listings = ls; fill(ls); }).catch(() => {});
+/* ---------- revenue: real boosted count + /admin/revenue when live ---------- */
+async function loadRevenue(){
+  const boostedEl = document.getElementById('rev-boosted');
+  if (boostedEl){
+    const fill = ls => countUp(boostedEl, ls.filter(l => l.is_boosted === true).length);
+    if (_listings.length) fill(_listings);
+    else fetch(`${API}/admin/all-listings`).then(r => r.ok ? r.json() : []).then(ls => { _listings = ls; fill(ls); }).catch(() => {});
+  }
+  const period = document.getElementById('rev-period')?.value || 'monthly';
+  let data = null;
+  try { const r = await fetch(`${API}/admin/revenue?period=${period}`); if (r.ok) data = await r.json(); } catch {}
+
+  const setMoney = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = (v == null ? '—' : fmtK(v)); };
+  setMoney('rev-today', data?.today);
+  setMoney('rev-month', data?.month);
+  setMoney('rev-year',  data?.year);
+
+  // trend line
+  const tctx = document.getElementById('revenueChart');
+  if (tctx && window.Chart){
+    destroyChart('revenueChart');
+    charts['revenueChart'] = new Chart(tctx, {
+      type:'bar',
+      data:{ labels: data?.trend?.labels || ['—'], datasets:[{ label:'Revenue', data: data?.trend?.values || [0], backgroundColor:'#ea580c', borderRadius:6, maxBarThickness:34 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0f172a',padding:10,cornerRadius:8,callbacks:{label:c=>'K'+Number(c.raw).toLocaleString()}}},
+        scales:{ x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}, y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:11}},beginAtZero:true} } }
+    });
+  }
+  // by source doughnut
+  const sctx = document.getElementById('revSourceChart');
+  const sources = data?.by_source || { verification_fee:0, featured:0, boost:0, escrow:0, viewing:0 };
+  const labels = ['Verification','Featured','Boost','Escrow','Viewing'];
+  const cols = ['#ea580c','#3b82f6','#8b5cf6','#16a34a','#f59e0b'];
+  const vals = [sources.verification_fee||0, sources.featured||0, sources.boost||0, sources.escrow||0, sources.viewing||0];
+  if (sctx && window.Chart){
+    destroyChart('revSourceChart');
+    charts['revSourceChart'] = new Chart(sctx, {
+      type:'doughnut',
+      data:{ labels, datasets:[{ data: vals.some(v=>v>0) ? vals : [1,1,1,1,1], backgroundColor: cols, borderWidth:0, cutout:'68%' }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{enabled: vals.some(v=>v>0)}} }
+    });
+  }
+  const leg = document.getElementById('rev-source-legend');
+  if (leg) leg.innerHTML = labels.map((l,i)=>`<div class="flex items-center gap-1.5 text-slate-500"><span class="w-2.5 h-2.5 rounded-sm" style="background:${cols[i]}"></span>${l} <span class="ml-auto font-bold tabnum text-slate-700">${fmtK(vals[i])}</span></div>`).join('');
 }
 
 /* ====================================================================
@@ -1183,68 +1258,168 @@ function ghostCard(title, sub, icon){
     <div class="font-extrabold text-slate-700 text-[14px]">${title}</div><div class="text-[12px] text-slate-400 mt-1 max-w-xs mx-auto">${sub}</div></div>`;
 }
 
-function buildPreviewSections(){
-  // Revenue
+function emptyState(icon, title, sub){
+  return `<div class="card p-10 text-center"><span class="ico-box bg-slate-100 text-slate-400 mx-auto mb-3"><i class="fas ${icon}"></i></span>
+    <div class="font-extrabold text-slate-700 text-[14px]">${title}</div><div class="text-[12px] text-slate-400 mt-1 max-w-md mx-auto">${sub}</div></div>`;
+}
+function awaitingState(target){
+  return `<div class="px-5 py-12 text-center text-slate-400 text-sm"><i class="fas fa-plug-circle-xmark text-2xl text-slate-300 mb-3 block"></i>No data yet — waiting on <code class="text-slate-500">${target}</code>.</div>`;
+}
+function moneyKpi(id, label, icon, color){
+  const c = { orange:['bg-orange-50','text-orange-600'], green:['bg-emerald-50','text-emerald-600'], blue:['bg-blue-50','text-blue-600'], purple:['bg-purple-50','text-purple-600'], amber:['bg-amber-50','text-amber-600'], red:['bg-red-50','text-red-600'], teal:['bg-teal-50','text-teal-600'] }[color] || ['bg-slate-100','text-slate-500'];
+  return `<div class="kpi"><div class="flex items-start justify-between mb-3"><span class="ico-box ${c[0]} ${c[1]}"><i class="fas ${icon}"></i></span></div>
+    <div class="text-[24px] font-extrabold text-slate-900 tabnum" id="${id}">—</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${label}</div></div>`;
+}
+
+function buildModuleSections(){
+  /* ---------------- REVENUE DASHBOARD ---------------- */
   document.getElementById('tab-revenue').innerHTML =
-    previewBanner('monetary totals need a payments / mobile-money backend')
-    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
-        ${ghostKpi('Revenue Today','fa-coins')}${ghostKpi('Revenue This Month','fa-calendar')}${ghostKpi('Revenue This Year','fa-chart-line')}
-        <div class="kpi"><div class="flex items-start justify-between mb-3"><span class="ico-box bg-orange-50 text-orange-600"><i class="fas fa-rocket"></i></span><span class="pill bg-emerald-50 text-emerald-600">Live</span></div>
-          <div class="text-[24px] font-extrabold text-slate-900 tabnum" id="rev-boosted">—</div><div class="text-[12px] font-semibold text-slate-400 mt-1">Boosted Listings</div></div>
+    `<div class="flex flex-wrap items-center gap-3 mb-5">
+       <select id="rev-period" class="fmn-input w-auto" onchange="loadRevenue()">
+         <option value="daily">Daily</option><option value="monthly" selected>Monthly</option><option value="annual">Annual</option>
+       </select>
+       <button class="btn btn-ghost ml-auto" onclick="exportReport('revenue','xlsx')"><i class="fas fa-file-excel"></i>Excel</button>
+       <button class="btn btn-ghost" onclick="exportReport('revenue','pdf')"><i class="fas fa-file-pdf"></i>PDF</button>
+     </div>
+     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+       ${moneyKpi('rev-today','Revenue Today','fa-coins','orange')}
+       ${moneyKpi('rev-month','This Month','fa-calendar','green')}
+       ${moneyKpi('rev-year','This Year','fa-chart-line','blue')}
+       ${moneyKpi('rev-boosted','Boosted Listings','fa-rocket','purple')}
+     </div>
+     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+       <div class="card p-5 xl:col-span-2">
+         <h3 class="font-extrabold text-slate-900 text-[15px]">Revenue Trend</h3>
+         <p class="text-[12px] text-slate-400 font-medium">Gross revenue over the selected period</p>
+         <div class="h-[240px] mt-3"><canvas id="revenueChart"></canvas></div>
        </div>
-       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        ${ghostCard('Revenue by Source','Featured listings, boosts, verification fees, reservation deposits — once payments are live, this chart fills automatically.','fa-chart-pie')}
-        ${ghostCard('Revenue by Province','Earnings split across Copperbelt, Lusaka, and other provinces.','fa-map-location-dot')}
-       </div>`;
+       <div class="card p-5">
+         <h3 class="font-extrabold text-slate-900 text-[15px]">By Source</h3>
+         <p class="text-[12px] text-slate-400 font-medium">Verification · Featured · Boost · Escrow · Viewing</p>
+         <div class="h-[180px] mt-3 relative"><canvas id="revSourceChart"></canvas></div>
+         <div id="rev-source-legend" class="grid grid-cols-2 gap-2 mt-3 text-[11px]"></div>
+       </div>
+     </div>`;
 
-  // Escrow
+  /* ---------------- TRANSACTION CENTER ---------------- */
+  document.getElementById('tab-transactions').innerHTML =
+    `<div class="card overflow-hidden">
+       <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-2.5">
+         <div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Transactions <span id="txn-count" class="ml-1 text-[12px] font-semibold text-slate-400"></span></h3>
+           <p class="text-[12px] text-slate-400 font-medium">Every payment across FindMyNyumba</p></div>
+         <select id="txn-status" class="fmn-input w-auto" onchange="renderTransactions()">
+           <option value="">All statuses</option><option value="pending">Pending</option><option value="success">Success</option><option value="failed">Failed</option><option value="refunded">Refunded</option></select>
+         <select id="txn-method" class="fmn-input w-auto" onchange="renderTransactions()">
+           <option value="">All methods</option><option value="airtel_money">Airtel Money</option><option value="mtn_money">MTN Money</option><option value="zamtel_money">Zamtel Money</option><option value="bank_transfer">Bank Transfer</option></select>
+         <button class="btn btn-ghost" onclick="exportReport('transactions','csv')"><i class="fas fa-file-csv"></i>Export</button>
+       </div>
+       <div class="overflow-x-auto"><table class="w-full"><thead><tr>
+         <th class="data-th">Reference</th><th class="data-th hidden md:table-cell">User</th><th class="data-th">Type</th>
+         <th class="data-th hidden lg:table-cell">Method</th><th class="data-th">Amount</th><th class="data-th">Status</th><th class="data-th">Action</th>
+       </tr></thead><tbody id="txn-table"></tbody></table></div>
+     </div>`;
+
+  /* ---------------- ESCROW MANAGEMENT ---------------- */
   document.getElementById('tab-escrow').innerHTML =
-    previewBanner('escrow module designed, awaiting build')
-    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
-        ${ghostKpi('Active Transactions','fa-arrows-rotate')}${ghostKpi('Pending Deposits','fa-hourglass-half')}${ghostKpi('Released Payments','fa-circle-check')}${ghostKpi('Dispute Cases','fa-scale-balanced')}
+    `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+       ${moneyKpi('esc-waiting','Waiting','fa-hourglass-half','amber')}
+       ${moneyKpi('esc-held','Held','fa-vault','blue')}
+       ${moneyKpi('esc-released','Released','fa-circle-check','green')}
+       ${moneyKpi('esc-disputed','Disputed','fa-scale-balanced','red')}
+     </div>
+     <div class="card overflow-hidden">
+       <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+         <div><h3 class="font-extrabold text-slate-900 text-[15px]">Escrow Ledger</h3>
+           <p class="text-[12px] text-slate-400 font-medium">waiting → held → released · or refunded / disputed</p></div>
+         <button class="btn btn-ghost" onclick="loadEscrow()"><i class="fas fa-rotate"></i>Refresh</button>
        </div>
-       ${ghostCard('Secured Deposit Flow','Students place a deposit held in escrow, released to the landlord only after a successful move-in. Refunds and disputes are managed here.','fa-vault')}`;
+       <div class="overflow-x-auto"><table class="w-full"><thead><tr>
+         <th class="data-th">Ref</th><th class="data-th hidden md:table-cell">Student</th><th class="data-th hidden md:table-cell">Landlord</th>
+         <th class="data-th">Amount</th><th class="data-th">Status</th><th class="data-th">Actions</th>
+       </tr></thead><tbody id="escrow-table"></tbody></table></div>
+     </div>`;
 
-  // Fraud — real "most-reported" risk table (derived) + preview for NRC/phone dedup
+  /* ---------------- FRAUD CENTER + RISK ENGINE ---------------- */
   document.getElementById('tab-fraud').innerHTML =
-    `<div class="card overflow-hidden mb-5">
-        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
-          <div>
-            <h3 class="font-extrabold text-slate-900 text-[15px]">Most-Reported Listings <span class="pill bg-emerald-50 text-emerald-600 align-middle">Live</span></h3>
-            <p class="text-[12px] text-slate-400 font-medium">Risk scored by number of reports received</p>
-          </div>
-          <button class="btn btn-ghost" onclick="loadFraud()"><i class="fas fa-rotate"></i>Refresh</button>
-        </div>
-        <div class="overflow-x-auto"><table class="w-full"><thead><tr>
-          <th class="data-th">Listing</th><th class="data-th hidden md:table-cell">Location</th>
-          <th class="data-th hidden lg:table-cell">Owner</th><th class="data-th">Reports</th><th class="data-th">Risk</th><th class="data-th">Action</th>
-        </tr></thead><tbody id="fraud-reported"></tbody></table></div>
-     </div>`
-    + previewBanner('NRC / phone duplicate detection needs id_number & phone_number exposed in /admin/users')
-    + `<div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5">
-        ${ghostKpi('Duplicate NRCs','fa-id-card')}${ghostKpi('Repeated Numbers','fa-phone')}${ghostKpi('Multi-Account Signals','fa-fingerprint')}
-       </div>`;
-
-  // Support
-  document.getElementById('tab-support').innerHTML =
-    previewBanner('ticketing backend not connected')
-    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
-        ${ghostKpi('Open Tickets','fa-envelope-open')}${ghostKpi('Resolved','fa-circle-check')}${ghostKpi('Avg Response','fa-clock')}${ghostKpi('Satisfaction','fa-face-smile')}
+    `<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-5">
+       <div class="card p-5 xl:col-span-2">
+         <div class="flex items-center justify-between mb-1">
+           <div><h3 class="font-extrabold text-slate-900 text-[15px]">Most-Reported Listings <span class="pill bg-emerald-50 text-emerald-600 align-middle">Live</span></h3>
+             <p class="text-[12px] text-slate-400 font-medium">Risk scored by reports received</p></div>
+           <button class="btn btn-ghost" onclick="loadFraud()"><i class="fas fa-rotate"></i>Refresh</button>
+         </div>
+         <div class="overflow-x-auto mt-3"><table class="w-full"><thead><tr>
+           <th class="data-th">Listing</th><th class="data-th hidden md:table-cell">Location</th>
+           <th class="data-th hidden lg:table-cell">Owner</th><th class="data-th">Reports</th><th class="data-th">Risk</th><th class="data-th">Action</th>
+         </tr></thead><tbody id="fraud-reported"></tbody></table></div>
        </div>
-       ${ghostCard('Support Center','Categorised tickets — scam reports, technical issues, verification, payments and listings — with response-time tracking.','fa-headset')}`;
+       <div class="card p-5">
+         <h3 class="font-extrabold text-slate-900 text-[15px]">High-Risk Landlords</h3>
+         <p class="text-[12px] text-slate-400 font-medium">Risk engine score 0–100</p>
+         <div id="fraud-landlords" class="mt-3 space-y-2"></div>
+       </div>
+     </div>
+     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5">
+       ${moneyKpi('fraud-dup-nrc','Duplicate NRCs','fa-id-card','red')}
+       ${moneyKpi('fraud-dup-phone','Repeated Numbers','fa-phone','amber')}
+       ${moneyKpi('fraud-multi','Multi-Account Signals','fa-fingerprint','purple')}
+     </div>`;
 
-  // Institutions
+  /* ---------------- SUPPORT / MESSAGES ---------------- */
+  document.getElementById('tab-support').innerHTML =
+    `<div class="card overflow-hidden">
+       <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-2.5">
+         <div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Messages &amp; Support</h3>
+           <p class="text-[12px] text-slate-400 font-medium">Student↔Landlord · Student↔Support · Admin broadcasts</p></div>
+         <select id="support-kind" class="fmn-input w-auto" onchange="renderSupport()">
+           <option value="">All conversations</option><option value="student_support">Support tickets</option><option value="student_landlord">Student ↔ Landlord</option></select>
+         <div class="relative"><i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+           <input id="support-search" class="fmn-input pl-9 w-44" placeholder="Search…" oninput="renderSupport()"></div>
+       </div>
+       <div id="support-list" class="divide-y divide-slate-50"></div>
+     </div>`;
+
+  /* ---------------- INSTITUTIONS ---------------- */
   document.getElementById('tab-institutions').innerHTML =
-    previewBanner('institutions table not yet exposed by the API')
-    + ghostCard('Institutions & Locations','Manage the list of universities, colleges and neighbourhoods students search near.','fa-graduation-cap');
+    `<div class="card overflow-hidden">
+       <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+         <div><h3 class="font-extrabold text-slate-900 text-[15px]">Institutions <span id="inst-count" class="ml-1 text-[12px] font-semibold text-slate-400"></span></h3>
+           <p class="text-[12px] text-slate-400 font-medium">Universities &amp; colleges students search near</p></div>
+         <button class="btn btn-pri" onclick="addInstitution()"><i class="fas fa-plus"></i>Add</button>
+       </div>
+       <div class="overflow-x-auto"><table class="w-full"><thead><tr>
+         <th class="data-th">Name</th><th class="data-th hidden md:table-cell">Town</th><th class="data-th">Type</th>
+         <th class="data-th">Students</th><th class="data-th">Action</th>
+       </tr></thead><tbody id="inst-table"></tbody></table></div>
+     </div>`;
 
-  // Demand (inside analytics)
+  /* ---------------- SEARCH ANALYTICS + GEO (inside analytics) ---------------- */
   document.getElementById('demand-preview').innerHTML =
-    previewBanner('demand heatmap needs search-event tracking')
-    + `<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        ${ghostCard('Demand Heatmap','Most-searched areas across Kitwe, Lusaka, Ndola, Kabwe and Livingstone.','fa-fire')}
-        ${ghostCard('University Trends','Most-searched institutions and average price by area.','fa-arrow-trend-up')}
-       </div>`;
+    `<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+       <div class="card p-5">
+         <h3 class="font-extrabold text-slate-900 text-[15px]">Most-Searched Areas</h3>
+         <p class="text-[12px] text-slate-400 font-medium">Demand by neighbourhood</p>
+         <div id="search-areas" class="mt-3 space-y-2"></div>
+       </div>
+       <div class="card p-5">
+         <h3 class="font-extrabold text-slate-900 text-[15px]">Geographic Intelligence</h3>
+         <p class="text-[12px] text-slate-400 font-medium">High demand vs. low supply</p>
+         <div id="geo-panel" class="mt-3"></div>
+       </div>
+     </div>`;
+
+  /* ---------------- RBAC (injected into Settings) ---------------- */
+  const settingsWrap = document.querySelector('#tab-settings .max-w-2xl');
+  if (settingsWrap && !document.getElementById('rbac-card')){
+    const rbac = document.createElement('div');
+    rbac.id = 'rbac-card';
+    rbac.className = 'card p-6 mt-4';
+    rbac.innerHTML =
+      `<h3 class="font-extrabold text-slate-900 text-[15px] mb-1">Roles &amp; Permissions</h3>
+       <p class="text-[12px] text-slate-400 font-medium mb-4">Who can do what. Changes apply on save.</p>
+       <div id="rbac-matrix" class="overflow-x-auto"></div>`;
+    settingsWrap.appendChild(rbac);
+  }
 }
 
 /* ====================================================================
@@ -1280,6 +1455,468 @@ function showToast(msg, type='success'){
   requestAnimationFrame(() => t.classList.remove('opacity-0','translate-y-2'));
   setTimeout(() => { t.classList.add('opacity-0','translate-y-2'); setTimeout(() => t.remove(), 300); }, 3200);
 }
+
+/* ====================================================================
+   NOTIFICATIONS
+==================================================================== */
+function toggleNotifMenu(){ document.getElementById('notif-menu').classList.toggle('hidden'); }
+document.addEventListener('click', e => {
+  const m = document.getElementById('notif-menu');
+  if (m && !m.classList.contains('hidden') && !e.target.closest('#notif-menu') && !e.target.closest('button[onclick="toggleNotifMenu()"]')) m.classList.add('hidden');
+});
+async function loadNotifications(){
+  const list = document.getElementById('notif-list'); if (!list) return;
+  let items = [];
+  try { const r = await fetch(`${API}/notifications`); if (r.ok) items = await r.json(); } catch {}
+  const unread = items.filter(n => !n.read_at).length;
+  document.getElementById('notif-dot').classList.toggle('hidden', unread === 0 && _reportsCount === 0);
+  if (!items.length){ list.innerHTML = `<div class="px-4 py-10 text-center text-slate-400 text-[12px]"><i class="fas fa-bell-slash text-2xl text-slate-300 mb-2 block"></i>No notifications.</div>`; return; }
+  const icon = { report:'fa-flag text-red-500', verification:'fa-user-shield text-orange-500', payment:'fa-coins text-emerald-500', escrow:'fa-vault text-blue-500', listing:'fa-building text-purple-500' };
+  list.innerHTML = items.slice(0,20).map(n => `
+    <button onclick="readNotif('${esc(n.id)}')" class="w-full text-left px-4 py-3 flex gap-3 hover:bg-slate-50 ${n.read_at ? '' : 'bg-orange-50/40'} border-b border-slate-50">
+      <i class="fas ${icon[n.type] || 'fa-circle-info text-slate-400'} mt-0.5"></i>
+      <div class="min-w-0"><div class="text-[12.5px] font-bold text-slate-800 truncate">${esc(n.title)}</div>
+        <div class="text-[11.5px] text-slate-500 line-clamp-2">${esc(n.body)}</div></div>
+    </button>`).join('');
+}
+async function readNotif(id){ try { await fetch(`${API}/notifications/${id}/read`, { method:'PATCH' }); } catch {} loadNotifications(); }
+async function markAllNotifsRead(){ try { await fetch(`${API}/notifications/read-all`, { method:'PATCH' }); } catch {} loadNotifications(); showToast('Marked all read.'); }
+
+/* ====================================================================
+   TRANSACTION CENTER
+==================================================================== */
+let _txns = [];
+function txnStatusPill(s){
+  const map = { success:'bg-emerald-50 text-emerald-600', pending:'bg-amber-50 text-amber-600', failed:'bg-red-50 text-red-600', refunded:'bg-slate-100 text-slate-500' };
+  return `<span class="pill ${map[s]||'bg-slate-100 text-slate-500'}">${esc(s)}</span>`;
+}
+const TXN_TYPE_LABEL = { verification_fee:'Verification', featured:'Featured', boost:'Boost', escrow_deposit:'Escrow', viewing_fee:'Viewing' };
+const TXN_METHOD_LABEL = { airtel_money:'Airtel', mtn_money:'MTN', zamtel_money:'Zamtel', bank_transfer:'Bank' };
+async function loadTransactions(){
+  const tb = document.getElementById('txn-table'); if (!tb) return;
+  tb.innerHTML = skeletonRows(5,7);
+  try { const r = await fetch(`${API}/admin/transactions`); _txns = r.ok ? await r.json() : []; }
+  catch { _txns = []; }
+  renderTransactions();
+}
+function renderTransactions(){
+  const tb = document.getElementById('txn-table'); if (!tb) return;
+  const sF = document.getElementById('txn-status')?.value || '';
+  const mF = document.getElementById('txn-method')?.value || '';
+  const rows = _txns.filter(t => (!sF || t.status === sF) && (!mF || t.method === mF));
+  document.getElementById('txn-count').textContent = `${rows.length} of ${_txns.length}`;
+  if (!_txns.length){ tb.innerHTML = `<tr><td colspan="7">${awaitingState('/admin/transactions')}</td></tr>`; return; }
+  if (!rows.length){ tb.innerHTML = emptyRow(7,'No transactions match your filters.'); return; }
+  tb.innerHTML = rows.map(t => `
+    <tr class="hover:bg-slate-50">
+      <td class="data-td font-bold text-slate-900">${esc(t.ref)}</td>
+      <td class="data-td text-slate-500 hidden md:table-cell">${esc(t.user_name || ('User '+t.user_id))}</td>
+      <td class="data-td">${esc(TXN_TYPE_LABEL[t.type]||t.type)}</td>
+      <td class="data-td text-slate-500 hidden lg:table-cell">${esc(TXN_METHOD_LABEL[t.method]||t.method)}</td>
+      <td class="data-td font-semibold tabnum">${fmtK(t.amount)}</td>
+      <td class="data-td">${txnStatusPill(t.status)}</td>
+      <td class="data-td">${t.status==='success' ? `<button onclick="refundTxn('${esc(t.id)}','${esc(t.ref)}')" class="btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 text-[12px]">Refund</button>` : '<span class="text-[11px] text-slate-300">—</span>'}</td>
+    </tr>`).join('');
+}
+function refundTxn(id, ref){
+  showModal('Refund Transaction', `Refund ${ref}? This reverses the payment and is recorded in the audit log.`, async () => {
+    const r = await fetch(`${API}/admin/transactions/${id}/refund`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reason:'admin_refund' }) });
+    if (r.ok){ showToast('Refund issued.'); loadTransactions(); } else showToast('Refund endpoint not live yet.','error');
+  });
+}
+
+/* ====================================================================
+   ESCROW MANAGEMENT
+==================================================================== */
+let _escrow = [];
+function escrowPill(s){
+  const map = { waiting:'bg-amber-50 text-amber-600', held:'bg-blue-50 text-blue-600', released:'bg-emerald-50 text-emerald-600', refunded:'bg-slate-100 text-slate-500', disputed:'bg-red-50 text-red-600' };
+  return `<span class="pill ${map[s]||'bg-slate-100 text-slate-500'}">${esc(s)}</span>`;
+}
+async function loadEscrow(){
+  const tb = document.getElementById('escrow-table'); if (!tb) return;
+  tb.innerHTML = skeletonRows(4,6);
+  try { const r = await fetch(`${API}/admin/escrow`); _escrow = r.ok ? await r.json() : []; } catch { _escrow = []; }
+  const sum = s => _escrow.filter(e => e.status === s).reduce((a,e)=>a+Number(e.amount||0),0);
+  const setM = (id,v)=>{ const el=document.getElementById(id); if (el) el.textContent = _escrow.length ? fmtK(v) : '—'; };
+  setM('esc-waiting', sum('waiting')); setM('esc-held', sum('held')); setM('esc-released', sum('released')); setM('esc-disputed', sum('disputed'));
+  if (!_escrow.length){ tb.innerHTML = `<tr><td colspan="6">${awaitingState('/admin/escrow')}</td></tr>`; return; }
+  tb.innerHTML = _escrow.map(e => {
+    const acts = [];
+    if (e.status === 'held'){ acts.push(`<button onclick="escrowAction('${esc(e.id)}','release')" class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-2.5 py-1.5 text-[12px]">Release</button>`);
+      acts.push(`<button onclick="escrowAction('${esc(e.id)}','refund')" class="btn bg-amber-50 text-amber-600 hover:bg-amber-100 px-2.5 py-1.5 text-[12px]">Refund</button>`);
+      acts.push(`<button onclick="escrowAction('${esc(e.id)}','dispute')" class="btn bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1.5 text-[12px]">Dispute</button>`); }
+    return `<tr class="hover:bg-slate-50">
+      <td class="data-td font-bold text-slate-900">${esc(e.ref || e.id)}</td>
+      <td class="data-td text-slate-500 hidden md:table-cell">${esc(e.student_name||e.student_id)}</td>
+      <td class="data-td text-slate-500 hidden md:table-cell">${esc(e.landlord_name||e.landlord_id)}</td>
+      <td class="data-td font-semibold tabnum">${fmtK(e.amount)}</td>
+      <td class="data-td">${escrowPill(e.status)}</td>
+      <td class="data-td"><div class="flex flex-wrap gap-1.5">${acts.join('') || '<span class="text-[11px] text-slate-300">—</span>'}</div></td>
+    </tr>`; }).join('');
+}
+function escrowAction(id, action){
+  const verb = { release:'Release to landlord', refund:'Refund to student', dispute:'Mark as disputed' }[action];
+  showModal(verb, `${verb} for this escrow? This is recorded in the audit log.`, async () => {
+    const r = await fetch(`${API}/admin/escrow/${id}/${action}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reason:'admin_action' }) });
+    if (r.ok){ showToast(`${verb} done.`); loadEscrow(); } else showToast('Escrow endpoint not live yet.','error');
+  });
+}
+
+/* ====================================================================
+   INSTITUTIONS
+==================================================================== */
+let _institutions = [];
+async function loadInstitutions(){
+  const tb = document.getElementById('inst-table'); if (!tb) return;
+  tb.innerHTML = skeletonRows(4,5);
+  try { const r = await fetch(`${API}/admin/institutions`); _institutions = r.ok ? await r.json() : []; } catch { _institutions = []; }
+  document.getElementById('inst-count').textContent = _institutions.length ? `${_institutions.length}` : '';
+  if (!_institutions.length){ tb.innerHTML = `<tr><td colspan="5">${awaitingState('/admin/institutions')}</td></tr>`; return; }
+  tb.innerHTML = _institutions.map(i => `
+    <tr class="hover:bg-slate-50">
+      <td class="data-td font-bold text-slate-900">${esc(i.name)}</td>
+      <td class="data-td text-slate-500 hidden md:table-cell">${esc(i.town)}</td>
+      <td class="data-td">${esc(i.type || '—')}</td>
+      <td class="data-td tabnum">${i.student_count ?? '—'}</td>
+      <td class="data-td"><button onclick="deleteInstitution('${esc(i.id)}','${esc((i.name||'').replace(/'/g,''))}')" class="btn bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1.5 text-[12px]">Remove</button></td>
+    </tr>`).join('');
+}
+function addInstitution(){
+  const name = window.prompt('Institution name:'); if (!name) return;
+  const town = window.prompt('Town:') || '';
+  fetch(`${API}/admin/institutions`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:name.trim(), town:town.trim() }) })
+    .then(r => { if (r.ok){ showToast('Institution added.'); loadInstitutions(); } else showToast('Endpoint not live yet.','error'); }).catch(()=>showToast('Endpoint not live yet.','error'));
+}
+function deleteInstitution(id, name){
+  showModal('Remove Institution', `Remove "${name}"?`, async () => {
+    const r = await fetch(`${API}/admin/institutions/${id}`, { method:'DELETE' });
+    if (r.ok){ showToast('Removed.'); loadInstitutions(); } else showToast('Endpoint not live yet.','error');
+  });
+}
+
+/* ====================================================================
+   SUPPORT / MESSAGES
+==================================================================== */
+let _convos = [];
+async function loadSupport(){
+  const el = document.getElementById('support-list'); if (!el) return;
+  el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
+  try { const r = await fetch(`${API}/admin/conversations`); _convos = r.ok ? await r.json() : []; } catch { _convos = []; }
+  renderSupport();
+}
+function renderSupport(){
+  const el = document.getElementById('support-list'); if (!el) return;
+  if (!_convos.length){ el.innerHTML = awaitingState('/admin/conversations'); return; }
+  const kF = document.getElementById('support-kind')?.value || '';
+  const q = (document.getElementById('support-search')?.value || '').toLowerCase().trim();
+  const rows = _convos.filter(c => (!kF || c.kind === kF) && (!q || (c.subject||c.last_message||'').toLowerCase().includes(q) || (c.participant_name||'').toLowerCase().includes(q)));
+  if (!rows.length){ el.innerHTML = emptyRow(1,'No conversations match.'); return; }
+  const kindPill = { student_support:'bg-orange-50 text-orange-600', student_landlord:'bg-blue-50 text-blue-600', admin_user:'bg-purple-50 text-purple-600' };
+  el.innerHTML = rows.map(c => `
+    <button onclick="openConversation('${esc(c.id)}')" class="w-full text-left px-5 py-4 flex items-start gap-3 hover:bg-slate-50 transition">
+      <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fas fa-comment"></i></div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2"><span class="font-bold text-slate-800 text-[13.5px] truncate">${esc(c.participant_name || c.subject || 'Conversation')}</span>
+          <span class="pill ${kindPill[c.kind]||'bg-slate-100 text-slate-500'}">${esc((c.kind||'').replace('_',' '))}</span>
+          ${c.unread ? '<span class="w-2 h-2 rounded-full bg-orange-500"></span>' : ''}</div>
+        <div class="text-[12px] text-slate-500 truncate mt-0.5">${esc(c.last_message || '—')}</div>
+      </div>
+      <span class="text-[11px] text-slate-300 flex-shrink-0">${esc(c.last_at || '')}</span>
+    </button>`).join('');
+}
+function openConversation(id){ showToast('Conversation thread view opens here once /admin/conversations/{id}/messages is live.'); }
+
+/* ====================================================================
+   SEARCH ANALYTICS + GEO INTELLIGENCE
+==================================================================== */
+async function loadSearchGeo(){
+  const areasEl = document.getElementById('search-areas');
+  const geoEl = document.getElementById('geo-panel');
+  if (areasEl){
+    let areas = [];
+    try { const r = await fetch(`${API}/admin/analytics/search`); if (r.ok){ const d = await r.json(); areas = d.areas || []; } } catch {}
+    if (!areas.length){ areasEl.innerHTML = awaitingState('/admin/analytics/search'); }
+    else {
+      const max = Math.max(...areas.map(a => a.count)) || 1;
+      areasEl.innerHTML = areas.slice(0,8).map(a => `
+        <div><div class="flex justify-between text-[12px] mb-1"><span class="font-bold text-slate-700">${esc(a.area)}</span><span class="text-slate-400 tabnum">${a.count}</span></div>
+          <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full bg-orange-500" style="width:${Math.round(a.count/max*100)}%"></div></div></div>`).join('');
+    }
+  }
+  if (geoEl){
+    let geo = null;
+    try { const r = await fetch(`${API}/admin/analytics/geo`); if (r.ok) geo = await r.json(); } catch {}
+    geoEl.innerHTML = geo && geo.points?.length
+      ? geoHeatPanel(geo.points)
+      : `<div class="rounded-xl border border-slate-100 overflow-hidden">
+           <div class="h-[180px] relative bg-gradient-to-br from-emerald-50 via-amber-50 to-red-50 flex items-center justify-center">
+             <div class="absolute inset-0 opacity-70" style="background:radial-gradient(circle at 30% 40%, rgba(239,68,68,.45), transparent 35%), radial-gradient(circle at 65% 60%, rgba(245,158,11,.4), transparent 30%), radial-gradient(circle at 50% 30%, rgba(234,88,12,.35), transparent 25%)"></div>
+             <span class="relative text-[12px] font-semibold text-slate-500"><i class="fas fa-map-location-dot mr-1.5"></i>Demand heatmap — wire <code>/admin/analytics/geo</code></span>
+           </div></div>`;
+  }
+}
+function geoHeatPanel(points){
+  return `<div class="rounded-xl border border-slate-100 h-[180px] bg-slate-50 flex items-center justify-center text-[12px] text-slate-400">${points.length} demand points loaded</div>`;
+}
+
+/* ====================================================================
+   FRAUD — landlord risk + duplicate signals (extends loadFraud)
+==================================================================== */
+async function loadFraudExtras(){
+  const ll = document.getElementById('fraud-landlords');
+  if (ll){
+    const high = _users.filter(u => (u.role === 'landlord' || u.role === 'student_host') && Number(u.risk_score) >= 67);
+    if (!_users.length || !_users.some(u => u.risk_score != null)){
+      ll.innerHTML = awaitingState('risk_score on /admin/users');
+    } else if (!high.length){
+      ll.innerHTML = `<div class="text-[12px] text-slate-400 py-6 text-center"><i class="fas fa-shield-heart text-emerald-400 text-xl block mb-2"></i>No high-risk landlords.</div>`;
+    } else {
+      ll.innerHTML = high.sort((a,b)=>b.risk_score-a.risk_score).slice(0,6).map(u => `
+        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-red-50/60">
+          <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[11px] font-bold">${esc((u.full_name||'?')[0])}</div>
+          <div class="min-w-0 flex-1"><div class="text-[12.5px] font-bold text-slate-800 truncate">${esc(u.full_name)}</div><div class="text-[11px] text-slate-400">${esc(u.email)}</div></div>
+          <span class="pill bg-red-50 text-red-600">${u.risk_score}</span>
+        </div>`).join('');
+    }
+  }
+  let sig = null;
+  try { const r = await fetch(`${API}/admin/fraud/signals`); if (r.ok) sig = await r.json(); } catch {}
+  const set = (id,v)=>{ const el=document.getElementById(id); if (el) el.textContent = v==null?'—':v; };
+  set('fraud-dup-nrc', sig?.duplicate_nrc); set('fraud-dup-phone', sig?.duplicate_phone); set('fraud-multi', sig?.multi_account);
+}
+
+/* ====================================================================
+   RBAC — role × permission matrix (Settings)
+==================================================================== */
+const RBAC_ROLES = [
+  ['super_admin','Super Admin'], ['verification_officer','Verification Officer'], ['support_agent','Support Agent'],
+  ['finance_officer','Finance Officer'], ['content_moderator','Content Moderator'], ['analytics_manager','Analytics Mgr'],
+];
+const RBAC_PERMS = [
+  ['dashboard.view','Dashboard'], ['listing.moderate','Listings: approve/reject'], ['verification.review','Verification & docs'],
+  ['user.moderate','Users: suspend/ban'], ['report.handle','Reports & complaints'], ['txn.view','Transactions: view'],
+  ['txn.refund','Transactions: refund'], ['escrow.manage','Escrow: release/refund'], ['revenue.view','Revenue dashboard'],
+  ['analytics.view','Search/Geo analytics'], ['broadcast.send','Broadcast'], ['audit.view','Audit log'], ['rbac.manage','RBAC / settings'],
+];
+const RBAC_DEFAULTS = {
+  super_admin: RBAC_PERMS.map(p=>p[0]),
+  verification_officer: ['dashboard.view','verification.review','audit.view'],
+  support_agent: ['dashboard.view','report.handle','user.moderate','broadcast.send','audit.view'],
+  finance_officer: ['dashboard.view','txn.view','txn.refund','escrow.manage','revenue.view','audit.view'],
+  content_moderator: ['dashboard.view','listing.moderate','user.moderate','report.handle','audit.view'],
+  analytics_manager: ['dashboard.view','revenue.view','analytics.view','audit.view'],
+};
+let _rbac = null;
+async function loadRoles(){
+  const wrap = document.getElementById('rbac-matrix'); if (!wrap) return;
+  if (!_rbac){
+    _rbac = JSON.parse(JSON.stringify(RBAC_DEFAULTS));
+    try { const r = await fetch(`${API}/admin/roles`); if (r.ok){ const d = await r.json(); if (d && d.matrix) _rbac = d.matrix; } } catch {}
+  }
+  renderRbacMatrix();
+}
+function renderRbacMatrix(){
+  const wrap = document.getElementById('rbac-matrix'); if (!wrap) return;
+  const head = `<th class="data-th sticky left-0 bg-[#fafbfc]">Permission</th>` + RBAC_ROLES.map(r=>`<th class="data-th text-center">${r[1]}</th>`).join('');
+  const body = RBAC_PERMS.map(p => {
+    const cells = RBAC_ROLES.map(r => {
+      const on = (_rbac[r[0]]||[]).includes(p[0]);
+      const locked = r[0]==='super_admin';
+      return `<td class="data-td text-center"><input type="checkbox" ${on?'checked':''} ${locked?'disabled':''} onchange="toggleRbac('${r[0]}','${p[0]}',this.checked)" class="w-4 h-4 accent-orange-600"></td>`;
+    }).join('');
+    return `<tr class="hover:bg-slate-50"><td class="data-td font-semibold text-slate-700 sticky left-0 bg-white">${p[1]}</td>${cells}</tr>`;
+  }).join('');
+  wrap.innerHTML = `<table class="w-full text-[12px]"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+    <button class="btn btn-pri mt-4" onclick="saveRbac()"><i class="fas fa-floppy-disk"></i>Save permissions</button>`;
+}
+function toggleRbac(role, perm, on){
+  _rbac[role] = _rbac[role] || [];
+  if (on && !_rbac[role].includes(perm)) _rbac[role].push(perm);
+  if (!on) _rbac[role] = _rbac[role].filter(p => p !== perm);
+}
+async function saveRbac(){
+  try { const r = await fetch(`${API}/admin/roles`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ matrix:_rbac }) });
+    if (r.ok) showToast('Permissions saved.'); else showToast('RBAC endpoint not live yet.','error'); }
+  catch { showToast('RBAC endpoint not live yet.','error'); }
+}
+
+/* ====================================================================
+   REPORT GENERATOR (PDF / Excel / CSV)
+==================================================================== */
+function exportReport(resource, format){
+  if (format === 'csv' && (resource === 'users' || resource === 'listings')) return exportCSV(resource);
+  showToast(`Preparing ${resource} ${format.toUpperCase()}…`);
+  fetch(`${API}/admin/export/${resource}.${format}`)
+    .then(r => { if (!r.ok) throw 0; return r.blob(); })
+    .then(b => { const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`findmynyumba_${resource}.${format}`; a.click(); URL.revokeObjectURL(a.href); showToast('Exported.'); })
+    .catch(() => showToast(`Export endpoint not live yet (${resource}.${format}).`,'error'));
+}
+
+/* ====================================================================
+   LISTING DETAIL SLIDE-OVER  (matches the design mock)
+==================================================================== */
+function verifyPill(s){
+  const map = { verified:'bg-emerald-50 text-emerald-600', pending:'bg-amber-50 text-amber-600', rejected:'bg-red-50 text-red-600', unverified:'bg-slate-100 text-slate-500', resubmit:'bg-orange-50 text-orange-600' };
+  return `<span class="pill ${map[s]||'bg-slate-100 text-slate-500'}">${esc(s||'unverified')}</span>`;
+}
+function riskGauge(score, band){
+  const s = (score==null||isNaN(score)) ? null : Math.max(0,Math.min(100,Number(score)));
+  const col = band==='high' ? '#ef4444' : band==='medium' ? '#f59e0b' : '#16a34a';
+  const label = band ? band[0].toUpperCase()+band.slice(1)+' Risk' : '—';
+  const r=52, c=2*Math.PI*r, off = s==null ? c : c*(1-s/100);
+  return `<svg width="140" height="140" viewBox="0 0 140 140" class="mx-auto">
+      <circle cx="70" cy="70" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="14"/>
+      <circle cx="70" cy="70" r="${r}" fill="none" stroke="${s==null?'#e2e8f0':col}" stroke-width="14" stroke-linecap="round"
+        stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 70 70)"/>
+      <text x="70" y="66" text-anchor="middle" font-size="30" font-weight="800" fill="#0f172a">${s==null?'—':s}</text>
+      <text x="70" y="88" text-anchor="middle" font-size="11" font-weight="700" fill="${col}">${label}</text>
+    </svg>`;
+}
+function riskFactor(ok, label){
+  return `<div class="flex items-center gap-2 text-[12px]"><i class="fas ${ok?'fa-circle-check text-emerald-500':'fa-circle-xmark text-slate-300'}"></i><span class="text-slate-600">${label}</span></div>`;
+}
+function ldSectionCard(title, inner, action){
+  return `<div class="card overflow-hidden">
+    <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between"><h3 class="font-extrabold text-slate-900 text-[14px]">${title}</h3>${action||''}</div>
+    <div class="p-5">${inner}</div></div>`;
+}
+
+function openListingDetail(id){
+  const panel = document.getElementById('listing-detail');
+  const slide = document.getElementById('ld-panel');
+  const content = document.getElementById('ld-content');
+  content.innerHTML = `<div class="p-8 space-y-4"><div class="skeleton h-7 w-72"></div><div class="skeleton h-4 w-48"></div><div class="grid grid-cols-3 gap-3 mt-4">${'<div class="skeleton h-16"></div>'.repeat(9)}</div><div class="skeleton h-48 mt-4"></div></div>`;
+  panel.classList.remove('hidden');
+  requestAnimationFrame(() => slide.classList.remove('translate-x-full'));
+  document.body.style.overflow = 'hidden';
+  const cached = _listings.find(l => String(l.id) === String(id)) || {};
+  fetch(`${API}/admin/listings/${id}`).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(data => renderListingDetail({ ...cached, ...(data || {}), id }));
+}
+function closeListingDetail(){
+  const panel = document.getElementById('listing-detail');
+  document.getElementById('ld-panel').classList.add('translate-x-full');
+  document.body.style.overflow = '';
+  setTimeout(() => panel.classList.add('hidden'), 300);
+}
+function openLightbox(url){ document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
+function closeLightbox(){ document.getElementById('lightbox').classList.add('hidden'); }
+
+function renderListingDetail(d){
+  const a = d.analytics || {};
+  const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : '—';
+  const landlord = d.landlord || {};
+  const stat = (label, val, extra='') => `<div class="bg-white rounded-xl border border-slate-100 px-3.5 py-3"><div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">${label}</div><div class="mt-1 ${extra}">${val}</div></div>`;
+
+  // photos
+  const media = d.media || [];
+  const photos = media.length
+    ? `<div class="grid grid-cols-3 gap-2">${media.slice(0,6).map(m => `<button onclick="openLightbox('${esc(m.url)}')" class="aspect-[4/3] rounded-lg overflow-hidden bg-slate-100"><img src="${esc(m.url)}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-slate-300\\'><i class=\\'fas fa-image\\'></i></div>'"></button>`).join('')}</div>`
+    : `<div class="text-[12px] text-slate-400 py-6 text-center"><i class="fas fa-images text-2xl text-slate-300 block mb-2"></i>No photos uploaded.</div>`;
+
+  // verification documents
+  const DOCS = [['nrc_front','NRC Front'],['nrc_back','NRC Back'],['selfie','Selfie'],['utility_bill','Utility Bill'],['ownership','Property Ownership'],['residence','Proof of Residence']];
+  const docsMap = {}; (d.documents||[]).forEach(x => docsMap[x.doc_type] = x);
+  const docs = DOCS.map(([k,lbl]) => {
+    const doc = docsMap[k];
+    return `<div class="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
+      <span class="ico-box bg-slate-100 text-slate-500" style="width:34px;height:34px;font-size:13px"><i class="fas fa-file-${k==='selfie'?'image':'lines'}"></i></span>
+      <div class="flex-1 min-w-0"><div class="text-[12.5px] font-bold text-slate-700">${lbl}</div></div>
+      ${verifyPill(doc?.status || (doc?'pending':'unverified'))}
+      ${doc?.url ? `<button onclick="openLightbox('${esc(doc.url)}')" class="text-orange-600 hover:text-orange-700 text-[12px] font-bold"><i class="fas fa-eye"></i></button>
+        <a href="${esc(doc.url)}" download class="text-slate-400 hover:text-slate-600 text-[12px]"><i class="fas fa-download"></i></a>` : '<span class="text-[11px] text-slate-300">—</span>'}
+    </div>`; }).join('');
+
+  // timeline
+  const tl = (d.timeline||[]);
+  const timeline = tl.length
+    ? `<div class="space-y-3">${tl.map(t => `<div class="flex gap-3"><div class="flex flex-col items-center"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 mt-1"></span><span class="flex-1 w-px bg-slate-100"></span></div><div class="pb-1"><div class="text-[12.5px] font-semibold text-slate-700">${esc(t.text)}</div><div class="text-[11px] text-slate-400">${esc(t.ts||'')}</div></div></div>`).join('')}</div>`
+    : awaitingState('timeline on /admin/listings/{id}');
+
+  // reports
+  const reps = (d.reports||[]);
+  const reportsInner = reps.length
+    ? reps.map(r => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(r.category)}</div><div class="text-[11px] text-slate-400">by ${esc(r.reporter_name||'user')} · ${esc(r.created_at||'')}</div></div><span class="pill bg-orange-50 text-orange-600">${esc(r.status)}</span></div>`).join('')
+    : `<div class="text-[12px] text-slate-400 py-4 text-center">No reports on this listing.</div>`;
+
+  // transactions
+  const txns = (d.transactions||[]);
+  const txnInner = txns.length
+    ? txns.map(t => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(TXN_TYPE_LABEL[t.type]||t.type)}</div><div class="text-[11px] text-slate-400">${esc(t.ref||'')} · ${esc(TXN_METHOD_LABEL[t.method]||t.method||'')}</div></div><div class="text-right"><div class="text-[12.5px] font-bold tabnum">${fmtK(t.amount)}</div>${txnStatusPill(t.status)}</div></div>`).join('')
+    : `<div class="text-[12px] text-slate-400 py-4 text-center">No transactions yet.</div>`;
+
+  // audit
+  const audit = (d.audit||[]);
+  const auditInner = audit.length
+    ? `<div class="overflow-x-auto"><table class="w-full text-[12px]"><tbody>${audit.slice(0,8).map(x => `<tr class="border-b border-slate-50"><td class="py-2 text-slate-400 whitespace-nowrap pr-3">${esc(x.created_at||'')}</td><td class="py-2 font-semibold text-slate-700">${esc(x.actor||'')}</td><td class="py-2 text-slate-600">${esc(x.action||'')}</td><td class="py-2 text-slate-400 hidden sm:table-cell">${esc(x.ip||'')}</td></tr>`).join('')}</tbody></table></div>`
+    : awaitingState('/admin/audit');
+
+  // admin notes
+  const notes = (d.notes||[]);
+  const notesInner = `${notes.length ? notes.map(n => `<div class="bg-slate-50 rounded-lg px-3 py-2 mb-2"><div class="text-[12.5px] text-slate-700">${esc(n.text)}</div><div class="text-[11px] text-slate-400 mt-0.5">${esc(n.author||'admin')} · ${esc(n.created_at||'')}</div></div>`).join('') : '<div class="text-[12px] text-slate-400 mb-2">No notes yet.</div>'}
+    <div class="flex gap-2"><input id="ld-note-input" class="fmn-input" placeholder="Add an internal note…"><button class="btn btn-pri" onclick="addAdminNote('${esc(d.id)}')"><i class="fas fa-plus"></i></button></div>`;
+
+  const suspended = d.status === 'suspended';
+  document.getElementById('ld-content').innerHTML = `
+    <div class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-5 sm:px-7 py-4 flex items-center gap-3">
+      <button onclick="closeListingDetail()" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500"><i class="fas fa-arrow-left"></i></button>
+      <div class="min-w-0 flex-1">
+        <div class="text-[11px] text-slate-400 font-semibold">Listings / Listing Details</div>
+        <h2 class="text-[18px] font-extrabold text-slate-900 truncate">${esc(d.title)}</h2>
+        <div class="text-[12px] text-slate-400">${esc(d.location || [d.area,d.town].filter(Boolean).join(', ') || '—')} · Posted ${created} · ${esc(d.ref || ('#'+d.id))}</div>
+      </div>
+      <button class="btn btn-ghost hidden sm:inline-flex" onclick="exportReport('listing-'+${JSON.stringify(d.id)},'pdf')"><i class="fas fa-download"></i>Report</button>
+      ${d.status==='pending' ? `<button class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100" onclick="approveListing(${d.id});closeListingDetail()"><i class="fas fa-check"></i>Approve</button>` : ''}
+      <button class="btn ${suspended?'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-600'}" onclick="suspendFromDetail(${d.id}, ${suspended})">${suspended?'Unsuspend':'Suspend'}</button>
+    </div>
+
+    <div class="p-5 sm:p-7 space-y-5">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        ${stat('Landlord', `<span class="text-[13px] font-bold text-slate-800">${esc(landlord.full_name||'—')}</span>`)}
+        ${stat('Price', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${d.price!=null?fmtK(d.price):'—'}</span>`)}
+        ${stat('Type', `<span class="text-[13px] font-bold text-slate-800">${esc(d.listing_type||'—')}</span>`)}
+        ${stat('Status', statusBadge(d.status))}
+        ${stat('Verification', verifyPill(d.verification_status))}
+        ${stat('Risk', `<span class="pill ${d.risk_band==='high'?'bg-red-50 text-red-600':d.risk_band==='medium'?'bg-amber-50 text-amber-600':'bg-emerald-50 text-emerald-600'}">${esc(d.risk_band?d.risk_band+' risk':'—')}</span>`)}
+        ${stat('Views', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.views??'—'}</span>`)}
+        ${stat('Contacts', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.contacts??'—'}</span>`)}
+        ${stat('Reports', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.reports??reps.length}</span>`)}
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 space-y-4">
+          ${ldSectionCard('Listing Photos', photos)}
+          ${ldSectionCard('Activity Timeline', timeline)}
+          ${ldSectionCard('Reports &amp; Complaints', reportsInner)}
+          ${ldSectionCard('Transactions', txnInner)}
+          ${ldSectionCard('Audit Log', auditInner, `<button class="text-[12px] font-bold text-orange-600 hover:text-orange-700" onclick="showTab('trust')">Full log →</button>`)}
+        </div>
+        <div class="space-y-4">
+          ${ldSectionCard('Verification Documents', docs)}
+          ${ldSectionCard('Risk Analysis', `${riskGauge(d.risk_score, d.risk_band)}<div class="mt-4 space-y-2">${riskFactor(landlord.phone_verified ?? d.phone_verified, 'Phone verified')}${riskFactor(landlord.nrc_status==='verified', 'NRC verified')}${riskFactor(d.verification_status==='verified', 'Property verified')}${riskFactor(!!landlord.full_name, 'Profile complete')}</div>`)}
+          ${ldSectionCard('Admin Notes', notesInner)}
+          ${ldSectionCard('Geographic Intelligence', (d.latitude && d.longitude)
+            ? `<div class="rounded-xl overflow-hidden border border-slate-100 h-[150px] bg-gradient-to-br from-emerald-50 to-orange-50 flex items-center justify-center text-[12px] text-slate-500"><i class="fas fa-location-dot text-orange-500 mr-1.5"></i>${d.latitude.toFixed(3)}, ${d.longitude.toFixed(3)}</div>`
+            : `<div class="rounded-xl overflow-hidden border border-slate-100 h-[150px] bg-slate-50 flex items-center justify-center text-[12px] text-slate-400"><i class="fas fa-map-location-dot mr-1.5"></i>No coordinates</div>`)}
+        </div>
+      </div>
+    </div>`;
+}
+function suspendFromDetail(id, isSuspended){
+  const action = isSuspended ? 'unsuspend' : 'suspend';
+  showModal(isSuspended?'Unsuspend Listing':'Suspend Listing', `${isSuspended?'Restore':'Hide'} this listing?`, async () => {
+    const r = await fetch(`${API}/admin/listings/${id}/${action}`, { method:'PATCH' });
+    if (r.ok){ showToast(`Listing ${action}ed.`); loadListings(); closeListingDetail(); } else showToast('Endpoint not live yet.','error');
+  });
+}
+function addAdminNote(id){
+  const input = document.getElementById('ld-note-input'); const text = (input?.value||'').trim(); if (!text) return;
+  fetch(`${API}/admin/listings/${id}/notes`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text }) })
+    .then(r => { if (r.ok){ showToast('Note added.'); openListingDetail(id); } else showToast('Notes endpoint not live yet.','error'); })
+    .catch(() => showToast('Notes endpoint not live yet.','error'));
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeLightbox(); if (!document.getElementById('listing-detail').classList.contains('hidden')) closeListingDetail(); } });
 </script>
 </body>
 </html>
