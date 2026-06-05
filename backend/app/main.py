@@ -31,6 +31,31 @@ from app.models.admin_models import (               # noqa: F401
 # ── Create any missing DB tables (idempotent — safe to run on every startup) ──
 Base.metadata.create_all(bind=engine)
 
+
+# ── Ensure newly-added columns exist on pre-existing tables ───────────────────
+# create_all() only CREATES missing tables; it never ALTERs existing ones. The
+# Listing table predates listing_type/latitude/longitude, so add them here.
+# Postgres supports IF NOT EXISTS; SQLite doesn't, so we catch the dup-column error.
+def _ensure_columns():
+    from sqlalchemy import text
+    cols = {"listing_type": "VARCHAR", "latitude": "FLOAT", "longitude": "FLOAT"}
+    is_pg = engine.dialect.name == "postgresql"
+    try:
+        with engine.begin() as conn:
+            for col, typ in cols.items():
+                if is_pg:
+                    conn.execute(text(f"ALTER TABLE listings ADD COLUMN IF NOT EXISTS {col} {typ}"))
+                else:
+                    try:
+                        conn.execute(text(f"ALTER TABLE listings ADD COLUMN {col} {typ}"))
+                    except Exception:
+                        pass  # column already exists
+    except Exception as e:  # never block startup on a migration hiccup
+        print(f"[startup] column ensure skipped: {e}")
+
+
+_ensure_columns()
+
 # ── Ensure static upload directory exists ────────────────────────────────────
 os.makedirs("static/uploads/properties",    exist_ok=True)
 os.makedirs("static/uploads/verification",  exist_ok=True)

@@ -33,6 +33,14 @@ class Listing(Base):
     # Boost: when True, listing appears at top of browse results
     is_boosted  = Column(Boolean, default=False, nullable=False)
 
+    # Listing type (e.g. "Room for Rent", "Self-contained", "Bedspace"). Nullable
+    # so existing rows are valid; populated by the create/edit forms going forward.
+    listing_type = Column(String, nullable=True)
+
+    # Coordinates for the geo-intelligence map. Nullable until geocoded/entered.
+    latitude    = Column(Float, nullable=True)
+    longitude   = Column(Float, nullable=True)
+
     # Timestamps
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 

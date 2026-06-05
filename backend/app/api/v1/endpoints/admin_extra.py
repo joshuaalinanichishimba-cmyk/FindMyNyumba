@@ -88,6 +88,31 @@ def _iso(dt) -> Optional[str]:
     return dt.isoformat() if dt else None
 
 
+def compute_risk(user: User, db: Session) -> tuple[int, str]:
+    """
+    Lightweight risk score 0..100 from data we already have. Lower = safer.
+    Mirrors the blueprint formula, minus factors we don't model yet.
+    """
+    if not user:
+        return 50, "medium"
+    score = 50
+    score += -10 if user.phone_number else 10
+    verified = (user.verification_status == "verified") or bool(user.is_verified)
+    score += -15 if verified else 15
+    score += -5 if (user.full_name and user.email) else 5
+
+    listing_ids = [row[0] for row in
+                   db.query(Listing.id).filter(Listing.owner_id == user.id).all()]
+    if listing_ids:
+        reports = (db.query(Report)
+                   .filter(Report.listing_id.in_(listing_ids)).count())
+        score += reports * 12
+
+    score = max(0, min(100, score))
+    band = "high" if score >= 67 else "medium" if score >= 34 else "low"
+    return score, band
+
+
 TXN_SOURCE_KEYS = ["verification_fee", "featured", "boost", "escrow_deposit", "viewing_fee"]
 
 
@@ -142,6 +167,8 @@ def admin_listing_detail(listing_id: int, request: Request,
             u = db.query(User).filter(User.id == n.author_id).first()
             note_authors[n.author_id] = u.full_name if u else "admin"
 
+    risk_score, risk_band = (compute_risk(owner, db) if owner else (None, None))
+
     return {
         "id": listing.id,
         "ref": f"FMN-{listing.id:06d}",
@@ -151,14 +178,15 @@ def admin_listing_detail(listing_id: int, request: Request,
         "area": listing.location,
         "town": None,
         "price": listing.price,
-        "listing_type": None,            # not modelled yet
+        "listing_type": getattr(listing, "listing_type", None),
         "status": listing.status,
         "verification_status": (owner.verification_status if owner else None),
-        "risk_score": None,              # add risk engine in a later phase
-        "risk_band": None,
+        "risk_score": risk_score,
+        "risk_band": risk_band,
         "is_boosted": listing.is_boosted,
         "created_at": _iso(listing.created_at),
-        "latitude": None, "longitude": None,
+        "latitude": getattr(listing, "latitude", None),
+        "longitude": getattr(listing, "longitude", None),
         "landlord": ({
             "id": owner.id, "full_name": owner.full_name, "email": owner.email,
             "phone": owner.phone_number, "nrc_number": owner.id_number,
@@ -250,6 +278,61 @@ def admin_add_note(listing_id: int, body: NoteBody, request: Request,
     db.commit()
     write_audit(db, request, admin, "listing.note", "listing", listing_id)
     return {"status": "success"}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  USER DETAIL  (drill into one student / landlord / staff member)
+# ══════════════════════════════════════════════════════════════════════════════
+@router.get("/admin/users/{user_id}")
+def admin_user_detail(user_id: int, admin: User = Depends(require_admin),
+                      db: Session = Depends(get_db)):
+    u = db.query(User).filter(User.id == user_id).first()
+    if not u:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    listings = db.query(Listing).filter(Listing.owner_id == user_id).all()
+    active = sum(1 for l in listings if l.status == "active")
+    suspended = sum(1 for l in listings if l.status == "suspended")
+    listing_ids = [l.id for l in listings]
+    reports_against = (db.query(Report).filter(Report.listing_id.in_(listing_ids)).count()
+                       if listing_ids else 0)
+    risk_score, risk_band = compute_risk(u, db)
+
+    nrc_state = u.verification_status or "unverified"
+    return {
+        "id": u.id,
+        "full_name": u.full_name,
+        "email": u.email,
+        "phone": u.phone_number,
+        "role": u.role,
+        "is_active": u.is_active,
+        "status": "active" if u.is_active else "suspended",
+        "avatar_url": u.avatar_url,
+        "nrc_number": u.id_number,
+        "business_name": u.business_name,
+        "business_location": u.business_location,
+        "verification_status": u.verification_status or "unverified",
+        "verification_rejection_reason": u.verification_rejection_reason,
+        "created_at": _iso(u.created_at),
+        "last_login": _iso(u.last_login),
+        "stats": {
+            "listings": len(listings),
+            "active_listings": active,
+            "suspended_listings": suspended,
+            "reports_against": reports_against,
+        },
+        "verification": {
+            "nrc": nrc_state,
+            "phone": "verified" if u.phone_number else "unverified",
+            "property": "verified" if (u.verification_status == "verified") else "unverified",
+        },
+        "risk_score": risk_score,
+        "risk_band": risk_band,
+        "listings": [
+            {"id": l.id, "title": l.title, "status": l.status,
+             "price": l.price, "location": l.location} for l in listings
+        ],
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════════
