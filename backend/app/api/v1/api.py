@@ -11,6 +11,7 @@ from app.api.v1.endpoints.messages      import router as messages_router
 from app.api.v1.endpoints.landlords     import router as landlords_router
 from app.api.v1.endpoints.student_hosts import router as student_hosts_router
 from app.api.v1.endpoints.admin         import router as admin_router
+from app.api.v1.endpoints.admin_extra   import router as admin_extra_router
 
 api_router = APIRouter()
 
@@ -22,3 +23,4 @@ api_router.include_router(messages_router)
 api_router.include_router(landlords_router)
 api_router.include_router(student_hosts_router)
 api_router.include_router(admin_router)
+api_router.include_router(admin_extra_router)
