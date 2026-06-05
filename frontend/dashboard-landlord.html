@@ -59,7 +59,12 @@
         .amenity-chip.amenity-on .amenity-box{background:#ea580c;border-color:#ea580c;color:#fff;}
         .fmn-faux-map{background-color:#eef2f5;background-image:linear-gradient(#dde3e8 1px,transparent 1px),linear-gradient(90deg,#dde3e8 1px,transparent 1px);background-size:22px 22px;}
         .pv-chip{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:9999px;}
-    </style>
+        /* Uniform, decent listing media (cards + uploader thumbnails + preview) */
+    .landlord-card-media{aspect-ratio:4/3;height:auto!important;overflow:hidden;background:#f1f5f9;}
+    .landlord-card-media img,.landlord-card-media video{width:100%;height:100%;object-fit:cover;display:block;}
+    #landlord-media-uploader img,#landlord-media-uploader video{aspect-ratio:1/1;width:100%;height:auto;object-fit:cover;border-radius:.6rem;display:block;}
+    #prop-preview-media img,#prop-preview-media video{aspect-ratio:4/3;width:100%;height:auto;object-fit:cover;border-radius:.75rem;display:block;}
+</style>
 </head>
 <body class="bg-slate-50" style="overflow:hidden; height:100vh; display:flex; flex-direction:column;">
 
@@ -236,23 +241,23 @@
                                     <div class="relative w-28 h-28 mx-auto mb-2">
                                         <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
                                             <path d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 0 1 0-31" fill="none" stroke="#f1f5f9" stroke-width="3.2"/>
-                                            <path d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 0 1 0-31" fill="none" stroke="#ea580c" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="73 100"/>
+                                            <path id="qs-ring" d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 0 1 0-31" fill="none" stroke="#ea580c" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="0 100" style="transition:stroke-dasharray .4s ease"/>
                                         </svg>
                                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                            <span class="text-2xl font-black text-slate-900">75%</span>
+                                            <span id="qs-pct" class="text-2xl font-black text-slate-900">0%</span>
                                         </div>
                                     </div>
-                                    <p class="text-center text-xs font-black text-slate-700">Good Start!</p>
+                                    <p id="qs-label" class="text-center text-xs font-black text-slate-700">Just getting started</p>
                                     <p class="text-center text-[11px] text-slate-400 mt-1 mb-4 leading-snug">Complete all sections to get 3x more views and more bookings.</p>
                                     <ul class="space-y-2 text-[12px] font-semibold">
-                                        <li class="flex items-center gap-2 text-slate-700"><i class="fas fa-check-circle text-green-500"></i> Basic Information</li>
-                                        <li class="flex items-center gap-2 text-slate-700"><i class="fas fa-check-circle text-green-500"></i> Price</li>
-                                        <li class="flex items-center gap-2 text-slate-700"><i class="fas fa-check-circle text-green-500"></i> Description</li>
-                                        <li class="flex items-center gap-2 text-slate-700"><i class="fas fa-check-circle text-green-500"></i> Photos (4/20)</li>
-                                        <li class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Add Video</li>
-                                        <li class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Amenities</li>
-                                        <li class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Location on Map</li>
-                                        <li class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Verification</li>
+                                        <li id="qs-basic"  class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Basic Information</li>
+                                        <li id="qs-price"  class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Price</li>
+                                        <li id="qs-desc"   class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Description</li>
+                                        <li id="qs-photos" class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Photos</li>
+                                        <li id="qs-video"  class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Add Video</li>
+                                        <li id="qs-amen"   class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Amenities</li>
+                                        <li id="qs-map"    class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Location on Map</li>
+                                        <li id="qs-verify" class="flex items-center gap-2 text-slate-400"><i class="far fa-circle"></i> Verification</li>
                                     </ul>
                                 </div>
                                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
@@ -542,11 +547,16 @@
                                                     <input type="text" id="prop-contact-name" disabled class="w-full px-4 py-3 bg-slate-100 border border-slate-100 rounded-xl text-slate-500 font-medium text-sm cursor-not-allowed">
                                                 </div>
                                                 <div>
-                                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Contact Phone</label>
-                                                    <input type="text" id="prop-contact-phone" disabled class="w-full px-4 py-3 bg-slate-100 border border-slate-100 rounded-xl text-slate-500 font-medium text-sm cursor-not-allowed">
+                                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">WhatsApp / Call Number</label>
+                                                    <input type="tel" id="prop-contact-phone" placeholder="+260…" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium text-sm transition" oninput="renderPreview()">
                                                 </div>
                                             </div>
-                                            <p class="text-[11px] text-slate-400 mt-2">Update these in your <button type="button" onclick="switchTab('profile')" class="text-[#ea580c] font-bold underline">Profile</button>.</p>
+                                            <div class="flex flex-wrap gap-4 mt-3">
+                                                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" id="prop-allow-call" class="accent-[#ea580c]" checked onchange="renderPreview()"> <i class="fas fa-phone text-emerald-500"></i> Allow calls</label>
+                                                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" id="prop-allow-whatsapp" class="accent-[#ea580c]" checked onchange="renderPreview()"> <i class="fab fa-whatsapp text-green-500"></i> Allow WhatsApp</label>
+                                                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" id="prop-allow-sms" class="accent-[#ea580c]" onchange="renderPreview()"> <i class="fas fa-comment-sms text-blue-500"></i> Allow SMS</label>
+                                            </div>
+                                            <p class="text-[11px] text-slate-400 mt-2">This number is shown on your public listing for Call/WhatsApp/SMS, and saved to your <button type="button" onclick="switchTab('profile')" class="text-[#ea580c] font-bold underline">Profile</button>.</p>
 
                                             <div class="mt-5 p-4 bg-slate-50 rounded-xl border border-slate-100">
                                                 <p class="text-xs font-black text-slate-500 uppercase tracking-wide mb-2">Review</p>
@@ -627,23 +637,7 @@
                                     <button type="button" class="mt-4 w-full bg-[#ea580c] text-white text-xs font-bold py-2.5 rounded-xl hover:bg-orange-700 transition"><i class="fas fa-shield-alt mr-1"></i> Request Verification</button>
                                 </div>
 
-                                <!-- Promote Your Listing (TODO: static) -->
-                                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-                                    <h4 class="text-sm font-black text-slate-900">Promote Your Listing</h4>
-                                    <p class="text-[11px] text-slate-400 mb-4">Get more visibility and more bookings</p>
-                                    <!-- TODO(static): needs a payments/boost flow. -->
-                                    <div class="space-y-2.5">
-                                        <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer hover:border-orange-300 transition">
-                                            <span class="flex items-center gap-2 text-sm font-bold text-slate-700"><i class="fas fa-star text-amber-400"></i> Featured for 7 Days <span class="text-slate-400 font-medium">ZMW 20</span></span>
-                                            <input type="radio" name="promote" class="accent-[#ea580c]">
-                                        </label>
-                                        <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer hover:border-orange-300 transition">
-                                            <span class="flex items-center gap-2 text-sm font-bold text-slate-700"><i class="fas fa-star text-amber-400"></i> Featured for 30 Days <span class="text-slate-400 font-medium">ZMW 60</span></span>
-                                            <input type="radio" name="promote" class="accent-[#ea580c]">
-                                        </label>
-                                    </div>
-                                    <button type="button" class="mt-4 w-full bg-[#ea580c] text-white text-xs font-bold py-2.5 rounded-xl hover:bg-orange-700 transition"><i class="fas fa-rocket mr-1"></i> Boost Listing Now</button>
-                                </div>
+                                <!-- Promote Your Listing removed (paid boosts are an admin/payments feature) -->
                             </aside>
                         </div>
                     </div>
@@ -1148,7 +1142,45 @@ function initAddPropertyForm() {
         if (c) c.textContent = desc.value.length;
     });
 
+    // ── Listing Quality Score: react to form + amenities + media changes ──
+    ['prop-title','prop-price','prop-province','prop-city','prop-area','prop-type','prop-description','prop-distance']
+        .forEach(id => { const el = document.getElementById(id);
+            if (el) { el.addEventListener('input', updateQualityScore); el.addEventListener('change', updateQualityScore); } });
+    const _ag = document.getElementById('amenities-grid');
+    if (_ag) _ag.addEventListener('change', updateQualityScore);
+    const _mu = document.getElementById('landlord-media-uploader');
+    if (_mu) new MutationObserver(() => updateQualityScore()).observe(_mu, { childList: true, subtree: true });
+    updateQualityScore();
+
     _addFormInited = true;
+}
+
+function _qsSet(id, done){
+    const li = document.getElementById(id); if (!li) return;
+    li.className = 'flex items-center gap-2 ' + (done ? 'text-slate-700' : 'text-slate-400');
+    const ic = li.querySelector('i'); if (ic) ic.className = done ? 'fas fa-check-circle text-green-500' : 'far fa-circle';
+}
+function updateQualityScore(){
+    const val = id => (document.getElementById(id)?.value || '').trim();
+    const mu = document.getElementById('landlord-media-uploader');
+    const u = window._currentUser || {};
+    const checks = [
+        ['qs-basic',  !!(val('prop-title') && val('prop-type') && (val('prop-province') || val('prop-city') || val('prop-area')))],
+        ['qs-price',  parseFloat(val('prop-price')) > 0],
+        ['qs-desc',   val('prop-description').length >= 20],
+        ['qs-photos', !!(mu && mu.querySelector('img'))],
+        ['qs-video',  !!(mu && mu.querySelector('video'))],
+        ['qs-amen',   !!document.querySelector('.amenity:checked')],
+        ['qs-map',    !!(val('prop-area') && (val('prop-province') || val('prop-city')))],
+        ['qs-verify', !!(u.verification_status === 'verified' || u.is_verified === true)],
+    ];
+    let done = 0;
+    checks.forEach(([id, ok]) => { _qsSet(id, !!ok); if (ok) done++; });
+    const pct = Math.round(done / checks.length * 100);
+    const pctEl = document.getElementById('qs-pct'); if (pctEl) pctEl.textContent = pct + '%';
+    const ring = document.getElementById('qs-ring'); if (ring) ring.setAttribute('stroke-dasharray', pct + ' 100');
+    const label = document.getElementById('qs-label');
+    if (label) label.textContent = pct >= 90 ? 'Excellent listing!' : pct >= 60 ? 'Good progress' : pct >= 30 ? 'Getting there' : 'Just getting started';
 }
 
 // ── Step navigation ─────────────────────────────────────────────────────────
@@ -1312,7 +1344,7 @@ function _fillContactFromUser() {
     const n = document.getElementById('prop-contact-name');
     const p = document.getElementById('prop-contact-phone');
     if (n) n.value = u.full_name || 'Your name';
-    if (p) p.value = u.phone || u.phone_number || 'Add a phone in Profile';
+    if (p && !p.value) p.value = u.phone || u.phone_number || '';
 }
 
 function showAddPropertyForm() {
@@ -1403,6 +1435,21 @@ async function submitProperty() {
 
     btn.disabled = true;
     btn.textContent = 'Saving...';
+
+    // Persist the WhatsApp/Call number to the landlord's profile so the public
+    // listing's Call/WhatsApp/SMS buttons work. Best-effort — never blocks submit.
+    try {
+        const phone = (document.getElementById('prop-contact-phone')?.value || '').trim();
+        const u = window._currentUser || {};
+        if (phone && phone !== (u.phone || u.phone_number || '')) {
+            fetch(`${API}/landlord/profile`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ full_name: u.full_name || '', phone_number: phone,
+                                       business_name: u.business_name || '' })
+            }).then(() => { if (window._currentUser) window._currentUser.phone = phone; }).catch(() => {});
+        }
+    } catch {}
 
     // ── Request shape EXACTLY as landlords.py expects ───────────────────────
     const fd = new FormData();
@@ -1660,13 +1707,6 @@ const FMN_LOGO = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1B
 })();
 </script>
 
-<!-- mobile bottom nav -->
-<nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-100 flex items-center justify-around px-2 py-2" style="box-shadow:0 -4px 20px -8px rgba(15,23,42,.15);">
-    <button onclick="switchTab('overview')" class="flex flex-col items-center gap-0.5 text-[#ea580c] px-3"><i class="fas fa-home text-lg"></i><span class="text-[10px] font-bold">Home</span></button>
-    <button onclick="switchTab('properties')" class="flex flex-col items-center gap-0.5 text-slate-400 px-3"><i class="fas fa-building text-lg"></i><span class="text-[10px] font-bold">Properties</span></button>
-    <button onclick="switchTab('properties')" class="w-14 h-14 -mt-6 rounded-full bg-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-300 border-4 border-white"><i class="fas fa-plus text-lg"></i></button>
-    <button onclick="switchTab('messages')" class="flex flex-col items-center gap-0.5 text-slate-400 px-3"><i class="fas fa-comments text-lg"></i><span class="text-[10px] font-bold">Messages</span></button>
-    <button onclick="switchTab('profile')" class="flex flex-col items-center gap-0.5 text-slate-400 px-3"><i class="fas fa-user text-lg"></i><span class="text-[10px] font-bold">Profile</span></button>
-</nav>
+<!-- mobile bottom nav removed — the sidebar/drawer is the single nav -->
 </body>
 </html>
