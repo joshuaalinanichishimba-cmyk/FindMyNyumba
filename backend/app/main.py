@@ -1,4 +1,4 @@
-﻿"""
+"""
 main.py
 FindMyNyumba FastAPI application entry point.
 
@@ -32,6 +32,19 @@ from app.models.listing_event import ListingEvent   # noqa: F401
 
 # â”€â”€ Create any missing DB tables (idempotent â€” safe to run on every startup) â”€â”€
 Base.metadata.create_all(bind=engine)
+
+# One-time: add report workflow columns if missing
+from sqlalchemy import text as _sql_text
+with engine.connect() as _conn:
+    for _ddl in [
+        "ALTER TABLE reports ADD COLUMN resolution TEXT",
+        "ALTER TABLE reports ADD COLUMN handled_by INTEGER",
+        "ALTER TABLE reports ADD COLUMN handled_at TIMESTAMP",
+    ]:
+        try:
+            _conn.execute(_sql_text(_ddl)); _conn.commit()
+        except Exception:
+            pass  # column already exists
 
 
 # â”€â”€ Ensure newly-added columns exist on pre-existing tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
