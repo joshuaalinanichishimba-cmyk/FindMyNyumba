@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     PRODUCTION: bool = False
 
     # -- URLs -------------------------------------------------------------------
-    FRONTEND_URL: str = "http://localhost:5500"   # Update for production
+    FRONTEND_URL: str = "https://find-my-nyumba-original.vercel.app"
     BACKEND_URL: str  = "http://127.0.0.1:8000"  # Update for production
 
     # -- Auth -------------------------------------------------------------------
@@ -84,5 +84,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
 
 
