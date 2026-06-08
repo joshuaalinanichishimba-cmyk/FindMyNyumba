@@ -91,17 +91,27 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
 
 
+# Roles a self-registering user is allowed to choose. Anything else
+# (especially "admin") is forced to "student" so nobody can grant
+# themselves staff access by tampering with the request body.
+SELF_SIGNUP_ROLES = {"student", "student_host", "landlord"}
+
+
 @router.post("/register", response_model=UserResponse)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_in.email.lower()).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    # SECURITY: never trust the role from the client. Admin/staff accounts
+    # are created by an existing admin, never through public registration.
+    safe_role = user_in.role if user_in.role in SELF_SIGNUP_ROLES else "student"
+
     new_user = User(
         email=user_in.email.lower(),
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
-        role=user_in.role,
+        role=safe_role,
         is_active=True,
     )
     db.add(new_user)
