@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     # Sign up free at https://resend.com â†’ API Keys â†’ Create Key
     # Add a verified sender domain in Resend dashboard, then set MAIL_FROM.
     RESEND_API_KEY: str              = ""          # Required in production
-    MAIL_FROM: str                   = ""          # e.g. noreply@findmynyumba.com
+    MAIL_FROM: str                   = "onboarding@resend.dev"
     MAIL_FROM_NAME: str              = "FindMyNyumba"
 
     # -- Cloudinary (image hosting) --------------------------------------------
@@ -84,6 +84,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
 
 
 

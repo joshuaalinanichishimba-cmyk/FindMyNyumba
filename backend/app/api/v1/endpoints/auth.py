@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/api/v1/endpoints/auth.py
 
 Full auth router. Adds the THREE endpoints the frontend was already calling
@@ -136,7 +136,7 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
     db.commit()
 
     # FRONTEND_URL MUST be your real site in production, e.g.
-    # https://find-my-nyumba-original.vercel.app  — otherwise the link
+    # https://find-my-nyumba-original.vercel.app  â€” otherwise the link
     # points at localhost and nobody can use it.
     reset_url = f"{settings.FRONTEND_URL.rstrip('/')}/reset-password.html?token={raw_token}"
 
@@ -196,7 +196,7 @@ def google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
         info = id_token.verify_oauth2_token(
             body.credential,
             google_requests.Request(),
-            settings.GOOGLE_CLIENT_ID,   # this is the audience check — must match login.html
+            settings.GOOGLE_CLIENT_ID,   # this is the audience check â€” must match login.html
         )
     except ValueError:
         # Bad signature, wrong audience, or expired token.
@@ -235,3 +235,4 @@ def google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
         "role": user.role,
         "user_id": user.id,
     }
+
