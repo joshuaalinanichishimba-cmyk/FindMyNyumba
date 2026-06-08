@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin · FindMyNyumba</title>
+<title>Admin Â· FindMyNyumba</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -183,13 +183,13 @@
 
       <div class="hidden sm:block">
         <h1 id="page-title" class="text-[19px] font-extrabold text-slate-900 leading-none">Dashboard</h1>
-        <p id="page-sub" class="text-[12px] text-slate-400 font-medium mt-1">Welcome back — here's what's happening today</p>
+        <p id="page-sub" class="text-[12px] text-slate-400 font-medium mt-1">Welcome back â€” here's what's happening today</p>
       </div>
 
       <div class="flex-1 max-w-md mx-auto hidden md:block">
         <div class="relative">
           <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
-          <input id="global-search" class="fmn-input pl-10" placeholder="Search users, listings, reports…"
+          <input id="global-search" class="fmn-input pl-10" placeholder="Search users, listings, reportsâ€¦"
                  oninput="globalSearch(this.value)">
         </div>
       </div>
@@ -267,7 +267,7 @@
           <div class="card xl:col-span-2 overflow-hidden">
             <div class="px-5 py-4 flex items-center justify-between border-b border-slate-100">
               <h3 class="font-extrabold text-slate-900 text-[15px]">Recent Listings</h3>
-              <button onclick="showTab('listings')" class="text-[12px] font-bold text-orange-600 hover:text-orange-700">View all →</button>
+              <button onclick="showTab('listings')" class="text-[12px] font-bold text-orange-600 hover:text-orange-700">View all â†’</button>
             </div>
             <div id="recent-listings" class="divide-y divide-slate-50"></div>
           </div>
@@ -278,15 +278,15 @@
             <div class="space-y-2">
               <button onclick="showTab('verifications')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
                 <span class="ico-box bg-orange-50 text-orange-600 group-hover:bg-orange-100"><i class="fas fa-user-shield"></i></span>
-                <span><span class="block text-[13.5px] font-bold text-slate-800">Verification Queue</span><span class="block text-[11px] text-slate-400" id="qa-verif">— pending</span></span>
+                <span><span class="block text-[13.5px] font-bold text-slate-800">Verification Queue</span><span class="block text-[11px] text-slate-400" id="qa-verif">â€” pending</span></span>
               </button>
               <button onclick="showTab('listings')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
                 <span class="ico-box bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100"><i class="fas fa-circle-check"></i></span>
-                <span><span class="block text-[13.5px] font-bold text-slate-800">Approve Listings</span><span class="block text-[11px] text-slate-400" id="qa-listings">— pending</span></span>
+                <span><span class="block text-[13.5px] font-bold text-slate-800">Approve Listings</span><span class="block text-[11px] text-slate-400" id="qa-listings">â€” pending</span></span>
               </button>
               <button onclick="showTab('trust')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
                 <span class="ico-box bg-red-50 text-red-600 group-hover:bg-red-100"><i class="fas fa-flag"></i></span>
-                <span><span class="block text-[13.5px] font-bold text-slate-800">Review Reports</span><span class="block text-[11px] text-slate-400" id="qa-reports">— open</span></span>
+                <span><span class="block text-[13.5px] font-bold text-slate-800">Review Reports</span><span class="block text-[11px] text-slate-400" id="qa-reports">â€” open</span></span>
               </button>
               <button onclick="showTab('announcements')" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 text-left transition group">
                 <span class="ico-box bg-blue-50 text-blue-600 group-hover:bg-blue-100"><i class="fas fa-bullhorn"></i></span>
@@ -316,7 +316,7 @@
             </select>
             <div class="relative">
               <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
-              <input id="user-search" class="fmn-input pl-9 w-44" placeholder="Search…" oninput="renderUsers()">
+              <input id="user-search" class="fmn-input pl-9 w-44" placeholder="Searchâ€¦" oninput="renderUsers()">
             </div>
             <button class="btn btn-ghost" onclick="exportCSV('users')"><i class="fas fa-file-csv"></i>Export</button>
           </div>
@@ -347,7 +347,7 @@
             </select>
             <div class="relative">
               <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
-              <input id="listing-search" class="fmn-input pl-9 w-44" placeholder="Search…" oninput="renderListings()">
+              <input id="listing-search" class="fmn-input pl-9 w-44" placeholder="Searchâ€¦" oninput="renderListings()">
             </div>
             <button class="btn btn-ghost" onclick="exportCSV('listings')"><i class="fas fa-file-csv"></i>Export</button>
           </div>
@@ -379,7 +379,7 @@
       </section>
 
       <!-- ============================================================
-           TRUST & SAFETY — Reports & Complaints (LIVE)
+           TRUST & SAFETY â€” Reports & Complaints (LIVE)
       ============================================================= -->
       <section id="tab-trust" class="tab-section">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5" id="trust-kpis"></div>
@@ -426,7 +426,7 @@
       <section id="tab-transactions" class="tab-section"></section>
 
       <!-- ============================================================
-           ANALYTICS — Growth (LIVE) + Demand (PREVIEW)
+           ANALYTICS â€” Growth (LIVE) + Demand (PREVIEW)
       ============================================================= -->
       <section id="tab-analytics" class="tab-section">
         <div class="card p-5 mb-5">
@@ -458,7 +458,7 @@
             <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Title</label>
             <input id="announce-title" class="fmn-input mb-4" placeholder="e.g. New verification requirements">
             <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Message</label>
-            <textarea id="announce-body" rows="5" class="fmn-input mb-5" placeholder="Write your announcement…"></textarea>
+            <textarea id="announce-body" rows="5" class="fmn-input mb-5" placeholder="Write your announcementâ€¦"></textarea>
             <button class="btn btn-pri" onclick="sendAnnouncement()"><i class="fas fa-paper-plane"></i>Send announcement</button>
           </div>
         </div>
@@ -531,9 +531,11 @@
           <h3 class="font-extrabold text-slate-900 text-lg mb-4">Change Password</h3>
           <div id="cpwd-error" class="hidden mb-3 text-sm font-semibold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3"></div>
           <div id="cpwd-success" class="hidden mb-3 text-sm font-semibold text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-3"><i class="fas fa-check-circle mr-1.5"></i>Password updated.</div>
-          <input type="password" id="cpwd-old" class="fmn-input mb-3" placeholder="Current password">
-          <input type="password" id="cpwd-new" class="fmn-input mb-3" placeholder="New password">
-          <input type="password" id="cpwd-confirm" class="fmn-input mb-5" placeholder="Confirm new password">
+          <form onsubmit="return false;" autocomplete="off">
+          <input type="password" id="cpwd-old" class="fmn-input mb-3" placeholder="Current password" autocomplete="current-password">
+          <input type="password" id="cpwd-new" class="fmn-input mb-3" placeholder="New password" autocomplete="new-password">
+          <input type="password" id="cpwd-confirm" class="fmn-input mb-5" placeholder="Confirm new password" autocomplete="new-password">
+          </form>
           <div class="flex gap-3 justify-end">
             <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
             <button id="cpwd-btn" class="btn btn-pri" onclick="submitChangePassword()">Update</button>
@@ -566,7 +568,7 @@
           </div>
           <div id="thread-body" class="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50"></div>
           <div id="thread-compose" class="p-3 border-t border-slate-100 flex gap-2 flex-shrink-0">
-            <input id="thread-input" class="fmn-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendThreadMessage()">
+            <input id="thread-input" class="fmn-input" placeholder="Type a messageâ€¦" onkeydown="if(event.key==='Enter')sendThreadMessage()">
             <button class="btn btn-pri" onclick="sendThreadMessage()"><i class="fas fa-paper-plane"></i></button>
           </div>
         </div>
@@ -600,12 +602,12 @@ let _reportsCount = 0;
 const charts = {};      // Chart.js instances by id
 
 function esc(str){
-  if (str === null || str === undefined) return '—';
+  if (str === null || str === undefined) return 'â€”';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
                     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-function fmtK(n){ // kwacha-style currency, no fabricated values — only used where a real number is passed
-  if (n === null || n === undefined || isNaN(n)) return '—';
+function fmtK(n){ // kwacha-style currency, no fabricated values â€” only used where a real number is passed
+  if (n === null || n === undefined || isNaN(n)) return 'â€”';
   return 'K' + Number(n).toLocaleString();
 }
 
@@ -646,7 +648,7 @@ function logout(){
 
 /* ---------- navigation ---------- */
 const TAB_META = {
-  dashboard:   ['Dashboard',          "Welcome back — here's what's happening today"],
+  dashboard:   ['Dashboard',          "Welcome back â€” here's what's happening today"],
   users:       ['Users',              'Manage students, landlords and staff'],
   listings:    ['Listings',           'Every property on the platform'],
   verifications:['Verification Queue','Review submitted documents'],
@@ -699,7 +701,7 @@ document.addEventListener('click', e => {
 
 /* ---------- count-up animation ---------- */
 function countUp(el, target){
-  if (target === '—' || target === null || target === undefined || isNaN(Number(target))) { el.textContent = target ?? '—'; return; }
+  if (target === 'â€”' || target === null || target === undefined || isNaN(Number(target))) { el.textContent = target ?? 'â€”'; return; }
   target = Number(target); const dur = 700; const start = performance.now();
   (function step(now){
     const p = Math.min((now - start) / dur, 1);
@@ -709,7 +711,7 @@ function countUp(el, target){
 }
 
 /* ====================================================================
-   DASHBOARD — real data from /admin/stats + derived from users/listings
+   DASHBOARD â€” real data from /admin/stats + derived from users/listings
 ==================================================================== */
 async function loadDashboard(){
   // pull everything we can in parallel; derive KPIs that the stats endpoint may not return
@@ -735,7 +737,7 @@ async function loadDashboard(){
     ?? (Array.isArray(reports) ? reports.filter(r => r.status === 'pending').length : 0);
   _reportsCount = pendingReports;
 
-  // KPI cards — every tile is a real, live figure (from /admin/stats or derived from /admin data)
+  // KPI cards â€” every tile is a real, live figure (from /admin/stats or derived from /admin data)
   const kpis = [
     { label:'Total Listings',   val: stats.total_listings ?? _listings.length, icon:'fa-building',       color:'orange', live:true },
     { label:'Active Listings',  val: activeL,                                   icon:'fa-circle-check',   color:'green',  live:true },
@@ -763,7 +765,7 @@ async function loadDashboard(){
       <div class="flex items-start justify-between mb-3">
         <span class="ico-box ${bg} ${tx}"><i class="fas ${k.icon}"></i></span>${badge}
       </div>
-      <div class="text-[26px] font-extrabold text-slate-900 tabnum leading-none" id="kpi-${i}">${k.val === '—' ? '—' : '0'}</div>
+      <div class="text-[26px] font-extrabold text-slate-900 tabnum leading-none" id="kpi-${i}">${k.val === 'â€”' ? 'â€”' : '0'}</div>
       <div class="text-[12px] font-semibold text-slate-400 mt-1.5">${k.label}</div>
     </div>`;
   }).join('');
@@ -800,7 +802,7 @@ function destroyChart(id){ if (charts[id]) { charts[id].destroy(); delete charts
 function renderGrowthChart(data, canvasId){
   const ctx = document.getElementById(canvasId); if (!ctx || !window.Chart) return;
   destroyChart(canvasId);
-  const months = data?.months || ['—'];
+  const months = data?.months || ['â€”'];
   const users  = data?.users  || [0];
   const listings = data?.listings || [0];
   charts[canvasId] = new Chart(ctx, {
@@ -926,7 +928,7 @@ function renderListings(){
     <tr class="hover:bg-slate-50">
       <td class="data-td font-bold text-slate-900 max-w-[220px]"><button onclick="openListingDetail(${l.id})" class="block truncate text-left hover:text-orange-600">${esc(l.title)}</button></td>
       <td class="data-td text-slate-500 hidden md:table-cell">${esc(l.location)}</td>
-      <td class="data-td text-slate-700 font-semibold tabnum hidden lg:table-cell">${l.price != null ? fmtK(l.price) : '—'}</td>
+      <td class="data-td text-slate-700 font-semibold tabnum hidden lg:table-cell">${l.price != null ? fmtK(l.price) : 'â€”'}</td>
       <td class="data-td">${statusBadge(l.status)}</td>
       <td class="data-td">
         <div class="flex flex-wrap gap-1.5">
@@ -958,7 +960,7 @@ async function loadVerifications(){
     const res = await fetch(`${API}/admin/verifications`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (!data || !data.length) { tbody.innerHTML = emptyRow(5,'No pending verifications. 🎉'); return; }
+    if (!data || !data.length) { tbody.innerHTML = emptyRow(5,'No pending verifications. ðŸŽ‰'); return; }
     tbody.innerHTML = data.map(v => `
       <tr class="hover:bg-slate-50">
         <td class="data-td">
@@ -989,7 +991,7 @@ async function approveVerification(userId){
   });
 }
 async function rejectVerification(userId){
-  const reason = window.prompt('Rejection reason (optional — shown to user):') ?? '';
+  const reason = window.prompt('Rejection reason (optional â€” shown to user):') ?? '';
   showModal('Reject Verification', 'Reject this verification? The user will be notified.', async () => {
     const res = await fetch(`${API}/admin/verifications/${userId}/reject`, {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reason: reason.trim() || null })
@@ -999,11 +1001,11 @@ async function rejectVerification(userId){
 }
 
 /* ====================================================================
-   TRUST & SAFETY — reports
+   TRUST & SAFETY â€” reports
 ==================================================================== */
 async function loadReports(){
   const el = document.getElementById('reports-list');
-  el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
+  el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Loadingâ€¦</div>`;
   try {
     const res = await fetch(`${API}/admin/reports`);
     if (!res.ok) throw new Error();
@@ -1013,7 +1015,7 @@ async function loadReports(){
     reports.sort((a,b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
     _reportsCount = reports.filter(r => r.status === 'pending').length;
     renderTrustKpis(reports);
-    if (!reports.length) { el.innerHTML = `<div class="px-5 py-12 text-center text-slate-400"><i class="fas fa-circle-check text-3xl text-emerald-400 mb-3 block"></i>No reports — all clear.</div>`; return; }
+    if (!reports.length) { el.innerHTML = `<div class="px-5 py-12 text-center text-slate-400"><i class="fas fa-circle-check text-3xl text-emerald-400 mb-3 block"></i>No reports â€” all clear.</div>`; return; }
     const statusPill = { pending:'bg-orange-50 text-orange-600', reviewed:'bg-blue-50 text-blue-600', dismissed:'bg-slate-100 text-slate-500' };
     el.innerHTML = reports.map(r => `
       <div class="px-5 py-4 hover:bg-slate-50 transition">
@@ -1023,7 +1025,7 @@ async function loadReports(){
               <span class="font-extrabold text-slate-900 text-sm">${esc(r.listing_title || ('Listing #' + r.listing_id))}</span>
               <span class="pill ${statusPill[r.status] || 'bg-slate-100 text-slate-500'}">${esc(r.status)}</span>
             </div>
-            <div class="text-[11.5px] text-slate-400 mt-1">Report #${esc(r.id)} · by ${esc(r.reporter_name || ('User ' + r.reporter_id))}${r.reporter_email ? ' · ' + esc(r.reporter_email) : ''}</div>
+            <div class="text-[11.5px] text-slate-400 mt-1">Report #${esc(r.id)} Â· by ${esc(r.reporter_name || ('User ' + r.reporter_id))}${r.reporter_email ? ' Â· ' + esc(r.reporter_email) : ''}</div>
             <div class="mt-2 text-[13.5px] text-slate-700"><span class="font-bold">Reason:</span> ${esc(r.reason)}</div>
             ${r.description ? `<div class="mt-1 text-[13px] text-slate-500">${esc(r.description)}</div>` : ''}
           </div>
@@ -1055,7 +1057,7 @@ function renderTrustKpis(reports){
 async function dismissReport(id){ const res = await fetch(`${API}/admin/reports/${id}/dismiss`, { method:'PATCH' }); if (res.ok) { showToast('Report dismissed.'); loadReports(); } }
 
 /* ====================================================================
-   FRAUD — real "most-reported listings" risk panel
+   FRAUD â€” real "most-reported listings" risk panel
    Derived by joining /admin/reports to /admin/all-listings (no new backend).
 ==================================================================== */
 async function loadFraud(){
@@ -1076,9 +1078,9 @@ async function loadFraud(){
     });
     let rows = Object.keys(agg).map(id => {
       const a = agg[id], l = lmap[id] || {};
-      return { id, total:a.total, open:a.open, title:a.title || l.title || ('Listing #' + id), location:l.location || '—', owner:l.owner_id ?? '—' };
+      return { id, total:a.total, open:a.open, title:a.title || l.title || ('Listing #' + id), location:l.location || 'â€”', owner:l.owner_id ?? 'â€”' };
     }).sort((x,y) => y.total - x.total || y.open - x.open);
-    if (!rows.length){ tbody.innerHTML = emptyRow(6,'No reported listings — nothing flagged. 🎉'); return; }
+    if (!rows.length){ tbody.innerHTML = emptyRow(6,'No reported listings â€” nothing flagged. ðŸŽ‰'); return; }
     const risk = n => n >= 4 ? ['Critical','bg-red-50 text-red-600'] : n === 3 ? ['High','bg-orange-50 text-orange-600'] : n === 2 ? ['Medium','bg-amber-50 text-amber-600'] : ['Low','bg-slate-100 text-slate-500'];
     tbody.innerHTML = rows.map(r => {
       const [label,cls] = risk(r.total);
@@ -1106,7 +1108,7 @@ async function loadRevenue(){
   let data = null;
   try { const r = await fetch(`${API}/admin/revenue?period=${period}`); if (r.ok) data = await r.json(); } catch {}
 
-  const setMoney = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = (v == null ? '—' : fmtK(v)); };
+  const setMoney = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = (v == null ? 'â€”' : fmtK(v)); };
   setMoney('rev-today', data?.today);
   setMoney('rev-month', data?.month);
   setMoney('rev-year',  data?.year);
@@ -1117,7 +1119,7 @@ async function loadRevenue(){
     destroyChart('revenueChart');
     charts['revenueChart'] = new Chart(tctx, {
       type:'bar',
-      data:{ labels: data?.trend?.labels || ['—'], datasets:[{ label:'Revenue', data: data?.trend?.values || [0], backgroundColor:'#ea580c', borderRadius:6, maxBarThickness:34 }] },
+      data:{ labels: data?.trend?.labels || ['â€”'], datasets:[{ label:'Revenue', data: data?.trend?.values || [0], backgroundColor:'#ea580c', borderRadius:6, maxBarThickness:34 }] },
       options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0f172a',padding:10,cornerRadius:8,callbacks:{label:c=>'K'+Number(c.raw).toLocaleString()}}},
         scales:{ x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}, y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:11}},beginAtZero:true} } }
     });
@@ -1152,11 +1154,11 @@ async function loadAnalytics(){
 }
 
 /* ====================================================================
-   SYSTEM HEALTH — pings the real API; rest labelled preview
+   SYSTEM HEALTH â€” pings the real API; rest labelled preview
 ==================================================================== */
 async function loadSystemHealth(){
   const el = document.getElementById('system-list');
-  el.innerHTML = `<div class="px-5 py-8 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Checking services…</div>`;
+  el.innerHTML = `<div class="px-5 py-8 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Checking servicesâ€¦</div>`;
   let apiUp = false, t0 = performance.now(), ms = 0;
   try { const r = await fetch(`${API}/auth/me`); apiUp = r.ok || r.status === 401 || r.status === 403; ms = Math.round(performance.now() - t0); }
   catch { apiUp = false; }
@@ -1227,7 +1229,7 @@ async function submitChangePassword(){
   const PWD_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
   if (!PWD_RE.test(newPwd)){ errEl.textContent='Password must be 8+ characters with uppercase, lowercase, number, and symbol.'; errEl.classList.remove('hidden'); return; }
   if (newPwd!==confirm){ errEl.textContent='New passwords do not match.'; errEl.classList.remove('hidden'); return; }
-  btn.disabled=true; btn.textContent='Updating…';
+  btn.disabled=true; btn.textContent='Updatingâ€¦';
   try {
     const res = await fetch(`${API}/admin/change-password`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ old_password:oldPwd, new_password:newPwd, confirm_password:confirm }) });
     const data = await res.json().catch(()=>({}));
@@ -1270,14 +1272,14 @@ function exportCSV(kind){
 
 /* ====================================================================
    PREVIEW SECTIONS (Revenue / Escrow / Fraud / Support / Institutions / Demand)
-   — full UI, clearly marked as not-yet-connected to a backend.
+   â€” full UI, clearly marked as not-yet-connected to a backend.
 ==================================================================== */
 function previewBanner(text){
-  return `<div class="preview-badge mb-5"><i class="fas fa-flask"></i>Preview · ${text}</div>`;
+  return `<div class="preview-badge mb-5"><i class="fas fa-flask"></i>Preview Â· ${text}</div>`;
 }
 function ghostKpi(label, icon){
   return `<div class="kpi opacity-90"><div class="flex items-start justify-between mb-3"><span class="ico-box bg-slate-100 text-slate-400"><i class="fas ${icon}"></i></span><span class="pill bg-amber-50 text-amber-700">Preview</span></div>
-    <div class="text-[24px] font-extrabold text-slate-300 tabnum">—</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${label}</div></div>`;
+    <div class="text-[24px] font-extrabold text-slate-300 tabnum">â€”</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${label}</div></div>`;
 }
 function ghostCard(title, sub, icon){
   return `<div class="card p-6 text-center"><span class="ico-box bg-slate-100 text-slate-400 mx-auto mb-3"><i class="fas ${icon}"></i></span>
@@ -1289,12 +1291,12 @@ function emptyState(icon, title, sub){
     <div class="font-extrabold text-slate-700 text-[14px]">${title}</div><div class="text-[12px] text-slate-400 mt-1 max-w-md mx-auto">${sub}</div></div>`;
 }
 function awaitingState(target){
-  return `<div class="px-5 py-12 text-center text-slate-400 text-sm"><i class="fas fa-plug-circle-xmark text-2xl text-slate-300 mb-3 block"></i>No data yet — waiting on <code class="text-slate-500">${target}</code>.</div>`;
+  return `<div class="px-5 py-12 text-center text-slate-400 text-sm"><i class="fas fa-plug-circle-xmark text-2xl text-slate-300 mb-3 block"></i>No data yet â€” waiting on <code class="text-slate-500">${target}</code>.</div>`;
 }
 function moneyKpi(id, label, icon, color){
   const c = { orange:['bg-orange-50','text-orange-600'], green:['bg-emerald-50','text-emerald-600'], blue:['bg-blue-50','text-blue-600'], purple:['bg-purple-50','text-purple-600'], amber:['bg-amber-50','text-amber-600'], red:['bg-red-50','text-red-600'], teal:['bg-teal-50','text-teal-600'] }[color] || ['bg-slate-100','text-slate-500'];
   return `<div class="kpi"><div class="flex items-start justify-between mb-3"><span class="ico-box ${c[0]} ${c[1]}"><i class="fas ${icon}"></i></span></div>
-    <div class="text-[24px] font-extrabold text-slate-900 tabnum" id="${id}">—</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${label}</div></div>`;
+    <div class="text-[24px] font-extrabold text-slate-900 tabnum" id="${id}">â€”</div><div class="text-[12px] font-semibold text-slate-400 mt-1">${label}</div></div>`;
 }
 
 function buildModuleSections(){
@@ -1321,7 +1323,7 @@ function buildModuleSections(){
        </div>
        <div class="card p-5">
          <h3 class="font-extrabold text-slate-900 text-[15px]">By Source</h3>
-         <p class="text-[12px] text-slate-400 font-medium">Verification · Featured · Boost · Escrow · Viewing</p>
+         <p class="text-[12px] text-slate-400 font-medium">Verification Â· Featured Â· Boost Â· Escrow Â· Viewing</p>
          <div class="h-[180px] mt-3 relative"><canvas id="revSourceChart"></canvas></div>
          <div id="rev-source-legend" class="grid grid-cols-2 gap-2 mt-3 text-[11px]"></div>
        </div>
@@ -1356,7 +1358,7 @@ function buildModuleSections(){
      <div class="card overflow-hidden">
        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
          <div><h3 class="font-extrabold text-slate-900 text-[15px]">Escrow Ledger</h3>
-           <p class="text-[12px] text-slate-400 font-medium">waiting → held → released · or refunded / disputed</p></div>
+           <p class="text-[12px] text-slate-400 font-medium">waiting â†’ held â†’ released Â· or refunded / disputed</p></div>
          <button class="btn btn-ghost" onclick="loadEscrow()"><i class="fas fa-rotate"></i>Refresh</button>
        </div>
        <div class="overflow-x-auto"><table class="w-full"><thead><tr>
@@ -1381,7 +1383,7 @@ function buildModuleSections(){
        </div>
        <div class="card p-5">
          <h3 class="font-extrabold text-slate-900 text-[15px]">High-Risk Landlords</h3>
-         <p class="text-[12px] text-slate-400 font-medium">Risk engine score 0–100</p>
+         <p class="text-[12px] text-slate-400 font-medium">Risk engine score 0â€“100</p>
          <div id="fraud-landlords" class="mt-3 space-y-2"></div>
        </div>
      </div>
@@ -1396,11 +1398,11 @@ function buildModuleSections(){
     `<div class="card overflow-hidden">
        <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-2.5">
          <div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Messages &amp; Support</h3>
-           <p class="text-[12px] text-slate-400 font-medium">Student↔Landlord · Student↔Support · Admin broadcasts</p></div>
+           <p class="text-[12px] text-slate-400 font-medium">Studentâ†”Landlord Â· Studentâ†”Support Â· Admin broadcasts</p></div>
          <select id="support-kind" class="fmn-input w-auto" onchange="renderSupport()">
-           <option value="">All conversations</option><option value="student_support">Support tickets</option><option value="student_landlord">Student ↔ Landlord</option></select>
+           <option value="">All conversations</option><option value="student_support">Support tickets</option><option value="student_landlord">Student â†” Landlord</option></select>
          <div class="relative"><i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
-           <input id="support-search" class="fmn-input pl-9 w-44" placeholder="Search…" oninput="renderSupport()"></div>
+           <input id="support-search" class="fmn-input pl-9 w-44" placeholder="Searchâ€¦" oninput="renderSupport()"></div>
        </div>
        <div id="support-list" class="divide-y divide-slate-50"></div>
      </div>`;
@@ -1541,7 +1543,7 @@ function renderTransactions(){
       <td class="data-td text-slate-500 hidden lg:table-cell">${esc(TXN_METHOD_LABEL[t.method]||t.method)}</td>
       <td class="data-td font-semibold tabnum">${fmtK(t.amount)}</td>
       <td class="data-td">${txnStatusPill(t.status)}</td>
-      <td class="data-td">${t.status==='success' ? `<button onclick="refundTxn('${esc(t.id)}','${esc(t.ref)}')" class="btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 text-[12px]">Refund</button>` : '<span class="text-[11px] text-slate-300">—</span>'}</td>
+      <td class="data-td">${t.status==='success' ? `<button onclick="refundTxn('${esc(t.id)}','${esc(t.ref)}')" class="btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 text-[12px]">Refund</button>` : '<span class="text-[11px] text-slate-300">â€”</span>'}</td>
     </tr>`).join('');
 }
 function refundTxn(id, ref){
@@ -1564,7 +1566,7 @@ async function loadEscrow(){
   tb.innerHTML = skeletonRows(4,6);
   try { const r = await fetch(`${API}/admin/escrow`); _escrow = r.ok ? await r.json() : []; } catch { _escrow = []; }
   const sum = s => _escrow.filter(e => e.status === s).reduce((a,e)=>a+Number(e.amount||0),0);
-  const setM = (id,v)=>{ const el=document.getElementById(id); if (el) el.textContent = _escrow.length ? fmtK(v) : '—'; };
+  const setM = (id,v)=>{ const el=document.getElementById(id); if (el) el.textContent = _escrow.length ? fmtK(v) : 'â€”'; };
   setM('esc-waiting', sum('waiting')); setM('esc-held', sum('held')); setM('esc-released', sum('released')); setM('esc-disputed', sum('disputed'));
   if (!_escrow.length){ tb.innerHTML = `<tr><td colspan="6">${awaitingState('/admin/escrow')}</td></tr>`; return; }
   tb.innerHTML = _escrow.map(e => {
@@ -1578,7 +1580,7 @@ async function loadEscrow(){
       <td class="data-td text-slate-500 hidden md:table-cell">${esc(e.landlord_name||e.landlord_id)}</td>
       <td class="data-td font-semibold tabnum">${fmtK(e.amount)}</td>
       <td class="data-td">${escrowPill(e.status)}</td>
-      <td class="data-td"><div class="flex flex-wrap gap-1.5">${acts.join('') || '<span class="text-[11px] text-slate-300">—</span>'}</div></td>
+      <td class="data-td"><div class="flex flex-wrap gap-1.5">${acts.join('') || '<span class="text-[11px] text-slate-300">â€”</span>'}</div></td>
     </tr>`; }).join('');
 }
 function escrowAction(id, action){
@@ -1603,8 +1605,8 @@ async function loadInstitutions(){
     <tr class="hover:bg-slate-50">
       <td class="data-td font-bold text-slate-900">${esc(i.name)}</td>
       <td class="data-td text-slate-500 hidden md:table-cell">${esc(i.town)}</td>
-      <td class="data-td">${esc(i.type || '—')}</td>
-      <td class="data-td tabnum">${i.student_count ?? '—'}</td>
+      <td class="data-td">${esc(i.type || 'â€”')}</td>
+      <td class="data-td tabnum">${i.student_count ?? 'â€”'}</td>
       <td class="data-td"><button onclick="deleteInstitution('${esc(i.id)}','${esc((i.name||'').replace(/'/g,''))}')" class="btn bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1.5 text-[12px]">Remove</button></td>
     </tr>`).join('');
 }
@@ -1627,7 +1629,7 @@ function deleteInstitution(id, name){
 let _convos = [];
 async function loadSupport(){
   const el = document.getElementById('support-list'); if (!el) return;
-  el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
+  el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Loadingâ€¦</div>`;
   try { const r = await fetch(`${API}/admin/conversations`); _convos = r.ok ? await r.json() : []; } catch { _convos = []; }
   renderSupport();
 }
@@ -1646,7 +1648,7 @@ function renderSupport(){
         <div class="flex items-center gap-2"><span class="font-bold text-slate-800 text-[13.5px] truncate">${esc(c.participant_name || c.subject || 'Conversation')}</span>
           <span class="pill ${kindPill[c.kind]||'bg-slate-100 text-slate-500'}">${esc((c.kind||'').replace('_',' '))}</span>
           ${c.unread ? '<span class="w-2 h-2 rounded-full bg-orange-500"></span>' : ''}</div>
-        <div class="text-[12px] text-slate-500 truncate mt-0.5">${esc(c.last_message || '—')}</div>
+        <div class="text-[12px] text-slate-500 truncate mt-0.5">${esc(c.last_message || 'â€”')}</div>
       </div>
       <span class="text-[11px] text-slate-300 flex-shrink-0">${esc(c.last_at || '')}</span>
     </button>`).join('');
@@ -1678,7 +1680,7 @@ async function loadSearchGeo(){
       : `<div class="rounded-xl border border-slate-100 overflow-hidden">
            <div class="h-[180px] relative bg-gradient-to-br from-emerald-50 via-amber-50 to-red-50 flex items-center justify-center">
              <div class="absolute inset-0 opacity-70" style="background:radial-gradient(circle at 30% 40%, rgba(239,68,68,.45), transparent 35%), radial-gradient(circle at 65% 60%, rgba(245,158,11,.4), transparent 30%), radial-gradient(circle at 50% 30%, rgba(234,88,12,.35), transparent 25%)"></div>
-             <span class="relative text-[12px] font-semibold text-slate-500"><i class="fas fa-map-location-dot mr-1.5"></i>Demand heatmap — wire <code>/admin/analytics/geo</code></span>
+             <span class="relative text-[12px] font-semibold text-slate-500"><i class="fas fa-map-location-dot mr-1.5"></i>Demand heatmap â€” wire <code>/admin/analytics/geo</code></span>
            </div></div>`;
   }
 }
@@ -1687,7 +1689,7 @@ function geoHeatPanel(points){
 }
 
 /* ====================================================================
-   FRAUD — landlord risk + duplicate signals (extends loadFraud)
+   FRAUD â€” landlord risk + duplicate signals (extends loadFraud)
 ==================================================================== */
 async function loadFraudExtras(){
   const ll = document.getElementById('fraud-landlords');
@@ -1710,12 +1712,12 @@ async function loadFraudExtras(){
   }
   let sig = null;
   try { const r = await fetch(`${API}/admin/fraud/signals`); if (r.ok) sig = await r.json(); } catch {}
-  const set = (id,v)=>{ const el=document.getElementById(id); if (el) el.textContent = v==null?'—':v; };
+  const set = (id,v)=>{ const el=document.getElementById(id); if (el) el.textContent = v==null?'â€”':v; };
   set('fraud-dup-nrc', sig?.duplicate_nrc); set('fraud-dup-phone', sig?.duplicate_phone); set('fraud-multi', sig?.multi_account);
 }
 
 /* ====================================================================
-   RBAC — role × permission matrix (Settings)
+   RBAC â€” role Ã— permission matrix (Settings)
 ==================================================================== */
 const RBAC_ROLES = [
   ['super_admin','Super Admin'], ['verification_officer','Verification Officer'], ['support_agent','Support Agent'],
@@ -1774,7 +1776,7 @@ async function saveRbac(){
 ==================================================================== */
 function exportReport(resource, format){
   if (format === 'csv' && (resource === 'users' || resource === 'listings')) return exportCSV(resource);
-  showToast(`Preparing ${resource} ${format.toUpperCase()}…`);
+  showToast(`Preparing ${resource} ${format.toUpperCase()}â€¦`);
   fetch(`${API}/admin/export/${resource}.${format}`)
     .then(r => { if (!r.ok) throw 0; return r.blob(); })
     .then(b => { const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`findmynyumba_${resource}.${format}`; a.click(); URL.revokeObjectURL(a.href); showToast('Exported.'); })
@@ -1791,13 +1793,13 @@ function verifyPill(s){
 function riskGauge(score, band){
   const s = (score==null||isNaN(score)) ? null : Math.max(0,Math.min(100,Number(score)));
   const col = band==='high' ? '#ef4444' : band==='medium' ? '#f59e0b' : '#16a34a';
-  const label = band ? band[0].toUpperCase()+band.slice(1)+' Risk' : '—';
+  const label = band ? band[0].toUpperCase()+band.slice(1)+' Risk' : 'â€”';
   const r=52, c=2*Math.PI*r, off = s==null ? c : c*(1-s/100);
   return `<svg width="140" height="140" viewBox="0 0 140 140" class="mx-auto">
       <circle cx="70" cy="70" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="14"/>
       <circle cx="70" cy="70" r="${r}" fill="none" stroke="${s==null?'#e2e8f0':col}" stroke-width="14" stroke-linecap="round"
         stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 70 70)"/>
-      <text x="70" y="66" text-anchor="middle" font-size="30" font-weight="800" fill="#0f172a">${s==null?'—':s}</text>
+      <text x="70" y="66" text-anchor="middle" font-size="30" font-weight="800" fill="#0f172a">${s==null?'â€”':s}</text>
       <text x="70" y="88" text-anchor="middle" font-size="11" font-weight="700" fill="${col}">${label}</text>
     </svg>`;
 }
@@ -1833,7 +1835,7 @@ function closeLightbox(){ document.getElementById('lightbox').classList.add('hid
 
 function renderListingDetail(d){
   const a = d.analytics || {};
-  const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : '—';
+  const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : 'â€”';
   const landlord = d.landlord || {};
   const stat = (label, val, extra='') => `<div class="bg-white rounded-xl border border-slate-100 px-3.5 py-3"><div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">${label}</div><div class="mt-1 ${extra}">${val}</div></div>`;
 
@@ -1853,7 +1855,7 @@ function renderListingDetail(d){
       <div class="flex-1 min-w-0"><div class="text-[12.5px] font-bold text-slate-700">${lbl}</div></div>
       ${verifyPill(doc?.status || (doc?'pending':'unverified'))}
       ${doc?.url ? `<button onclick="openLightbox('${esc(doc.url)}')" class="text-orange-600 hover:text-orange-700 text-[12px] font-bold"><i class="fas fa-eye"></i></button>
-        <a href="${esc(doc.url)}" download class="text-slate-400 hover:text-slate-600 text-[12px]"><i class="fas fa-download"></i></a>` : '<span class="text-[11px] text-slate-300">—</span>'}
+        <a href="${esc(doc.url)}" download class="text-slate-400 hover:text-slate-600 text-[12px]"><i class="fas fa-download"></i></a>` : '<span class="text-[11px] text-slate-300">â€”</span>'}
     </div>`; }).join('');
 
   // timeline
@@ -1865,13 +1867,13 @@ function renderListingDetail(d){
   // reports
   const reps = (d.reports||[]);
   const reportsInner = reps.length
-    ? reps.map(r => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(r.category)}</div><div class="text-[11px] text-slate-400">by ${esc(r.reporter_name||'user')} · ${esc(r.created_at||'')}</div></div><span class="pill bg-orange-50 text-orange-600">${esc(r.status)}</span></div>`).join('')
+    ? reps.map(r => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(r.category)}</div><div class="text-[11px] text-slate-400">by ${esc(r.reporter_name||'user')} Â· ${esc(r.created_at||'')}</div></div><span class="pill bg-orange-50 text-orange-600">${esc(r.status)}</span></div>`).join('')
     : `<div class="text-[12px] text-slate-400 py-4 text-center">No reports on this listing.</div>`;
 
   // transactions
   const txns = (d.transactions||[]);
   const txnInner = txns.length
-    ? txns.map(t => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(TXN_TYPE_LABEL[t.type]||t.type)}</div><div class="text-[11px] text-slate-400">${esc(t.ref||'')} · ${esc(TXN_METHOD_LABEL[t.method]||t.method||'')}</div></div><div class="text-right"><div class="text-[12.5px] font-bold tabnum">${fmtK(t.amount)}</div>${txnStatusPill(t.status)}</div></div>`).join('')
+    ? txns.map(t => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(TXN_TYPE_LABEL[t.type]||t.type)}</div><div class="text-[11px] text-slate-400">${esc(t.ref||'')} Â· ${esc(TXN_METHOD_LABEL[t.method]||t.method||'')}</div></div><div class="text-right"><div class="text-[12.5px] font-bold tabnum">${fmtK(t.amount)}</div>${txnStatusPill(t.status)}</div></div>`).join('')
     : `<div class="text-[12px] text-slate-400 py-4 text-center">No transactions yet.</div>`;
 
   // audit
@@ -1882,8 +1884,8 @@ function renderListingDetail(d){
 
   // admin notes
   const notes = (d.notes||[]);
-  const notesInner = `${notes.length ? notes.map(n => `<div class="bg-slate-50 rounded-lg px-3 py-2 mb-2"><div class="text-[12.5px] text-slate-700">${esc(n.text)}</div><div class="text-[11px] text-slate-400 mt-0.5">${esc(n.author||'admin')} · ${esc(n.created_at||'')}</div></div>`).join('') : '<div class="text-[12px] text-slate-400 mb-2">No notes yet.</div>'}
-    <div class="flex gap-2"><input id="ld-note-input" class="fmn-input" placeholder="Add an internal note…"><button class="btn btn-pri" onclick="addAdminNote('${esc(d.id)}')"><i class="fas fa-plus"></i></button></div>`;
+  const notesInner = `${notes.length ? notes.map(n => `<div class="bg-slate-50 rounded-lg px-3 py-2 mb-2"><div class="text-[12.5px] text-slate-700">${esc(n.text)}</div><div class="text-[11px] text-slate-400 mt-0.5">${esc(n.author||'admin')} Â· ${esc(n.created_at||'')}</div></div>`).join('') : '<div class="text-[12px] text-slate-400 mb-2">No notes yet.</div>'}
+    <div class="flex gap-2"><input id="ld-note-input" class="fmn-input" placeholder="Add an internal noteâ€¦"><button class="btn btn-pri" onclick="addAdminNote('${esc(d.id)}')"><i class="fas fa-plus"></i></button></div>`;
 
   const suspended = d.status === 'suspended';
   document.getElementById('ld-content').innerHTML = `
@@ -1892,7 +1894,7 @@ function renderListingDetail(d){
       <div class="min-w-0 flex-1">
         <div class="text-[11px] text-slate-400 font-semibold">Listings / Listing Details</div>
         <h2 class="text-[18px] font-extrabold text-slate-900 truncate">${esc(d.title)}</h2>
-        <div class="text-[12px] text-slate-400">${esc(d.location || [d.area,d.town].filter(Boolean).join(', ') || '—')} · Posted ${created} · ${esc(d.ref || ('#'+d.id))}</div>
+        <div class="text-[12px] text-slate-400">${esc(d.location || [d.area,d.town].filter(Boolean).join(', ') || 'â€”')} Â· Posted ${created} Â· ${esc(d.ref || ('#'+d.id))}</div>
       </div>
       <button class="btn btn-ghost hidden sm:inline-flex" onclick="exportReport('listings','csv')"><i class="fas fa-file-csv"></i>Export CSV</button>
       ${d.status==='pending' ? `<button class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100" onclick="approveListing(${d.id});closeListingDetail()"><i class="fas fa-check"></i>Approve</button>` : ''}
@@ -1901,14 +1903,14 @@ function renderListingDetail(d){
 
     <div class="p-5 sm:p-7 space-y-5">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-        ${stat('Landlord', `<span class="text-[13px] font-bold text-slate-800">${esc(landlord.full_name||'—')}</span>`)}
-        ${stat('Price', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${d.price!=null?fmtK(d.price):'—'}</span>`)}
-        ${stat('Type', `<span class="text-[13px] font-bold text-slate-800">${esc(d.listing_type||'—')}</span>`)}
+        ${stat('Landlord', `<span class="text-[13px] font-bold text-slate-800">${esc(landlord.full_name||'â€”')}</span>`)}
+        ${stat('Price', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${d.price!=null?fmtK(d.price):'â€”'}</span>`)}
+        ${stat('Type', `<span class="text-[13px] font-bold text-slate-800">${esc(d.listing_type||'â€”')}</span>`)}
         ${stat('Status', statusBadge(d.status))}
         ${stat('Verification', verifyPill(d.verification_status))}
-        ${stat('Risk', `<span class="pill ${d.risk_band==='high'?'bg-red-50 text-red-600':d.risk_band==='medium'?'bg-amber-50 text-amber-600':'bg-emerald-50 text-emerald-600'}">${esc(d.risk_band?d.risk_band+' risk':'—')}</span>`)}
-        ${stat('Views', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.views??'—'}</span>`)}
-        ${stat('Contacts', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.contacts??'—'}</span>`)}
+        ${stat('Risk', `<span class="pill ${d.risk_band==='high'?'bg-red-50 text-red-600':d.risk_band==='medium'?'bg-amber-50 text-amber-600':'bg-emerald-50 text-emerald-600'}">${esc(d.risk_band?d.risk_band+' risk':'â€”')}</span>`)}
+        ${stat('Views', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.views??'â€”'}</span>`)}
+        ${stat('Contacts', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.contacts??'â€”'}</span>`)}
         ${stat('Reports', `<span class="text-[14px] font-extrabold text-slate-900 tabnum">${a.reports??reps.length}</span>`)}
       </div>
 
@@ -1918,7 +1920,7 @@ function renderListingDetail(d){
           ${ldSectionCard('Activity Timeline', timeline)}
           ${ldSectionCard('Reports &amp; Complaints', reportsInner)}
           ${ldSectionCard('Transactions', txnInner)}
-          ${ldSectionCard('Audit Log', auditInner, `<button class="text-[12px] font-bold text-orange-600 hover:text-orange-700" onclick="showTab('trust')">Full log →</button>`)}
+          ${ldSectionCard('Audit Log', auditInner, `<button class="text-[12px] font-bold text-orange-600 hover:text-orange-700" onclick="showTab('trust')">Full log â†’</button>`)}
         </div>
         <div class="space-y-4">
           ${ldSectionCard('Verification Documents', docs)}
@@ -1967,7 +1969,7 @@ function closeUserDetail(){
 function renderUserDetail(d){
   const s = d.stats || {};
   const v = d.verification || {};
-  const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : '—';
+  const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : 'â€”';
   const suspended = d.is_active === false || d.status === 'suspended';
   const stat = (label, val) => `<div class="bg-white rounded-xl border border-slate-100 px-3.5 py-3"><div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">${label}</div><div class="mt-1 text-[18px] font-extrabold text-slate-900 tabnum">${val}</div></div>`;
   const idRow = (label, val) => `<div class="flex justify-between py-2 border-b border-slate-50 last:border-0"><span class="text-[12px] text-slate-400">${label}</span><span class="text-[12.5px] font-semibold text-slate-700">${val}</span></div>`;
@@ -1984,7 +1986,7 @@ function renderUserDetail(d){
       <div class="w-11 h-11 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center font-bold">${esc((d.full_name||'?')[0])}</div>
       <div class="min-w-0 flex-1">
         <h2 class="text-[18px] font-extrabold text-slate-900 truncate">${esc(d.full_name)}</h2>
-        <div class="text-[12px] text-slate-400">${esc(d.email)} · joined ${created}</div>
+        <div class="text-[12px] text-slate-400">${esc(d.email)} Â· joined ${created}</div>
       </div>
       ${roleBadge(d.role)}
       <button class="btn btn-ghost" onclick="openThread(${d.id}, '${esc((d.full_name||'').replace(/'/g,''))}')"><i class="fas fa-paper-plane"></i>Message</button>
@@ -2034,7 +2036,7 @@ function suspendFromUserDetail(id, email, willSuspend){
 }
 
 /* ====================================================================
-   MESSAGE THREAD  (admin ↔ user with reply, or read-only pair thread)
+   MESSAGE THREAD  (admin â†” user with reply, or read-only pair thread)
 ==================================================================== */
 let _threadTarget = null;   // {userId} when admin can reply; null = read-only
 function openThread(userId, name){
@@ -2056,7 +2058,7 @@ function openConvThread(convId, title){
 function closeThread(){ document.getElementById('thread-modal').classList.add('hidden'); _threadTarget = null; }
 async function loadThread(url){
   const body = document.getElementById('thread-body');
-  body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
+  body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8"><i class="fas fa-circle-notch spin mr-2"></i>Loadingâ€¦</div>`;
   let data = null;
   try { const r = await fetch(url); if (r.ok) data = await r.json(); } catch {}
   const msgs = data?.messages || [];
