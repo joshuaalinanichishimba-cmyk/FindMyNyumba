@@ -627,14 +627,11 @@
                                 <!-- Verification Status (TODO: static) -->
                                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                                     <h4 class="text-sm font-black text-slate-900 mb-4">Verification Status</h4>
-                                    <!-- TODO(static): drive from /landlord/verification + wire "Request Verification" to /landlord/verify. -->
-                                    <ul class="space-y-3 text-sm font-semibold text-slate-700">
-                                        <li class="flex items-center justify-between"><span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Phone Verified</span><i class="fas fa-check-circle text-green-500"></i></li>
-                                        <li class="flex items-center justify-between"><span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Email Verified</span><i class="fas fa-check-circle text-green-500"></i></li>
-                                        <li class="flex items-center justify-between"><span class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> ID Verified</span><i class="fas fa-check-circle text-green-500"></i></li>
-                                        <li class="flex items-center justify-between text-slate-400"><span class="flex items-center gap-2"><i class="far fa-circle"></i> Property Verified</span><span class="text-[11px]">Pending</span></li>
-                                    </ul>
-                                    <button type="button" class="mt-4 w-full bg-[#ea580c] text-white text-xs font-bold py-2.5 rounded-xl hover:bg-orange-700 transition"><i class="fas fa-shield-alt mr-1"></i> Request Verification</button>
+                                    <!-- Driven by real verification_status from /auth/me -->
+                                    <div id="verify-status-box" class="text-sm font-semibold text-slate-700">
+                                        <p class="text-slate-400 text-xs">Loading verification status...</p>
+                                    </div>
+                                    <button id="verify-request-btn" type="button" onclick="requestVerification()" class="mt-4 w-full bg-[#ea580c] text-white text-xs font-bold py-2.5 rounded-xl hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-shield-alt mr-1"></i> Request Verification</button>
                                 </div>
 
                                 <!-- Promote Your Listing removed (paid boosts are an admin/payments feature) -->
@@ -907,6 +904,54 @@ function logout() {
     window.location.replace('login.html');
 }
 
+
+// ── Verification status + request ─────────────────────────────────────────────
+function renderVerifyStatus() {
+    const u = window._currentUser || {};
+    const status = (u.verification_status || 'unverified').toLowerCase();
+    const box = document.getElementById('verify-status-box');
+    const btn = document.getElementById('verify-request-btn');
+    if (!box || !btn) return;
+
+    const map = {
+        verified:   { color: 'green',  icon: 'fa-check-circle',       text: 'Your account is verified.' },
+        pending:    { color: 'amber',  icon: 'fa-clock',              text: 'Verification pending — our team is reviewing your account.' },
+        rejected:   { color: 'red',    icon: 'fa-times-circle',       text: 'Verification was not approved. ' + (u.verification_rejection_reason || 'Please contact support.') },
+        unverified: { color: 'slate',  icon: 'fa-shield-alt',         text: 'Your account is not yet verified. Request verification to build trust with students.' }
+    };
+    const s = map[status] || map.unverified;
+    const colorClass = { green:'text-green-600', amber:'text-amber-600', red:'text-red-600', slate:'text-slate-500' }[s.color];
+
+    box.innerHTML = '<div class="flex items-start gap-2"><i class="fas ' + s.icon + ' ' + colorClass + ' mt-0.5"></i><span class="' + colorClass + '">' + s.text + '</span></div>';
+
+    // Hide/disable the button when verified or already pending
+    if (status === 'verified' || status === 'pending') {
+        btn.classList.add('hidden');
+    } else {
+        btn.classList.remove('hidden');
+        btn.disabled = false;
+    }
+}
+
+async function requestVerification() {
+    const btn = document.getElementById('verify-request-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...'; }
+    try {
+        const res = await fetch(`${API}/landlord/request-verification`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.detail || 'Could not submit request. Please try again.');
+        if (window._currentUser) window._currentUser.verification_status = 'pending';
+        renderVerifyStatus();
+        alert('Verification requested. Our team will review your account shortly.');
+    } catch (err) {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-shield-alt mr-1"></i> Request Verification'; }
+        alert(err.message || 'Network error. Please try again.');
+    }
+}
+
 // Boot
 async function initDashboard() {
     const token = getToken();
@@ -922,6 +967,7 @@ async function initDashboard() {
             return;
         }
         window._currentUser = user;
+        renderVerifyStatus();
         const initials  = (user.full_name || 'L').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
         const avatarSrc = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=ea580c&color=fff`;
         const set = (id, val) => { const el = document.getElementById(id); if (el) el[el.tagName === 'IMG' ? 'src' : 'textContent'] = val; };

@@ -378,6 +378,24 @@ async def submit_verification(doc1: UploadFile = File(...), doc2: UploadFile = F
     return {"status": "success", "message": "Verification documents submitted."}
 
 
+# ── POST /landlord/request-verification ───────────────────────────────────────
+# Simple no-upload verification request. Landlord clicks "Request Verification";
+# this flags their account as pending so an admin can review (manual review at
+# launch — docs checked over WhatsApp/in person). Avoids the ephemeral-disk
+# problem of file uploads on Render. Add document upload later via Cloudinary
+# if/when volume requires self-service.
+@router.post("/request-verification")
+def request_verification(landlord: User = Depends(require_landlord), db: Session = Depends(get_db)):
+    if landlord.verification_status == "verified":
+        raise HTTPException(status_code=409, detail="Your account is already verified.")
+    if landlord.verification_status == "pending":
+        raise HTTPException(status_code=409, detail="A verification request is already pending review.")
+    landlord.verification_status = "pending"
+    landlord.verification_rejection_reason = None
+    db.commit()
+    return {"status": "success", "message": "Verification requested. Our team will review your account shortly."}
+
+
 # ── Profile ───────────────────────────────────────────────────────────────────
 class ProfileUpdate(BaseModel):
     full_name:     str           = Field(..., min_length=1, max_length=120)
