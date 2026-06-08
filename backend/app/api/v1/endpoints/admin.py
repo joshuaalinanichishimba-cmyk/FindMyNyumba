@@ -62,16 +62,16 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
-def _get_verification_docs(user_id: int, request: Request) -> list:
+def _get_verification_docs(user, request: Request = None) -> list:
     """
-    Scan the verification upload directory for files belonging to user_id.
-    Filenames follow the pattern: {user_id}_doc1_{rand}_{original} and
-                                  {user_id}_doc2_{rand}_{original}
-    Returns a list of dicts: [{label, url}, ...]
+    Return the user's verification documents from the Cloudinary URLs stored
+    on their account. (Previously scanned local disk, which Render wipes on
+    every deploy.) `request` is kept for signature compatibility but unused.
     """
-    docs = []
-    if not VERIFY_DIR.exists():
-        return docs
+    return [
+        {"label": "ID Document",        "url": getattr(user, "verification_doc1_url", None)},
+        {"label": "Ownership Document", "url": getattr(user, "verification_doc2_url", None)},
+    ]
 
     prefix = f"{user_id}_"
     base_url = str(request.base_url).rstrip("/")
@@ -230,7 +230,7 @@ def get_verifications(
             "email":               u.email,
             "role":                u.role,
             "verification_status": u.verification_status,
-            "documents":           _get_verification_docs(u.id, request),
+            "documents":           _get_verification_docs(u, request),
         }
         for u in users
     ]

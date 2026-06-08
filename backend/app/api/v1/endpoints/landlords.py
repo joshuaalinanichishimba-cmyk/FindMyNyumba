@@ -40,6 +40,37 @@ MAX_DOC_SIZE_MB   = 10
 MAX_IMAGE_SIZE_MB = 8
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
+# ── Verification document upload to Cloudinary (PERSISTENT) ───────────────────
+# Verification docs were previously saved to local disk, which Render wipes on
+# every deploy. This uploads them to Cloudinary instead so they survive.
+# NOTE (privacy): these land in a dedicated folder with unguessable URLs. The
+# URLs are public-but-unguessable, not truly private. For NRC/selfie data,
+# upgrade to Cloudinary "authenticated" delivery (signed URLs) when you do the
+# broader data-protection hardening.
+
+async def _upload_doc_to_cloudinary(f: UploadFile, user_id: int, label: str) -> str:
+    """Upload a verification document to Cloudinary; return the secure URL."""
+    mime = (f.content_type or "").lower()
+    if mime not in ALLOWED_DOC_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unsupported document type: {mime}.")
+    data = await f.read()
+    if len(data) > MAX_DOC_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=400, detail=f"Document exceeds {MAX_DOC_SIZE_MB}MB limit.")
+    # PDFs upload as resource_type "raw"; images as "image".
+    resource_type = "raw" if mime == "application/pdf" else "image"
+    try:
+        result = cloudinary.uploader.upload(
+            data,
+            folder="findmynyumba/verification",
+            resource_type=resource_type,
+            public_id=f"user_{user_id}_{label}",
+            overwrite=True,
+        )
+        return result["secure_url"]
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Document upload failed: {e}")
+
+
 PASSWORD_RE = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
 PASSWORD_RULE_MSG = (
     "Password must be at least 8 characters and include uppercase, "
@@ -370,30 +401,12 @@ def get_verification(landlord: User = Depends(require_landlord)):
 async def submit_verification(doc1: UploadFile = File(...), doc2: UploadFile = File(...), landlord: User = Depends(require_landlord), db: Session = Depends(get_db)):
     if landlord.verification_status == "pending":
         raise HTTPException(status_code=409, detail="A verification request is already pending review.")
-    await _save_doc_upload(doc1, VERIFY_DIR, landlord.id, prefix="doc1_")
-    await _save_doc_upload(doc2, VERIFY_DIR, landlord.id, prefix="doc2_")
+    landlord.verification_doc1_url = await _upload_doc_to_cloudinary(doc1, landlord.id, "doc1")
+    landlord.verification_doc2_url = await _upload_doc_to_cloudinary(doc2, landlord.id, "doc2")
     landlord.verification_status = "pending"
     landlord.verification_rejection_reason = None
     db.commit()
     return {"status": "success", "message": "Verification documents submitted."}
-
-
-# ── POST /landlord/request-verification ───────────────────────────────────────
-# Simple no-upload verification request. Landlord clicks "Request Verification";
-# this flags their account as pending so an admin can review (manual review at
-# launch — docs checked over WhatsApp/in person). Avoids the ephemeral-disk
-# problem of file uploads on Render. Add document upload later via Cloudinary
-# if/when volume requires self-service.
-@router.post("/request-verification")
-def request_verification(landlord: User = Depends(require_landlord), db: Session = Depends(get_db)):
-    if landlord.verification_status == "verified":
-        raise HTTPException(status_code=409, detail="Your account is already verified.")
-    if landlord.verification_status == "pending":
-        raise HTTPException(status_code=409, detail="A verification request is already pending review.")
-    landlord.verification_status = "pending"
-    landlord.verification_rejection_reason = None
-    db.commit()
-    return {"status": "success", "message": "Verification requested. Our team will review your account shortly."}
 
 
 # ── Profile ───────────────────────────────────────────────────────────────────

@@ -72,6 +72,10 @@ class User(Base):
     reset_token_used       = Column(Boolean, default=False,  nullable=False)
     reset_token_expires = Column(DateTime(timezone=True), nullable=True)
 
+    # ── Verification documents (Cloudinary URLs — persistent) ─────────────────
+    verification_doc1_url = Column(String, nullable=True)
+    verification_doc2_url = Column(String, nullable=True)
+
     # Relationships
     listings = relationship("Listing", back_populates="owner")
 

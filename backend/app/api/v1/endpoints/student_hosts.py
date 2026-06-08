@@ -45,6 +45,25 @@ cloudinary.config(
 UPLOAD_DIR = Path("static/uploads/properties")
 VERIFY_DIR = Path("static/uploads/verification")
 
+async def _upload_doc_to_cloudinary(f, user_id, label):
+    """Upload a verification document to Cloudinary; return the secure URL."""
+    import cloudinary, cloudinary.uploader
+    mime = (f.content_type or "").lower()
+    allowed = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
+    if mime not in allowed:
+        raise HTTPException(status_code=400, detail=f"Unsupported document type: {mime}.")
+    data = await f.read()
+    if len(data) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Document exceeds 10MB limit.")
+    resource_type = "raw" if mime == "application/pdf" else "image"
+    try:
+        result = cloudinary.uploader.upload(data, folder="findmynyumba/verification",
+                                            resource_type=resource_type,
+                                            public_id=f"user_{user_id}_{label}", overwrite=True)
+        return result["secure_url"]
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Document upload failed: {e}")
+
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 ALLOWED_DOC_TYPES   = {
     "image/jpeg", "image/png", "image/webp",
@@ -62,7 +81,7 @@ PASSWORD_RULE_MSG = (
 _SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────[...]
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 def require_student_host(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "student_host":
         raise HTTPException(
@@ -262,7 +281,7 @@ def _listing_response(l: Listing, request: Request) -> dict:
     }
 
 
-# ── Dashboard Stats ────────────────────────────────────────────────────────[...]
+# â”€â”€ Dashboard Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 @router.get("/dashboard/stats")
 def get_host_stats(
     host: User    = Depends(require_student_host),
@@ -294,7 +313,7 @@ def get_host_stats(
     }
 
 
-# ── Listings ───────────────────────────────────────────────────────────[...]
+# â”€â”€ Listings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 @router.get("/properties")
 @router.get("/listings")
 def get_host_listings(
@@ -378,7 +397,7 @@ async def create_host_listing(
     }
 
 
-# ── Edit Listing ─────────────────────────────────────────────────────────[...]
+# â”€â”€ Edit Listing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 @router.put("/properties/{listing_id}")
 async def edit_host_listing(
     listing_id:          int,
@@ -408,7 +427,7 @@ async def edit_host_listing(
     listing.location            = location.strip()
     listing.nearest_institution = (nearest_institution or "").strip() or None
 
-    # Update spots — available_spots can't exceed total_spots
+    # Update spots â€” available_spots can't exceed total_spots
     old_total = listing.total_spots or 1
     listing.total_spots = total_spots
     if total_spots < old_total:
@@ -417,7 +436,7 @@ async def edit_host_listing(
         # Increase available by the same delta
         listing.available_spots = (listing.available_spots or 0) + (total_spots - old_total)
 
-    # Legacy images path (photos only) — unchanged, used only when no `media`.
+    # Legacy images path (photos only) â€” unchanged, used only when no `media`.
     if images and not media:
         has_real_file = any(img.filename for img in images)
         if has_real_file:
@@ -454,7 +473,7 @@ async def edit_host_listing(
     }
 
 
-# ── Toggle Availability ──────────────────────────────────────────────────────
+# â”€â”€ Toggle Availability â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class AvailabilityUpdate(BaseModel):
     availability_status: str = Field(..., pattern="^(available|taken)$")
 
@@ -486,7 +505,7 @@ def toggle_availability(
     return {"status": "success", "message": f"Listing marked as {label}."}
 
 
-# ── Update Spots ─────────────────────────────────────────────────────────[...]
+# â”€â”€ Update Spots â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 class SpotsUpdate(BaseModel):
     available_spots: int = Field(..., ge=0)
 
@@ -523,7 +542,7 @@ def update_spots(
     }
 
 
-# ── Delete Listing ─────────────────────────────────────────────────────────[...]
+# â”€â”€ Delete Listing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 @router.delete("/properties/{listing_id}")
 def delete_host_listing(
     listing_id: int,
@@ -544,7 +563,7 @@ def delete_host_listing(
 
 
 
-# ── Boost Listing ─────────────────────────────────────────────────────────[...]
+# â”€â”€ Boost Listing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 @router.post("/properties/{listing_id}/boost")
 def boost_host_listing(
     listing_id: int,
@@ -568,7 +587,7 @@ def boost_host_listing(
     }
 
 
-# ── Inquiries ──────────────────────────────────────────────────────────[...]
+# â”€â”€ Inquiries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 @router.get("/inquiries")
 def get_host_inquiries(
     host: User    = Depends(require_student_host),
@@ -613,7 +632,7 @@ def get_host_inquiries(
     return result
 
 
-# ── Verification ─────────────────────────────────────────────────────────[...]
+# â”€â”€ Verification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 @router.get("/verification")
 def get_host_verification(host: User = Depends(require_student_host)):
     return {
@@ -635,14 +654,8 @@ async def submit_verification(
             detail="A verification request is already pending review.",
         )
 
-    await _save_upload(
-        doc1, VERIFY_DIR, host.id,
-        allowed_types=ALLOWED_DOC_TYPES, max_mb=MAX_DOC_SIZE_MB, prefix="doc1_",
-    )
-    await _save_upload(
-        doc2, VERIFY_DIR, host.id,
-        allowed_types=ALLOWED_DOC_TYPES, max_mb=MAX_DOC_SIZE_MB, prefix="doc2_",
-    )
+    host.verification_doc1_url = await _upload_doc_to_cloudinary(doc1, host.id, "doc1")
+    host.verification_doc2_url = await _upload_doc_to_cloudinary(doc2, host.id, "doc2")
 
     host.verification_status           = "pending"
     host.verification_rejection_reason = None
@@ -653,7 +666,7 @@ async def submit_verification(
     }
 
 
-# ── Profile ───────────────────────────────────────────────────────────[...]
+# â”€â”€ Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 class ProfileUpdate(BaseModel):
     full_name: str           = Field(..., min_length=1, max_length=120)
     phone:     Optional[str] = Field(None, max_length=40)
@@ -675,7 +688,7 @@ def update_profile(
     return {"status": "success", "message": "Profile updated successfully."}
 
 
-# ── Change Password ────────────────────────────────────────────────────────[...]
+# â”€â”€ Change Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€[...]
 class PasswordChange(BaseModel):
     current_password: str
     new_password:     str
