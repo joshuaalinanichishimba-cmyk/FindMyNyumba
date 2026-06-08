@@ -1,4 +1,4 @@
-"""
+﻿"""
 main.py
 FindMyNyumba FastAPI application entry point.
 
@@ -7,7 +7,7 @@ IMPORTANT:
   "/student-host" respectively (NOT "/api/v1/..."). The "/api/v1" prefix
   is added here via api_router mounted at prefix="/api/v1".
 - CORS is restricted to known origins. Do NOT use allow_origins=["*"] with
-  allow_credentials=True — that violates the CORS spec and is a security risk.
+  allow_credentials=True â€” that violates the CORS spec and is a security risk.
 """
 import os
 from fastapi import FastAPI
@@ -18,8 +18,9 @@ from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import Base, engine
 
-# ── Import ALL models before create_all so every table is registered ──────────
-from app.models.user import User                    # noqa: F401
+# â”€â”€ Import ALL models before create_all so every table is registered â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+from app.models.user import User
+from app.models.password_reset import PasswordResetToken  # noqa: F401                    # noqa: F401
 from app.models.listing import Listing              # noqa: F401
 from app.models.saved_listing import SavedListing   # noqa: F401
 from app.models.report import Report                # noqa: F401
@@ -29,11 +30,11 @@ from app.models.admin_models import (               # noqa: F401
 )
 from app.models.listing_event import ListingEvent   # noqa: F401
 
-# ── Create any missing DB tables (idempotent — safe to run on every startup) ──
+# â”€â”€ Create any missing DB tables (idempotent â€” safe to run on every startup) â”€â”€
 Base.metadata.create_all(bind=engine)
 
 
-# ── Ensure newly-added columns exist on pre-existing tables ───────────────────
+# â”€â”€ Ensure newly-added columns exist on pre-existing tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # create_all() only CREATES missing tables; it never ALTERs existing ones. The
 # Listing table predates listing_type/latitude/longitude, so add them here.
 # Postgres supports IF NOT EXISTS; SQLite doesn't, so we catch the dup-column error.
@@ -57,21 +58,21 @@ def _ensure_columns():
 
 _ensure_columns()
 
-# ── Ensure static upload directory exists ────────────────────────────────────
+# â”€â”€ Ensure static upload directory exists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 os.makedirs("static/uploads/properties",    exist_ok=True)
 os.makedirs("static/uploads/verification",  exist_ok=True)
 
-# ── App ───────────────────────────────────────────────────────────────────────
+# â”€â”€ App â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="1.0.0",
-    # Hide /docs and /redoc in production — set to None when deploying
+    # Hide /docs and /redoc in production â€” set to None when deploying
     docs_url="/docs",
     redoc_url="/redoc",
 )
 
-# ── CORS ──────────────────────────────────────────────────────────────────────
-# allow_credentials=True requires explicit origins — never use ["*"] with it.
+# â”€â”€ CORS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# allow_credentials=True requires explicit origins â€” never use ["*"] with it.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
@@ -80,10 +81,10 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
-# ── Static files (uploaded property images, verification docs) ───────────────
+# â”€â”€ Static files (uploaded property images, verification docs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# ── API routes ────────────────────────────────────────────────────────────────
+# â”€â”€ API routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # All sub-routers are registered inside api_router (see app/api/v1/api.py).
 # The "/api/v1" prefix is added once here.
 app.include_router(api_router, prefix="/api/v1")
@@ -114,3 +115,4 @@ async def favicon():
         return FileResponse(str(favicon_path))
     from fastapi.responses import Response
     return Response(status_code=204)
+

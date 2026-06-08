@@ -549,6 +549,29 @@
         </aside>
       </div>
 
+      <!-- ===================== USER DETAIL SLIDE-OVER ===================== -->
+      <div id="user-detail" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-slate-900/50" onclick="closeUserDetail()"></div>
+        <aside id="ud-panel" class="absolute right-0 inset-y-0 w-full max-w-[820px] bg-[#f8fafc] shadow-2xl overflow-y-auto translate-x-full transition-transform duration-300">
+          <div id="ud-content"></div>
+        </aside>
+      </div>
+
+      <!-- ===================== MESSAGE THREAD MODAL ===================== -->
+      <div id="thread-modal" class="hidden fixed inset-0 z-[55] flex items-center justify-center p-4 bg-slate-900/50" onclick="if(event.target===this)closeThread()">
+        <div class="card w-full max-w-lg flex flex-col" style="max-height:82vh">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+            <div><h3 id="thread-title" class="font-extrabold text-slate-900 text-[15px]"></h3><p id="thread-sub" class="text-[12px] text-slate-400"></p></div>
+            <button onclick="closeThread()" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500"><i class="fas fa-xmark"></i></button>
+          </div>
+          <div id="thread-body" class="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50"></div>
+          <div id="thread-compose" class="p-3 border-t border-slate-100 flex gap-2 flex-shrink-0">
+            <input id="thread-input" class="fmn-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendThreadMessage()">
+            <button class="btn btn-pri" onclick="sendThreadMessage()"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+
       <!-- ===================== IMAGE LIGHTBOX ===================== -->
       <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-slate-900/90 flex items-center justify-center p-4" onclick="closeLightbox()">
         <button class="absolute top-5 right-5 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white text-xl" onclick="closeLightbox()"><i class="fas fa-xmark"></i></button>
@@ -846,10 +869,10 @@ function renderUsers(){
   tbody.innerHTML = rows.map(u => `
     <tr class="hover:bg-slate-50">
       <td class="data-td font-bold text-slate-900">
-        <div class="flex items-center gap-2.5">
+        <button onclick="openUserDetail(${u.id})" class="flex items-center gap-2.5 text-left hover:text-orange-600">
           <div class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-[11px] font-bold text-slate-600 flex-shrink-0">${esc((u.full_name||'?')[0])}</div>
           <span class="truncate">${esc(u.full_name)}</span>
-        </div>
+        </button>
       </td>
       <td class="data-td text-slate-500 hidden md:table-cell">${esc(u.email)}</td>
       <td class="data-td">${roleBadge(u.role)}</td>
@@ -857,10 +880,13 @@ function renderUsers(){
         <span class="pill ${u.is_active !== false ? 'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-600'}">${u.is_active !== false ? 'Active':'Suspended'}</span>
       </td>
       <td class="data-td">
-        <button onclick="toggleSuspend(${u.id}, '${esc(u.email)}', ${u.is_active})"
-          class="btn ${u.is_active !== false ? 'bg-red-50 text-red-600 hover:bg-red-100':'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'} px-3 py-1.5 text-[12px]">
-          ${u.is_active !== false ? 'Suspend':'Reinstate'}
-        </button>
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="openUserDetail(${u.id})" class="btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 text-[12px]">View</button>
+          <button onclick="toggleSuspend(${u.id}, '${esc(u.email)}', ${u.is_active})"
+            class="btn ${u.is_active !== false ? 'bg-red-50 text-red-600 hover:bg-red-100':'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'} px-3 py-1.5 text-[12px]">
+            ${u.is_active !== false ? 'Suspend':'Reinstate'}
+          </button>
+        </div>
       </td>
     </tr>`).join('');
 }
@@ -1614,7 +1640,7 @@ function renderSupport(){
   if (!rows.length){ el.innerHTML = emptyRow(1,'No conversations match.'); return; }
   const kindPill = { student_support:'bg-orange-50 text-orange-600', student_landlord:'bg-blue-50 text-blue-600', admin_user:'bg-purple-50 text-purple-600' };
   el.innerHTML = rows.map(c => `
-    <button onclick="openConversation('${esc(c.id)}')" class="w-full text-left px-5 py-4 flex items-start gap-3 hover:bg-slate-50 transition">
+    <button onclick="openConversation('${esc(c.id)}','${esc((c.participant_name||'Conversation').replace(/'/g,''))}')" class="w-full text-left px-5 py-4 flex items-start gap-3 hover:bg-slate-50 transition">
       <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0"><i class="fas fa-comment"></i></div>
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2"><span class="font-bold text-slate-800 text-[13.5px] truncate">${esc(c.participant_name || c.subject || 'Conversation')}</span>
@@ -1625,7 +1651,7 @@ function renderSupport(){
       <span class="text-[11px] text-slate-300 flex-shrink-0">${esc(c.last_at || '')}</span>
     </button>`).join('');
 }
-function openConversation(id){ showToast('Conversation thread view opens here once /admin/conversations/{id}/messages is live.'); }
+function openConversation(id, title){ openConvThread(id, title); }
 
 /* ====================================================================
    SEARCH ANALYTICS + GEO INTELLIGENCE
@@ -1666,18 +1692,20 @@ function geoHeatPanel(points){
 async function loadFraudExtras(){
   const ll = document.getElementById('fraud-landlords');
   if (ll){
-    const high = _users.filter(u => (u.role === 'landlord' || u.role === 'student_host') && Number(u.risk_score) >= 67);
-    if (!_users.length || !_users.some(u => u.risk_score != null)){
-      ll.innerHTML = awaitingState('risk_score on /admin/users');
+    let landlords = [];
+    try { const r = await fetch(`${API}/admin/risk/landlords`); if (r.ok) landlords = await r.json(); } catch {}
+    const high = landlords.filter(u => u.risk_band === 'high' || Number(u.risk_score) >= 67);
+    if (!landlords.length){
+      ll.innerHTML = `<div class="text-[12px] text-slate-400 py-6 text-center"><i class="fas fa-user-slash text-slate-300 text-xl block mb-2"></i>No landlords yet.</div>`;
     } else if (!high.length){
       ll.innerHTML = `<div class="text-[12px] text-slate-400 py-6 text-center"><i class="fas fa-shield-heart text-emerald-400 text-xl block mb-2"></i>No high-risk landlords.</div>`;
     } else {
-      ll.innerHTML = high.sort((a,b)=>b.risk_score-a.risk_score).slice(0,6).map(u => `
-        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-red-50/60">
+      ll.innerHTML = high.slice(0,6).map(u => `
+        <button onclick="openUserDetail(${u.id})" class="w-full text-left flex items-center gap-2.5 p-2.5 rounded-xl bg-red-50/60 hover:bg-red-50">
           <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[11px] font-bold">${esc((u.full_name||'?')[0])}</div>
-          <div class="min-w-0 flex-1"><div class="text-[12.5px] font-bold text-slate-800 truncate">${esc(u.full_name)}</div><div class="text-[11px] text-slate-400">${esc(u.email)}</div></div>
+          <div class="min-w-0 flex-1"><div class="text-[12.5px] font-bold text-slate-800 truncate">${esc(u.full_name)}</div><div class="text-[11px] text-slate-400 truncate">${esc(u.email)}</div></div>
           <span class="pill bg-red-50 text-red-600">${u.risk_score}</span>
-        </div>`).join('');
+        </button>`).join('');
     }
   }
   let sig = null;
@@ -1866,7 +1894,7 @@ function renderListingDetail(d){
         <h2 class="text-[18px] font-extrabold text-slate-900 truncate">${esc(d.title)}</h2>
         <div class="text-[12px] text-slate-400">${esc(d.location || [d.area,d.town].filter(Boolean).join(', ') || '—')} · Posted ${created} · ${esc(d.ref || ('#'+d.id))}</div>
       </div>
-      <button class="btn btn-ghost hidden sm:inline-flex" onclick="exportReport('listing-'+${JSON.stringify(d.id)},'pdf')"><i class="fas fa-download"></i>Report</button>
+      <button class="btn btn-ghost hidden sm:inline-flex" onclick="exportReport('listings','csv')"><i class="fas fa-file-csv"></i>Export CSV</button>
       ${d.status==='pending' ? `<button class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100" onclick="approveListing(${d.id});closeListingDetail()"><i class="fas fa-check"></i>Approve</button>` : ''}
       <button class="btn ${suspended?'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-600'}" onclick="suspendFromDetail(${d.id}, ${suspended})">${suspended?'Unsuspend':'Suspend'}</button>
     </div>
@@ -1916,7 +1944,145 @@ function addAdminNote(id){
     .then(r => { if (r.ok){ showToast('Note added.'); openListingDetail(id); } else showToast('Notes endpoint not live yet.','error'); })
     .catch(() => showToast('Notes endpoint not live yet.','error'));
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeLightbox(); if (!document.getElementById('listing-detail').classList.contains('hidden')) closeListingDetail(); } });
+/* ====================================================================
+   USER DETAIL SLIDE-OVER  (drill into a single student / landlord)
+==================================================================== */
+function openUserDetail(id){
+  const panel = document.getElementById('user-detail');
+  const slide = document.getElementById('ud-panel');
+  const content = document.getElementById('ud-content');
+  content.innerHTML = `<div class="p-8 space-y-4"><div class="skeleton h-7 w-64"></div><div class="skeleton h-4 w-40"></div><div class="grid grid-cols-4 gap-3 mt-4">${'<div class="skeleton h-16"></div>'.repeat(4)}</div><div class="skeleton h-48 mt-4"></div></div>`;
+  panel.classList.remove('hidden');
+  requestAnimationFrame(() => slide.classList.remove('translate-x-full'));
+  document.body.style.overflow = 'hidden';
+  const cached = _users.find(u => String(u.id) === String(id)) || {};
+  fetch(`${API}/admin/users/${id}`).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(data => renderUserDetail({ ...cached, ...(data || {}), id }));
+}
+function closeUserDetail(){
+  document.getElementById('ud-panel').classList.add('translate-x-full');
+  document.body.style.overflow = '';
+  setTimeout(() => document.getElementById('user-detail').classList.add('hidden'), 300);
+}
+function renderUserDetail(d){
+  const s = d.stats || {};
+  const v = d.verification || {};
+  const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : '—';
+  const suspended = d.is_active === false || d.status === 'suspended';
+  const stat = (label, val) => `<div class="bg-white rounded-xl border border-slate-100 px-3.5 py-3"><div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">${label}</div><div class="mt-1 text-[18px] font-extrabold text-slate-900 tabnum">${val}</div></div>`;
+  const idRow = (label, val) => `<div class="flex justify-between py-2 border-b border-slate-50 last:border-0"><span class="text-[12px] text-slate-400">${label}</span><span class="text-[12.5px] font-semibold text-slate-700">${val}</span></div>`;
+
+  const listingsInner = (d.listings && d.listings.length)
+    ? d.listings.map(l => `<button onclick="closeUserDetail();setTimeout(()=>openListingDetail(${l.id}),320)" class="w-full text-left flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-1 rounded">
+        <div class="min-w-0"><div class="text-[12.5px] font-bold text-slate-700 truncate">${esc(l.title)}</div><div class="text-[11px] text-slate-400">${esc(l.location)}</div></div>
+        <div class="flex items-center gap-2 flex-shrink-0">${statusBadge(l.status)}<span class="text-[12px] font-bold tabnum text-slate-600">${l.price!=null?fmtK(l.price):''}</span></div></button>`).join('')
+    : `<div class="text-[12px] text-slate-400 py-4 text-center">No listings.</div>`;
+
+  document.getElementById('ud-content').innerHTML = `
+    <div class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-5 sm:px-7 py-4 flex items-center gap-3">
+      <button onclick="closeUserDetail()" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500"><i class="fas fa-arrow-left"></i></button>
+      <div class="w-11 h-11 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center font-bold">${esc((d.full_name||'?')[0])}</div>
+      <div class="min-w-0 flex-1">
+        <h2 class="text-[18px] font-extrabold text-slate-900 truncate">${esc(d.full_name)}</h2>
+        <div class="text-[12px] text-slate-400">${esc(d.email)} · joined ${created}</div>
+      </div>
+      ${roleBadge(d.role)}
+      <button class="btn btn-ghost" onclick="openThread(${d.id}, '${esc((d.full_name||'').replace(/'/g,''))}')"><i class="fas fa-paper-plane"></i>Message</button>
+      <button class="btn ${suspended?'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-600'}" onclick="suspendFromUserDetail(${d.id}, '${esc(d.email)}', ${!suspended})">${suspended?'Reinstate':'Suspend'}</button>
+    </div>
+
+    <div class="p-5 sm:p-7 space-y-5">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        ${stat('Listings', s.listings ?? 0)}
+        ${stat('Active', s.active_listings ?? 0)}
+        ${stat('Suspended', s.suspended_listings ?? 0)}
+        ${stat('Reports', s.reports_against ?? 0)}
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 space-y-4">
+          ${ldSectionCard('Identity', `
+            ${idRow('Full name', esc(d.full_name))}
+            ${idRow('Email', esc(d.email))}
+            ${idRow('Phone', esc(d.phone))}
+            ${idRow('NRC number', esc(d.nrc_number))}
+            ${idRow('Role', esc(d.role))}
+            ${idRow('Status', `<span class="pill ${suspended?'bg-red-50 text-red-600':'bg-emerald-50 text-emerald-600'}">${suspended?'suspended':'active'}</span>`)}
+            ${d.business_name ? idRow('Business', esc(d.business_name)) : ''}
+            ${d.business_location ? idRow('Business location', esc(d.business_location)) : ''}`)}
+          ${ldSectionCard(`Listings (${s.listings ?? 0})`, listingsInner)}
+        </div>
+        <div class="space-y-4">
+          ${ldSectionCard('Verification', `
+            ${idRow('NRC', verifyPill(v.nrc))}
+            ${idRow('Phone', verifyPill(v.phone))}
+            ${idRow('Property', verifyPill(v.property))}
+            ${d.verification_rejection_reason ? `<div class="mt-2 text-[11.5px] text-red-500">${esc(d.verification_rejection_reason)}</div>` : ''}`)}
+          ${ldSectionCard('Risk Analysis', `${riskGauge(d.risk_score, d.risk_band)}<div class="mt-4 space-y-2">${riskFactor(!!d.phone, 'Phone on file')}${riskFactor(v.nrc==='verified', 'NRC verified')}${riskFactor((s.reports_against??0)===0, 'No reports against')}${riskFactor(!!d.full_name, 'Profile complete')}</div>`)}
+        </div>
+      </div>
+    </div>`;
+}
+function suspendFromUserDetail(id, email, willSuspend){
+  showModal(willSuspend ? 'Suspend User' : 'Reinstate User',
+    willSuspend ? `Suspend ${email}? They won't be able to log in.` : `Reinstate ${email}? They will regain access.`,
+    async () => {
+      const r = await fetch(`${API}/admin/users/${id}/suspend`, { method:'POST' });
+      if (r.ok){ showToast(willSuspend ? 'User suspended.' : 'User reinstated.'); openUserDetail(id); loadUsers(); }
+      else showToast('Action failed.','error');
+    });
+}
+
+/* ====================================================================
+   MESSAGE THREAD  (admin ↔ user with reply, or read-only pair thread)
+==================================================================== */
+let _threadTarget = null;   // {userId} when admin can reply; null = read-only
+function openThread(userId, name){
+  _threadTarget = { userId };
+  document.getElementById('thread-title').textContent = name || 'Conversation';
+  document.getElementById('thread-sub').textContent = 'Direct message';
+  document.getElementById('thread-compose').style.display = 'flex';
+  document.getElementById('thread-modal').classList.remove('hidden');
+  loadThread(`${API}/admin/messages/${userId}`);
+}
+function openConvThread(convId, title){
+  _threadTarget = null;
+  document.getElementById('thread-title').textContent = title || 'Conversation';
+  document.getElementById('thread-sub').textContent = 'Read-only';
+  document.getElementById('thread-compose').style.display = 'none';
+  document.getElementById('thread-modal').classList.remove('hidden');
+  loadThread(`${API}/admin/conversations/${convId}/messages`);
+}
+function closeThread(){ document.getElementById('thread-modal').classList.add('hidden'); _threadTarget = null; }
+async function loadThread(url){
+  const body = document.getElementById('thread-body');
+  body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
+  let data = null;
+  try { const r = await fetch(url); if (r.ok) data = await r.json(); } catch {}
+  const msgs = data?.messages || [];
+  if (!msgs.length){ body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8">No messages yet.</div>`; return; }
+  body.innerHTML = msgs.map(m => `
+    <div class="flex ${m.mine ? 'justify-end' : 'justify-start'}">
+      <div class="max-w-[75%] px-3.5 py-2 rounded-2xl text-[13px] ${m.mine ? 'bg-orange-500 text-white' : 'bg-white border border-slate-100 text-slate-700'}">
+        ${esc(m.content)}
+        <div class="text-[10px] mt-1 ${m.mine ? 'text-orange-100' : 'text-slate-400'}">${m.created_at ? esc(new Date(m.created_at).toLocaleString()) : ''}</div>
+      </div></div>`).join('');
+  body.scrollTop = body.scrollHeight;
+}
+async function sendThreadMessage(){
+  if (!_threadTarget) return;
+  const input = document.getElementById('thread-input');
+  const content = (input.value || '').trim(); if (!content) return;
+  input.value = '';
+  try {
+    const r = await fetch(`${API}/admin/messages`, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ receiver_id: _threadTarget.userId, content }) });
+    if (r.ok) loadThread(`${API}/admin/messages/${_threadTarget.userId}`);
+    else showToast('Send failed.','error');
+  } catch { showToast('Send failed.','error'); }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeLightbox(); closeThread(); if (!document.getElementById('listing-detail').classList.contains('hidden')) closeListingDetail(); if (!document.getElementById('user-detail').classList.contains('hidden')) closeUserDetail(); } });
 </script>
 </body>
 </html>

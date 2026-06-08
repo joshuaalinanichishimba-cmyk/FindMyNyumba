@@ -1,7 +1,7 @@
-"""
+﻿"""
 app/core/config.py
 Application settings loaded from environment variables / .env file.
-SECURITY: SECRET_KEY has no default — must be set in .env or the app
+SECURITY: SECRET_KEY has no default â€” must be set in .env or the app
 will refuse to start. This prevents JWT forgery if .env is missing.
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "FindMyNyumba"
 
     # -- Database ---------------------------------------------------------------
-    DATABASE_URL: str  # Required — must be set in .env
+    DATABASE_URL: str  # Required â€” must be set in .env
 
     # -- Environment ------------------------------------------------------------
     # Set PRODUCTION=true in production .env.
@@ -28,18 +28,20 @@ class Settings(BaseSettings):
 
     # -- Auth -------------------------------------------------------------------
     SECRET_KEY: str
+    GOOGLE_CLIENT_ID: str            = "194165956778-4k6oied4jds8ofbbnfr98h3ueeteclmb.apps.googleusercontent.com"
+    GOOGLE_CLIENT_ID: str            = "194165956778-4k6oied4jds8ofbbnfr98h3ueeteclmb.apps.googleusercontent.com"
     ALGORITHM: str                   = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
 
     # -- Email (Resend) ---------------------------------------------------------
-    # Sign up free at https://resend.com → API Keys → Create Key
+    # Sign up free at https://resend.com â†’ API Keys â†’ Create Key
     # Add a verified sender domain in Resend dashboard, then set MAIL_FROM.
     RESEND_API_KEY: str              = ""          # Required in production
     MAIL_FROM: str                   = ""          # e.g. noreply@findmynyumba.com
     MAIL_FROM_NAME: str              = "FindMyNyumba"
 
     # -- Cloudinary (image hosting) --------------------------------------------
-    # Sign up free at https://cloudinary.com → Dashboard → API Keys
+    # Sign up free at https://cloudinary.com â†’ Dashboard â†’ API Keys
     CLOUDINARY_CLOUD_NAME: str       = ""
     CLOUDINARY_API_KEY: str          = ""
     CLOUDINARY_API_SECRET: str       = ""
@@ -82,3 +84,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
