@@ -67,6 +67,15 @@
   .data-th{padding:11px 18px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;text-align:left;background:#fafbfc;}
   .data-td{padding:13px 18px;font-size:13.5px;border-bottom:1px solid #f1f5f9;}
 
+  /* ---- mobile responsiveness ---- */
+  @media (max-width:640px){
+    .data-th{padding:9px 12px;font-size:10px;}
+    .data-td{padding:11px 12px;font-size:13px;}
+    .kpi{padding:14px;}
+    .btn-pri,.btn-ghost{padding:9px 12px;}
+    main.flex-1{padding:14px;}
+  }
+
   ::-webkit-scrollbar{width:7px;height:7px;}
   ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -181,9 +190,9 @@
     <header class="h-[68px] bg-white border-b border-slate-100 flex items-center gap-3 px-4 sm:px-6 flex-shrink-0 z-20">
       <button class="lg:hidden w-10 h-10 rounded-xl hover:bg-slate-100 text-slate-600" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 
-      <div class="hidden sm:block">
-        <h1 id="page-title" class="text-[19px] font-extrabold text-slate-900 leading-none">Dashboard</h1>
-        <p id="page-sub" class="text-[12px] text-slate-400 font-medium mt-1">Welcome back — here's what's happening today</p>
+      <div class="min-w-0">
+        <h1 id="page-title" class="text-[16px] sm:text-[19px] font-extrabold text-slate-900 leading-none truncate">Dashboard</h1>
+        <p id="page-sub" class="text-[12px] text-slate-400 font-medium mt-1 hidden sm:block">Welcome back — here's what's happening today</p>
       </div>
 
       <div class="flex-1 max-w-md mx-auto hidden md:block">
@@ -574,10 +583,12 @@
         </div>
       </div>
 
-      <!-- ===================== IMAGE LIGHTBOX ===================== -->
-      <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-slate-900/90 flex items-center justify-center p-4" onclick="closeLightbox()">
-        <button class="absolute top-5 right-5 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white text-xl" onclick="closeLightbox()"><i class="fas fa-xmark"></i></button>
-        <img id="lightbox-img" src="" alt="" class="max-h-[88vh] max-w-[92vw] rounded-xl object-contain">
+      <!-- ===================== DOCUMENT / IMAGE LIGHTBOX ===================== -->
+      <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-slate-900/90 flex items-center justify-center p-3 sm:p-4" onclick="if(event.target===this)closeLightbox()">
+        <button class="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white text-xl z-10" onclick="closeLightbox()"><i class="fas fa-xmark"></i></button>
+        <a id="lightbox-open" href="#" target="_blank" rel="noopener" class="absolute top-4 left-4 inline-flex items-center gap-2 text-[12.5px] font-bold text-white/90 bg-white/10 hover:bg-white/20 rounded-full px-3.5 py-2 z-10"><i class="fas fa-up-right-from-square"></i><span class="hidden sm:inline">Open in new tab</span></a>
+        <img id="lightbox-img" src="" alt="" class="hidden max-h-[88vh] max-w-[92vw] rounded-xl object-contain">
+        <iframe id="lightbox-pdf" class="hidden w-full max-w-[860px] h-[88vh] rounded-xl bg-white" title="Document preview"></iframe>
       </div>
     </main>
   </div>
@@ -961,17 +972,22 @@ async function loadVerifications(){
     if (!res.ok) throw new Error();
     const data = await res.json();
     if (!data || !data.length) { tbody.innerHTML = emptyRow(5,'No pending verifications. 🎉'); return; }
+    const docLinks = (docs, extra='') => (docs && docs.length)
+      ? docs.map(d => d.url
+          ? `<button onclick="viewDocument('${esc(d.url)}')" class="inline-flex items-center gap-1.5 text-[12px] font-bold text-orange-600 hover:underline ${extra}"><i class="fas fa-file-lines"></i>${esc(d.label)}</button>`
+          : `<span class="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-300 ${extra}"><i class="fas fa-file-circle-xmark"></i>${esc(d.label)} — not uploaded</span>`
+        ).join('')
+      : '<span class="text-[12px] text-slate-400 italic">No documents</span>';
     tbody.innerHTML = data.map(v => `
       <tr class="hover:bg-slate-50">
         <td class="data-td">
           <div class="font-bold text-slate-900">${esc(v.full_name)}</div>
           <div class="text-[11px] text-slate-400">${esc(v.email)}</div>
+          <div class="md:hidden mt-2 flex flex-col gap-1.5">${docLinks(v.documents, 'mr-3')}</div>
         </td>
         <td class="data-td">${roleBadge(v.role)}</td>
         <td class="data-td hidden md:table-cell">
-          ${v.documents && v.documents.length
-            ? v.documents.map(d => `<a href="${esc(d.url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-[12px] font-bold text-orange-600 hover:underline mr-3"><i class="fas fa-file-lines"></i>${esc(d.label)}</a>`).join('')
-            : '<span class="text-[12px] text-slate-400 italic">No documents</span>'}
+          <div class="flex flex-col gap-1.5 items-start">${docLinks(v.documents)}</div>
         </td>
         <td class="data-td"><span class="pill bg-amber-50 text-amber-600">Pending Review</span></td>
         <td class="data-td">
@@ -1830,8 +1846,36 @@ function closeListingDetail(){
   document.body.style.overflow = '';
   setTimeout(() => panel.classList.add('hidden'), 300);
 }
-function openLightbox(url){ document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
-function closeLightbox(){ document.getElementById('lightbox').classList.add('hidden'); }
+function _isPdf(url){ return /\.pdf(\?|#|$)/i.test(url || '') || /\/raw\/|resource_type=raw/i.test(url || ''); }
+
+function openLightbox(url){
+  if (!url) { showToast('No document available.', 'error'); return; }
+  const box = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  const pdf = document.getElementById('lightbox-pdf');
+  const open = document.getElementById('lightbox-open');
+  open.href = url;
+  if (_isPdf(url)) {
+    img.classList.add('hidden'); img.src = '';
+    pdf.src = url; pdf.classList.remove('hidden');
+  } else {
+    pdf.classList.add('hidden'); pdf.src = '';
+    img.src = url; img.classList.remove('hidden');
+  }
+  box.classList.remove('hidden');
+}
+function closeLightbox(){
+  const box = document.getElementById('lightbox');
+  box.classList.add('hidden');
+  document.getElementById('lightbox-img').src = '';
+  document.getElementById('lightbox-pdf').src = '';
+}
+// Smart document opener used by the verification queue + detail panels.
+// Images/PDFs preview in the lightbox; anything else opens in a new tab.
+function viewDocument(url){
+  if (!url || url === 'null' || url === 'undefined') { showToast('Document not uploaded.', 'error'); return; }
+  openLightbox(url);
+}
 
 function renderListingDetail(d){
   const a = d.analytics || {};
@@ -1854,8 +1898,8 @@ function renderListingDetail(d){
       <span class="ico-box bg-slate-100 text-slate-500" style="width:34px;height:34px;font-size:13px"><i class="fas fa-file-${k==='selfie'?'image':'lines'}"></i></span>
       <div class="flex-1 min-w-0"><div class="text-[12.5px] font-bold text-slate-700">${lbl}</div></div>
       ${verifyPill(doc?.status || (doc?'pending':'unverified'))}
-      ${doc?.url ? `<button onclick="openLightbox('${esc(doc.url)}')" class="text-orange-600 hover:text-orange-700 text-[12px] font-bold"><i class="fas fa-eye"></i></button>
-        <a href="${esc(doc.url)}" download class="text-slate-400 hover:text-slate-600 text-[12px]"><i class="fas fa-download"></i></a>` : '<span class="text-[11px] text-slate-300">—</span>'}
+      ${doc?.url ? `<button onclick="viewDocument('${esc(doc.url)}')" class="text-orange-600 hover:text-orange-700 text-[12px] font-bold"><i class="fas fa-eye"></i></button>
+        <a href="${esc(doc.url)}" target="_blank" rel="noopener" class="text-slate-400 hover:text-slate-600 text-[12px]"><i class="fas fa-download"></i></a>` : '<span class="text-[11px] text-slate-300">—</span>'}
     </div>`; }).join('');
 
   // timeline

@@ -125,25 +125,57 @@ TXN_SOURCE_KEYS = ["verification_fee", "featured", "boost", "escrow_deposit", "v
 _VERIFY_DIR = Path("static/uploads/verification")
 
 
-def _user_documents(user_id: int, request: Request, verification_status: str | None) -> list:
+def _user_documents(user, request: Request, verification_status: str | None) -> list:
     """
-    Surface a landlord's uploaded verification files (same on-disk pattern as
-    admin.py's verification queue: {user_id}_doc1_* and {user_id}_doc2_*).
-    Returns the shape the listing/user detail document panel expects.
+    Surface a landlord/student-host's uploaded verification files.
+
+    PRIMARY source = the persistent Cloudinary URLs stored on the user record
+    (verification_doc1_url / verification_doc2_url) — the same source admin.py's
+    verification queue uses. This is consistent across deploys.
+
+    FALLBACK = the legacy on-disk pattern ({user_id}_doc1_* / {user_id}_doc2_*),
+    used only if a Cloudinary URL is missing. Note Render wipes this directory on
+    every deploy, so the fallback rarely yields anything in production — it exists
+    only for local dev / legacy records.
+
+    Returns the shape the listing/user detail document panel expects:
+        [{ "doc_type": ..., "url": ..., "status": ... }, ...]
+    Entries with no resolvable URL are omitted.
+
+    `user` may be a User object or a bare user id (legacy callers); when only an
+    id is passed, the Cloudinary lookup is skipped and we go straight to disk.
     """
+    status_val = verification_status or "pending"
+
+    # Allow being called with either the user object or just the id.
+    user_obj = user if not isinstance(user, int) else None
+    user_id = user.id if user_obj is not None else user
+
     docs = []
-    if not _VERIFY_DIR.exists():
-        return docs
+    mapping = [
+        ("verification_doc1_url", "doc1", "nrc_front"),
+        ("verification_doc2_url", "doc2", "ownership"),
+    ]
+
     base = str(request.base_url).rstrip("/")
-    mapping = [("doc1", "nrc_front"), ("doc2", "ownership")]
-    for tag, doc_type in mapping:
-        found = sorted(_VERIFY_DIR.glob(f"{user_id}_{tag}_*"))
-        if found:
+    dir_exists = _VERIFY_DIR.exists()
+
+    for attr, tag, doc_type in mapping:
+        url = getattr(user_obj, attr, None) if user_obj is not None else None
+
+        # Fallback to scanning local disk only if no persistent URL exists.
+        if not url and dir_exists:
+            found = sorted(_VERIFY_DIR.glob(f"{user_id}_{tag}_*"))
+            if found:
+                url = f"{base}/static/uploads/verification/{found[-1].name}"
+
+        if url:
             docs.append({
                 "doc_type": doc_type,
-                "url": f"{base}/static/uploads/verification/{found[-1].name}",
-                "status": verification_status or "pending",
+                "url": url,
+                "status": status_val,
             })
+
     return docs
 
 
@@ -217,7 +249,7 @@ def admin_listing_detail(listing_id: int, request: Request,
 
     risk_score, risk_band = (compute_risk(owner, db) if owner else (None, None))
     engagement = _listing_engagement(listing_id, db)
-    owner_docs = (_user_documents(owner.id, request, owner.verification_status)
+    owner_docs = (_user_documents(owner, request, owner.verification_status)
                   if owner else [])
 
     return {
@@ -386,7 +418,7 @@ def admin_user_detail(user_id: int, request: Request,
         },
         "risk_score": risk_score,
         "risk_band": risk_band,
-        "documents": _user_documents(u.id, request, u.verification_status),
+        "documents": _user_documents(u, request, u.verification_status),
         "listings": [
             {"id": l.id, "title": l.title, "status": l.status,
              "price": l.price, "location": l.location} for l in listing_rows
