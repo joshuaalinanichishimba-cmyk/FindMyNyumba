@@ -638,7 +638,7 @@ def admin_conversations(admin: User = Depends(require_admin), db: Session = Depe
             convos[key] = {
                 "id": f"{key[0]}-{key[1]}",
                 "kind": kind,
-                "participant_name": f"{a_name} â†” {b_name}",
+                "participant_name": f"{a_name} <-> {b_name}",
                 "last_message": m.content,
                 "last_at": m.created_at.strftime("%b %d") if m.created_at else "",
                 "unread": 0,
