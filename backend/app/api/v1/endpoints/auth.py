@@ -1,26 +1,52 @@
-﻿"""
+"""
 app/api/v1/endpoints/auth.py
 
-Full auth router. Adds the THREE endpoints the frontend was already calling
-but that did not exist on the backend:
-  - POST /forgot-password   (forgot-password.html)
-  - POST /reset-password    (reset-password.html)
-  - POST /google-login      (login.html  Google Sign-In)
+Full auth router.
 
-Existing /login, /me, /register are unchanged in behaviour.
+WHAT CHANGED IN THIS VERSION
+----------------------------
+1. Rate limiting is applied to every sensitive endpoint via the shared limiter
+   from app.core.rate_limiter. Each decorated function now takes `request: Request`
+   (slowapi needs it to read the client IP).
+2. A lightweight failed-login lockout was added on top of the rate limit:
+   after MAX_FAILED_ATTEMPTS wrong passwords for the same email+IP within
+   LOCKOUT_WINDOW, further attempts are refused for LOCKOUT_SECONDS. This stops
+   slow, targeted credential-stuffing that stays under the per-minute IP limit.
+
+   NOTE: the lockout store is in-memory, so it is per-process. On a single
+   Render web worker that's fine. If you scale to multiple workers, move this
+   to Redis or a DB table — the interface (`_register_failure` / `_is_locked`
+   / `_clear_failures`) is small and easy to swap.
+
+Endpoints (behaviour otherwise unchanged):
+  - POST /login
+  - GET  /me
+  - POST /register
+  - POST /forgot-password
+  - POST /reset-password
+  - POST /google-login
 """
 import hashlib
 import logging
 import secrets
+import time
+from collections import defaultdict
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.api.deps import create_access_token, get_current_user
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.rate_limiter import (
+    limiter,
+    LOGIN_LIMIT,
+    REGISTER_LIMIT,
+    FORGOT_PASSWORD_LIMIT,
+    RESET_PASSWORD_LIMIT,
+)
 from app.core.security import verify_password, get_password_hash
 from app.models.user import User
 from app.models.password_reset import PasswordResetToken
@@ -35,6 +61,47 @@ log = logging.getLogger("findmynyumba.auth")
 SAFE_RESET_RESPONSE = {
     "message": "If that email is registered, a password reset link has been sent."
 }
+
+# ---------------------------------------------------------------------------
+# Failed-login lockout (in-memory; see module docstring for the scaling note)
+# ---------------------------------------------------------------------------
+MAX_FAILED_ATTEMPTS = 5          # wrong passwords before lockout
+LOCKOUT_WINDOW      = 15 * 60    # seconds: attempts older than this are forgotten
+LOCKOUT_SECONDS     = 15 * 60    # seconds the key stays locked once tripped
+
+# key -> list[timestamp] of recent failures
+_failures: dict[str, list[float]] = defaultdict(list)
+# key -> unix time when the lock expires
+_locked_until: dict[str, float] = {}
+
+
+def _lock_key(email: str, request: Request) -> str:
+    ip = request.client.host if request.client else "unknown"
+    return f"{email.lower()}|{ip}"
+
+
+def _is_locked(key: str) -> bool:
+    until = _locked_until.get(key)
+    if until and time.time() < until:
+        return True
+    if until:  # lock expired -> clean up
+        _locked_until.pop(key, None)
+    return False
+
+
+def _register_failure(key: str) -> None:
+    now = time.time()
+    recent = [t for t in _failures[key] if now - t < LOCKOUT_WINDOW]
+    recent.append(now)
+    _failures[key] = recent
+    if len(recent) >= MAX_FAILED_ATTEMPTS:
+        _locked_until[key] = now + LOCKOUT_SECONDS
+        _failures[key] = []  # reset the counter once locked
+
+
+def _clear_failures(key: str) -> None:
+    _failures.pop(key, None)
+    _locked_until.pop(key, None)
 
 
 # ---------------------------------------------------------------------------
@@ -62,9 +129,18 @@ class GoogleLoginRequest(BaseModel):
 # Existing endpoints
 # ---------------------------------------------------------------------------
 @router.post("/login")
-def login(body: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit(LOGIN_LIMIT)
+def login(request: Request, body: LoginRequest, db: Session = Depends(get_db)):
+    key = _lock_key(body.email, request)
+    if _is_locked(key):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many failed attempts. Please wait a few minutes and try again.",
+        )
+
     user = db.query(User).filter(User.email == body.email.lower()).first()
     if not user or not verify_password(body.password, user.hashed_password):
+        _register_failure(key)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -74,6 +150,8 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account suspended.",
         )
+
+    _clear_failures(key)  # successful login wipes the failure record
     token = create_access_token(
         data={"sub": str(user.id)},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
@@ -98,7 +176,8 @@ SELF_SIGNUP_ROLES = {"student", "student_host", "landlord"}
 
 
 @router.post("/register", response_model=UserResponse)
-def register(user_in: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit(REGISTER_LIMIT)
+def register(request: Request, user_in: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_in.email.lower()).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -121,10 +200,11 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 
 
 # ---------------------------------------------------------------------------
-# NEW: Forgot password  -> generate token, email a reset link
+# Forgot password -> generate token, email a reset link
 # ---------------------------------------------------------------------------
 @router.post("/forgot-password")
-def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit(FORGOT_PASSWORD_LIMIT)
+def forgot_password(request: Request, body: ForgotPasswordRequest, db: Session = Depends(get_db)):
     email = body.email.lower()
     user = db.query(User).filter(User.email == email).first()
 
@@ -145,8 +225,7 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
     db.add(prt)
     db.commit()
 
-    # FRONTEND_URL MUST be your real site in production, e.g.
-    # https://find-my-nyumba-original.vercel.app  â€” otherwise the link
+    # FRONTEND_URL MUST be your real site in production, otherwise the link
     # points at localhost and nobody can use it.
     reset_url = f"{settings.FRONTEND_URL.rstrip('/')}/reset-password.html?token={raw_token}"
 
@@ -160,10 +239,11 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
 
 
 # ---------------------------------------------------------------------------
-# NEW: Reset password  -> verify token, set new password
+# Reset password -> verify token, set new password
 # ---------------------------------------------------------------------------
 @router.post("/reset-password")
-def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit(RESET_PASSWORD_LIMIT)
+def reset_password(request: Request, body: ResetPasswordRequest, db: Session = Depends(get_db)):
     token_hash = hashlib.sha256(body.token.encode()).hexdigest()
 
     prt = (
@@ -187,14 +267,18 @@ def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
     prt.used = True
     db.commit()
 
+    # A successful reset clears any active lockout for this account.
+    _clear_failures(_lock_key(user.email, request))
+
     return {"message": "Password updated. You can now sign in with your new password."}
 
 
 # ---------------------------------------------------------------------------
-# NEW: Google login  -> verify Google ID token, log in or create the user
+# Google login -> verify Google ID token, log in or create the user
 # ---------------------------------------------------------------------------
 @router.post("/google-login")
-def google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
+@limiter.limit(LOGIN_LIMIT)
+def google_login(request: Request, body: GoogleLoginRequest, db: Session = Depends(get_db)):
     # Imported here so the rest of auth works even before google-auth is installed.
     from google.oauth2 import id_token
     from google.auth.transport import requests as google_requests
@@ -206,7 +290,7 @@ def google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
         info = id_token.verify_oauth2_token(
             body.credential,
             google_requests.Request(),
-            settings.GOOGLE_CLIENT_ID,   # this is the audience check â€” must match login.html
+            settings.GOOGLE_CLIENT_ID,   # audience check — must match login.html
         )
     except ValueError:
         # Bad signature, wrong audience, or expired token.
@@ -245,4 +329,3 @@ def google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
         "role": user.role,
         "user_id": user.id,
     }
-

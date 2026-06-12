@@ -1,14 +1,19 @@
 """
 app/api/v1/endpoints/messages.py
 
-FIXES vs previous version:
-- get_thread: eliminated N+1 query. Previously queried User once per message
-  inside the result loop. Now pre-fetches the other user once before the loop.
-- get_conversations: eliminated N+1 unread-count queries. Previously ran a
-  separate COUNT query for each conversation thread. Now uses a single batch
-  query grouped by (sender_id, property_id) — reduces a 20-thread load from
-  21 DB queries down to 2.
-- POST /messages/send: dual JSON/FormData support retained from previous fix.
+WHAT CHANGED IN THIS VERSION
+----------------------------
+- POST /messages/send now:
+    (a) is rate limited (MESSAGE_SEND_LIMIT) to curb spam blasts, and
+    (b) runs scam_detection.scan_message() on the outgoing text. If any signal
+        fires (mobile-money number shared, "deposit before viewing", off-platform
+        push, etc.) the message is STILL delivered, but an audit entry with
+        action="message.scam_signal" is written so admins can review it via the
+        existing GET /admin/audit endpoint. We flag rather than block so honest
+        users aren't hit by false positives and so you collect real-world data
+        before tightening.
+- The N+1 fixes and dual JSON/FormData handling from the previous version are
+  unchanged.
 """
 
 from pathlib import Path
@@ -19,7 +24,10 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.audit import record_audit
 from app.core.database import get_db
+from app.core.rate_limiter import limiter, MESSAGE_SEND_LIMIT
+from app.core.scam_detection import scan_message, risk_score
 from app.models.listing import Listing
 from app.models.message import Message
 from app.models.user import User
@@ -37,7 +45,7 @@ ALLOWED_ATTACH_TYPES = {
 MAX_ATTACH_MB = 10
 
 
-# ── Unread count ──────────────────────────────────────────────────────────[...]
+# ── Unread count ──────────────────────────────────────────────────────────
 @router.get("/unread-count")
 def get_unread_count(
     current_user: User = Depends(get_current_user),
@@ -45,7 +53,7 @@ def get_unread_count(
 ):
     count = db.query(Message).filter(
         Message.receiver_id == current_user.id,
-        Message.is_read     == False,
+        Message.is_read     == False,  # noqa: E712
     ).count()
     return {"unread_count": count}
 
@@ -57,7 +65,7 @@ def get_conversations(
     db: Session        = Depends(get_db),
 ):
     """
-    FIX: Replaced per-thread unread COUNT queries with a single batch query.
+    Replaced per-thread unread COUNT queries with a single batch query.
     Old code: 1 + N queries (N = number of conversation threads).
     New code: 2 queries total regardless of thread count.
     """
@@ -89,14 +97,12 @@ def get_conversations(
     if not threads:
         return []
 
-    # Batch-fetch all other users and listings in 2 queries
     other_ids   = {t[0] for t in threads}
     listing_ids = {t[1] for t in threads if t[1]}
 
     users    = {u.id: u for u in db.query(User).filter(User.id.in_(other_ids)).all()} if other_ids else {}
     listings = {l.id: l for l in db.query(Listing).filter(Listing.id.in_(listing_ids)).all()} if listing_ids else {}
 
-    # Single batch unread-count query grouped by (sender_id, property_id)
     unread_rows = (
         db.query(
             Message.sender_id,
@@ -105,7 +111,7 @@ def get_conversations(
         )
         .filter(
             Message.receiver_id == current_user.id,
-            Message.is_read     == False,
+            Message.is_read     == False,  # noqa: E712
             Message.sender_id.in_(other_ids),
         )
         .group_by(Message.sender_id, Message.property_id)
@@ -139,9 +145,7 @@ def get_thread(
     db: Session        = Depends(get_db),
 ):
     """
-    FIX: Eliminated N+1 query. Previously queried User once per message inside
-    the result loop. Now pre-fetches the other user once before the loop.
-    Also replaced per-message is_read updates with a single bulk UPDATE.
+    Eliminated N+1 query (other user pre-fetched once). Bulk mark-as-read.
     """
     prop_filter = (
         Message.property_id == property_id if property_id else Message.property_id.is_(None)
@@ -160,7 +164,6 @@ def get_thread(
         .all()
     )
 
-    # Bulk mark-as-read in one UPDATE instead of setting flags in a Python loop
     unread_ids = [m.id for m in msgs if m.receiver_id == current_user.id and not m.is_read]
     if unread_ids:
         db.query(Message).filter(Message.id.in_(unread_ids)).update(
@@ -168,7 +171,6 @@ def get_thread(
         )
         db.commit()
 
-    # Pre-fetch the other user ONCE — eliminates the per-message N+1
     other_user = db.query(User).filter(User.id == other_user_id).first()
     other_name = other_user.full_name if other_user else "Unknown"
 
@@ -191,6 +193,7 @@ def get_thread(
 
 # ── Send message (Smart JSON/Form Handler) ────────────────────────────────────
 @router.post("/send")
+@limiter.limit(MESSAGE_SEND_LIMIT)
 async def send_message(
     request: Request,
     current_user: User = Depends(get_current_user),
@@ -199,6 +202,7 @@ async def send_message(
     """
     Accepts both application/json (property detail page) and
     multipart/form-data (messages dashboard). Supports optional attachments.
+    Runs a scam-signal scan and flags (does not block) suspicious messages.
     """
     content_type = request.headers.get("content-type", "")
 
@@ -253,11 +257,13 @@ async def send_message(
     if not receiver:
         raise HTTPException(status_code=404, detail="Recipient not found.")
 
+    clean_content = str(content).strip()
+
     msg = Message(
         sender_id       = current_user.id,
         receiver_id     = receiver_id,
         property_id     = property_id,
-        content         = str(content).strip(),
+        content         = clean_content,
         is_read         = False,
         attachment_url  = attachment_url,
         attachment_name = attachment_name,
@@ -266,6 +272,25 @@ async def send_message(
     db.add(msg)
     db.commit()
     db.refresh(msg)
+
+    # Anti-scam: scan the delivered text. Flag (don't block) so admins can review
+    # via GET /admin/audit?action=message.scam_signal. False positives here are
+    # cheap; a blocked legitimate message is not.
+    signals = scan_message(clean_content)
+    if signals:
+        record_audit(
+            db, request,
+            actor=current_user,
+            action="message.scam_signal",
+            entity_type="message",
+            entity_id=msg.id,
+            meta={
+                "signals": signals,
+                "risk": risk_score(signals),
+                "receiver_id": receiver_id,
+                "property_id": property_id,
+            },
+        )
 
     return {
         "status":          "success",
