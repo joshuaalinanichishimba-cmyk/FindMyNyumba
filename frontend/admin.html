@@ -153,6 +153,7 @@
         <div class="sb-group-label px-3 mb-2">Trust &amp; Safety</div>
         <div class="sb-link" id="nav-verifications" onclick="showTab('verifications')"><i class="fas fa-user-shield"></i>Verification Queue</div>
         <div class="sb-link" id="nav-trust" onclick="showTab('trust')"><i class="fas fa-flag"></i>Reports &amp; Complaints</div>
+        <div class="sb-link" id="nav-reviews" onclick="showTab('reviews')"><i class="fas fa-star"></i>Reviews</div>
         <div class="sb-link" id="nav-fraud" onclick="showTab('fraud')"><i class="fas fa-shield-halved"></i>Fraud Center</div>
       </div>
 
@@ -403,6 +404,7 @@
           <div id="reports-list" class="divide-y divide-slate-50"></div>
         </div>
       </section>
+      <section id="tab-reviews" class="tab-section"></section>
 
       <!-- ============================================================
            FRAUD CENTER (PREVIEW)
@@ -697,6 +699,7 @@ function showTab(name){
   if (name === 'escrow')        loadEscrow();
   if (name === 'institutions')  loadInstitutions();
   if (name === 'support')       loadSupport();
+  if (name === 'reviews')       loadReviews();
   if (name === 'analytics')     { loadAnalytics(); loadSearchGeo(); }
   if (name === 'system')        loadSystemHealth();
   if (name === 'settings')      loadRoles();
@@ -2161,3 +2164,34 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeLightb
 </script>
 </body>
 </html>
+<script>
+let _reviews = [];
+async function loadReviews(){
+  const sec = document.getElementById('tab-reviews');
+  sec.innerHTML = `<div class="card overflow-hidden"><div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5"><div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Reviews</h3><p class="text-[12px] text-slate-400 font-medium">Approve or reject student reviews before they show publicly</p></div><select id="review-status" class="fmn-input w-auto" onchange="fetchReviews()"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="">All</option></select></div><div id="reviews-list" class="divide-y divide-slate-50"><div class="px-5 py-10 text-center text-slate-400 text-sm">Loading…</div></div></div>`;
+  await fetchReviews();
+}
+async function fetchReviews(){
+  const st = document.getElementById('review-status')?.value ?? 'pending';
+  const el = document.getElementById('reviews-list');
+  try {
+    const r = await fetch(`${API}/admin/reviews${st ? '?status='+st : ''}`);
+    if (!r.ok){ el.innerHTML = `<div class="px-5 py-10 text-center text-red-500 text-sm">Couldn't load reviews — HTTP ${r.status}.</div>`; return; }
+    _reviews = await r.json();
+  } catch { el.innerHTML = `<div class="px-5 py-10 text-center text-red-500 text-sm">Network error.</div>`; return; }
+  renderReviews();
+}
+function renderReviews(){
+  const el = document.getElementById('reviews-list'); if (!el) return;
+  if (!_reviews.length){ el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm">No reviews here.</div>`; return; }
+  const stars = n => '?'.repeat(n) + '?'.repeat(5-n);
+  el.innerHTML = _reviews.map(r => `<div class="px-5 py-4"><div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-slate-800 text-[13.5px]">${esc(r.user_name||'User')}</span><span class="text-amber-500 text-sm">${stars(r.rating||0)}</span><span class="pill ${r.status==='approved'?'bg-green-50 text-green-600':r.status==='rejected'?'bg-red-50 text-red-500':'bg-amber-50 text-amber-700'}">${esc(r.status)}</span><span class="text-[11px] text-slate-300 ml-auto">${esc(r.listing_title||'')}</span></div><p class="text-[13px] text-slate-600 mt-1.5">${esc(r.comment||'—')}</p><div class="flex gap-2 mt-2"><button onclick="moderateReview(${r.id},'approved')" class="btn btn-pri text-xs">Approve</button><button onclick="moderateReview(${r.id},'rejected')" class="btn text-xs border border-slate-200">Reject</button></div></div>`).join('');
+}
+async function moderateReview(id, status){
+  try {
+    const r = await fetch(`${API}/admin/reviews/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ status }) });
+    if (r.ok){ showToast(`Review ${status}.`, 'success'); fetchReviews(); }
+    else { showToast('Action failed.', 'error'); }
+  } catch { showToast('Network error.', 'error'); }
+}
+</script>
