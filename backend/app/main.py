@@ -33,6 +33,7 @@ from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.rate_limiter import setup_rate_limiting
+from app.models.viewing_request import ViewingRequest   # noqa: F401
 
 # --- Optional Sentry error monitoring -------------------------------------
 # Only initialises if SENTRY_DSN is present in the environment, so local dev

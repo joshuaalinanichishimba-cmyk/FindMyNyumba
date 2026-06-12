@@ -12,6 +12,8 @@ from app.api.v1.endpoints.landlords     import router as landlords_router
 from app.api.v1.endpoints.student_hosts import router as student_hosts_router
 from app.api.v1.endpoints.admin         import router as admin_router
 from app.api.v1.endpoints.admin_extra   import router as admin_extra_router
+from app.api.v1.endpoints.viewing_requests import router as viewing_requests_router
+api_router.include_router(viewing_requests_router)
 
 api_router = APIRouter()
 
