@@ -8,7 +8,8 @@ WHAT CHANGED IN THIS VERSION
    so unhandled errors are captured off-box. Render's disk is ephemeral, so a
    local error.log is wiped on every deploy — Sentry fixes that. It only turns
    on when SENTRY_DSN is set, so local dev is unaffected.
-2. Rate limiting is wired in via setup_rate_limiting(app). The limiter existed
+2. Rate limiting is wired in via setup_rate_limiting(app)
+setup_exception_handlers(app). The limiter existed
    but was never attached, so /auth/login had no brute-force protection.
 3. A small SecurityHeadersMiddleware adds HSTS / X-Content-Type-Options /
    X-Frame-Options / Referrer-Policy to every response.
@@ -33,6 +34,7 @@ from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.rate_limiter import setup_rate_limiting
+from app.core.errors import setup_exception_handlers
 from app.models.viewing_request import ViewingRequest   # noqa: F401
 
 # --- Optional Sentry error monitoring -------------------------------------
@@ -146,6 +148,7 @@ app = FastAPI(
 
 # Rate limiting: attach the shared limiter + 429 handler.
 setup_rate_limiting(app)
+setup_exception_handlers(app)
 
 # Security headers on every response.
 app.add_middleware(SecurityHeadersMiddleware)
