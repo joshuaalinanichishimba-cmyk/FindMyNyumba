@@ -578,13 +578,53 @@ function contactGuard(kind) {
 }
 
 /* ---- Request viewing (TODO: Requires Viewing Request Backend) ---- */
-function requestViewing() {
-    if (!getToken()) { showToast('Please log in to request a viewing.', 'info'); setTimeout(() => window.location.href = 'login.html', 1800); return; }
-    const date = document.getElementById('view-date').value;
-    const time = document.getElementById('view-time').value;
-    if (!date || !time) { showToast('Please pick a date and time.', 'info'); return; }
-    /* TODO: Requires Viewing Request Backend -> POST /api/v1/viewings { property_id, date, time, notes } */
-    showToast(`Viewing requested for ${date} at ${time}. Awaiting confirmation.`, 'success');
+async function requestViewing() {
+    if (!getToken()) {
+        showToast('Please log in to request a viewing.', 'info');
+        setTimeout(() => window.location.href = 'login.html', 1800);
+        return;
+    }
+
+    const date  = document.getElementById('view-date').value;
+    const time  = document.getElementById('view-time').value;
+    const notes = (document.getElementById('view-notes').value || '').trim();
+
+    if (!date || !time) {
+        showToast('Please pick a date and time.', 'info');
+        return;
+    }
+    if (!currentProperty || !currentProperty.id) {
+        showToast('Could not identify this listing. Please refresh.', 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/viewings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify({
+                listing_id: currentProperty.id,
+                date: date,
+                time: time,
+                notes: notes,
+            }),
+        });
+
+        if (res.ok) {
+            showToast(`Viewing requested for ${date} at ${time}. The landlord will confirm.`, 'success');
+            document.getElementById('view-date').value = '';
+            document.getElementById('view-time').value = '';
+            document.getElementById('view-notes').value = '';
+        } else {
+            const d = await res.json().catch(() => ({}));
+            showToast(typeof d.detail === 'string' ? d.detail : 'Could not request viewing.', 'error');
+        }
+    } catch (err) {
+        showToast('Network error. Please try again.', 'error');
+    }
 }
 
 /* ===== New-section renderers (graceful fallbacks; backend-optional) ===== */
