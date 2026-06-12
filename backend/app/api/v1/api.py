@@ -13,7 +13,6 @@ from app.api.v1.endpoints.student_hosts import router as student_hosts_router
 from app.api.v1.endpoints.admin         import router as admin_router
 from app.api.v1.endpoints.admin_extra   import router as admin_extra_router
 from app.api.v1.endpoints.viewing_requests import router as viewing_requests_router
-api_router.include_router(viewing_requests_router)
 
 api_router = APIRouter()
 
@@ -26,3 +25,4 @@ api_router.include_router(landlords_router)
 api_router.include_router(student_hosts_router)
 api_router.include_router(admin_router)
 api_router.include_router(admin_extra_router)
+api_router.include_router(viewing_requests_router)
