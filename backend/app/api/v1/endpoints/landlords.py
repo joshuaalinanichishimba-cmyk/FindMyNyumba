@@ -114,7 +114,7 @@ async def _upload_to_cloudinary(f: UploadFile) -> str:
         )
         return result["secure_url"]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Image upload failed. Please try again.")
 
 
 def _cloudinary_upload_media(data: bytes, vm: "mv.ValidatedMedia") -> dict:
@@ -449,7 +449,7 @@ async def _upload_avatar_to_cloudinary(f: UploadFile) -> str:
         )
         return result["secure_url"]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Photo upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Photo upload failed. Please try again.")
 
 
 @router.post("/profile/photo")

@@ -59,7 +59,7 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
         db.rollback()
         print("--- ERROR DETECTED ---")
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
 
 
 @router.post("/me/photo")
@@ -89,7 +89,7 @@ async def upload_my_photo(
                              "gravity": "face", "quality": "auto"}],
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Photo upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Photo upload failed. Please try again.")
 
     current_user.avatar_url = result["secure_url"]
     db.commit()
