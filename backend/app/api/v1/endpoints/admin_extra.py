@@ -38,6 +38,8 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.models.user import User
+from app.models.review import Review
+from app.models.listing import Listing
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.message import Message
@@ -919,3 +921,34 @@ def admin_export(filename: str, admin: User = Depends(require_admin),
                              rows, "findmynyumba_revenue.csv")
 
     raise HTTPException(status_code=404, detail=f"Unknown export resource '{resource}'.")
+
+# -- Reviews moderation ----------------------------------------------------
+from pydantic import BaseModel as _ReviewBaseModel
+
+class ReviewModerate(_ReviewBaseModel):
+    status: str
+
+@router.get("/admin/reviews")
+def admin_list_reviews(status: Optional[str] = None, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    q = db.query(Review)
+    if status:
+        q = q.filter(Review.status == status)
+    rows = q.order_by(Review.created_at.desc()).all()
+    listing_ids = {r.listing_id for r in rows}
+    titles = {}
+    if listing_ids:
+        for l in db.query(Listing).filter(Listing.id.in_(listing_ids)).all():
+            titles[l.id] = l.title
+    return [{"id": r.id, "listing_id": r.listing_id, "listing_title": titles.get(r.listing_id, f"Listing #{r.listing_id}"), "user_name": r.user_name, "rating": r.rating, "comment": r.comment, "status": r.status, "created_at": r.created_at.isoformat() if r.created_at else None} for r in rows]
+
+@router.patch("/admin/reviews/{review_id}")
+def admin_moderate_review(review_id: int, body: ReviewModerate, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    new_status = (body.status or "").lower().strip()
+    if new_status not in {"approved", "rejected", "pending"}:
+        raise HTTPException(status_code=400, detail="status must be approved, rejected, or pending.")
+    review = db.query(Review).filter(Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found.")
+    review.status = new_status
+    db.commit()
+    return {"status": "success", "review_id": review_id, "new_status": new_status}

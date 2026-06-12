@@ -32,6 +32,7 @@ from app.core.database import get_db
 from app.models.listing import Listing
 from app.models.listing_media import ListingMedia
 from app.models.report import Report
+from app.models.review import Review
 from app.models.user import User
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
@@ -203,29 +204,26 @@ def get_listing_detail(
 
 
 # ── POST /properties/{id}/reviews ─────────────────────────────────────────────
-@router.post("/{listing_id}/reviews", status_code=202)
+@router.post("/{listing_id}/reviews", status_code=201)
 def post_review(
     listing_id: int,
     review: ReviewCreate,
-    current_user: User    = Depends(get_current_user),
-    db: Session           = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    db: Session        = Depends(get_db),
 ):
-    """
-    Authenticated review submission. Pydantic enforces 1≤rating≤5 and
-    non-empty comment, so by the time we get here the payload is valid.
-
-    Status is 202 (Accepted, not yet processed) until the Review model is
-    added — this is honest about what is happening server-side.
-    """
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
-
     if listing.owner_id == current_user.id:
         raise HTTPException(status_code=400, detail="You cannot review your own listing.")
+    existing = db.query(Review).filter(Review.listing_id == listing_id, Review.user_id == current_user.id).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="You have already reviewed this listing.")
+    row = Review(listing_id=listing_id, user_id=current_user.id, user_name=current_user.full_name, rating=review.rating, comment=review.comment.strip(), status="pending")
+    db.add(row)
+    db.commit()
+    return {"status": "submitted", "message": "Thank you! Your review will appear after approval."}
 
-    # TODO: persist to Review(listing_id, author_id, rating, comment, created_at)
-    return {"status": "accepted", "message": "Review received. Thank you!"}
 
 
 # ── POST /properties/{id}/report ──────────────────────────────────────────────

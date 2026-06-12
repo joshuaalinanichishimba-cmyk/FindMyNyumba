@@ -64,6 +64,7 @@ from app.models.admin_models import (                  # noqa: E402,F401
     AuditLog, AdminNote, RolePermission,
 )
 from app.models.listing_event import ListingEvent      # noqa: E402,F401
+from app.models.review import Review                 # noqa: E402,F401
 
 # --- Create any missing tables (idempotent; safe on every startup) --------
 Base.metadata.create_all(bind=engine)
