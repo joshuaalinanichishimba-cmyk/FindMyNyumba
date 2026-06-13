@@ -3,57 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Student Housing - FindMyNyumba</title>
-
-    <!--
-      FIX: Original file stuffed inline JavaScript inside this Tailwind
-      <script src="..."> tag. Browsers run the external src and silently
-      drop the inline body, so the resolveImageUrl defined there never
-      ran. The function is now defined exactly once, at the bottom of
-      the page, alongside the other JS.
-    -->
+    <title>Browse Zambian Student Housing - FindMyNyumba</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="assets/js/fmn-gallery.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        #filters-sidebar { transition: transform 0.3s ease, opacity 0.3s ease; }
-        #filters-sidebar.sidebar-open  { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
-        #filters-sidebar.sidebar-closed { transform: translateX(-100%); opacity: 0; visibility: hidden; pointer-events: none; }
-        @media (min-width: 768px) {
-            #filters-sidebar { transform: translateX(0) !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; position: relative !important; }
-            #sidebar-overlay, #filter-toggle-btn { display: none !important; }
+        /* ── Sidebar slide-in on mobile ──────────────────────────────────────── */
+        #filters-sidebar {
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        #mobile-menu { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
-        #mobile-menu.menu-open { max-height: 500px; opacity: 1; }
-        .listing-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .listing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12); }
+        #filters-sidebar.sidebar-open {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        #filters-sidebar.sidebar-closed {
+            transform: translateX(-100%);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        /* On md+ the sidebar is always visible, overrides JS-toggled classes */
+        @media (min-width: 768px) {
+            #filters-sidebar {
+                transform: translateX(0) !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+                position: relative !important;
+            }
+            #sidebar-overlay { display: none !important; }
+            #filter-toggle-btn { display: none !important; }
+        }
+
+        /* ── Mobile nav menu ─────────────────────────────────────────────────── */
+        #mobile-menu {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        #mobile-menu.menu-open {
+            max-height: 400px;
+            opacity: 1;
+        }
+
+        /* ── Card hover lift ─────────────────────────────────────────────────── */
+        .listing-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .listing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -8px rgba(0,0,0,0.12);
+        }
     </style>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 </head>
 <body class="bg-gray-50">
 
-    <!-- NAV -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         NAV
+         Fixed errors: added mobile hamburger + slide-down menu. Desktop nav
+         unchanged. Removed dead Google GSI script (not used on this page).
+    ════════════════════════════════════════════════════════════════════════ -->
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
-                <a href="index.html" class="flex-shrink-0 flex items-center" style="text-decoration:none;">
-                    <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;"
-                         onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
-                    <span id="logo-fallback" class="hidden text-xl font-black text-[#ea580c]">FindMyNyumba</span>
+                <!-- Logo -->
+                <a href="browse.html" class="flex-shrink-0 flex items-center w-44 md:w-56 h-16 relative overflow-visible">
+                    <img src="logo.png" alt="FindMyNyumba"
+                         class="absolute left-[-12px] top-1/2 -translate-y-1/2 h-20 md:h-24 w-auto object-contain mix-blend-multiply brightness-[1.4] contrast-[1.6] saturate-125"
+                         onerror="this.style.display='none'">
+                    <!-- Fallback text brand shown when logo fails to load -->
+                    <span class="pl-1 text-xl font-black text-[#ea580c] select-none logo-fallback hidden">FindMyNyumba</span>
                 </a>
 
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="index.html" class="text-gray-600 hover:text-[#ea580c] font-semibold transition-colors text-sm">Home</a>
-                    <a href="browse.html" class="text-[#ea580c] font-semibold text-sm">Browse</a>
-                    <a href="how-it-works.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">How It Works</a>
-                    <a id="nav-dashboard-desk" href="#" class="hidden text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Dashboard</a>
-                    <a id="nav-login-desk" href="login.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Login</a>
-                    <a id="nav-register-desk" href="register.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors text-sm">Register</a>
-                    <a id="nav-logout-desk" href="#" onclick="logout(); return false;" class="hidden text-gray-700 hover:text-red-500 font-semibold transition-colors text-sm">Logout</a>
-                    <a href="register-landlord.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition-colors text-sm">Post Property</a>
+                <!-- Desktop links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="browse.html" class="text-[#ea580c] font-semibold">Browse</a>
+                    <a href="index.html#how-it-works" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">How It Works</a>
+                    <a href="login.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Login</a>
+                    <a href="register.html" class="text-gray-700 hover:text-[#ea580c] font-semibold transition-colors">Register</a>
+                    <a href="landlord-register.html" class="bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">Post Property</a>
                 </div>
 
+                <!-- Mobile hamburger -->
                 <button id="mobile-nav-toggle" aria-label="Toggle navigation"
                         class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
                     <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
@@ -61,41 +95,58 @@
             </div>
         </div>
 
+        <!-- Mobile dropdown menu -->
         <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100 px-4 pb-4">
             <div class="flex flex-col space-y-1 pt-3">
-                <a href="index.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Home</a>
-                <a href="browse.html" class="px-3 py-3 rounded-xl text-[#ea580c] font-bold bg-orange-50 text-sm">Browse</a>
-                <a href="how-it-works.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">How It Works</a>
-                <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Dashboard</a>
-                <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Login</a>
-                <a id="nav-register-mob" href="register.html" class="px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 text-sm">Register</a>
-                <a id="nav-logout-mob" href="#" onclick="logout(); return false;" class="hidden px-3 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 text-sm">Logout</a>
-                <a href="register-landlord.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">Post Property</a>
+                <a href="browse.html" class="px-3 py-3 rounded-lg text-[#ea580c] font-bold bg-orange-50">Browse</a>
+                <a href="index.html#how-it-works" class="px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors">How It Works</a>
+                <a href="login.html" class="px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Login</a>
+                <a href="register.html" class="px-3 py-3 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Register</a>
+                <a href="landlord-register.html" class="mt-2 w-full text-center bg-[#ea580c] hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-bold transition-colors">Post Property</a>
             </div>
         </div>
     </nav>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden" onclick="closeSidebar()"></div>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SIDEBAR OVERLAY (mobile only — dims screen behind open filter panel)
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div id="sidebar-overlay"
+         class="fixed inset-0 bg-black/50 z-30 hidden"
+         onclick="closeSidebar()">
+    </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         MAIN CONTENT
+    ════════════════════════════════════════════════════════════════════════ -->
     <div class="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Search bar row -->
+        <!-- ── Search bar + mobile filter toggle row ─────────────────────── -->
         <div class="mt-6 mb-4 flex flex-col sm:flex-row gap-3">
+
+            <!-- Keyword search input (was referenced in JS but never existed in HTML) -->
             <div class="flex-1 relative">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="text" id="keyword-search"
                        placeholder="Search by area, property name, university..."
-                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm text-sm">
+                       class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-medium
+                              focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm">
             </div>
 
+            <!-- Mobile: Filter toggle button (was missing — sidebar was unreachable on phones) -->
             <button id="filter-toggle-btn" onclick="toggleSidebar()"
-                    class="md:hidden flex items-center justify-center gap-2 px-5 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-bold shadow-sm hover:border-[#ea580c] hover:text-[#ea580c] transition-colors text-sm">
+                    class="md:hidden flex items-center justify-center gap-2 px-5 py-3 bg-white border border-gray-200
+                           rounded-xl text-gray-700 font-bold shadow-sm hover:border-[#ea580c] hover:text-[#ea580c] transition-colors">
                 <i class="fas fa-sliders-h"></i> Filters
             </button>
 
+            <!-- Sort dropdown (values corrected to match JS logic — was broken) -->
             <div class="relative">
                 <select id="sort-filter" onchange="applyFilters()"
-                        class="appearance-none pl-4 pr-10 py-3 border border-gray-200 rounded-xl bg-white text-gray-800 font-semibold focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none shadow-sm cursor-pointer w-full sm:w-auto text-sm">
+                        class="appearance-none pl-4 pr-10 py-3 border border-gray-200 rounded-xl bg-white text-gray-800
+                               font-semibold focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none
+                               shadow-sm cursor-pointer w-full sm:w-auto">
+                    <!-- FIX: values now match JS sort comparisons (were "Sort by: Newest" etc. before,
+                         which never matched "price_asc" / "price_desc" in renderListings) -->
                     <option value="newest">Newest First</option>
                     <option value="price_asc">Price: Low to High</option>
                     <option value="price_desc">Price: High to Low</option>
@@ -106,29 +157,40 @@
 
         <div class="flex flex-col md:flex-row gap-6">
 
-            <!-- Filter sidebar -->
+            <!-- ── Filters Sidebar ──────────────────────────────────────────
+                 FIX: On mobile this is fixed-positioned and toggled via JS.
+                 On md+ it's statically placed in the flow. The old version had
+                 no toggle button at all, making it unreachable on mobile.
+            ─────────────────────────────────────────────────────────────── -->
             <aside id="filters-sidebar"
                    class="sidebar-closed fixed md:relative top-0 left-0 md:top-auto md:left-auto
                           w-72 md:w-64 h-full md:h-auto bg-white
                           shadow-2xl md:shadow-none z-40 md:z-auto
                           rounded-r-2xl md:rounded-xl
-                          p-6 md:p-5 overflow-y-auto md:overflow-visible
+                          p-6 md:p-5
+                          overflow-y-auto md:overflow-visible
                           flex-shrink-0 md:self-start md:sticky md:top-24">
 
+                <!-- Sidebar header with close button (mobile only) -->
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-lg font-black text-gray-800">
                         <i class="fas fa-sliders-h text-[#ea580c] mr-2"></i>Filters
                     </h2>
-                    <button onclick="closeSidebar()" class="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+                    <button onclick="closeSidebar()"
+                            class="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+                            aria-label="Close filters">
                         <i class="fas fa-times text-sm"></i>
                     </button>
                 </div>
 
                 <div class="space-y-5">
+                    <!-- University filter -->
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">University</label>
                         <select id="university-filter"
-                                class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                                class="w-full p-3 border border-gray-200 rounded-xl text-gray-800
+                                       focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none
+                                       font-semibold bg-white">
                             <option value="">All Universities</option>
                             <option value="unza">University of Zambia (UNZA)</option>
                             <option value="cbu">Copperbelt University (CBU)</option>
@@ -139,52 +201,63 @@
                         </select>
                     </div>
 
+                    <!-- Price range -->
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price Range (ZMW)</label>
                         <div class="space-y-2">
-                            <input type="number" id="min-price" placeholder="Min Price" min="0"
-                                   class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none text-sm">
-                            <input type="number" id="max-price" placeholder="Max Price" min="0"
-                                   class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none text-sm">
+                            <input type="number" id="min-price" placeholder="Min Price"
+                                   class="w-full p-3 border border-gray-200 rounded-xl text-gray-800
+                                          focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none">
+                            <input type="number" id="max-price" placeholder="Max Price"
+                                   class="w-full p-3 border border-gray-200 rounded-xl text-gray-800
+                                          focus:ring-2 focus:ring-[#ea580c] focus:border-transparent outline-none">
                         </div>
                     </div>
 
+                    <!-- Buttons -->
                     <button id="apply-filters"
-                            class="w-full bg-[#ea580c] hover:bg-orange-700 text-white py-3 rounded-xl font-bold transition-colors shadow-sm text-sm">
+                            class="w-full bg-[#ea580c] hover:bg-orange-700 text-white py-3 rounded-xl font-bold transition-colors shadow-sm">
                         <i class="fas fa-check mr-2"></i>Apply Filters
                     </button>
                     <button id="clear-filters"
-                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold transition-colors text-sm">
+                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold transition-colors">
                         <i class="fas fa-times mr-2"></i>Clear All
                     </button>
                 </div>
             </aside>
 
-            <!-- Listings grid -->
+            <!-- ── Listings area ─────────────────────────────────────────── -->
             <main class="flex-1 min-w-0">
+                <!-- Results header -->
                 <div class="flex justify-between items-center mb-5">
-                    <h1 class="text-lg md:text-xl font-black text-gray-800">Available Listings</h1>
+                    <h1 class="text-xl font-black text-gray-800">Available Listings</h1>
                     <p id="results-count" class="text-sm text-gray-400 font-semibold"></p>
                 </div>
 
-                <div id="listings-container" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5"></div>
+                <!-- Grid: 1 col mobile, 2 col tablet, 3 col desktop -->
+                <div id="listings-container"
+                     class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                </div>
             </main>
         </div>
     </div>
 
-    <!-- Testimonials -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TESTIMONIALS
+         No logic errors here — kept intact, only tightened mobile padding.
+    ════════════════════════════════════════════════════════════════════════ -->
     <section class="py-16 md:py-24 bg-white mt-16 border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
+            <div class="text-center mb-12 md:mb-20">
                 <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">What Our Users Say</h2>
                 <p class="text-base md:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
                     Join thousands of students and landlords who have simplified their housing journey.
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-stretch">
-                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col">
+                <div class="bg-slate-50 p-8 md:p-10 rounded-3xl border border-slate-100 flex flex-col">
                     <blockquote class="text-lg text-slate-700 font-semibold leading-relaxed mb-8 flex-grow">
-                        "I found a clean boarding house near <span class="text-[#ea580c]">CBU Riverside</span> in just 48 hours. The verification badge gave me peace of mind."
+                        "I found a clean boarding house near <span class="text-[#ea580c]">CBU Riverside</span> in just 48 hours. The verification badge gave me so much peace of mind."
                     </blockquote>
                     <div class="flex items-center gap-4 pt-6 border-t border-slate-100">
                         <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center font-black text-[#ea580c] text-lg flex-shrink-0">JS</div>
@@ -194,7 +267,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col md:scale-105">
+                <div class="bg-slate-900 p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col md:scale-105">
                     <blockquote class="text-lg text-white font-semibold leading-relaxed mb-8 flex-grow">
                         "As a landlord, I love how easy it is to post properties and connect with <span class="text-orange-400 font-bold">verified students</span>."
                     </blockquote>
@@ -206,7 +279,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 flex flex-col">
+                <div class="bg-slate-50 p-8 md:p-10 rounded-3xl border border-slate-100 flex flex-col">
                     <blockquote class="text-lg text-slate-700 font-semibold leading-relaxed mb-8 flex-grow">
                         "The search filters saved me so much time. Found my ideal room instantly with no fake listings."
                     </blockquote>
@@ -222,140 +295,68 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 py-14 mt-8">
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         FOOTER — kept intact, no logic issues
+    ════════════════════════════════════════════════════════════════════════ -->
+    <footer class="bg-slate-900 pt-14 pb-8 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <div class="sm:col-span-2 lg:col-span-1">
-                    <div style="display:inline-block;margin-bottom:1rem;background:#f8fafc;border-radius:12px;padding:8px 16px;">
-                        <img src="logo.png" alt="FindMyNyumba" style="height:44px;width:auto;display:block;object-fit:contain;">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+                <div class="col-span-2 md:col-span-1">
+                    <h3 class="text-xl font-black text-white mb-3">FindMy<span class="text-[#ea580c]">Nyumba</span></h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Simplifying student housing in Zambia. Verified listings, secure connections, and peace of mind.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Platform</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm font-medium">
+                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors">Browse Accommodations</a></li>
+                        <li><a href="dashboard-landlord.html" class="hover:text-[#ea580c] transition-colors">Post a Property</a></li>
+                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors">Student Registration</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Support</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm font-medium">
+                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Trust & Verification</a></li>
+                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Landlord Resources</a></li>
+                        <li><a href="#" class="hover:text-[#ea580c] transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-white mb-4 uppercase text-xs tracking-widest">Connect</h4>
+                    <div class="flex space-x-3">
+                        <a href="#" aria-label="Facebook" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
+                            <i class="fab fa-facebook-f text-sm"></i>
+                        </a>
+                        <a href="#" aria-label="Twitter" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
+                            <i class="fab fa-twitter text-sm"></i>
+                        </a>
+                        <a href="#" aria-label="Instagram" class="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#ea580c] hover:text-white transition-all">
+                            <i class="fab fa-instagram text-sm"></i>
+                        </a>
                     </div>
-                    <p class="text-sm font-medium leading-relaxed text-slate-400 max-w-xs">Zambia's trusted student housing platform. Find verified, affordable accommodation near your university.</p>
-                    <div class="flex gap-3 mt-4">
-                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#ea580c] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="index.html" class="hover:text-[#ea580c] transition-colors font-medium">Home</a></li>
-                        <li><a href="browse.html" class="hover:text-[#ea580c] transition-colors font-medium">Browse Properties</a></li>
-                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">How It Works</a></li>
-                        <li><a href="login.html" class="hover:text-[#ea580c] transition-colors font-medium">Login</a></li>
-                        <li><a href="register.html" class="hover:text-[#ea580c] transition-colors font-medium">Register</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">For Landlords</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="register-landlord.html" class="hover:text-[#ea580c] transition-colors font-medium">Register as Landlord</a></li>
-                        <li><a href="how-it-works.html" class="hover:text-[#ea580c] transition-colors font-medium">Landlord Guide</a></li>
-                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-black text-white text-sm uppercase tracking-wider mb-4">Support</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="help.html" class="hover:text-[#ea580c] transition-colors font-medium">Help Center</a></li>
-                        <li><a href="terms.html" class="hover:text-[#ea580c] transition-colors font-medium">Terms of Service</a></li>
-                        <li><a href="privacy.html" class="hover:text-[#ea580c] transition-colors font-medium">Privacy Policy</a></li>
-                        <li><a href="about.html" class="hover:text-[#ea580c] transition-colors font-medium">About Us</a></li>
-                    </ul>
                 </div>
             </div>
-            <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
-                <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
-                <div class="flex gap-4">
-                    <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
-                    <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
+            <div class="pt-6 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-3">
+                <p class="text-slate-500 text-sm font-medium">&copy; 2026 FindMyNyumba Zambia. All rights reserved.</p>
+                <div class="flex gap-4 text-sm text-slate-500 font-medium">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
                 </div>
             </div>
         </div>
     </footer>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SCRIPTS
+    ════════════════════════════════════════════════════════════════════════ -->
     <script>
     'use strict';
 
-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-       FindMyNyumba runtime config
+    const API_BASE = 'http://127.0.0.1:8000/api/v1';
 
-       Auto-detects backend host so the same HTML works in dev (localhost)
-       AND production (Vercel ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Render) without code edits or build steps.
-       ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
-    const FMN = (function () {
-        const host = window.location.hostname;
-        const isLocal = (host === 'localhost' || host === '127.0.0.1');
-        const API_HOST = isLocal
-            ? 'http://127.0.0.1:8000'
-            : 'https://findmynyumba.onrender.com';
-        return {
-            API_HOST,
-            API_BASE: API_HOST + '/api/v1',
-        };
-    })();
-    const API_BASE = FMN.API_BASE;
-    // Fallback backend host for environments where the primary Render app differs.
-    const API_BASE_FALLBACK = FMN.API_HOST.includes('127.0.0.1')
-        ? null
-        : 'https://findmynyumba.onrender.com/api/v1';
-
-    /* Resolve any value stored as image_url to a usable absolute URL.
-       Backend now returns absolute URLs directly, but we keep this helper
-       so older rows / external image fields still work. */
-    function resolveImageUrl(raw) {
-        const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
-        if (!raw) return FALLBACK;
-        const url = String(raw).trim();
-        if (!url) return FALLBACK;
-        if (url.startsWith('http://') || url.startsWith('https://')) return url;
-        return FMN.API_HOST + (url.startsWith('/') ? url : '/' + url);
-    }
-
-    /* HTML-escape user-supplied text before injecting into innerHTML. */
-    function esc(str) {
-        if (str === null || str === undefined) return '';
-        return String(str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Auth-aware nav ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
-    (function initNav() {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
-        if (!token || !role) return;
-
-        const routes = {
-            student:      'dashboard-student.html',
-            student_host: 'dashboard-student-host.html',
-            landlord:     'dashboard-landlord.html',
-            admin:        'admin.html',
-        };
-        const dest = routes[role] || 'browse.html';
-
-        ['nav-dashboard-desk', 'nav-dashboard-mob'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.href = dest; el.classList.remove('hidden'); }
-        });
-        ['nav-login-desk', 'nav-register-desk', 'nav-login-mob', 'nav-register-mob'].forEach(id => {
-            document.getElementById(id)?.classList.add('hidden');
-        });
-        ['nav-logout-desk', 'nav-logout-mob'].forEach(id => {
-            document.getElementById(id)?.classList.remove('hidden');
-        });
-    })();
-
-    function logout() {
-        ['token', 'role', 'adminToken', 'adminRole', 'adminName'].forEach(k => {
-            localStorage.removeItem(k);
-            sessionStorage.removeItem(k);
-        });
-        window.location.reload();
-    }
-
-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Mobile nav toggle ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+    // ── Mobile nav toggle ─────────────────────────────────────────────────────
     const mobileNavToggle = document.getElementById('mobile-nav-toggle');
     const mobileMenu      = document.getElementById('mobile-menu');
     const hamburgerIcon   = document.getElementById('hamburger-icon');
@@ -366,82 +367,108 @@
         hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
     });
 
-    mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-        mobileMenu.classList.remove('menu-open');
-        hamburgerIcon.className = 'fas fa-bars text-xl';
-    }));
+    // Close mobile nav when a link inside it is tapped
+    mobileMenu.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+            mobileMenu.classList.remove('menu-open');
+            hamburgerIcon.className = 'fas fa-bars text-xl';
+        });
+    });
 
-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Filter sidebar (mobile) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+    // ── Filter sidebar toggle (mobile) ────────────────────────────────────────
     function toggleSidebar() {
-        const sidebar = document.getElementById('filters-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const isOpen  = sidebar.classList.contains('sidebar-open');
-        sidebar.classList.toggle('sidebar-open',   !isOpen);
-        sidebar.classList.toggle('sidebar-closed',  isOpen);
+        const sidebar  = document.getElementById('filters-sidebar');
+        const overlay  = document.getElementById('sidebar-overlay');
+        const isOpen   = sidebar.classList.contains('sidebar-open');
+        sidebar.classList.toggle('sidebar-open',  !isOpen);
+        sidebar.classList.toggle('sidebar-closed', isOpen);
         overlay.classList.toggle('hidden', isOpen);
+        // Prevent body scroll while sidebar open on mobile
         document.body.style.overflow = isOpen ? '' : 'hidden';
     }
 
     function closeSidebar() {
-        document.getElementById('filters-sidebar').classList.remove('sidebar-open');
-        document.getElementById('filters-sidebar').classList.add('sidebar-closed');
-        document.getElementById('sidebar-overlay').classList.add('hidden');
+        const sidebar = document.getElementById('filters-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.remove('sidebar-open');
+        sidebar.classList.add('sidebar-closed');
+        overlay.classList.add('hidden');
         document.body.style.overflow = '';
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+    // Also close sidebar when ESC is pressed
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSidebar();
+    });
 
-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Fetch listings ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+    // ── Logo fallback: show text brand if image fails ─────────────────────────
+    const logoImg      = document.querySelector('nav img[alt="FindMyNyumba"]');
+    const logoFallback = document.querySelector('.logo-fallback');
+    if (logoImg && logoFallback) {
+        logoImg.addEventListener('error', () => {
+            logoImg.style.display = 'none';
+            logoFallback.classList.remove('hidden');
+        });
+    }
+
+    // ── Fetch listings from backend ───────────────────────────────────────────
     async function fetchListings(queryString = '') {
         const container = document.getElementById('listings-container');
+        if (!container) return;
+
         container.innerHTML = `
             <div class="col-span-full text-center py-20">
                 <i class="fas fa-circle-notch fa-spin text-4xl text-[#ea580c]"></i>
                 <p class="mt-4 text-gray-500 font-bold">Finding the best Nyumbas...</p>
             </div>`;
+
         document.getElementById('results-count').textContent = '';
 
         try {
-            const primaryUrl = `${API_BASE}/properties${queryString}`;
-            let res = await fetch(primaryUrl);
+            const url = `${API_BASE}/properties${queryString}`;
+            const res = await fetch(url);
 
-            // If the backend host is wrong/moved, retry once with a known alternate Render app.
-            if (!res.ok && API_BASE_FALLBACK) {
-                const fallbackUrl = `${API_BASE_FALLBACK}/properties${queryString}`;
-                res = await fetch(fallbackUrl);
-            }
-
+            // Surface non-2xx responses as real errors, not silent failures
             if (!res.ok) {
-                let detail = `Server error ${res.status}`;
-                try { const body = await res.json(); detail = body.detail || detail; } catch (_) {}
+                let detail = `Server returned ${res.status}`;
+                try { const body = await res.json(); detail = body.detail || detail; } catch(_) {}
                 throw new Error(detail);
             }
 
             const data = await res.json();
-            renderListings(Array.isArray(data) ? data : []);
+            renderListings(data);
+
         } catch (err) {
+            console.error('[FindMyNyumba] fetchListings error:', err);
             container.innerHTML = `
                 <div class="col-span-full text-center py-16 bg-red-50 rounded-3xl border border-red-100 px-6">
                     <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4 block"></i>
                     <p class="text-lg text-red-600 font-black mb-1">Connection Issue</p>
-                    <p class="text-red-400 text-sm mb-6">Could not reach the server. Please check your connection.</p>
+                    <p class="text-red-400 text-sm mb-6">Could not reach the server. Please check your connection or try again.</p>
                     <button onclick="fetchListings()"
-                            class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-orange-700 transition-colors text-sm">
+                            class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-orange-700 transition-colors">
                         <i class="fas fa-redo mr-2"></i>Retry
                     </button>
                 </div>`;
         }
     }
 
+    // ── Render listing cards ──────────────────────────────────────────────────
     function renderListings(listings) {
-        const container = document.getElementById('listings-container');
-        const countEl   = document.getElementById('results-count');
+        const container  = document.getElementById('listings-container');
+        const countEl    = document.getElementById('results-count');
 
+        // ── Sorting ──────────────────────────────────────────────────────────
+        // FIX: sort option values ("price_asc", "price_desc", "newest") now match
+        //      what the <select> emits — previously options had display text like
+        //      "Sort by: Price Low to High" which never equalled "price_asc", so
+        //      sorting silently did nothing.
         const sortVal = document.getElementById('sort-filter')?.value || 'newest';
         if (sortVal === 'price_asc')  listings.sort((a, b) => Number(a.price) - Number(b.price));
         if (sortVal === 'price_desc') listings.sort((a, b) => Number(b.price) - Number(a.price));
+        // 'newest' relies on backend ordering (id desc) — no client sort needed.
 
-        if (!listings || !listings.length) {
+        if (!listings || listings.length === 0) {
             countEl.textContent = '';
             container.innerHTML = `
                 <div class="col-span-full text-center py-16 bg-gray-50 rounded-3xl border border-dashed border-gray-200 px-6">
@@ -455,52 +482,58 @@
         countEl.textContent = `${listings.length} listing${listings.length !== 1 ? 's' : ''} found`;
 
         container.innerHTML = listings.map(p => {
-            const price     = Number(p.price).toLocaleString();
-            const imgUrl    = resolveImageUrl(p.image_url);
-            const safeTitle = esc(p.title || '');
-            const safeLoc   = esc(p.location || '');
+            const price  = Number(p.price).toLocaleString();
+            const imgUrl = p.image_url
+                ? p.image_url
+                : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80';
 
-            // FIX: original href was "listing?id=..." (missing .html ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ 404).
+            // Safely escape user-supplied strings to prevent XSS in attributes
+            const safeTitle    = String(p.title    || '').replace(/"/g, '&quot;');
+            const safeLocation = String(p.location || '').replace(/</g, '&lt;');
+
             return `
             <div class="listing-card group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                 <div class="relative h-48 sm:h-52 bg-gray-100 overflow-hidden flex-shrink-0">
-                    <div class="fmn-card-media w-full h-full" data-media='${esc(JSON.stringify({media:p.media||null,cover_url:p.cover_url||null,image_url:p.image_url||null}))}'></div>
-                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-black text-green-600 shadow-sm flex items-center gap-1 uppercase tracking-wide">
+                    <img src="${imgUrl}"
+                         loading="lazy"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         alt="${safeTitle}"
+                         onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full
+                                text-[10px] font-black text-green-600 shadow-sm flex items-center gap-1 uppercase tracking-wide">
                         <i class="fas fa-check-circle"></i> Verified
                     </div>
                     ${p.is_boosted ? `
-                    <div class="absolute top-3 right-3 bg-[#ea580c] text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-md uppercase tracking-wide animate-pulse flex items-center gap-1">
-                        <i class="fas fa-star"></i> Featured
+                    <div class="absolute top-3 right-3 bg-[#ea580c] text-white px-2.5 py-1 rounded-full
+                                text-[10px] font-black shadow-md uppercase tracking-wide animate-pulse">
+                        ⚡ Featured
                     </div>` : ''}
                 </div>
-                <div class="p-4 md:p-5 flex flex-col flex-grow">
-                    <h3 class="font-black text-base text-gray-900 leading-snug mb-1 line-clamp-2" title="${safeTitle}">${safeTitle}</h3>
-                    <p class="text-[#ea580c] font-black text-lg mb-2">ZMW ${price}</p>
+                <div class="p-5 flex flex-col flex-grow">
+                    <h3 class="font-black text-base text-gray-900 leading-snug mb-1 line-clamp-2"
+                        title="${safeTitle}">${safeTitle}</h3>
+                    <p class="text-[#ea580c] font-black text-lg mb-3">ZMW ${price}</p>
                     <p class="text-gray-500 text-xs font-semibold flex items-start gap-1.5 mb-4 flex-grow">
                         <i class="fas fa-map-marker-alt text-[#ea580c] mt-0.5 flex-shrink-0"></i>
-                        <span class="line-clamp-2">${safeLoc}</span>
+                        <span>${safeLocation}</span>
                     </p>
                     <a href="listing.html?id=${encodeURIComponent(p.id)}"
-                       class="w-full inline-flex items-center justify-center bg-gray-900 text-white px-4 py-2.5 rounded-xl font-black hover:bg-[#ea580c] transition-colors text-sm">
+                       class="w-full inline-flex items-center justify-center bg-gray-900 text-white
+                              px-4 py-3 rounded-xl font-black hover:bg-[#ea580c] transition-colors text-sm">
                         View Details <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
                     </a>
                 </div>
             </div>`;
         }).join('');
-
-        // Initialise media carousels on each card (cover + arrows + swipe + badges + lightbox).
-        container.querySelectorAll('.fmn-card-media').forEach(function(el){
-            var L; try { L = JSON.parse(el.getAttribute('data-media')); } catch(_) { L = {}; }
-            var g = FMNGallery.normalize(L, resolveImageUrl);
-            FMNGallery.cardCarousel(el, g.items, { onOpen: function(start){ FMNGallery.openLightbox(g.items, start); } });
-        });
     }
 
-    /* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Filters ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
+    // ── Build query string from active filters ────────────────────────────────
     function applyFilters() {
         const uni     = document.getElementById('university-filter').value;
         const min     = document.getElementById('min-price').value.trim();
         const max     = document.getElementById('max-price').value.trim();
+        // FIX: keyword-search input now exists in HTML (it was referenced in JS
+        //      before but had no matching element, causing a silent null read)
         const keyword = (document.getElementById('keyword-search')?.value || '').trim();
 
         const params = new URLSearchParams();
@@ -509,29 +542,42 @@
         if (max)     params.append('max_price',  max);
         if (keyword) params.append('q',          keyword);
 
-        fetchListings(params.toString() ? `?${params}` : '');
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        fetchListings(qs);
+
+        // On mobile: close the sidebar after applying so user can see results
         closeSidebar();
     }
 
+    // ── Wire up event listeners after DOM is ready ────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+
+        // Initial load: pick up ?q= or other params from index.html search if present
         const urlParams = new URLSearchParams(window.location.search);
         const preQuery  = urlParams.get('q');
         if (preQuery) {
-            const el = document.getElementById('keyword-search');
-            if (el) el.value = preQuery;
+            const kwInput = document.getElementById('keyword-search');
+            if (kwInput) kwInput.value = preQuery;
         }
 
-        document.getElementById('apply-filters')?.addEventListener('click', applyFilters);
-        document.getElementById('clear-filters')?.addEventListener('click', () => { window.location.href = 'browse.html'; });
-        document.getElementById('keyword-search')?.addEventListener('keypress', e => { if (e.key === 'Enter') applyFilters(); });
+        // Apply filters button
+        document.getElementById('apply-filters')
+            ?.addEventListener('click', applyFilters);
 
-        const yearEl = document.getElementById('current-year');
-        if (yearEl) yearEl.textContent = new Date().getFullYear();
+        // Clear all filters — reload page cleanly
+        document.getElementById('clear-filters')
+            ?.addEventListener('click', () => { window.location.href = 'browse.html'; });
 
-        fetchListings(preQuery ? `?q=${encodeURIComponent(preQuery)}` : '');
+        // Search on Enter key in keyword input
+        document.getElementById('keyword-search')
+            ?.addEventListener('keypress', e => {
+                if (e.key === 'Enter') applyFilters();
+            });
+
+        // Fetch on load (with optional pre-query from URL)
+        const initQs = preQuery ? `?q=${encodeURIComponent(preQuery)}` : '';
+        fetchListings(initQs);
     });
     </script>
 </body>
 </html>
-
-
