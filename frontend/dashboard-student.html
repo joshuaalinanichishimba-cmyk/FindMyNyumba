@@ -887,7 +887,7 @@ async function openThread(otherId, propId, otherName, propTitle) {
             return;
         }
         messages.innerHTML = msgs.map(m => {
-            const mine = m.is_mine;
+            const mine = (m.sender_name === 'Me') || (window._currentUser && m.sender_id === window._currentUser.id);
             let attachHtml = '';
             if (m.attachment_url) {
                 if (m.attachment_type === 'image') {
