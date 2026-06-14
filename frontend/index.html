@@ -1,986 +1,532 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ali Subscription Express</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #0c0a1e; color: #f0f0f0; }
-        :root { --primary-glow: #00f2fe; --secondary-glow: #8A2BE2; }
-        main, header, footer { position: relative; z-index: 2; }
-        .gradient-text { background: linear-gradient(90deg, #fff, var(--primary-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .header.sticky { background: rgba(12, 10, 30, 0.8); backdrop-filter: blur(10px); }
-        .interactive-card { background: rgba(22, 21, 47, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; position: relative; }
-        .interactive-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .animate-on-scroll { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-        .animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
-        [v-cloak] { display: none; }
-        .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
-        .hero-bg::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/1280px-Netflix_2015_logo.svg.png'), url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Spotify_icon.svg/1982px-Spotify_icon.svg.png'), url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Apple_Music_logo.svg/1024px-Apple_Music_logo.svg.png');
-            background-repeat: no-repeat; background-size: 300px, 150px, 150px;
-            background-position: calc(50% - 150px) 45%, 50% calc(50% + 80px), calc(50% + 150px) 45%;
-            opacity: 0.08; filter: blur(5px);
-        }
-        .gemini-loader { border: 4px solid rgba(255, 255, 255, 0.2); border-left-color: var(--primary-glow); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-        .glass-form-card {
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        .form-input-group { position: relative; }
-        .form-input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #f87171; width: 1.25rem; height: 1.25rem; }
-        .form-input-field, .form-select-field {
-            padding-left: 3rem; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white; border-radius: 12px; height: 50px; width: 100%;
-        }
-        .form-input-field::placeholder { color: #a0a0a0; }
-        .form-input-field:focus, .form-select-field:focus {
-            border-color: #f472b6; background: rgba(0, 0, 0, 0.3); outline: none; box-shadow: none;
-        }
-        .form-select-field { appearance: none; }
-        .form-select-arrow { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #e0e0e0; pointer-events: none; }
-        select option { background: #1f2937; color: white; }
-        .admin-dashboard-bg {
-             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FindMyNyumba — Student Housing in Zambia</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@700&display=swap');
+  body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .script-accent { font-family: 'Caveat', cursive; font-weight: 700; }
+  .chip { transition: all .15s ease; }
+  .chip:hover { border-color:#86efac; background:#f0fdf4; transform:translateY(-1px); }
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -16px rgba(15,23,42,.18); }
+  .area-card { transition: transform .25s ease, box-shadow .25s ease; }
+  .area-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px -16px rgba(15,23,42,.3); }
+  #mobile-menu { transition: max-height .3s ease, opacity .3s ease; max-height:0; opacity:0; overflow:hidden; }
+  #mobile-menu.menu-open { max-height:560px; opacity:1; }
+  /* Responsive-nav fallback so the menu is never broken before the Tailwind CDN finishes compiling */
+  .nav-desktop { display:none; }
+  .nav-hamburger { display:inline-flex; }
+  @media (min-width:768px){
+    .nav-desktop { display:flex; }
+    .nav-hamburger { display:none; }
+    #mobile-menu { display:none !important; }
+  }
+</style>
+<style>html.fmn-pending body{visibility:hidden!important}</style>
+<script>
+  /* Anti-flash: hide the page until Tailwind compiles, with a safety timer. */
+  document.documentElement.classList.add('fmn-pending');
+  (function () {
+    function reveal(){ document.documentElement.classList.remove('fmn-pending'); }
+    document.addEventListener('DOMContentLoaded', function(){ requestAnimationFrame(function(){ requestAnimationFrame(reveal); }); });
+    window.addEventListener('load', reveal);
+    setTimeout(reveal, 2500);
+  })();
+</script>
 </head>
-<body class="overflow-x-hidden">
+<body class="bg-white text-slate-800">
 
-    <div id="app" v-cloak>
-        <div v-if="!isAdmin">
-            <header ref="header" class="fixed top-0 left-0 w-full p-5 z-50 transition-all duration-300">
-                <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-white">Ali Subscription Express</h1>
-                    <nav class="hidden md:flex space-x-8">
-                        <a href="#features" class="font-semibold text-white hover:text-cyan-300">Services</a>
-                        <a href="#pricing" class="font-semibold text-white hover:text-cyan-300">Pricing</a>
-                        <a href="#register" class="font-semibold text-white hover:text-cyan-300">Register</a>
-                        <a href="#testimonials" class="font-semibold text-white hover:text-cyan-300">Testimonials</a>
-                        <a href="#feedback" class="font-semibold text-white hover:text-cyan-300">Feedback</a>
-                        </nav>
-                    <a href="#" @click.prevent="showAdminLogin" class="text-xs text-gray-500 hover:text-white">Admin Panel</a>
-                </div>
-            </header>
-            <main>
-                <section class="hero min-h-screen flex items-center justify-center text-center px-4 relative bg-[#0c0a1e]">
-                    <div class="hero-bg"></div>
-                    <div class="animate-on-scroll z-10">
-                        <div class="inline-block bg-purple-600/50 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4 backdrop-blur-sm">Premium Streaming Services</div>
-                        <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-4">Ali <span class="gradient-text">Subscription</span> Express</h1>
-                        <p class="text-lg md:text-xl text-indigo-200 max-w-2xl mx-auto mb-8">Access Netflix, Spotify, and Apple Music at unbeatable prices.</p>
-                        <div class="flex justify-center items-center space-x-4"><a href="#pricing" class="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:scale-105">Get Started Now</a><a href="#features" class="inline-block bg-gray-700/50 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:scale-105 backdrop-blur-sm">View Services</a></div>
-                        <div class="mt-8 flex justify-center space-x-6 text-cyan-300"><span>● Serving Zambia</span><span>● Instant Activation</span></div>
-                    </div>
-                </section>
-                <section id="features" class="py-20 bg-[#0c0a1e]">
-                    <div class="max-w-6xl mx-auto px-4 text-center animate-on-scroll">
-                        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Your Favourite Services, <span class="gradient-text">Sorted.</span></h2>
-                        <div class="grid md:grid-cols-3 gap-8 mt-12 text-left">
-                            <div class="interactive-card p-8 transition-all duration-300"><h3 class="text-2xl font-bold mb-4 text-white">🎬 Netflix</h3><p class="text-indigo-200 mb-6">Unlimited movies, TV shows, and more. Shared and private profiles available.</p></div>
-                            <div class="interactive-card p-8 transition-all duration-300"><h3 class="text-2xl font-bold mb-4 text-white">🎶 Spotify</h3><p class="text-indigo-200 mb-6">70+ million songs, ad-free. Listen offline and get unlimited skips.</p></div>
-                            <div class="interactive-card p-8 transition-all duration-300"><h3 class="text-2xl font-bold mb-4 text-white">🎧 Apple Music</h3><p class="text-indigo-200 mb-6">100+ million songs in lossless audio. Pure vibes, no card needed.</p></div>
-                        </div>
-                    </div>
-                </section>
-                <section id="pricing" class="py-20 bg-[#100e26]">
-                    <div class="max-w-7xl mx-auto px-4 text-center animate-on-scroll">
-                        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Choose Your <span class="gradient-text">Perfect Plan</span></h2>
-                        <p class="text-indigo-200 max-w-2xl mx-auto mb-12">Select your service and enjoy instant activation at the best prices in Zambia.</p>
-                        <div v-for="service in services" :key="service.name" class="mb-16">
-                            <h3 class="text-3xl font-bold text-white mb-8">{{ service.name }}</h3>
-                            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 items-center">
-                                <div v-for="plan in service.plans" :key="plan.name" @click="selectPlan(plan)" :class="[plan.popular ? 'transform md:scale-110 ring-2 ring-purple-500' : '']" class="interactive-card p-8 text-left cursor-pointer transition-all duration-300 h-full flex flex-col justify-between">
-                                    <div>
-                                        <span v-if="plan.popular" class="absolute top-0 -mt-4 left-1/2 -translate-x-1/2 inline-block bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">Best Value</span>
-                                        <h4 class="text-xl font-bold mb-2 text-white">{{ plan.duration }}</h4>
-                                        <p class="text-5xl font-extrabold text-white mb-2">K{{ plan.price }}</p>
-                                        <ul class="space-y-3 text-indigo-200 mt-6 min-h-[60px]">
-                                            <li v-for="feature in plan.features" :key="feature" class="flex items-start">
-                                                <svg class="w-5 h-5 text-cyan-400 mr-2 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                <span>{{ feature }}</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <a href="#register" :class="[plan.popular ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black']" class="block w-full text-center mt-8 py-3 px-6 rounded-full font-bold transition-colors">Select Plan</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <section id="register" class="py-20 bg-[#0c0a1e]">
-                    <div class="max-w-xl mx-auto px-4 text-center animate-on-scroll">
-                        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Start Your <span class="gradient-text">Streaming Journey</span></h2>
-                        <p class="text-indigo-200 mb-10">Fill in your details and we'll get you set up in no time.</p>
-                        <form @submit.prevent="handleSubmit" class="glass-form-card p-8 md:p-12 text-left space-y-6">
-                            <div class="form-input-group">
-                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
-                                <input v-model="form.name" type="text" placeholder="Full Name *" required class="form-input-field">
-                            </div>
-                            <div class="form-input-group">
-                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg>
-                                <input v-model="form.email" type="email" placeholder="Email Address (Optional)" class="form-input-field">
-                            </div>
-                            <div class="form-input-group">
-                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.1a1.5 1.5 0 01-1.052 1.767l-2.387.995c.03.07.062.14.098.21l.005.01c.04.07.083.139.13.209l.026.038c.145.213.306.413.48.595l.04.042c.183.173.383.333.595.48l.038.026c.07.046.139.09.209.13l.01.005c.07.036.14.067.21.098l.995-2.387a1.5 1.5 0 011.767-1.052l3.1.716A1.5 1.5 0 0118 13.352V14.5a1.5 1.5 0 01-1.5 1.5h-1.052a10 10 0 01-9.92-8.696c-.068-.52-.068-1.05-.002-1.572A1.5 1.5 0 013.5 2H2z" clip-rule="evenodd" /></svg>
-                                <input v-model="form.number" type="tel" placeholder="Phone Number (097... or 076...) *" required class="form-input-field">
-                            </div>
-                            <div class="form-input-group">
-                                <svg class="form-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" /></svg>
-                                <select v-model="form.plan" required class="form-select-field">
-                                    <option value="" disabled>Select Subscription Plan *</option>
-                                    <optgroup v-for="service in services" :label="service.name" :key="service.name">
-                                        <option v-for="plan in service.plans" :value="plan.name" :key="plan.name">{{ plan.name }} - K{{ plan.price }}</option>
-                                    </optgroup>
-                                </select>
-                                <svg class="form-select-arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                            </div>
-                            <button type="submit" class="w-full bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:scale-105 transition-transform flex items-center justify-center space-x-2">
-                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009.175 17V5.414l1.715 4.34a1 1 0 00.868.513l4.312.216a1 1 0 00.725-1.681l-7-14z" /></svg>
-                                <span>Submit Registration</span>
-                            </button>
-                            <p class="text-center text-indigo-200 text-sm">After registration, we'll send you payment details and activation instructions.</p>
-                        </form>
-                        <transition name="fade">
-                            <div v-if="showPaymentSteps" class="mt-10 p-6 bg-gray-800 border border-gray-700 rounded-lg text-left">
-                                <h3 class="text-xl font-semibold text-white mb-4">Complete Your Payment</h3>
-                                <p class="text-indigo-200 mb-4" v-if="paymentStep === 1">
-                                    Registration submitted for {{ pendingPaymentDetails?.name }} ({{ pendingPaymentDetails?.plan }} - K{{ pendingPaymentDetails?.price }}).
-                                    Click below to view payment details.
-                                </p>
-                                <transition name="fade">
-                                    <div v-if="paymentStep === 2">
-                                        <p class="text-indigo-200 mb-4">Please send K{{ pendingPaymentDetails?.price }} to one of the following numbers:</p>
-                                        <div class="space-y-3 mb-6">
-                                            <div class="bg-gray-700 p-4 rounded-md">
-                                                <p class="font-medium text-white flex items-center"><span class="text-xl mr-2">📲</span> Airtel Money:</p>
-                                                <p class="text-cyan-300 font-bold text-lg pl-8">{{ myAirtel }}</p>
-                                                <p class="text-xs text-gray-400 pl-8">(Name: Joshua Chishimba)</p>
-                                            </div>
-                                            <div class="bg-gray-700 p-4 rounded-md">
-                                                <p class="font-medium text-white flex items-center"><span class="text-xl mr-2">📲</span> MTN Mobile Money (MoMo):</p>
-                                                <p class="text-cyan-300 font-bold text-lg pl-8">{{ myMtn }}</p>
-                                                <p class="text-xs text-gray-400 pl-8">(Name: Joshua Chishimba)</p>
-                                            </div>
-                                        </div>
-                                        <p class="text-indigo-200 mb-4 text-sm">After sending, please click the button below to notify us.</p>
-                                        <button @click="confirmPaymentSent" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
-                                            I Have Sent the Payment
-                                        </button>
-                                    </div>
-                                </transition>
-                                <button v-if="paymentStep === 1" @click="paymentStep = 2" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg">
-                                    Show Payment Details
-                                </button>
-                            </div>
-                        </transition>
-                    </div>
-                </section>
-                <section id="testimonials" class="py-20 bg-[#100e26]">
-                    <div class="max-w-6xl mx-auto px-4 text-center animate-on-scroll">
-                         <h2 class="text-4xl md:text-5xl font-extrabold mb-4">What Our <span class="gradient-text">Clients Say</span></h2>
-                         <p class="text-indigo-200 mb-12">(Testimonials section placeholder)</p>
-                    </div>
-                </section>
-                <section id="feedback" class="py-20 bg-[#0c0a1e]">
-                     <div class="max-w-xl mx-auto px-4 text-center animate-on-scroll">
-                         <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Have <span class="gradient-text">Feedback?</span></h2>
-                         <p class="text-indigo-200 mb-10">Let us know how we can improve.</p>
-                         <form @submit.prevent="handleFeedback" class="glass-form-card p-8 md:p-12 text-left space-y-6">
-                            <textarea v-model="feedbackMessage" rows="5" placeholder="Your feedback..." class="w-full p-3 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
-                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 px-4 rounded-lg">Submit Feedback</button>
-                         </form>
-                    </div>
-                </section>
-            </main>
-            <footer class="text-center py-8 text-indigo-300 bg-[#100e26]">
-                <p>&copy; 2025 Ali Subscription Express. All rights reserved.</p>
-            </footer>
+<!-- Reusable student-room illustration (hero photo fallback) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe3f5"/><stop offset="1" stop-color="#eaf6fb"/></linearGradient>
+    <linearGradient id="wall-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7f3ea"/><stop offset="1" stop-color="#d6ecdb"/></linearGradient>
+  </defs>
+  <symbol id="room-illustration" viewBox="0 0 560 780">
+    <rect width="560" height="600" fill="url(#wall-g)"/>
+    <rect y="556" width="560" height="224" fill="#c89b63"/>
+    <rect y="556" width="560" height="12" fill="#b6884f"/>
+    <rect x="150" y="74" width="320" height="300" rx="10" fill="#3f6b46"/>
+    <rect x="164" y="88" width="292" height="272" fill="url(#sky-g)"/>
+    <rect x="306" y="88" width="8" height="272" fill="#3f6b46"/>
+    <rect x="164" y="220" width="292" height="8" fill="#3f6b46"/>
+    <rect x="362" y="402" width="92" height="58" rx="4" fill="#1e293b"/>
+    <rect x="368" y="408" width="80" height="46" rx="2" fill="#22c55e" opacity="0.45"/>
+    <rect x="352" y="460" width="112" height="8" rx="3" fill="#0f172a"/>
+    <rect x="18" y="450" width="252" height="40" rx="10" fill="#1e293b"/>
+    <rect x="18" y="472" width="252" height="112" rx="10" fill="#0f172a"/>
+    <rect x="18" y="488" width="252" height="72" rx="8" fill="#f8fafc"/>
+    <path d="M122 488 h148 v72 h-148 c-9 -24 -9 -48 0 -72z" fill="#16a34a"/>
+  </symbol>
+</svg>
+
+<!-- ===================== NAV ===================== -->
+<nav class="bg-white/95 backdrop-blur shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="index.html" class="flex items-center gap-2" style="text-decoration:none;">
+        <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;object-fit:contain;display:block;"
+             onerror="this.style.display='none';document.getElementById('logo-fallback-nav').classList.remove('hidden');">
+        <span id="logo-fallback-nav" class="hidden text-xl font-extrabold text-[#0f172a]"><i class="fas fa-leaf text-[#16a34a] mr-1"></i>FindMy<span class="text-[#16a34a]">Nyumba</span></span>
+      </a>
+
+      <div class="nav-desktop hidden md:flex items-center gap-7">
+        <a href="index.html" class="text-[#ea580c] font-bold text-sm relative after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-[#ea580c] after:rounded-full">Home</a>
+        <a href="browse.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Browse</a>
+        <a href="#areas" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Areas</a>
+        <a href="about.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">About Us</a>
+        <a href="contact.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Contact</a>
+        <a id="nav-dashboard-desk" href="#" class="hidden text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Dashboard</a>
+        <a id="nav-login-desk" href="login.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Login</a>
+        <a id="nav-logout-desk" href="#" onclick="logout()" class="hidden text-slate-600 hover:text-red-500 font-bold text-sm transition-colors">Logout</a>
+        <a href="register-landlord.html" class="bg-[#0f172a] hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold transition-colors text-sm shadow-sm">List Your Property</a>
+      </div>
+
+      <button id="mobile-nav-toggle" class="nav-hamburger md:hidden items-center justify-center w-10 h-10 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors">
+        <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="md:hidden bg-white border-t border-slate-100 px-4 pb-4">
+    <div class="flex flex-col gap-1 pt-3">
+      <a href="index.html" class="px-3 py-3 rounded-xl text-[#ea580c] font-bold bg-orange-50 text-sm">Home</a>
+      <a href="browse.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Browse</a>
+      <a href="#areas" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Areas</a>
+      <a href="about.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">About Us</a>
+      <a href="contact.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Contact</a>
+      <a id="nav-dashboard-mob" href="#" class="hidden px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Dashboard</a>
+      <a id="nav-login-mob" href="login.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Login</a>
+      <a id="nav-logout-mob" href="#" onclick="logout()" class="hidden px-3 py-3 rounded-xl text-red-600 font-bold hover:bg-red-50 text-sm">Logout</a>
+      <a href="register-landlord.html" class="mt-2 text-center bg-[#0f172a] hover:bg-slate-800 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">List Your Property</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section class="pt-16 bg-gradient-to-b from-green-50/60 via-white to-white overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center py-12 lg:py-20">
+      <!-- left -->
+      <div>
+        <div class="inline-flex items-center gap-2 bg-green-100 text-green-800 text-[11px] font-bold px-4 py-2 rounded-full mb-6 uppercase tracking-wider">
+          <i class="fas fa-shield-halved text-green-600"></i> Verified Student Housing in Zambia
         </div>
-        
-        <div v-else>
-            <div v-if="!authenticated" class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center" style="background-image: linear-gradient(rgba(45, 30, 80, 0.8), rgba(25, 15, 50, 0.9)), url('https://images.unsplash.com/photo-1522881193467-47b20b73147f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%D&auto=format&fit=crop&w=1740&q=80');">
-                <div class="w-full max-w-md">
-                    <div v-if="authView === 'signin'" class="bg-gray-900/70 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-2xl">
-                        <h2 class="text-3xl font-bold text-white text-center mb-2">Admin Sign In</h2>
-                        <p class="text-center text-gray-400 mb-6">Welcome back!</p>
-                        <form @submit.prevent="login" class="space-y-4">
-                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Username</label><input v-model="loginForm.username" type="text" placeholder="admin" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
-                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Password</label><input v-model="loginForm.password" type="password" placeholder="••••••••" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
-                            <p v-if="loginError" class="text-red-500 text-center text-sm">Incorrect username or password.</p>
-                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">Sign In</button>
-                            <div class="text-center text-sm text-gray-400"> <a href="#" @click.prevent="authView = 'forgot'" class="hover:text-white">Forgot Password?</a> </div>
-                        </form>
-                        <p class="text-center text-sm text-gray-300 mt-6">Don't have an account? <a href="#" @click.prevent="authView = 'signup'" class="font-bold text-white hover:underline">Sign Up</a></p>
-                    </div>
-                    <div v-if="authView === 'signup'" class="bg-gray-900/70 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-2xl">
-                        <h2 class="text-3xl font-bold text-white text-center mb-6">Create Admin Account</h2>
-                        <form @submit.prevent="handleSignup" class="space-y-4">
-                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Username</label><input v-model="signupForm.username" type="text" placeholder="Choose a username" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
-                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Password</label><input v-model="signupForm.password" type="password" placeholder="Create a strong password" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
-                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label><input v-model="signupForm.confirm" type="password" placeholder="Confirm your password" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
-                            <button type="submit" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">Sign Up</button>
-                        </form>
-                        <p class="text-center text-sm text-gray-300 mt-6">Already have an account? <a href="#" @click.prevent="authView = 'signin'" class="font-bold text-white hover:underline">Sign In</a></p>
-                    </div>
-                    <div v-if="authView === 'forgot'" class="bg-gray-900/70 backdrop-blur-md border border-gray-700 p-8 rounded-2xl shadow-2xl">
-                        <h2 class="text-3xl font-bold text-white text-center mb-6">Reset Password</h2>
-                        <form @submit.prevent="handleForgot" class="space-y-4">
-                            <div><label class="block text-sm font-medium text-gray-300 mb-1">Email</label><input type="email" placeholder="Enter your email" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"></div>
-                            <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">Send Reset Link</button>
-                        </form>
-                        <p class="text-center text-sm text-gray-300 mt-6">Remembered your password? <a href="#" @click.prevent="authView = 'signin'" class="font-bold text-white hover:underline">Sign In</a></p>
-                    </div>
-                </div>
-            </div>
-            
-            <div v-else class="admin-dashboard-bg min-h-screen p-4 sm:p-6 md:p-8">
-                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8">
-                    <h1 class="text-3xl font-bold text-white mb-4 sm:mb-0">Admin Dashboard</h1>
-                    <div class="flex space-x-2">
-                        <button @click="exportToCSV" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Export CSV</button>
-                        <button @click="logout" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mb-8">
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Total Revenue</h3><p class="text-3xl font-bold text-white">K{{ totalRevenue }}</p></div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">True Profit</h3><p class="text-3xl font-bold" :class="trueProfit >= 0 ? 'text-green-400' : 'text-red-400'">K{{ trueProfit }}</p></div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Customers</h3><p class="text-3xl font-bold text-white">{{ customers.length }}</p></div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Due Soon</h3><p class="text-3xl font-bold text-yellow-400">{{ dueSoonCount }}</p></div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Overdue</h3><p class="text-3xl font-bold text-red-400">{{ overdueCount }}</p></div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Loyal</h3><p class="text-3xl font-bold text-blue-400">{{ loyalCustomerCount }}</p></div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2 bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-                        <div class="p-4 flex flex-col sm:flex-row justify-between items-center border-b border-gray-700">
-                            <h2 class="text-xl font-bold text-white mb-4 sm:mb-0">Customers</h2>
-                            <input v-model="searchTerm" type="text" placeholder="Search by name or number..." class="w-full sm:w-64 p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left">
-                                <thead><tr class="bg-gray-700 text-gray-400 text-sm uppercase"><th class="p-4 font-medium">Name</th><th class="p-4 font-medium hidden md:table-cell">Phone</th><th class="p-4 font-medium">Status</th><th class="p-4 font-medium">Actions</th></tr></thead>
-                                <tbody>
-                                    <tr v-if="filteredCustomers.length === 0"><td colspan="4" class="text-center p-8 text-gray-400">No customers found matching your search.</td></tr>
-                                    <tr v-for="customer in filteredCustomers" :key="customer.id" class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
-                                        <td class="p-4">
-                                            <p class="text-white font-medium">{{ customer.name }}</p>
-                                            <p class="text-xs text-gray-400">{{ customer.plan_name }} | Due: {{ formatDate(customer.due_date) }}</p>
-                                        </td>
-                                        <td class="p-4 text-gray-300 hidden md:table-cell">
-                                            <a :href="'https://wa.me/26' + customer.number.replace(/^0+/, '')" target="_blank" class="flex items-center hover:text-green-400 transition-colors">
-                                                {{ customer.number }}
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009.175 17V5.414l1.715 4.34a1 1 0 00.868.513l4.312.216a1 1 0 00.725-1.681l-7-14z" /></svg>
-                                            </a>
-                                        </td>
-                                        <td class="p-4">
-                                            <span class="block mb-1 px-2 py-1 text-xs font-semibold rounded-full mr-2"
-                                                :class="customer.payment_confirmed ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'">
-                                                Payment: {{ customer.payment_confirmed ? 'Confirmed' : 'Pending' }}
-                                            </span>
-                                            <span class="block px-2 py-1 text-xs font-semibold rounded-full"
-                                                :class="getDetailedStatus(customer.due_date).class">
-                                                {{ getDetailedStatus(customer.due_date).text }}
-                                            </span>
-                                        </td>
-                                        <td class="p-4 flex items-center space-x-2">
-                                            <button v-if="!customer.payment_confirmed" @click="confirmCustomerPayment(customer)" class="text-yellow-400 hover:text-yellow-300 transition-colors" title="Confirm Payment & Send Details">✔️</button>
-                                            <button @click="generateAIReminder(customer)" class="text-cyan-400 hover:text-cyan-300 transition-colors" title="Generate AI Reminder">✨</button>
-                                            <button @click="openEditModal(customer)" class="text-blue-400 hover:text-blue-300 transition-colors" title="Edit/View Notes">📝</button>
-                                            <button @click="renewSubscription(customer)" class="text-green-400 hover:text-green-300 transition-colors" title="Renew Subscription">🔄</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="space-y-8">
-                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold text-white mb-4">Service Credentials & Links</h3>
-                            <div class="space-y-4">
-                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Netflix Email</label> <input v-model="netflixEmail" type="email" placeholder="netflix@example.com" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
-                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Netflix Password</label> <input v-model="netflixPassword" type="password" placeholder="••••••••" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
-                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Spotify Link / Info</label> <input v-model="spotifyInfo" type="text" placeholder="e.g., Invite Link or Instructions" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
-                                <div> <label class="block text-sm font-medium text-gray-400 mb-1">Apple Music Link / Info</label> <input v-model="appleMusicInfo" type="text" placeholder="e.g., Invite Link or Instructions" class="w-full p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"> </div>
-                                <button @click="saveCredentials" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg mt-4 transition-colors">Save Credentials</button>
-                            </div>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold text-white mb-4">✨ Growth Insights</h3>
-                            <button @click="generateBusinessInsights" :disabled="geminiLoading" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center disabled:opacity-50 transition-colors">
-                                <span v-if="!geminiLoading">Get AI Business Advice</span> <div v-else class="gemini-loader"></div>
-                            </button>
-                            <div v-if="businessInsights" class="mt-4 p-4 bg-gray-900/50 rounded-lg text-sm whitespace-pre-wrap">{{ businessInsights }}</div>
-                        </div>
-                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-xl font-bold text-white mb-4">Financials</h3><div><canvas id="financialChart"></canvas></div></div>
-                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-xl font-bold text-white mb-4">Plan Popularity</h3><div><canvas id="planChart"></canvas></div></div>
-                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-xl font-bold text-white mb-4">Log Monthly Expense</h3><div class="flex items-center space-x-2"><span class="text-gray-400">K</span><input type="number" v-model.number="currentExpense" placeholder="e.g. 150" class="flex-grow p-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"><button @click="logExpense" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors">Log</button></div></div>
-                    </div>
-                </div>
-            </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-slate-900 leading-[1.05] mb-5">
+          Student living,<br>made <span class="script-accent text-[#ea580c] text-[1.15em] leading-none">simple</span>
+        </h1>
+        <p class="text-base md:text-lg text-slate-500 font-medium leading-relaxed mb-8 max-w-md">
+          Find safe, affordable, and verified student housing across Zambia. Connect directly with trusted landlords and student hosts.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="browse.html" class="inline-flex items-center justify-center gap-2 bg-[#0f172a] hover:bg-slate-800 text-white px-7 py-3.5 rounded-xl font-bold transition-colors text-sm shadow-lg shadow-slate-900/15">
+            <i class="fas fa-search"></i> Search Homes
+          </a>
+          <a href="#areas" class="inline-flex items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-[#16a34a] text-slate-800 px-7 py-3.5 rounded-xl font-bold transition-colors text-sm">
+            <i class="fas fa-location-dot text-[#16a34a]"></i> Browse Areas
+          </a>
         </div>
-
-        <div v-if="showPlanAdvisor" @click.self="showPlanAdvisor = false" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-                <h2 class="text-2xl font-bold text-white mb-4">AI Plan Advisor</h2>
-                <p class="text-gray-300">This feature is coming soon!</p>
-                <button @click="showPlanAdvisor = false" class="mt-4 bg-purple-600 text-white py-2 px-4 rounded">Close</button>
-            </div>
+        <div class="mt-7 flex items-center gap-3">
+          <div class="flex -space-x-2">
+            <span class="w-8 h-8 rounded-full bg-green-200 border-2 border-white flex items-center justify-center text-green-700 text-xs font-bold">JM</span>
+            <span class="w-8 h-8 rounded-full bg-orange-200 border-2 border-white flex items-center justify-center text-orange-700 text-xs font-bold">CB</span>
+            <span class="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-blue-700 text-xs font-bold">TK</span>
+            <span class="w-8 h-8 rounded-full bg-slate-900 border-2 border-white flex items-center justify-center text-white text-[10px] font-bold">2K+</span>
+          </div>
+          <p class="text-sm text-slate-600 font-semibold flex items-center gap-1.5">
+            <i class="fas fa-circle-check text-[#16a34a]"></i> Join 2,000+ students who found a home
+          </p>
         </div>
+      </div>
 
-        <div v-if="aiReminder.show" @click.self="aiReminder.show = false" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-                <h2 class="text-2xl font-bold text-white mb-4">AI-Generated Reminder</h2>
-                <p class="text-gray-300 mb-4">Message for {{ aiReminder.customer?.name }}:</p>
-                <textarea v-model="aiReminder.message" class="w-full h-40 p-2 bg-gray-700 rounded text-white"></textarea>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button @click="aiReminder.show = false" class="bg-gray-600 text-white py-2 px-4 rounded">Close</button>
-                    <a :href="'https://wa.me/26' + aiReminder.customer?.number.replace(/^0+/, '') + '?text=' + encodeURIComponent(aiReminder.message)" target="_blank" class="bg-green-600 text-white py-2 px-4 rounded">Send on WhatsApp</a>
-                </div>
-            </div>
+      <!-- right: photo + floating cards -->
+      <div class="relative">
+        <div class="relative rounded-3xl overflow-hidden shadow-2xl shadow-green-900/10 ring-1 ring-slate-100 aspect-[4/3]">
+          <svg class="absolute inset-0 w-full h-full" viewBox="0 0 560 780" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#room-illustration" width="560" height="780"/></svg>
+          <img src="data:image/jpeg;base64,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" alt="Student studying at a laptop in her room" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove();">
         </div>
-
-        <div v-if="editingCustomer" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md overflow-y-auto max-h-[90vh]">
-                <h2 class="text-2xl font-bold text-white mb-4">Customer Details</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Name:</label>
-                        <input v-model="editingCustomer.name" type="text" class="w-full p-2 bg-gray-700 rounded text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Phone:</label>
-                        <input v-model="editingCustomer.number" type="tel" class="w-full p-2 bg-gray-700 rounded text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Email:</label>
-                        <input v-model="editingCustomer.email" type="email" class="w-full p-2 bg-gray-700 rounded text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Plan:</label>
-                        <select v-model="editingCustomer.plan_name" class="w-full p-2 bg-gray-700 rounded text-white">
-                            <optgroup v-for="service in services" :label="service.name" :key="service.name">
-                                <option v-for="plan in service.plans" :value="plan.name" :key="plan.name">{{ plan.name }} - K{{ plan.price }}</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                    <p><strong class="text-gray-400">Due:</strong> {{ formatDate(editingCustomer.due_date) }}</p>
-                    <p><strong class="text-gray-400">Renewals:</strong> {{ editingCustomer.renewal_count }}</p>
-                    <div>
-                        <label class="block text-gray-400 mb-2">Notes:</label>
-                        <textarea v-model="editingCustomer.notes" class="w-full h-24 p-2 bg-gray-700 rounded text-white"></textarea>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 mt-6">
-                    <button @click="closeEditModal" class="bg-gray-600 text-white py-2 px-4 rounded">Cancel</button>
-                    <button @click="saveCustomerDetails" class="bg-blue-600 text-white py-2 px-4 rounded">Save</button>
-                </div>
-            </div>
+        <!-- verified badge (top-right) -->
+        <div class="absolute -top-3 -right-3 sm:top-4 sm:-right-4 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 ring-1 ring-slate-100">
+          <div class="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center text-[#16a34a]"><i class="fas fa-shield-halved"></i></div>
+          <div>
+            <div class="text-sm font-extrabold text-slate-900 leading-tight">Verified &amp; Safe</div>
+            <div class="text-[11px] text-slate-400 font-semibold">Trusted listings</div>
+          </div>
         </div>
+        <!-- safety note (bottom-left) -->
+        <div class="absolute -bottom-4 left-3 sm:-bottom-5 sm:-left-4 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 max-w-[240px] ring-1 ring-slate-100">
+          <div class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-[#ea580c] flex-shrink-0"><i class="fas fa-circle-check"></i></div>
+          <div class="text-[12.5px] text-slate-600 font-semibold leading-snug">Every listing is checked for your safety</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    </div> <script>
-       const { createApp, ref, onMounted, computed, nextTick } = Vue;
+<!-- ===================== SEARCH BAR ===================== -->
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2 lg:-mt-4 relative z-20">
+  <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/70 ring-1 ring-slate-100 p-3 grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr_auto] gap-2">
+    <div class="relative">
+      <i class="fas fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-[#16a34a] text-sm"></i>
+      <input type="text" id="hero-search" placeholder="Where do you want to live?"
+             class="w-full pl-11 pr-4 py-3 rounded-xl text-sm text-slate-800 font-medium bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#16a34a]">
+    </div>
+    <div class="relative">
+      <i class="fas fa-wallet absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+      <select id="hero-budget" class="w-full appearance-none pl-11 pr-8 py-3 rounded-xl text-sm text-slate-700 font-medium bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#16a34a]">
+        <option value="">Any Budget</option>
+        <option value="0-1000">Under ZMW 1,000</option>
+        <option value="1000-2500">ZMW 1,000 – 2,500</option>
+        <option value="2500-5000">ZMW 2,500 – 5,000</option>
+        <option value="5000-">ZMW 5,000+</option>
+      </select>
+      <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 text-xs pointer-events-none"></i>
+    </div>
+    <div class="relative">
+      <i class="fas fa-house absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+      <select id="hero-type" class="w-full appearance-none pl-11 pr-8 py-3 rounded-xl text-sm text-slate-700 font-medium bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#16a34a]">
+        <option value="">All Property Types</option>
+        <option value="room">Room</option>
+        <option value="bedsitter">Bedsitter</option>
+        <option value="apartment">Apartment</option>
+        <option value="house">House</option>
+      </select>
+      <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 text-xs pointer-events-none"></i>
+    </div>
+    <button onclick="heroSearch()" class="bg-[#ea580c] hover:bg-orange-700 text-white px-7 py-3 rounded-xl font-bold transition-colors text-sm whitespace-nowrap flex items-center justify-center gap-2">
+      <i class="fas fa-search"></i> Search
+    </button>
+  </div>
+</div>
 
-createApp({
-    setup() {
-        // --- API & Auth State ---
-        const API_URL = 'http://127.0.0.1:8000/api/v1'; // Base URL is correct
-        const authToken = ref(localStorage.getItem('admin-token') || null);
+<!-- ===================== STATS ===================== -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 lg:pt-14">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <div class="w-11 h-11 rounded-2xl bg-green-100 flex items-center justify-center text-[#16a34a] text-lg mb-4"><i class="fas fa-house"></i></div>
+      <div class="text-2xl font-extrabold text-slate-900">500+</div>
+      <div class="text-[12px] font-bold text-slate-800 mt-0.5">Active Listings</div>
+      <p class="text-[12px] text-slate-400 font-medium mt-1 leading-snug">Rooms, bedsitters &amp; apartments available.</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <div class="w-11 h-11 rounded-2xl bg-orange-100 flex items-center justify-center text-[#ea580c] text-lg mb-4"><i class="fas fa-users"></i></div>
+      <div class="text-2xl font-extrabold text-slate-900">2K+</div>
+      <div class="text-[12px] font-bold text-slate-800 mt-0.5">Students</div>
+      <p class="text-[12px] text-slate-400 font-medium mt-1 leading-snug">Have found a safe &amp; comfortable home.</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <div class="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 text-lg mb-4"><i class="fas fa-shield-halved"></i></div>
+      <div class="text-2xl font-extrabold text-slate-900">200+</div>
+      <div class="text-[12px] font-bold text-slate-800 mt-0.5">Verified Landlords</div>
+      <p class="text-[12px] text-slate-400 font-medium mt-1 leading-snug">Trusted and verified, ready to host.</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <div class="w-11 h-11 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 text-lg mb-4"><i class="fas fa-location-dot"></i></div>
+      <div class="text-2xl font-extrabold text-slate-900">15+</div>
+      <div class="text-[12px] font-bold text-slate-800 mt-0.5">Areas Covered</div>
+      <p class="text-[12px] text-slate-400 font-medium mt-1 leading-snug">Cross town &amp; town centre — we've got you.</p>
+    </div>
+  </div>
+</div>
 
-        // --- Refs & State ---
-        const isAdmin = ref(false), authenticated = ref(false), loginError = ref(false);
-        const myAirtel = '0973404727', myMtn = '0765158426', myEmail = 'Joshuaalinanichishimba@gmail.com';
+<!-- ===================== POPULAR AREAS ===================== -->
+<section id="areas" class="pt-14 lg:pt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-end justify-between mb-6">
+      <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Popular areas for students</h2>
+      <a href="browse.html" class="hidden sm:inline-flex items-center gap-2 text-[#16a34a] font-bold text-sm hover:gap-3 transition-all">View all areas <i class="fas fa-arrow-right text-xs"></i></a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <a href="browse.html?q=Riverside" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-emerald-400 to-green-600">
+        <img data-area="riverside" alt="Riverside area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Riverside</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Nkana+East" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-orange-400 to-amber-600">
+        <img data-area="nkana east" alt="Nkana East area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Nkana East</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Chipata+Compound" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-sky-400 to-blue-600">
+        <img data-area="chipata compound" alt="Chipata Compound area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Chipata Compound</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Parklands" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-violet-400 to-purple-600">
+        <img data-area="parklands" alt="Parklands area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Parklands</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Nkana+West" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-rose-400 to-pink-600">
+        <img data-area="nkana west" alt="Nkana West area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Nkana West</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Kalundu" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-teal-400 to-cyan-600">
+        <img data-area="kalundu" alt="Kalundu area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Kalundu</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Kalingalinga" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-indigo-400 to-blue-700">
+        <img data-area="kalingalinga" alt="Kalingalinga area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Kalingalinga</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Kamloops" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-lime-400 to-green-700">
+        <img data-area="kamloops" alt="Kamloops area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Kamloops</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Roma" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-fuchsia-400 to-pink-700">
+        <img data-area="roma" alt="Roma area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Roma</div>
+        </div>
+      </a>
+      <a href="browse.html?q=Avondale" class="area-card group relative rounded-2xl overflow-hidden aspect-[4/5] block bg-gradient-to-br from-amber-400 to-orange-600">
+        <img data-area="avondale" alt="Avondale area" loading="lazy" class="area-img absolute inset-0 w-full h-full object-cover opacity-0 transition duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <div class="flex items-center gap-1.5 text-white font-extrabold text-sm drop-shadow"><i class="fas fa-location-dot text-[11px]"></i>Avondale</div>
+        </div>
+      </a>
+    </div>
+    <a href="browse.html" class="sm:hidden mt-5 inline-flex items-center gap-2 text-[#16a34a] font-bold text-sm">View all areas <i class="fas fa-arrow-right text-xs"></i></a>
+  </div>
+</section>
 
-        // --- PLANS DATA STRUCTURE (Copied from your original Vue code for context) ---
-        const netflixPlans = [
-            { name: 'Netflix (Shared / 1 Mo)', duration: '1 Month (Shared)', price: 50, months: 1, features: ['8-person share'] },
-            { name: 'Netflix (Shared / 2 Mo)', duration: '2 Months (Shared)', price: 90, months: 2, features: ['Save K10'] },
-            { name: 'Netflix (Shared / 3 Mo)', duration: '3 Months (Shared)', price: 135, months: 3, features: ['Save K15'], popular: true },
-            { name: 'Netflix (Private Profile / 1 Mo)', duration: '1 Month (Private)', price: 100, months: 1, features: ['Pin-locked profile', '4-person share'] }
-        ];
-        const spotifyPlans = [
-            { name: 'Spotify (1 Mo)', duration: '1 Month', price: 50, months: 1, features: ['Ad-free, unlimited skips'] },
-            { name: 'Spotify (2 Mo)', duration: '2 Months', price: 90, months: 2, features: ['Save K10'] },
-            { name: 'Spotify (3 Mo)', duration: '3 Months', price: 135, months: 3, features: ['Save K15'], popular: true }
-        ];
-        const appleMusicPlans = [
-            { name: 'Apple Music (1 Mo)', duration: '1 Month', price: 50, months: 1, features: ['100+ million songs'] },
-            { name: 'Apple Music (2 Mo)', duration: '2 Months', price: 90, months: 2, features: ['Save K10'] },
-            { name: 'Apple Music (3 Mo)', duration: '3 Months', price: 135, months: 3, features: ['Save K15'], popular: true }
-        ];
-        const services = ref([
-            { name: '🎬 Netflix', plans: netflixPlans },
-            { name: '🎶 Spotify Premium', plans: spotifyPlans },
-            { name: '🎧 Apple Music', plans: appleMusicPlans }
-        ]);
-        const allPlans = computed(() => {
-            return services.value.reduce((acc, service) => acc.concat(service.plans), []);
-        });
+<!-- ===================== UNIVERSITIES ===================== -->
+<section class="pt-12 lg:pt-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-end justify-between mb-5">
+      <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Find housing near universities</h2>
+      <a href="browse.html" class="hidden sm:inline-flex items-center gap-2 text-[#16a34a] font-bold text-sm hover:gap-3 transition-all">View all <i class="fas fa-arrow-right text-xs"></i></a>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <a href="browse.html?q=UNZA"       class="chip bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-700 text-sm flex items-center gap-2.5"><i class="fas fa-graduation-cap text-[#16a34a]"></i>Near UNZA</a>
+      <a href="browse.html?q=CBU"        class="chip bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-700 text-sm flex items-center gap-2.5"><i class="fas fa-graduation-cap text-[#16a34a]"></i>Near CBU</a>
+      <a href="browse.html?q=Mulungushi" class="chip bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-700 text-sm flex items-center gap-2.5"><i class="fas fa-graduation-cap text-[#16a34a]"></i>Near Mulungushi</a>
+      <a href="browse.html?q=ZCAS"       class="chip bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-700 text-sm flex items-center gap-2.5"><i class="fas fa-graduation-cap text-[#16a34a]"></i>Near ZCAS</a>
+      <a href="browse.html?q=Cavendish"  class="chip bg-white border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-700 text-sm flex items-center gap-2.5"><i class="fas fa-graduation-cap text-[#16a34a]"></i>Near Cavendish</a>
+    </div>
+  </div>
+</section>
 
-        const header = ref(null); 
-        const form = ref({ name: '', email: '', number: '', plan: '' });
-        const customers = ref([]);
-        const searchTerm = ref('');
-        const expenses = ref({}); 
-        const editingCustomer = ref(null), currentExpense = ref(null);
-        const showPlanAdvisor = ref(false), advisor = ref({ q1: 'Daily', q2: 'Very important', q3: 'Maybe', recommendation: '' });
-        const aiReminder = ref({ show: false, message: '', customer: null });
-        const businessInsights = ref('');
-        const geminiLoading = ref(false);
-        const authView = ref('signin');
-        const loginForm = ref({ username: '', password: '' });
-        const signupForm = ref({ username: '', password: '', confirm: '' });
-        let chartInstance = null;
-        let planChartInstance = null;
-        const feedbackMessage = ref('');
-        const showPaymentSteps = ref(false);
-        const paymentStep = ref(1);
-        const pendingPaymentDetails = ref(null);
-        const netflixEmail = ref('');
-        const netflixPassword = ref('');
-        const spotifyInfo = ref('');
-        const appleMusicInfo = ref('');
+<!-- ===================== WHY CHOOSE US ===================== -->
+<section class="py-14 lg:py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-10">Why students choose us</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="card-hover bg-white rounded-3xl border border-slate-100 shadow-sm p-7">
+        <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center text-[#16a34a] text-xl mb-5"><i class="fas fa-shield-halved"></i></div>
+        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Verified &amp; Safe</h3>
+        <p class="text-slate-500 font-medium text-sm leading-relaxed">Every property and landlord is verified before listing. Your safety comes first.</p>
+      </div>
+      <div class="card-hover bg-white rounded-3xl border border-slate-100 shadow-sm p-7">
+        <div class="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-[#ea580c] text-xl mb-5"><i class="fas fa-comments"></i></div>
+        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Direct &amp; Easy</h3>
+        <p class="text-slate-500 font-medium text-sm leading-relaxed">Deal directly with landlords and student hosts. No middlemen, no hidden fees.</p>
+      </div>
+      <div class="card-hover bg-white rounded-3xl border border-slate-100 shadow-sm p-7">
+        <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 text-xl mb-5"><i class="fas fa-wallet"></i></div>
+        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Affordable Options</h3>
+        <p class="text-slate-500 font-medium text-sm leading-relaxed">Find budget-friendly homes that fit your pocket and your student life.</p>
+      </div>
+      <div class="card-hover bg-white rounded-3xl border border-slate-100 shadow-sm p-7">
+        <div class="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 text-xl mb-5"><i class="fas fa-user-group"></i></div>
+        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Student Community</h3>
+        <p class="text-slate-500 font-medium text-sm leading-relaxed">Join thousands of students finding homes and sharing experiences.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        // --- Computed Properties ---
-        const totalRevenue = computed(() => customers.value.reduce((t, c) => t + (c.paid || 0), 0));
-        const totalExpenses = computed(() => Object.values(expenses.value).reduce((t, e) => t + e, 0));
-        const trueProfit = computed(() => totalRevenue.value - totalExpenses.value);
-        const dueSoonCount = computed(() => customers.value.filter(c => getDetailedStatus(c.due_date).text === 'Due Soon').length);
-        const overdueCount = computed(() => customers.value.filter(c => getDetailedStatus(c.due_date).text === 'Overdue').length);
-        const loyalCustomerCount = computed(() => customers.value.filter(c => (c.renewal_count || 0) >= 3).length);
-        const filteredCustomers = computed(() => {
-            const sorted = [...customers.value].sort((a,b) => new Date(a.due_date) - new Date(b.due_date));
-            if (!searchTerm.value) return sorted;
-            return sorted.filter(c =>
-                (c.name || '').toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-                (c.number || '').includes(searchTerm.value)
-            );
-        });
+<!-- ===================== CTA BANNER ===================== -->
+<section class="pb-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative bg-[#0f172a] rounded-3xl p-8 md:p-12 overflow-hidden">
+      <!-- skyline -->
+      <svg class="absolute bottom-0 right-0 w-full max-w-2xl h-auto opacity-25 pointer-events-none" viewBox="0 0 600 160" fill="none" aria-hidden="true">
+        <rect x="20" y="90" width="48" height="70" fill="#1e293b"/><rect x="78" y="60" width="40" height="100" fill="#243149"/>
+        <rect x="128" y="100" width="44" height="60" fill="#1e293b"/><rect x="182" y="74" width="50" height="86" fill="#243149"/>
+        <rect x="242" y="108" width="40" height="52" fill="#1e293b"/><rect x="292" y="56" width="46" height="104" fill="#243149"/>
+        <rect x="348" y="96" width="44" height="64" fill="#1e293b"/><rect x="402" y="70" width="52" height="90" fill="#243149"/>
+        <rect x="464" y="104" width="40" height="56" fill="#1e293b"/><rect x="514" y="64" width="46" height="96" fill="#243149"/>
+        <g fill="#334155"><rect x="88" y="72" width="6" height="6"/><rect x="100" y="72" width="6" height="6"/><rect x="192" y="86" width="6" height="6"/><rect x="302" y="68" width="6" height="6"/><rect x="414" y="82" width="6" height="6"/><rect x="524" y="76" width="6" height="6"/></g>
+      </svg>
+      <div class="relative flex flex-col md:flex-row items-center gap-6">
+        <div class="w-14 h-14 rounded-full bg-[#ea580c] flex items-center justify-center text-white text-xl flex-shrink-0 shadow-lg shadow-orange-900/40"><i class="fas fa-location-dot"></i></div>
+        <div class="flex-1 text-center md:text-left">
+          <h3 class="text-2xl md:text-3xl font-extrabold text-white leading-snug">Ready to find your <span class="script-accent text-[#ea580c] text-[1.2em]">perfect</span> place?</h3>
+          <p class="text-slate-400 text-sm font-medium mt-2">Start your search today and find safe, affordable accommodation across Zambia.</p>
+        </div>
+        <a href="#areas" class="bg-white hover:bg-slate-100 text-slate-900 font-bold px-7 py-3.5 rounded-xl transition-colors text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
+          <i class="fas fa-location-dot text-[#16a34a]"></i> Browse Areas
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
-        // --- API Helper Functions ---
-        
-        // Helper for PUBLIC (non-auth) endpoints
-        async function fetchPublic(endpoint, options = {}) {
-            const headers = { 'Content-Type': 'application/json', ...options.headers };
-            // Note: Public endpoints in your main.py are under /api/v1/public/...
-            const response = await fetch(`${API_URL}/public${endpoint}`, { ...options, headers });
-            if (!response.ok) {
-                const err = await response.json();
-                console.error("Public API Error:", err);
-                throw new Error(err.detail || 'Public API request failed');
-            }
-            if (response.status === 204) return null;
-            return response.json();
-        }
+<!-- ===================== FOOTER ===================== -->
+<footer class="bg-slate-900 text-slate-400 py-14">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      <div class="sm:col-span-2 lg:col-span-1">
+        <div style="display:inline-block;margin-bottom:1rem;background:#f8fafc;border-radius:12px;padding:8px 16px;">
+          <img src="logo.png" alt="FindMyNyumba" style="height:42px;width:auto;object-fit:contain;display:block;">
+        </div>
+        <p class="text-sm font-medium leading-relaxed text-slate-400 max-w-xs">Zambia's trusted student housing platform. Find verified, affordable accommodation near your university.</p>
+        <div class="flex gap-3 mt-4">
+          <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#16a34a] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#16a34a] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="w-9 h-9 bg-slate-800 hover:bg-[#16a34a] rounded-xl flex items-center justify-center transition-colors text-sm"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="index.html" class="hover:text-[#16a34a] transition-colors font-medium">Home</a></li>
+          <li><a href="browse.html" class="hover:text-[#16a34a] transition-colors font-medium">Browse</a></li>
+          <li><a href="how-it-works.html" class="hover:text-[#16a34a] transition-colors font-medium">How It Works</a></li>
+          <li><a href="login.html" class="hover:text-[#16a34a] transition-colors font-medium">Login</a></li>
+          <li><a href="register.html" class="hover:text-[#16a34a] transition-colors font-medium">Register</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-white text-sm uppercase tracking-wider mb-4">For Landlords</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="register-landlord.html" class="hover:text-[#16a34a] transition-colors font-medium">List Your Property</a></li>
+          <li><a href="how-it-works.html" class="hover:text-[#16a34a] transition-colors font-medium">Landlord Guide</a></li>
+          <li><a href="help.html" class="hover:text-[#16a34a] transition-colors font-medium">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-white text-sm uppercase tracking-wider mb-4">Support</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="help.html" class="hover:text-[#16a34a] transition-colors font-medium">Help Center</a></li>
+          <li><a href="contact.html" class="hover:text-[#16a34a] transition-colors font-medium">Contact</a></li>
+          <li><a href="terms.html" class="hover:text-[#16a34a] transition-colors font-medium">Terms of Service</a></li>
+          <li><a href="privacy.html" class="hover:text-[#16a34a] transition-colors font-medium">Privacy Policy</a></li>
+          <li><a href="about.html" class="hover:text-[#16a34a] transition-colors font-medium">About Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+      <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
+      <div class="flex gap-4">
+        <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
+        <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
+      </div>
+    </div>
+  </div>
+</footer>
 
-        // Helper for ADMIN (auth-required) endpoints
-        async function fetchAdmin(endpoint, options = {}) {
-            const headers = {
-                'Authorization': `Bearer ${authToken.value}`,
-                'Content-Type': 'application/json',
-                ...options.headers,
-            };
-            // Note: Admin endpoints in your main.py are under /api/v1/admin/...
-            const response = await fetch(`${API_URL}/admin${endpoint}`, { ...options, headers });
-            if (response.status === 401) {
-                alert("Your session has expired. Please log in again.");
-                clearSession(); 
-                throw new Error('Unauthorized');
-            }
-            if (!response.ok) {
-                const err = await response.json();
-                console.error("API Error:", err);
-                throw new Error(err.detail || 'API request failed');
-            }
-            if (response.status === 204) return null;
-            return response.json();
-        }
-        
-        async function loadAllAdminData() {
-            try {
-                const [custData, expData, credData] = await Promise.all([
-                    fetchAdmin('/customers'),
-                    fetchAdmin('/expenses'),
-                    fetchAdmin('/credentials')
-                ]);
+<script>
+  // Auth-aware nav (unchanged behaviour)
+  (function initNav() {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
+    if (!token || !role) return;
+    const routes = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html', admin:'admin.html' };
+    ['nav-dashboard-desk','nav-dashboard-mob'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.href = routes[role] || 'browse.html'; el.classList.remove('hidden'); }
+    });
+    ['nav-login-desk','nav-login-mob'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    ['nav-logout-desk','nav-logout-mob'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
+  })();
 
-                customers.value = custData;
+  function logout() {
+    ['token','role'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    window.location.reload();
+  }
 
-                const formattedExpenses = {};
-                for (const exp of expData) {
-                    formattedExpenses[exp.month_year] = (formattedExpenses[exp.month_year] || 0) + exp.amount;
-                }
-                expenses.value = formattedExpenses;
+  const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const hamburgerIcon = document.getElementById('hamburger-icon');
+  mobileNavToggle.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.contains('menu-open');
+    mobileMenu.classList.toggle('menu-open', !isOpen);
+    hamburgerIcon.className = isOpen ? 'fas fa-bars text-xl' : 'fas fa-times text-xl';
+  });
 
-                netflixEmail.value = credData.netflixEmail;
-                netflixPassword.value = credData.netflixPassword;
-                spotifyInfo.value = credData.spotifyInfo;
-                appleMusicInfo.value = credData.appleMusicInfo;
+  function heroSearch() {
+    const q = document.getElementById('hero-search').value.trim();
+    const budget = document.getElementById('hero-budget').value;
+    const type = document.getElementById('hero-type').value;
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (budget) params.set('budget', budget);
+    if (type) params.set('type', type);
+    const qs = params.toString();
+    window.location.href = qs ? `browse.html?${qs}` : 'browse.html';
+  }
+  document.getElementById('hero-search').addEventListener('keydown', e => { if (e.key === 'Enter') heroSearch(); });
 
-                console.log("All admin data loaded.");
-            } catch (error) {
-                console.error("Failed to load admin data:", error);
-            }
-        }
+  document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // --- Auth Functions (Uses the correct /api/v1/auth/token) ---
-        function clearSession() {
-            authenticated.value = false;
-            authToken.value = null;
-            localStorage.removeItem('admin-token');
-            loginForm.value = { username: '', password: '' };
-            console.log("Session cleared.");
-        }
+  // Pull a real listing photo for each area card from the properties API.
+  // Falls back silently to the card's gradient if the API is unreachable or an area has no listing yet.
+  (function loadAreaPhotos() {
+    const imgs = Array.from(document.querySelectorAll('.area-img'));
+    if (!imgs.length) return;
+    const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+    const API_BASE = (local ? 'http://localhost:8000' : 'https://findmynyumba.onrender.com') + '/api/v1';
 
-        async function login() {
-            console.log("Attempting login...");
-            loginError.value = false;
-            try {
-                const formData = new URLSearchParams();
-                formData.append('username', loginForm.value.username);
-                formData.append('password', loginForm.value.password);
-
-                console.log("Sending login request to API...");
-                // Note: Auth token endpoint uses the API_URL root, not the helper function path
-                const response = await fetch(`${API_URL}/auth/token`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                });
-                console.log("Login response status:", response.status);
-
-                if (!response.ok) {
-                    console.error("Login failed! Status:", response.status);
-                    throw new Error('Login failed');
-                }
-
-                const data = await response.json();
-                console.log("Login successful, received token.");
-                authToken.value = data.access_token;
-                localStorage.setItem('admin-token', data.access_token);
-
-                authenticated.value = true;
-                console.log("Authenticated flag set to true.");
-
-                console.log("Loading admin data...");
-                await loadAllAdminData();
-                console.log("Admin data loaded.");
-
-                nextTick(() => {
-                    console.log("Rendering charts...");
-                    renderChart();
-                    renderPlanChart();
-                });
-            } catch (error) {
-                console.error("Login error caught:", error);
-                loginError.value = true;
-                clearSession(); 
-            }
-        }
-        
-        function logout() {
-            clearSession();
-            isAdmin.value = false; 
-            console.log("Logged out.");
-        }
-
-        // --- Implemented Page Functions ---
-        function handleSignup() { alert("Signup functionality is not enabled."); }
-        function handleForgot() { alert("Password reset functionality is not enabled."); }
-        
-        function selectPlan(plan) {
-            form.value.plan = plan.name;
-            document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function handleSubmit() {
-            const selectedPlan = allPlans.value.find(p => p.name === form.value.plan);
-            if (selectedPlan) {
-                pendingPaymentDetails.value = {
-                    name: form.value.name,
-                    plan: selectedPlan.name,
-                    price: selectedPlan.price
-                };
-                showPaymentSteps.value = true;
-                paymentStep.value = 1;
-            } else {
-                alert("Please select a valid plan.");
-            }
-        }
-
-        // --- B. FIX: Updated Public Registration Endpoint to match /api/v1/public/registrations ---
-        async function confirmPaymentSent() {
-            try {
-                const selectedPlan = allPlans.value.find(p => p.name === form.value.plan);
-                
-                const payload = {
-                    name: form.value.name,
-                    number: form.value.number,
-                    email: form.value.email || null,
-                    plan: form.value.plan,
-                    months: selectedPlan.months || 1, // Pass months for correct due_date calculation
-                };
-                
-                // CRITICAL FIX: Changed endpoint from /register to /registrations
-                await fetchPublic('/registrations', { 
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-
-                alert('Thank you! We have received your registration and will activate your account once payment is confirmed.');
-                showPaymentSteps.value = false;
-                paymentStep.value = 1;
-                form.value = { name: '', email: '', number: '', plan: '' };
-                pendingPaymentDetails.value = null;
-            } catch (error) {
-                alert("There was an error submitting your registration. Please try again or contact us directly.");
-                console.error(error);
-            }
-        }
-        
-        async function handleFeedback() {
-            if (!feedbackMessage.value.trim()) return;
-            try {
-                await fetchPublic('/feedback', {
-                    method: 'POST',
-                    body: JSON.stringify({ message: feedbackMessage.value })
-                });
-                alert("Thank you for your feedback!");
-                feedbackMessage.value = '';
-            } catch (error) {
-                alert("Could not send feedback at this time.");
-                console.error(error);
-            }
-        }
-
-        // --- C. FIX: Updated Customer Payment Confirmation to match /confirm-payment and pass price ---
-        async function confirmCustomerPayment(customerToConfirm) {
-            const plan = allPlans.value.find(p => p.name === customerToConfirm.plan);
-            if (!plan) {
-                alert("Could not find plan price for this customer. Cannot confirm payment.");
-                return;
-            }
-            if (!confirm(`Confirm payment of K${plan.price} for ${customerToConfirm.name}? This will mark them as paid.`)) return;
-
-            try {
-                // CRITICAL FIX: Changed endpoint from /confirm to /confirm-payment and included plan_price in URL
-                const updatedCustomerResponse = await fetchAdmin(`/customers/${customerToConfirm.id}/confirm-payment?plan_price=${plan.price}`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        // Although the backend doesn't currently use this body, we send it just in case
-                        netflixEmail: netflixEmail.value,
-                        netflixPassword: netflixPassword.value,
-                        spotifyInfo: spotifyInfo.value,
-                        appleMusicInfo: appleMusicInfo.value
-                    })
-                });
-                
-                // The API now returns a ConfirmPaymentResponse, which contains the customer and the simulation_message
-                const updatedCustomer = updatedCustomerResponse.customer;
-
-                // Update local data
-                const index = customers.value.findIndex(c => c.id === updatedCustomer.id);
-                if (index !== -1) customers.value[index] = updatedCustomer;
-                alert(`Payment confirmed. Customer data updated. Message simulation:\n${updatedCustomerResponse.simulation_message}`);
-            } catch (error) {
-                alert(`Failed to confirm payment: ${error.message}`);
-            }
-        }
-
-        async function saveCredentials() {
-            try {
-                await fetchAdmin('/credentials', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        netflixEmail: netflixEmail.value,
-                        netflixPassword: netflixPassword.value,
-                        spotifyInfo: spotifyInfo.value,
-                        appleMusicInfo: appleMusicInfo.value
-                    })
-                });
-                alert("Credentials saved successfully!");
-            } catch (error) {
-                alert(`Failed to save credentials: ${error.message}`);
-            }
-        }
-
-        async function renewSubscription(c) {
-             const plan = allPlans.value.find(p => p.name === c.plan);
-             if (!plan) {
-                alert("Could not find plan details for renewal.");
-                return;
-            }
-            if (!confirm(`Renew subscription for ${c.name}? This will set a new due date and mark as PENDING PAYMENT for K${plan.price}.`)) return;
-            try {
-                // CRITICAL FIX: Added months and price as query params as defined in your FastAPI
-                const updatedCustomer = await fetchAdmin(`/customers/${c.id}/renew?months=${plan.months}&price=${plan.price}`, { method: 'POST' });
-                const index = customers.value.findIndex(cust => cust.id === updatedCustomer.id);
-                if (index !== -1) customers.value[index] = updatedCustomer;
-                alert("Subscription renewed. Waiting for payment confirmation.");
-            } catch (error) {
-                alert(`Failed to renew subscription: ${error.message}`);
-            }
-        }
-
-        async function logExpense() {
-            if (!currentExpense.value || currentExpense.value <= 0) {
-                alert("Please enter a valid expense amount.");
-                return;
-            }
-            try {
-                const currentMonthYear = new Date().toISOString().slice(0, 7); // "YYYY-MM"
-                const newExpense = await fetchAdmin('/expenses', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        amount: currentExpense.value,
-                        month_year: currentMonthYear
-                    })
-                });
-                // Update local state
-                expenses.value[newExpense.month_year] = (expenses.value[newExpense.month_year] || 0) + newExpense.amount;
-                currentExpense.value = null;
-                renderChart(); // Update chart
-            } catch (error) {
-                alert(`Failed to log expense: ${error.message}`);
-            }
-        }
-
-        function openEditModal(c) {
-            editingCustomer.value = JSON.parse(JSON.stringify(c)); // Deep copy
-        }
-
-        function closeEditModal() {
-            editingCustomer.value = null;
-        }
-
-        async function saveCustomerDetails() {
-            if (!editingCustomer.value) return;
-            try {
-                const payload = {
-                    name: editingCustomer.value.name,
-                    email: editingCustomer.value.email,
-                    number: editingCustomer.value.number,
-                    plan: editingCustomer.value.plan,
-                    notes: editingCustomer.value.notes,
-                    has_discount: editingCustomer.value.has_discount || false,
-                };
-                
-                // CRITICAL FIX: Changed from /customers/{id} to use the PUT method on the correct endpoint
-                const updatedCustomer = await fetchAdmin(`/customers/${editingCustomer.value.id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(payload)
-                });
-                const index = customers.value.findIndex(c => c.id === updatedCustomer.id);
-                if (index !== -1) customers.value[index] = updatedCustomer;
-                closeEditModal();
-            } catch (error) {
-                alert(`Failed to save details: ${error.message}`);
-            }
-        }
-
-        function exportToCSV() {
-            alert("Export to CSV is coming soon!");
-        }
-
-        // --- AI Placeholders ---
-        // (These functions need to be updated to match the /api/v1/ai/... endpoints, but we'll use a placeholder for now)
-        async function getAIRecommendation() { 
-             try {
-                geminiLoading.value = true;
-                const response = await fetchAdmin('/ai/recommendation', {
-                    method: 'POST',
-                    body: JSON.stringify({ q1: advisor.value.q1, q2: advisor.value.q2, q3: advisor.value.q3 })
-                });
-                const data = await response.json();
-                advisor.value.recommendation = data.recommendation;
-            } catch (error) {
-                advisor.value.recommendation = `Error: ${error.message}`;
-            } finally {
-                geminiLoading.value = false;
-            }
-        }
-
-        async function generateAIReminder(customer) {
-            const plan = allPlans.value.find(p => p.name === customer.plan);
-            if (!plan) { alert("Plan details not found."); return; }
-            
-            try {
-                geminiLoading.value = true;
-                const response = await fetchAdmin('/ai/reminder', {
-                    method: 'POST',
-                    body: JSON.stringify({ name: customer.name, plan: customer.plan, dueDate: customer.due_date })
-                });
-                const data = await response.json();
-                aiReminder.value = { show: true, message: data.message, customer: customer };
-            } catch (error) {
-                alert(`AI generation failed: ${error.message}`);
-            } finally {
-                geminiLoading.value = false;
-            }
-        }
-        
-        async function generateBusinessInsights() {
-            try {
-                geminiLoading.value = true;
-                const response = await fetchAdmin('/ai/insights', {
-                    method: 'POST',
-                    body: JSON.stringify({ 
-                        stats: {
-                            totalRevenue: totalRevenue.value,
-                            trueProfit: trueProfit.value,
-                            customerCount: customers.value.length,
-                            dueSoonCount: dueSoonCount.value,
-                            overdueCount: overdueCount.value,
-                            loyalCustomerCount: loyalCustomerCount.value
-                        },
-                        plans: allPlans.value.map(p => ({ name: p.name, count: customers.value.filter(c => c.plan === p.name).length }))
-                    })
-                });
-                const data = await response.json();
-                businessInsights.value = data.insights;
-            } catch (error) {
-                alert(`AI generation failed: ${error.message}`);
-            } finally {
-                geminiLoading.value = false;
-            }
-        }
-
-
-        // --- Page and Data Functions (No major changes here) ---
-        function showAdminLogin() {
-            isAdmin.value = true;
-        }
-
-        function formatDate(d) {
-            if (!d) return 'N/A';
-            try { return new Date(d).toLocaleDateString('en-GB'); }
-            catch (e) { console.error("Error formatting date:", d, e); return 'Invalid Date'; }
-        }
-
-        function getDetailedStatus(d) {
-            if (!d) return { text: 'N/A', class: 'bg-gray-500/20 text-gray-400' };
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const dueDate = new Date(d);
-            dueDate.setHours(0, 0, 0, 0);
-            const threeDaysFromNow = new Date(today);
-            threeDaysFromNow.setDate(today.getDate() + 3);
-
-            if (dueDate < today) return { text: 'Overdue', class: 'bg-red-500/20 text-red-400' };
-            if (dueDate >= today && dueDate <= threeDaysFromNow) return { text: 'Due Soon', class: 'bg-yellow-500/20 text-yellow-400' };
-            return { text: 'Active', class: 'bg-green-500/20 text-green-400' };
-        }
-
-        function renderChart() {
-            if (chartInstance) chartInstance.destroy();
-            const el = document.getElementById('financialChart');
-            if (!el) return; 
-            const ctx = el.getContext('2d');
-            Chart.defaults.color = '#9ca3af';
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Revenue', 'Expenses', 'Profit'],
-                    datasets: [{
-                        label: 'Financials (in K)',
-                        data: [totalRevenue.value, totalExpenses.value, trueProfit.value],
-                        backgroundColor: ['#8A2BE2', '#F97316', '#22C55E'],
-                        tension: 0.1,
-                        fill: true,
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } }
-            });
-        }
-
-        function renderPlanChart() {
-            if (planChartInstance) planChartInstance.destroy();
-            const el = document.getElementById('planChart');
-            if (!el) return; 
-            const ctx = el.getContext('2d');
-            const planCounts = { 'Netflix': 0, 'Spotify': 0, 'Apple Music': 0 };
-            customers.value.forEach(c => {
-                if (c.plan.includes('Netflix')) planCounts['Netflix']++;
-                else if (c.plan.includes('Spotify')) planCounts['Spotify']++;
-                else if (c.plan.includes('Apple Music')) planCounts['Apple Music']++;
-            });
-            
-            planChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(planCounts),
-                    datasets: [{
-                        data: Object.values(planCounts),
-                        backgroundColor: ['#E50914', '#1DB954', '#A2AA2D']
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-            });
-        }
-
-        // --- onMounted ---
-        onMounted(async () => {
-            console.log("Component mounted. Checking for existing token...");
-            if (authToken.value) {
-                console.log("Token found:", authToken.value);
-                isAdmin.value = true; 
-                try {
-                    console.log("Validating token...");
-                    await fetch(`${API_URL}/auth/me`, {
-                        method: 'GET',
-                        headers: { 'Authorization': `Bearer ${authToken.value}` }
-                    }); 
-                    console.log("Token validation successful.");
-                    authenticated.value = true; 
-                    
-                    console.log("Loading admin data on mount...");
-                    await loadAllAdminData();
-                    console.log("Admin data loaded on mount.");
-                    nextTick(() => {
-                        console.log("Rendering charts on mount...");
-                        renderChart();
-                        renderPlanChart();
-                    });
-                } catch (error) {
-                    console.error("Token validation failed on mount:", error);
-                    clearSession(); 
-                }
-            } else {
-                console.log("No token found in localStorage.");
-            }
-            
-            // Sticky header and scroll observer logic
-            window.addEventListener('scroll',()=>{if(header.value)header.value.classList.toggle('sticky',window.scrollY>10);});
-            const obs=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting){n.target.classList.add('is-visible');obs.unobserve(n.target)}})},{threshold:.1});
-            document.querySelectorAll('.animate-on-scroll').forEach(el=>obs.observe(el));
-        });
-
-        // --- Return ---
-        return {
-            isAdmin, authenticated, loginError, myAirtel, myMtn, myEmail, services, allPlans, form, customers, searchTerm,
-            totalRevenue, trueProfit, dueSoonCount, overdueCount, loyalCustomerCount,
-            showAdminLogin, login, logout, selectPlan, handleSubmit, renewSubscription,
-            formatDate, getDetailedStatus, editingCustomer, openEditModal, closeEditModal,
-            saveCustomerDetails, currentExpense, logExpense, exportToCSV, filteredCustomers,
-            showPlanAdvisor, advisor, getAIRecommendation, geminiLoading, aiReminder,
-            generateAIReminder, copyToClipboard: () => alert("Copied!"), businessInsights, generateBusinessInsights,
-            authView, loginForm, signupForm, handleSignup, handleForgot,
-            showPaymentSteps, paymentStep, pendingPaymentDetails, confirmPaymentSent,
-            netflixEmail, netflixPassword, spotifyInfo, appleMusicInfo, saveCredentials,
-            confirmCustomerPayment, feedbackMessage, handleFeedback,
-            header 
-        };
+    // Mirror fmn-gallery.js photo normalisation: media[] / cover_url, then images[] / image_url fallback.
+    function photoOf(l) {
+      if (!l) return null;
+      if (Array.isArray(l.media) && l.media.length) {
+        const m = l.media[0];
+        if (typeof m === 'string') return m;
+        if (m && (m.url || m.secure_url)) return m.url || m.secure_url;
+      }
+      return l.cover_url || (Array.isArray(l.images) && l.images[0]) || l.image_url || l.cover_image || l.thumbnail || null;
     }
-}).mount('#app');
-    </script>
+    function areaText(l) {
+      return [l.area, l.location, l.town, l.neighbourhood, l.address, l.title].filter(Boolean).join(' ').toLowerCase();
+    }
+
+    fetch(API_BASE + '/properties')
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => {
+        const listings = Array.isArray(data) ? data : (data.items || data.results || data.properties || data.data || []);
+        imgs.forEach(img => {
+          const area = (img.dataset.area || '').trim();
+          const match = listings.find(l => photoOf(l) && areaText(l).includes(area));
+          const url = match && photoOf(match);
+          if (url) {
+            img.onload = () => img.classList.remove('opacity-0');
+            img.onerror = () => img.remove();
+            img.src = url;
+          }
+        });
+      })
+      .catch(() => { /* keep gradient fallbacks */ });
+  })();
+</script>
 </body>
 </html>
