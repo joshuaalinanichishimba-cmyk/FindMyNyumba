@@ -173,9 +173,9 @@ def get_thread(
             "content": m.content,
             "is_read": m.is_read,
             "created_at": m.created_at,
-            "attachment_url": m.attachment_url,
-            "attachment_name": m.attachment_name,
-            "attachment_type": m.attachment_type,
+            "attachment_url": getattr(m, "attachment_url", None),
+            "attachment_name": getattr(m, "attachment_name", None),
+            "attachment_type": getattr(m, "attachment_type", None),
         }
         for m in thread_msgs
     ]
