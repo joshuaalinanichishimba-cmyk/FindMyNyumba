@@ -1022,7 +1022,7 @@ async function openThread(propId, otherId, otherName, propTitle) {
             msgDiv.innerHTML = '<div class="flex items-center justify-center h-full text-gray-400 text-sm italic">No messages yet.</div>';
         } else {
             msgDiv.innerHTML = msgs.map(m => {
-                const isMe = (_currentUser && m.sender_id === _currentUser.id) || (m.sender_name === 'Me');
+                const isMe = (m.sender_name === 'Me') || (_currentUser && String(m.sender_id) === String(_currentUser.id));
                 const alignCls  = isMe ? 'self-end' : 'self-start';
                 const bubbleCls = isMe ? 'chat-bubble-me' : 'chat-bubble-them shadow-sm border border-gray-100';
                 let attachHTML = '';
