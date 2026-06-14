@@ -25,7 +25,7 @@ from slowapi.util import get_remote_address
 # didn't exist.
 
 limiter = Limiter(key_func=get_remote_address)
-router = APIRouter(prefix="/api/v1/messages", tags=["Messaging Engine"])
+router = APIRouter(prefix="/messages", tags=["Messaging Engine"])
 
 
 # ── Send Message ──────────────────────────────────────────────────────────────
