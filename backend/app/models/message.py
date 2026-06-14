@@ -1,6 +1,6 @@
-"""
+﻿"""
 app/models/message.py
-Message model — stores student ↔ landlord/host conversation threads.
+Message model â€” stores student â†” landlord/host conversation threads.
 """
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text
 from sqlalchemy.sql import func
@@ -19,6 +19,9 @@ class Message(Base):
 
     content    = Column(Text, nullable=False)
     is_read    = Column(Boolean, default=False, nullable=False)
+    attachment_url  = Column(String, nullable=True)
+    attachment_name = Column(String, nullable=True)
+    attachment_type = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
