@@ -1578,7 +1578,7 @@ async function openThread(otherId, propId, name, propTitle) {
         const msgs = Array.isArray(data) ? data : (data.messages || []);
         const myId = window._currentUser?.id;
         messages.innerHTML = msgs.map(m => {
-            const mine = m.sender_id === myId;
+            const mine = (myId != null && m.sender_id === myId) || m.sender_name === 'Me';
             const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
             return `<div class="flex ${mine ? 'justify-end' : 'justify-start'}">
                 <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm font-medium ${mine ? 'bubble-me' : 'bubble-them'}">
