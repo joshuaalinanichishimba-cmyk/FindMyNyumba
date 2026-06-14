@@ -1,6 +1,6 @@
-"""
+﻿"""
 app/api/v1/endpoints/messages.py
-Shared messaging engine — works for all authenticated roles.
+Shared messaging engine â€” works for all authenticated roles.
 """
 import os
 import shutil
@@ -12,7 +12,7 @@ from typing import Optional
 
 from app.core.database import get_db
 from app.core.config import settings
-from app.auth.dependencies import get_current_user
+from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.message import Message
 from app.models.listing import Listing
@@ -28,7 +28,7 @@ limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/messages", tags=["Messaging Engine"])
 
 
-# ── Send Message ──────────────────────────────────────────────────────────────
+# â”€â”€ Send Message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.post("/send")
 @limiter.limit("20/minute")
 async def send_message(
@@ -81,7 +81,7 @@ async def send_message(
     return {"message": "Message sent successfully!", "id": new_msg.id}
 
 
-# ── Conversations List ────────────────────────────────────────────────────────
+# â”€â”€ Conversations List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/conversations")
 def get_conversations(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     all_msgs = (
@@ -101,7 +101,7 @@ def get_conversations(db: Session = Depends(get_db), current_user: User = Depend
     conversations = {}
     for msg in all_msgs:
         other_id = msg.receiver_id if msg.sender_id == current_user.id else msg.sender_id
-        prop_id  = msg.property_id  # keep as None if None — do not coerce to 0
+        prop_id  = msg.property_id  # keep as None if None â€” do not coerce to 0
 
         # FIX: use actual None as part of key, not 0, to avoid thread mismatch bug
         thread_key = f"{other_id}_{prop_id}"
@@ -126,7 +126,7 @@ def get_conversations(db: Session = Depends(get_db), current_user: User = Depend
     return list(conversations.values())
 
 
-# ── Thread (with mark-as-read) ────────────────────────────────────────────────
+# â”€â”€ Thread (with mark-as-read) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/thread/{property_id}/{other_user_id}")
 def get_thread(
     property_id: int,
@@ -134,7 +134,7 @@ def get_thread(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # FIX: property_id == 0 means "no property" — filter on IS NULL, not == 0
+    # FIX: property_id == 0 means "no property" â€” filter on IS NULL, not == 0
     prop_filter = (
         Message.property_id == property_id
         if property_id != 0
@@ -181,7 +181,7 @@ def get_thread(
     ]
 
 
-# ── Unread Count ──────────────────────────────────────────────────────────────
+# â”€â”€ Unread Count â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/unread-count")
 def get_unread_count(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     count = db.query(Message).filter(
