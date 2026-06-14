@@ -1,67 +1,181 @@
 """
 app/api/v1/endpoints/viewing_requests.py
 
-Endpoints for the viewing-request feature.
+Viewing-request lifecycle endpoints.
 
-  POST  /viewings            student requests a viewing
-  GET   /viewings/mine       requests the current user made (as a student)
-  GET   /viewings/incoming   requests for the current user's listings (as landlord)
-  PATCH /viewings/{id}       landlord confirms / declines / completes a request
+  POST  /viewing-requests                 student creates a request   -> pending
+  GET   /viewing-requests/landlord        landlord's incoming requests
+  GET   /viewing-requests/student         student's sent requests
+  PATCH /viewing-requests/{id}/respond    landlord accepts / rejects  (+ landlord_notes, rejection_reason)
+  PATCH /viewing-requests/{id}/reschedule landlord proposes new slot  -> rescheduled
+  PATCH /viewing-requests/{id}/cancel     student withdraws own request -> cancelled
 
-Authorization is enforced per-endpoint: a student can only see their own
-requests; a landlord can only see/act on requests for listings they own.
+WHAT CHANGED IN THIS VERSION
+----------------------------
+1. Every state change now writes a REAL in-app notification via
+   app.core.notify.push_notification (was a no-op stub).
+2. On ACCEPT, an approval message is auto-posted into the existing chat
+   (Message table) from the landlord to the student, e.g.
+   "Your viewing request for Room A has been approved for 2026-08-14 at 10:00."
+3. /respond accepts an optional `rejection_reason` (Property no longer
+   available | Time slot unavailable | Request incomplete | Other) which is
+   folded into landlord_notes and the student's notification body.
+
+SECURITY (unchanged): only the assigned landlord may respond/reschedule; only
+the owning student may cancel; a landlord cannot request their own listing.
 """
 from datetime import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.core.notify import (
+    push_notification,
+    VIEWING_REQUESTED, VIEWING_APPROVED, VIEWING_REJECTED,
+    VIEWING_RESCHEDULED, VIEWING_CANCELLED,
+)
 from app.models.listing import Listing
+from app.models.message import Message
 from app.models.user import User
-from app.models.viewing_request import ViewingRequest
+from app.models.viewing_request import ViewingRequest, ViewingStatus
 
-router = APIRouter(prefix="/viewings", tags=["Viewings"])
+router = APIRouter(prefix="/viewing-requests", tags=["Viewing Requests"])
 
-# Statuses a landlord is allowed to set.
-LANDLORD_STATUSES = {"confirmed", "declined", "completed"}
-# Statuses a student is allowed to set (just cancelling their own request).
-STUDENT_STATUSES = {"cancelled"}
+_RESPONDABLE   = {ViewingStatus.PENDING.value, ViewingStatus.RESCHEDULED.value}
+_RESCHEDULABLE = {ViewingStatus.PENDING.value, ViewingStatus.ACCEPTED.value, ViewingStatus.RESCHEDULED.value}
+_CANCELLABLE   = {ViewingStatus.PENDING.value, ViewingStatus.ACCEPTED.value, ViewingStatus.RESCHEDULED.value}
+
+_LEGACY_MAP = {"confirmed": "accepted", "declined": "rejected", "completed": "accepted"}
+
+# Allowed canned rejection reasons (free text "Other" also accepted).
+_REJECTION_REASONS = {
+    "Property no longer available",
+    "Time slot unavailable",
+    "Request incomplete",
+    "Other",
+}
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────
+def _validate_future(date_str: str, time_str: str) -> None:
+    if not date_str or not time_str:
+        raise HTTPException(status_code=400, detail="Please choose a date and time.")
+    try:
+        chosen = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date or time format (use YYYY-MM-DD and HH:MM).")
+    if chosen < datetime.now():
+        raise HTTPException(status_code=400, detail="Please choose a future date and time.")
+
+
+def _maybe_expire(vr: ViewingRequest) -> bool:
+    if vr.status != ViewingStatus.PENDING.value:
+        return False
+    try:
+        slot = datetime.strptime(f"{vr.preferred_date} {vr.preferred_time}", "%Y-%m-%d %H:%M")
+    except (ValueError, TypeError):
+        return False
+    if slot < datetime.now():
+        vr.status = ViewingStatus.EXPIRED.value
+        return True
+    return False
+
+
+def _post_chat_message(db: Session, vr: ViewingRequest, text: str) -> None:
+    """Auto-post a system-style chat message from landlord -> student, tied to
+    the listing so it threads under the right property conversation. Best-effort:
+    a chat failure must not break the viewing action."""
+    try:
+        db.add(Message(
+            sender_id=vr.landlord_id,
+            receiver_id=vr.student_id,
+            property_id=vr.listing_id,
+            content=text,
+            is_read=False,
+        ))
+        db.commit()
+    except Exception:
+        try:
+            db.rollback()
+        except Exception:
+            pass
+
+
+def _serialize(v: ViewingRequest) -> dict:
+    display_status = _LEGACY_MAP.get(v.status, v.status)
+    return {
+        "id": v.id,
+        "listing_id": v.listing_id,
+        "property_id": v.listing_id,
+        "listing_title": v.listing.title if v.listing else None,
+        "student_id": v.student_id,
+        "student_name": v.student.full_name if v.student else None,
+        "student_phone": v.student.phone_number if v.student else None,
+        "landlord_id": v.landlord_id,
+        "landlord_name": v.landlord.full_name if v.landlord else None,
+        "preferred_date": v.preferred_date,
+        "preferred_time": v.preferred_time,
+        "rescheduled_date": v.rescheduled_date,
+        "rescheduled_time": v.rescheduled_time,
+        "notes": v.notes,
+        "landlord_notes": v.landlord_notes,
+        "status": display_status,
+        "created_at": v.created_at.isoformat() if v.created_at else None,
+        "updated_at": v.updated_at.isoformat() if v.updated_at else None,
+    }
 
 
 # ── Request bodies ────────────────────────────────────────────────────────
 class ViewingCreate(BaseModel):
     listing_id: int
-    date: str            # "YYYY-MM-DD"
-    time: str            # "HH:MM"
-    notes: str | None = None
+    preferred_date: str
+    preferred_time: str
+    notes: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _accept_aliases(cls, data):
+        if isinstance(data, dict):
+            data = dict(data)
+            if data.get("listing_id") is None and data.get("property_id") is not None:
+                data["listing_id"] = data["property_id"]
+            if data.get("preferred_date") is None and data.get("date") is not None:
+                data["preferred_date"] = data["date"]
+            if data.get("preferred_time") is None and data.get("time") is not None:
+                data["preferred_time"] = data["time"]
+        return data
 
 
-class ViewingStatusUpdate(BaseModel):
-    status: str
+class RespondBody(BaseModel):
+    status: str                              # "accepted" | "rejected"
+    landlord_notes: Optional[str] = None
+    rejection_reason: Optional[str] = None   # one of _REJECTION_REASONS (or free text when "Other")
 
 
-def _serialize(v: ViewingRequest) -> dict:
-    return {
-        "id": v.id,
-        "listing_id": v.listing_id,
-        "listing_title": v.listing.title if v.listing else None,
-        "student_id": v.student_id,
-        "student_name": v.student.full_name if v.student else None,
-        "landlord_id": v.landlord_id,
-        "preferred_date": v.preferred_date,
-        "preferred_time": v.preferred_time,
-        "notes": v.notes,
-        "status": v.status,
-        "created_at": v.created_at.isoformat() if v.created_at else None,
-    }
+class RescheduleBody(BaseModel):
+    rescheduled_date: str
+    rescheduled_time: str
+    landlord_notes: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _accept_aliases(cls, data):
+        if isinstance(data, dict):
+            data = dict(data)
+            if data.get("rescheduled_date") is None and data.get("date") is not None:
+                data["rescheduled_date"] = data["date"]
+            if data.get("rescheduled_time") is None and data.get("time") is not None:
+                data["rescheduled_time"] = data["time"]
+        return data
 
 
-# ── Create ────────────────────────────────────────────────────────────────
+# ── Create (student) ──────────────────────────────────────────────────────
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_viewing(
+def create_viewing_request(
     body: ViewingCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -69,55 +183,39 @@ def create_viewing(
     listing = db.query(Listing).filter(Listing.id == body.listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
-
-    # A landlord can't request a viewing of their own listing.
     if listing.owner_id == current_user.id:
         raise HTTPException(status_code=400, detail="You cannot request a viewing of your own listing.")
 
-    if not body.date or not body.time:
-        raise HTTPException(status_code=400, detail="Please choose a date and time.")
-
-    # Basic guard: don't allow dates in the past.
-    try:
-        chosen = datetime.strptime(f"{body.date} {body.time}", "%Y-%m-%d %H:%M")
-        if chosen < datetime.now():
-            raise HTTPException(status_code=400, detail="Please choose a future date and time.")
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date or time format.")
+    _validate_future(body.preferred_date, body.preferred_time)
 
     vr = ViewingRequest(
         listing_id=listing.id,
         student_id=current_user.id,
         landlord_id=listing.owner_id,
-        preferred_date=body.date,
-        preferred_time=body.time,
+        preferred_date=body.preferred_date,
+        preferred_time=body.preferred_time,
         notes=(body.notes or "").strip() or None,
-        status="pending",
+        status=ViewingStatus.PENDING.value,
     )
     db.add(vr)
     db.commit()
     db.refresh(vr)
-    return {"status": "success", "message": "Viewing requested. The landlord will confirm.", "request": _serialize(vr)}
 
-
-# ── Student: my requests ──────────────────────────────────────────────────
-@router.get("/mine")
-def my_viewings(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    rows = (
-        db.query(ViewingRequest)
-        .filter(ViewingRequest.student_id == current_user.id)
-        .order_by(ViewingRequest.created_at.desc())
-        .all()
+    push_notification(
+        db, vr.landlord_id, VIEWING_REQUESTED,
+        "New viewing request",
+        f"{current_user.full_name or 'A student'} requested to view "
+        f"{listing.title} on {vr.preferred_date} at {vr.preferred_time}.",
     )
-    return [_serialize(v) for v in rows]
+
+    return {"status": "success",
+            "message": "Viewing requested. The landlord will respond shortly.",
+            "request": _serialize(vr)}
 
 
 # ── Landlord: incoming requests ───────────────────────────────────────────
-@router.get("/incoming")
-def incoming_viewings(
+@router.get("/landlord")
+def landlord_viewing_requests(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -127,34 +225,153 @@ def incoming_viewings(
         .order_by(ViewingRequest.created_at.desc())
         .all()
     )
+    if any(_maybe_expire(v) for v in rows):
+        db.commit()
     return [_serialize(v) for v in rows]
 
 
-# ── Update status (landlord confirm/decline/complete; student cancel) ──────
-@router.patch("/{viewing_id}")
-def update_viewing(
+# ── Student: sent requests ────────────────────────────────────────────────
+@router.get("/student")
+def student_viewing_requests(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(ViewingRequest)
+        .filter(ViewingRequest.student_id == current_user.id)
+        .order_by(ViewingRequest.created_at.desc())
+        .all()
+    )
+    if any(_maybe_expire(v) for v in rows):
+        db.commit()
+    return [_serialize(v) for v in rows]
+
+
+def _load_for_landlord(viewing_id: int, current_user: User, db: Session) -> ViewingRequest:
+    vr = db.query(ViewingRequest).filter(ViewingRequest.id == viewing_id).first()
+    if not vr:
+        raise HTTPException(status_code=404, detail="Viewing request not found.")
+    if current_user.id != vr.landlord_id:
+        raise HTTPException(status_code=403, detail="Only the listing's landlord can manage this request.")
+    return vr
+
+
+# ── Landlord: accept / reject ─────────────────────────────────────────────
+@router.patch("/{viewing_id}/respond")
+def respond_to_viewing(
     viewing_id: int,
-    body: ViewingStatusUpdate,
+    body: RespondBody,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    vr = _load_for_landlord(viewing_id, current_user, db)
+
+    new_status = (body.status or "").strip().lower()
+    if new_status not in {ViewingStatus.ACCEPTED.value, ViewingStatus.REJECTED.value}:
+        raise HTTPException(status_code=400, detail="Status must be 'accepted' or 'rejected'.")
+    if vr.status not in _RESPONDABLE:
+        raise HTTPException(status_code=409, detail=f"Cannot respond to a request that is '{vr.status}'.")
+
+    # Fold an optional rejection reason into landlord_notes.
+    note = (body.landlord_notes or "").strip()
+    if new_status == ViewingStatus.REJECTED.value and body.rejection_reason:
+        reason = body.rejection_reason.strip()
+        note = f"{reason} - {note}".strip(" -") if note else reason
+
+    vr.status = new_status
+    if note:
+        vr.landlord_notes = note
+    db.commit()
+    db.refresh(vr)
+
+    title = vr.listing.title if vr.listing else "your listing"
+
+    if new_status == ViewingStatus.ACCEPTED.value:
+        # Auto-post the approval message into chat (brief's wording).
+        _post_chat_message(
+            db, vr,
+            f"Your viewing request for {title} has been approved for "
+            f"{vr.preferred_date} at {vr.preferred_time}.",
+        )
+        push_notification(
+            db, vr.student_id, VIEWING_APPROVED,
+            "Viewing approved",
+            f"Your viewing for {title} is confirmed for {vr.preferred_date} at {vr.preferred_time}.",
+        )
+    else:
+        push_notification(
+            db, vr.student_id, VIEWING_REJECTED,
+            "Viewing declined",
+            "Unfortunately your viewing request has been declined."
+            + (f" Reason: {vr.landlord_notes}." if vr.landlord_notes else ""),
+        )
+
+    return {"status": "success", "request": _serialize(vr)}
+
+
+# ── Landlord: reschedule ──────────────────────────────────────────────────
+@router.patch("/{viewing_id}/reschedule")
+def reschedule_viewing(
+    viewing_id: int,
+    body: RescheduleBody,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    vr = _load_for_landlord(viewing_id, current_user, db)
+    if vr.status not in _RESCHEDULABLE:
+        raise HTTPException(status_code=409, detail=f"Cannot reschedule a request that is '{vr.status}'.")
+
+    _validate_future(body.rescheduled_date, body.rescheduled_time)
+
+    vr.status = ViewingStatus.RESCHEDULED.value
+    vr.rescheduled_date = body.rescheduled_date
+    vr.rescheduled_time = body.rescheduled_time
+    if body.landlord_notes is not None:
+        vr.landlord_notes = body.landlord_notes.strip() or None
+    db.commit()
+    db.refresh(vr)
+
+    title = vr.listing.title if vr.listing else "your listing"
+    _post_chat_message(
+        db, vr,
+        f"Your viewing request for {title} has been rescheduled to "
+        f"{vr.rescheduled_date} at {vr.rescheduled_time}."
+        + (f" Note: {vr.landlord_notes}" if vr.landlord_notes else ""),
+    )
+    push_notification(
+        db, vr.student_id, VIEWING_RESCHEDULED,
+        "Viewing rescheduled",
+        f"New proposed time for {title}: {vr.rescheduled_date} at {vr.rescheduled_time}. "
+        "Open your requests to accept or decline.",
+    )
+
+    return {"status": "success", "request": _serialize(vr)}
+
+
+# ── Student: cancel own request ───────────────────────────────────────────
+@router.patch("/{viewing_id}/cancel")
+def cancel_viewing(
+    viewing_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     vr = db.query(ViewingRequest).filter(ViewingRequest.id == viewing_id).first()
     if not vr:
         raise HTTPException(status_code=404, detail="Viewing request not found.")
+    if current_user.id != vr.student_id:
+        raise HTTPException(status_code=403, detail="You can only cancel your own request.")
+    if vr.status not in _CANCELLABLE:
+        raise HTTPException(status_code=409, detail=f"Cannot cancel a request that is '{vr.status}'.")
 
-    new_status = (body.status or "").lower().strip()
-
-    is_landlord = current_user.id == vr.landlord_id
-    is_student = current_user.id == vr.student_id
-
-    if is_landlord and new_status in LANDLORD_STATUSES:
-        vr.status = new_status
-    elif is_student and new_status in STUDENT_STATUSES:
-        vr.status = new_status
-    else:
-        # Either not a party to this request, or not an allowed transition.
-        raise HTTPException(status_code=403, detail="You can't make that change to this request.")
-
+    vr.status = ViewingStatus.CANCELLED.value
     db.commit()
     db.refresh(vr)
+
+    title = vr.listing.title if vr.listing else "your listing"
+    push_notification(
+        db, vr.landlord_id, VIEWING_CANCELLED,
+        "Viewing cancelled",
+        f"{vr.student.full_name if vr.student else 'A student'} cancelled their viewing for {title}.",
+    )
+
     return {"status": "success", "request": _serialize(vr)}
