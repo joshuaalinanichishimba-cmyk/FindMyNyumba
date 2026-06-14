@@ -1602,10 +1602,14 @@ async function sendMessage(e) {
     const btn     = document.querySelector('#chat-form button[type="submit"]');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-sm"></i>'; }
     try {
+        const _fd = new FormData();
+        _fd.append('receiver_id', _activeOtherId);
+        _fd.append('content', content);
+        if (_activePropId) _fd.append('property_id', _activePropId);
         const res = await fetch(`${API}/messages/send`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content })
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: _fd
         });
         if (res.ok) {
             input.value = '';
