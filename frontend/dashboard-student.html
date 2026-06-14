@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -642,7 +642,7 @@ function logout() {
     window.location.replace('login.html');
 }
 
-// Boot — guard prevents re-runs if browser re-executes script on tab focus/reload
+// Boot â€” guard prevents re-runs if browser re-executes script on tab focus/reload
 let _dashboardInitialised = false;
 async function initDashboard() {
     if (_dashboardInitialised) return;
@@ -678,7 +678,7 @@ async function initDashboard() {
     loadOverviewStats();
 }
 
-// Overview stats — _overviewLoaded prevents duplicate calls on page re-focus;
+// Overview stats â€” _overviewLoaded prevents duplicate calls on page re-focus;
 // the Retry button resets this flag before calling.
 let _overviewLoaded = false;
 async function loadOverviewStats(force = false) {
@@ -951,7 +951,7 @@ async function sendStudentMessage(e) {
             fd.append('attachment', file);
             res = await fetch(`${API}/messages/send`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
         } else {
-            res = await fetch(`${API}/messages/send`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ receiver_id: _activeOtherId, property_id: _activePropId || null, content }) });
+            res = await fetch(`${API}/messages/send`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, }, body: (function(){var _fd=new FormData();_fd.append('receiver_id',_activeOtherId);if(_activePropId)_fd.append('property_id',_activePropId);_fd.append('content',content);return _fd;})() });
         }
         if (res.ok) {
             input.value = '';
