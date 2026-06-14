@@ -1,35 +1,24 @@
-﻿"""
-app/models/message.py
-
-Message model for the FindMyNyumba messaging system.
-Supports text messages between users, optionally tied to a property listing.
-Attachment support is stored as URL references (files uploaded separately).
 """
-
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+app/models/message.py
+Message model — stores student ↔ landlord/host conversation threads.
+"""
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-
 from app.core.database import Base
 
 
 class Message(Base):
     __tablename__ = "messages"
-    __table_args__ = {"extend_existing": True}
+    __table_args__ = {'extend_existing': True}
 
     id          = Column(Integer, primary_key=True, index=True)
     sender_id   = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     receiver_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     property_id = Column(Integer, ForeignKey("listings.id"), nullable=True, index=True)
 
-    content     = Column(String, nullable=False)
-    is_read     = Column(Boolean, default=False, nullable=False)
-
-    # Attachment support
-    attachment_url  = Column(String, nullable=True)
-    attachment_name = Column(String, nullable=True)
-    attachment_type = Column(String, nullable=True)  # "image" | "file"
-
+    content    = Column(Text, nullable=False)
+    is_read    = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
