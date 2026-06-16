@@ -189,6 +189,7 @@ def get_listing_detail(
             "avatar_url":          owner.avatar_url,
             "member_since":        owner.created_at.isoformat() if owner.created_at else None,
             "listings_count":      _listings_count,
+            "phone_number":        owner.phone_number,
         }
 
     return {
