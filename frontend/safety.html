@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety Center · FindMyNyumba</title>
+<meta name="description" content="Stay safe finding student accommodation in Zambia. Spot viewing-fee scams, fake listings and fake landlords on the Copperbelt and beyond — and report fraud in seconds.">
+<link rel="icon" href="favicon.ico">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif}
+  .rule-card{transition:transform .2s ease,box-shadow .2s ease}
+  .rule-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(15,23,42,.10)}
+  /* Signature: a "danger ribbon" corner on each scam card */
+  .scam-card{position:relative;overflow:hidden}
+  .scam-card::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:#ef4444}
+</style>
+</head>
+<body class="bg-white text-slate-900">
+
+<!-- ===================== NAV (shared brand) ===================== -->
+<nav class="bg-white/95 backdrop-blur shadow-sm fixed w-full top-0 z-50 border-b border-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="index.html" class="flex items-center gap-2" style="text-decoration:none;">
+        <img src="logo.png" alt="FindMyNyumba" style="height:40px;width:auto;object-fit:contain;display:block;"
+             onerror="this.style.display='none';document.getElementById('logo-fallback-nav').classList.remove('hidden');">
+        <span id="logo-fallback-nav" class="hidden text-xl font-extrabold text-[#0f172a]"><i class="fas fa-leaf text-[#16a34a] mr-1"></i>FindMy<span class="text-[#16a34a]">Nyumba</span></span>
+      </a>
+      <div class="nav-desktop hidden md:flex items-center gap-7">
+        <a href="index.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Home</a>
+        <a href="browse.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Browse</a>
+        <a href="about.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">About Us</a>
+        <a href="contact.html" class="text-slate-600 hover:text-[#16a34a] font-bold text-sm transition-colors">Contact</a>
+        <a href="safety.html" class="text-[#16a34a] font-bold text-sm relative after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-[#16a34a] after:rounded-full">Safety</a>
+        <a href="register-landlord.html" class="bg-[#0f172a] hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold transition-colors text-sm shadow-sm">List Your Property</a>
+      </div>
+      <button id="mobile-nav-toggle" class="nav-hamburger md:hidden items-center justify-center w-10 h-10 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors">
+        <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="md:hidden bg-white border-t border-slate-100 px-4 pb-4 hidden">
+    <div class="flex flex-col gap-1 pt-3">
+      <a href="index.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Home</a>
+      <a href="browse.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Browse</a>
+      <a href="about.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">About Us</a>
+      <a href="contact.html" class="px-3 py-3 rounded-xl text-slate-700 font-bold hover:bg-slate-50 text-sm">Contact</a>
+      <a href="safety.html" class="px-3 py-3 rounded-xl text-[#16a34a] font-bold bg-green-50 text-sm">Safety</a>
+      <a href="register-landlord.html" class="mt-2 text-center bg-[#0f172a] hover:bg-slate-800 text-white px-4 py-3 rounded-xl font-bold transition-colors text-sm">List Your Property</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section class="pt-16 bg-gradient-to-b from-green-50/60 via-white to-white">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20 text-center">
+    <span class="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
+      <i class="fas fa-shield-halved"></i> Student Safety Center
+    </span>
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#0f172a] leading-tight">
+      Find your room without<br class="hidden sm:block"> getting <span class="text-[#16a34a]">scammed</span>.
+    </h1>
+    <p class="mt-5 text-base sm:text-lg text-slate-600 font-medium max-w-2xl mx-auto">
+      Most housing scams in Zambia follow the same handful of tricks. Learn to spot them in seconds,
+      and report anything suspicious straight to our Trust &amp; Safety team.
+    </p>
+    <!-- The one rule that prevents most losses -->
+    <div class="mt-8 inline-flex flex-col sm:flex-row items-center gap-3 bg-[#0f172a] text-white px-6 py-4 rounded-2xl shadow-lg shadow-slate-900/15 max-w-2xl">
+      <i class="fas fa-circle-exclamation text-2xl text-amber-400"></i>
+      <p class="text-sm sm:text-base font-bold text-left">
+        The golden rule: <span class="text-amber-300">never send money before you have physically viewed the property.</span>
+        FindMyNyumba never charges viewing fees.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SIGNATURE: ZAMBIAN SCAM PLAYBOOK ===================== -->
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="text-center mb-10">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f172a]">The scams we see most</h2>
+    <p class="mt-2 text-slate-600 font-medium">Recognise the play, and it stops working on you.</p>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-5">
+    <!-- Viewing fee -->
+    <div class="scam-card rule-card bg-white border border-slate-200 rounded-2xl p-6 pl-7">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center"><i class="fas fa-hand-holding-dollar"></i></span>
+        <h3 class="font-extrabold text-[#0f172a]">"Pay a viewing fee first"</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-3"><span class="font-bold text-slate-800">The play:</span> someone asks for K50–K200 on Airtel/MTN Money "to unlock the viewing" or "hold the room". After you pay, they vanish.</p>
+      <p class="text-sm text-slate-700"><span class="font-bold text-[#16a34a]">What to do:</span> refuse. Real landlords on FindMyNyumba do not charge to view. Report it.</p>
+    </div>
+
+    <!-- Deposit before viewing -->
+    <div class="scam-card rule-card bg-white border border-slate-200 rounded-2xl p-6 pl-7">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center"><i class="fas fa-money-bill-transfer"></i></span>
+        <h3 class="font-extrabold text-[#0f172a]">"Send the deposit to secure it"</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-3"><span class="font-bold text-slate-800">The play:</span> "Many students want this room — send the deposit now or you'll lose it." Pressure + a personal mobile-money number.</p>
+      <p class="text-sm text-slate-700"><span class="font-bold text-[#16a34a]">What to do:</span> slow down. Urgency is the scam. View first, then pay only after you have keys or a signed agreement.</p>
+    </div>
+
+    <!-- Fake landlord -->
+    <div class="scam-card rule-card bg-white border border-slate-200 rounded-2xl p-6 pl-7">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center"><i class="fas fa-user-secret"></i></span>
+        <h3 class="font-extrabold text-[#0f172a]">"I'm the landlord" (they're not)</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-3"><span class="font-bold text-slate-800">The play:</span> someone lists a property they don't own — often a real building they photographed or copied from another site.</p>
+      <p class="text-sm text-slate-700"><span class="font-bold text-[#16a34a]">What to do:</span> check for the <span class="font-bold">Verified Landlord</span> badge. Ask to meet at the property. No badge + won't meet = walk away.</p>
+    </div>
+
+    <!-- Agent fee -->
+    <div class="scam-card rule-card bg-white border border-slate-200 rounded-2xl p-6 pl-7">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center"><i class="fas fa-briefcase"></i></span>
+        <h3 class="font-extrabold text-[#0f172a]">The "agent" fee</h3>
+      </div>
+      <p class="text-sm text-slate-600 mb-3"><span class="font-bold text-slate-800">The play:</span> a middleman demands a non-refundable "agent fee" before he'll even show you a place, then disappears or shows nothing.</p>
+      <p class="text-sm text-slate-700"><span class="font-bold text-[#16a34a]">What to do:</span> you don't need a paid agent to find a room here. Report anyone demanding fees upfront.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW TO IDENTIFY FAKE LISTINGS ===================== -->
+<section class="bg-slate-50 border-y border-slate-100">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <div class="grid lg:grid-cols-2 gap-10 items-start">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f172a] mb-3">Spotting a fake listing</h2>
+        <p class="text-slate-600 font-medium mb-6">Fake posts share tell-tale signs. If two or more of these line up, treat it as suspicious.</p>
+        <ul class="space-y-3">
+          <li class="flex gap-3"><i class="fas fa-circle-xmark text-red-500 mt-1"></i><span class="text-sm text-slate-700"><b>Price too good to be true.</b> A self-contained near CBU at half the going rate is bait.</span></li>
+          <li class="flex gap-3"><i class="fas fa-circle-xmark text-red-500 mt-1"></i><span class="text-sm text-slate-700"><b>Photos look too polished</b> or are watermarked from another site — they may be stolen.</span></li>
+          <li class="flex gap-3"><i class="fas fa-circle-xmark text-red-500 mt-1"></i><span class="text-sm text-slate-700"><b>The "landlord" won't meet</b> or is "always travelling / abroad".</span></li>
+          <li class="flex gap-3"><i class="fas fa-circle-xmark text-red-500 mt-1"></i><span class="text-sm text-slate-700"><b>They push you off-platform</b> to WhatsApp immediately and avoid in-app chat.</span></li>
+          <li class="flex gap-3"><i class="fas fa-circle-xmark text-red-500 mt-1"></i><span class="text-sm text-slate-700"><b>Money before viewing,</b> in any form, for any reason.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f172a] mb-3">Reading the badges</h2>
+        <p class="text-slate-600 font-medium mb-6">Every listing and landlord carries a trust badge. Here's what each one means.</p>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 bg-white rounded-xl border border-slate-200 p-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:#dcfce7;color:#166534"><i class="fas fa-circle-check"></i>Verified Landlord</span>
+            <span class="text-sm text-slate-600">Identity (NRC + selfie) reviewed and approved.</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white rounded-xl border border-slate-200 p-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:#dcfce7;color:#166534"><i class="fas fa-circle-check"></i>Verified Property</span>
+            <span class="text-sm text-slate-600">Photos, location and documents checked by our team.</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white rounded-xl border border-slate-200 p-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:#fef9c3;color:#854d0e"><i class="fas fa-clock"></i>Phone Verified</span>
+            <span class="text-sm text-slate-600">Phone confirmed, identity not yet reviewed. Be cautious.</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white rounded-xl border border-slate-200 p-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:#fef9c3;color:#854d0e"><i class="fas fa-clock"></i>Identity Submitted</span>
+            <span class="text-sm text-slate-600">Documents uploaded, under review.</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white rounded-xl border border-slate-200 p-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:#fee2e2;color:#991b1b"><i class="fas fa-triangle-exclamation"></i>Unverified</span>
+            <span class="text-sm text-slate-600">Nothing confirmed. Never send money to an unverified user.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== VERIFY LANDLORDS + SAFE VIEWING ===================== -->
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+  <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f172a] text-center mb-3">A safe viewing, step by step</h2>
+  <p class="text-slate-600 font-medium text-center mb-10">Follow these and you cut your risk to almost nothing.</p>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="rule-card bg-white border border-slate-200 rounded-2xl p-6 text-center">
+      <span class="w-11 h-11 rounded-xl bg-green-50 text-[#16a34a] flex items-center justify-center mx-auto mb-3 text-lg font-extrabold">1</span>
+      <h3 class="font-extrabold text-[#0f172a] mb-1.5 text-sm">Chat in-app first</h3>
+      <p class="text-sm text-slate-600">Keep messages on FindMyNyumba. Our system watches for scam patterns there.</p>
+    </div>
+    <div class="rule-card bg-white border border-slate-200 rounded-2xl p-6 text-center">
+      <span class="w-11 h-11 rounded-xl bg-green-50 text-[#16a34a] flex items-center justify-center mx-auto mb-3 text-lg font-extrabold">2</span>
+      <h3 class="font-extrabold text-[#0f172a] mb-1.5 text-sm">Check the badge</h3>
+      <p class="text-sm text-slate-600">Prefer Verified Landlord / Verified Property listings. Ask why if there's no badge.</p>
+    </div>
+    <div class="rule-card bg-white border border-slate-200 rounded-2xl p-6 text-center">
+      <span class="w-11 h-11 rounded-xl bg-green-50 text-[#16a34a] flex items-center justify-center mx-auto mb-3 text-lg font-extrabold">3</span>
+      <h3 class="font-extrabold text-[#0f172a] mb-1.5 text-sm">View in daylight</h3>
+      <p class="text-sm text-slate-600">Go in person, ideally with a friend. Confirm the room, the address and who you're dealing with.</p>
+    </div>
+    <div class="rule-card bg-white border border-slate-200 rounded-2xl p-6 text-center">
+      <span class="w-11 h-11 rounded-xl bg-green-50 text-[#16a34a] flex items-center justify-center mx-auto mb-3 text-lg font-extrabold">4</span>
+      <h3 class="font-extrabold text-[#0f172a] mb-1.5 text-sm">Pay only after</h3>
+      <p class="text-sm text-slate-600">Money changes hands once you've viewed and have keys or a signed agreement — never before.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== REPORT FRAUD ===================== -->
+<section id="report" class="bg-[#0f172a]">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-white">
+    <span class="inline-flex items-center gap-2 bg-white/10 text-green-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
+      <i class="fas fa-flag"></i> Report fraud
+    </span>
+    <h2 class="text-2xl sm:text-3xl font-extrabold mb-3">Saw something off? Tell us.</h2>
+    <p class="text-slate-300 font-medium max-w-2xl mx-auto mb-8">
+      Reports are confidential and go straight to our Trust &amp; Safety team. Even if you weren't scammed,
+      flagging a suspicious listing protects the next student.
+    </p>
+    <button data-fmn-report class="inline-flex items-center gap-2 bg-[#16a34a] hover:bg-green-600 text-white px-7 py-3.5 rounded-xl font-bold transition-colors shadow-lg">
+      <i class="fas fa-flag"></i> Report a listing or user
+    </button>
+    <p class="text-xs text-slate-400 mt-6">
+      In immediate danger or a victim of theft? Contact the Zambia Police on <b class="text-white">991</b> as well.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== FOOTER (shared brand) ===================== -->
+<footer class="bg-slate-900 text-slate-400 py-14">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      <div class="sm:col-span-2 lg:col-span-1">
+        <div style="display:inline-block;margin-bottom:1rem;background:#f8fafc;border-radius:12px;padding:8px 16px;">
+          <img src="logo.png" alt="FindMyNyumba" style="height:42px;width:auto;object-fit:contain;display:block;">
+        </div>
+        <p class="text-sm font-medium leading-relaxed text-slate-400 max-w-xs">Zambia's trusted student housing platform. Find verified, affordable accommodation near your university.</p>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-white text-sm uppercase tracking-wider mb-4">Quick Links</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="index.html" class="hover:text-[#16a34a] transition-colors font-medium">Home</a></li>
+          <li><a href="browse.html" class="hover:text-[#16a34a] transition-colors font-medium">Browse</a></li>
+          <li><a href="how-it-works.html" class="hover:text-[#16a34a] transition-colors font-medium">How It Works</a></li>
+          <li><a href="safety.html" class="hover:text-[#16a34a] transition-colors font-medium">Safety Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-white text-sm uppercase tracking-wider mb-4">For Landlords</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="register-landlord.html" class="hover:text-[#16a34a] transition-colors font-medium">List Your Property</a></li>
+          <li><a href="how-it-works.html" class="hover:text-[#16a34a] transition-colors font-medium">Landlord Guide</a></li>
+          <li><a href="help.html" class="hover:text-[#16a34a] transition-colors font-medium">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-extrabold text-white text-sm uppercase tracking-wider mb-4">Support</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="help.html" class="hover:text-[#16a34a] transition-colors font-medium">Help Center</a></li>
+          <li><a href="contact.html" class="hover:text-[#16a34a] transition-colors font-medium">Contact</a></li>
+          <li><a href="terms.html" class="hover:text-[#16a34a] transition-colors font-medium">Terms of Service</a></li>
+          <li><a href="privacy.html" class="hover:text-[#16a34a] transition-colors font-medium">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+      <p class="font-medium">&copy; <span id="current-year"></span> FindMyNyumba. All rights reserved.</p>
+      <div class="flex gap-4">
+        <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
+        <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('current-year').textContent = new Date().getFullYear();
+  // Mobile menu toggle (mirrors site behaviour)
+  var t = document.getElementById('mobile-nav-toggle');
+  var m = document.getElementById('mobile-menu');
+  if (t && m) t.addEventListener('click', function(){ m.classList.toggle('hidden'); });
+</script>
+<!-- Trust kit: banners + report modal -->
+<script src="assets/fmn-trust.js" data-page="all"></script>
+<script src="assets/fmn-report.js"></script>
+</body>
+</html>
