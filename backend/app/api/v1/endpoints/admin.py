@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/api/v1/endpoints/admin_router.py
 
 FULL IMPLEMENTATION.
@@ -44,6 +44,7 @@ from app.core.security import get_password_hash, verify_password
 from app.models.listing import Listing
 from app.models.message import Message
 from app.models.report import Report
+from app.models.review import Review
 from app.models.user import User
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -51,7 +52,7 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 VERIFY_DIR = Path("static/uploads/verification")
 
 
-# ── Role guard ─────────────────────────────────────────────────────────────────
+# â”€â”€ Role guard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "admin":
         raise HTTPException(
@@ -61,7 +62,7 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _get_verification_docs(user, request: Request = None) -> list:
     """
     Return the user's verification documents from the Cloudinary URLs stored
@@ -98,7 +99,7 @@ def _get_verification_docs(user, request: Request = None) -> list:
     return docs
 
 
-# ── GET /admin/stats ──────────────────────────────────────────────────────────
+# â”€â”€ GET /admin/stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/stats")
 def get_stats(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     total_users      = db.query(User).count()
@@ -121,7 +122,7 @@ def get_stats(admin: User = Depends(require_admin), db: Session = Depends(get_db
     }
 
 
-# ── GET /admin/users ──────────────────────────────────────────────────────────
+# â”€â”€ GET /admin/users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/users")
 def get_users(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     users = db.query(User).order_by(User.created_at.desc()).all()
@@ -140,7 +141,7 @@ def get_users(admin: User = Depends(require_admin), db: Session = Depends(get_db
     ]
 
 
-# ── POST /admin/users/{id}/suspend ────────────────────────────────────────────
+# â”€â”€ POST /admin/users/{id}/suspend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.post("/users/{user_id}/suspend")
 def toggle_suspend(user_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     if user_id == admin.id:
@@ -154,7 +155,7 @@ def toggle_suspend(user_id: int, admin: User = Depends(require_admin), db: Sessi
     return {"status": "success", "message": f"User {action}.", "is_active": user.is_active}
 
 
-# ── GET /admin/all-listings ───────────────────────────────────────────────────
+# â”€â”€ GET /admin/all-listings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/all-listings")
 def get_all_listings(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     listings = db.query(Listing).order_by(Listing.created_at.desc()).all()
@@ -173,7 +174,7 @@ def get_all_listings(admin: User = Depends(require_admin), db: Session = Depends
     ]
 
 
-# ── PATCH /admin/listings/{id}/approve ───────────────────────────────────────
+# â”€â”€ PATCH /admin/listings/{id}/approve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/listings/{listing_id}/approve")
 def approve_listing(listing_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
@@ -184,7 +185,7 @@ def approve_listing(listing_id: int, admin: User = Depends(require_admin), db: S
     return {"status": "success", "message": "Listing approved and now live."}
 
 
-# ── PATCH /admin/listings/{id}/reject ────────────────────────────────────────
+# â”€â”€ PATCH /admin/listings/{id}/reject â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/listings/{listing_id}/reject")
 def reject_listing(listing_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
@@ -195,7 +196,7 @@ def reject_listing(listing_id: int, admin: User = Depends(require_admin), db: Se
     return {"status": "success", "message": "Listing rejected."}
 
 
-# ── DELETE /admin/listings/{id} ───────────────────────────────────────────────
+# â”€â”€ DELETE /admin/listings/{id} â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.delete("/listings/{listing_id}")
 def delete_listing(listing_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
@@ -206,7 +207,7 @@ def delete_listing(listing_id: int, admin: User = Depends(require_admin), db: Se
     return {"status": "success", "message": "Listing deleted."}
 
 
-# ── GET /admin/verifications ──────────────────────────────────────────────────
+# â”€â”€ GET /admin/verifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/verifications")
 def get_verifications(
     request: Request,
@@ -236,7 +237,7 @@ def get_verifications(
     ]
 
 
-# ── POST /admin/verifications/{id}/approve ────────────────────────────────────
+# â”€â”€ POST /admin/verifications/{id}/approve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.post("/verifications/{user_id}/approve")
 def approve_verification(user_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -248,7 +249,7 @@ def approve_verification(user_id: int, admin: User = Depends(require_admin), db:
     return {"status": "success", "message": f"{user.full_name} has been verified."}
 
 
-# ── POST /admin/verifications/{id}/reject ────────────────────────────────────
+# â”€â”€ POST /admin/verifications/{id}/reject â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class ResolveBody(BaseModel):
     resolution: str
 
@@ -272,8 +273,8 @@ def reject_verification(
     return {"status": "success", "message": "Verification rejected."}
 
 
-# ── GET /admin/reports ────────────────────────────────────────────────────────
-# ── GET /admin/reports ───────────────────────────────────────────────────────
+# â”€â”€ GET /admin/reports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â”€â”€ GET /admin/reports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/reports")
 def get_reports(
     status_filter: Optional[str] = None,
@@ -314,7 +315,7 @@ def get_reports(
     ]
 
 
-# ── PATCH /admin/reports/{id}/investigate ────────────────────────────────────
+# â”€â”€ PATCH /admin/reports/{id}/investigate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/reports/{report_id}/investigate")
 def investigate_report(report_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     report = db.query(Report).filter(Report.id == report_id).first()
@@ -327,7 +328,7 @@ def investigate_report(report_id: int, admin: User = Depends(require_admin), db:
     return {"status": "success", "message": "Report marked as investigating."}
 
 
-# ── PATCH /admin/reports/{id}/resolve ────────────────────────────────────────
+# â”€â”€ PATCH /admin/reports/{id}/resolve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/reports/{report_id}/resolve")
 def resolve_report(report_id: int, body: ResolveBody, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     report = db.query(Report).filter(Report.id == report_id).first()
@@ -341,7 +342,7 @@ def resolve_report(report_id: int, body: ResolveBody, admin: User = Depends(requ
     return {"status": "success", "message": "Report resolved."}
 
 
-# ── PATCH /admin/reports/{id}/dismiss ────────────────────────────────────────
+# â”€â”€ PATCH /admin/reports/{id}/dismiss â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/reports/{report_id}/dismiss")
 def dismiss_report(report_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     report = db.query(Report).filter(Report.id == report_id).first()
@@ -354,7 +355,7 @@ def dismiss_report(report_id: int, admin: User = Depends(require_admin), db: Ses
     return {"status": "success", "message": "Report dismissed."}
 
 
-# ── GET /admin/analytics/growth ───────────────────────────────────────────────
+# â”€â”€ GET /admin/analytics/growth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/analytics/growth")
 def get_growth(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     """
@@ -401,7 +402,7 @@ def get_growth(admin: User = Depends(require_admin), db: Session = Depends(get_d
     }
 
 
-# ── POST /admin/announcements ─────────────────────────────────────────────────
+# â”€â”€ POST /admin/announcements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class AnnouncementPayload(BaseModel):
     title:  str
     body:   str
@@ -436,7 +437,7 @@ def send_announcement(
     return {"status": "success", "message": f"Announcement sent to {len(users)} users."}
 
 
-# ── POST /admin/settings/update ───────────────────────────────────────────────
+# â”€â”€ POST /admin/settings/update â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class SettingsPayload(BaseModel):
     platform_name:    Optional[str]  = None
     support_email:    Optional[str]  = None
@@ -452,7 +453,7 @@ def update_settings(
     return {"status": "success", "message": "Settings saved."}
 
 
-# ── POST /admin/change-password ───────────────────────────────────────────────
+# â”€â”€ POST /admin/change-password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class AdminChangePasswordPayload(BaseModel):
     old_password:     str
     new_password:     str
@@ -492,3 +493,84 @@ async def migrate_broken_images(db: Session = Depends(get_db)):
             l.image_url = None
     db.commit()
     return {"fixed": len(fixed), "listings": fixed}
+# ==================================================
+# REVIEWS MODERATION
+# ==================================================
+@router.get("/reviews")
+def admin_list_reviews(status: str = "pending", admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    q = db.query(Review)
+    if status:
+        q = q.filter(Review.status == status)
+    rows = q.order_by(Review.created_at.desc()).all()
+    out = []
+    for r in rows:
+        listing = db.query(Listing).filter(Listing.id == r.listing_id).first()
+        out.append({
+            "id": r.id,
+            "listing_id": r.listing_id,
+            "listing_title": listing.title if listing else None,
+            "user_id": r.user_id,
+            "user_name": r.user_name,
+            "rating": r.rating,
+            "comment": r.comment,
+            "status": r.status,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        })
+    return out
+
+
+@router.patch("/reviews/{review_id}/approve")
+def admin_approve_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    r = db.query(Review).filter(Review.id == review_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Review not found")
+    r.status = "approved"
+    db.commit()
+    return {"id": r.id, "status": r.status}
+
+
+@router.patch("/reviews/{review_id}/reject")
+def admin_reject_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    r = db.query(Review).filter(Review.id == review_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Review not found")
+    r.status = "rejected"
+    db.commit()
+    return {"id": r.id, "status": r.status}
+
+
+# ==================================================
+# SUPPORT / CONVERSATIONS
+# ==================================================
+@router.get("/conversations")
+def admin_list_conversations(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    msgs = db.query(Message).order_by(Message.created_at.desc()).all()
+    threads = {}
+    name_cache = {}
+
+    def name_of(uid):
+        if uid not in name_cache:
+            u = db.query(User).filter(User.id == uid).first()
+            name_cache[uid] = u.full_name if u else f"User {uid}"
+        return name_cache[uid]
+
+    for m in msgs:
+        pair = tuple(sorted([m.sender_id, m.receiver_id]))
+        key = (pair, m.property_id)
+        if key not in threads:
+            threads[key] = {
+                "participants": [
+                    {"id": pair[0], "name": name_of(pair[0])},
+                    {"id": pair[1], "name": name_of(pair[1])},
+                ],
+                "property_id": m.property_id,
+                "last_message": m.content,
+                "last_at": m.created_at.isoformat() if m.created_at else None,
+                "unread": 0,
+                "count": 0,
+            }
+        threads[key]["count"] += 1
+        if not m.is_read:
+            threads[key]["unread"] += 1
+
+    return list(threads.values())
