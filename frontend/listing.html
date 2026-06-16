@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -104,7 +104,7 @@
                             <span id="sm-posted">Recently posted</span>
                         </li>
                     </ul>
-                    <p id="prop-ref" class="mt-4 text-[11px] font-semibold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">ID: —</p>
+                    <p id="prop-ref" class="mt-4 text-[11px] font-semibold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">ID: â€”</p>
                 </div>
             </div>
 
@@ -262,9 +262,9 @@
 
                 <!-- stats (TODO: backend member_since / active_listings / response_rate / response_time) -->
                 <div class="grid grid-cols-3 gap-2 my-4 text-center">
-                    <div><p class="text-[10px] uppercase font-bold text-gray-400">Member</p><p id="stat-member" class="text-sm font-extrabold">—</p></div>
-                    <div class="border-x border-gray-100"><p class="text-[10px] uppercase font-bold text-gray-400">Listings</p><p id="stat-listings" class="text-sm font-extrabold">—</p></div>
-                    <div><p class="text-[10px] uppercase font-bold text-gray-400">Response</p><p id="stat-response" class="text-sm font-extrabold">—</p></div>
+                    <div><p class="text-[10px] uppercase font-bold text-gray-400">Member</p><p id="stat-member" class="text-sm font-extrabold">â€”</p></div>
+                    <div class="border-x border-gray-100"><p class="text-[10px] uppercase font-bold text-gray-400">Listings</p><p id="stat-listings" class="text-sm font-extrabold">â€”</p></div>
+                    <div><p class="text-[10px] uppercase font-bold text-gray-400">Response</p><p id="stat-response" class="text-sm font-extrabold">â€”</p></div>
                 </div>
                 <p id="stat-time" class="text-center text-xs text-gray-500 font-semibold mb-4"><i class="fas fa-bolt text-brand"></i> Usually replies quickly</p>
 
@@ -320,7 +320,7 @@
 
             <!-- Promote (TODO: Requires Subscription/Advertising System) -->
             <div class="rounded-2xl shadow-sm border border-orange-100 p-5 bg-gradient-to-br from-orange-50 to-white">
-                <div class="flex items-center gap-2 mb-1"><h3 class="font-extrabold text-base">Promote This Listing</h3><span class="text-xl">🚀</span></div>
+                <div class="flex items-center gap-2 mb-1"><h3 class="font-extrabold text-base">Promote This Listing</h3><span class="text-xl">ðŸš€</span></div>
                 <p class="text-xs text-gray-500 mb-4">Landlords, get more visibility and attract serious students.</p>
                 <ul class="space-y-2 text-sm text-gray-700 mb-4">
                     <li class="flex items-center gap-2"><i class="fas fa-check text-brand text-xs"></i> Top placement in search</li>
@@ -662,13 +662,13 @@ function renderAmenities(highlights) {
 }
 function renderDetails(data) {
     const items = [
-        ['Property Type', pick(data, ['property_type', 'type'], '—'), 'fa-house'],
-        ['Bedrooms',      pick(data, ['bedrooms'], '—'), 'fa-bed'],
-        ['Bathrooms',     pick(data, ['bathrooms'], '—'), 'fa-bath'],
+        ['Property Type', pick(data, ['property_type', 'type'], 'â€”'), 'fa-house'],
+        ['Bedrooms',      pick(data, ['bedrooms'], 'â€”'), 'fa-bed'],
+        ['Bathrooms',     pick(data, ['bathrooms'], 'â€”'), 'fa-bath'],
         ['Furnished',     pick(data, ['furnished'], 'Yes'), 'fa-couch'],
         ['Water',         pick(data, ['water', 'water_available'], 'Yes'), 'fa-droplet'],
         ['Electricity',   pick(data, ['electricity'], 'Yes'), 'fa-bolt'],
-        ['Deposit',       data.deposit != null ? 'K' + Number(data.deposit).toLocaleString() : '—', 'fa-wallet'],
+        ['Deposit',       data.deposit != null ? 'K' + Number(data.deposit).toLocaleString() : 'â€”', 'fa-wallet'],
         ['Minimum Stay',  pick(data, ['minimum_stay', 'min_stay'], '6 Months'), 'fa-calendar-day'],
     ];
     document.getElementById('details-grid').innerHTML = items.map(([k, v, ic]) => `
@@ -719,10 +719,10 @@ function renderStats(owner) {
     owner = owner || {};
     /* TODO: backend member_since / active_listings / response_rate / response_time / rating_count */
     const ms = pick(owner, ['member_since', 'created_at'], null);
-    document.getElementById('stat-member').textContent   = ms ? (String(ms).match(/\d{4}/)?.[0] || ms) : '—';
-    document.getElementById('stat-listings').textContent = pick(owner, ['active_listings', 'listings_count'], '—');
+    document.getElementById('stat-member').textContent   = ms ? (String(ms).match(/\d{4}/)?.[0] || ms) : 'â€”';
+    document.getElementById('stat-listings').textContent = pick(owner, ['active_listings', 'listings_count'], 'â€”');
     const rr = pick(owner, ['response_rate'], null);
-    document.getElementById('stat-response').textContent = rr != null ? rr + '%' : '—';
+    document.getElementById('stat-response').textContent = rr != null ? rr + '%' : 'â€”';
     const rt = pick(owner, ['response_time'], null);
     if (rt) document.getElementById('stat-time').innerHTML = `<i class="fas fa-bolt text-brand"></i> Replies within ${esc(rt)}`;
     const rc = pick(owner, ['rating_count', 'reviews_count'], 0);
@@ -741,7 +741,7 @@ async function loadSimilar(currentId) {
     const grid = document.getElementById('similar-grid');
     const card = (p, href) => {
         const img = resolveImageUrl(pick(p, ['cover_url', 'image_url'], '')) || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400';
-        const price = p.price != null ? 'K' + Number(p.price).toLocaleString() : '—';
+        const price = p.price != null ? 'K' + Number(p.price).toLocaleString() : 'â€”';
         return `<a href="${href}" class="block rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition">
                     <img src="${esc(img)}" class="w-full h-28 object-cover" alt="${esc(p.title || '')}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'">
                     <div class="p-3">
@@ -814,7 +814,7 @@ async function loadData() {
 
         if (data.is_boosted) document.getElementById('boosted-badge').classList.remove('hidden');
 
-        /* Images / media — existing FMNGallery flow preserved */
+        /* Images / media â€” existing FMNGallery flow preserved */
         const imgEl    = document.getElementById('main-image');
         const vidEl    = document.getElementById('main-video');
         const FALLBACK = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80';
@@ -1043,5 +1043,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+<script src="assets/fmn-trust.js" data-page="property"></script>
+<script src="assets/fmn-report.js"></script>
 </body>
 </html>
