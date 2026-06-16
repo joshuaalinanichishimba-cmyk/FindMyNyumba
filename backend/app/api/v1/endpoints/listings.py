@@ -79,7 +79,7 @@ def _watermark(url):
         return url
     if "l_text:" in url:
         return url
-    wm = "l_text:Arial_40_bold:FindMyNyumba,co_white,o_55,g_south_east,x_20,y_20"
+    wm = "l_text:Arial_70_bold:FindMyNyumba,co_white,o_20,g_center"
     return url.replace("/image/upload/", f"/image/upload/{wm}/", 1)
 
 
