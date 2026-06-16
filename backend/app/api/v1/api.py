@@ -7,7 +7,7 @@ must NOT include "/api/v1" in its own prefix.
 """
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, admin, listings, messages, landlords, student_hosts, students
+from app.api.v1.endpoints import auth, admin, listings, messages, landlords, student_hosts, students, notifications
 from app.api.v1.endpoints import trust, verification, fraud, admin_trust
 
 api_router = APIRouter()
@@ -24,6 +24,7 @@ api_router.include_router(students.router)     # /api/v1/students/...
 
 # â”€â”€ Admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 api_router.include_router(admin.router)        # /api/v1/admin/...
+api_router.include_router(notifications.router) # /api/v1/notifications/...
 
 # -- Trust & Safety --
 api_router.include_router(trust.router)
