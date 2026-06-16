@@ -1,481 +1,197 @@
+﻿"""
+main.py
+FindMyNyumba FastAPI application entry point.
+
+WHAT CHANGED IN THIS VERSION
+----------------------------
+1. Sentry is now actually initialised (it was in requirements.txt but unused),
+   so unhandled errors are captured off-box. Render's disk is ephemeral, so a
+   local error.log is wiped on every deploy â€” Sentry fixes that. It only turns
+   on when SENTRY_DSN is set, so local dev is unaffected.
+2. Rate limiting is wired in via setup_rate_limiting(app)
+setup_exception_handlers(app). The limiter existed
+   but was never attached, so /auth/login had no brute-force protection.
+3. A small SecurityHeadersMiddleware adds HSTS / X-Content-Type-Options /
+   X-Frame-Options / Referrer-Policy to every response.
+4. The mojibake comment blocks from the previous file were removed; logic is
+   unchanged.
+
+IMPORTANT (unchanged behaviour):
+- Sub-routers are registered inside api_router (see app/api/v1/api.py); the
+  "/api/v1" prefix is added once here.
+- CORS is restricted to known origins. Never use allow_origins=["*"] together
+  with allow_credentials=True.
+"""
 import os
-import datetime
-from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.sql.expression import func
-from typing import List
+from fastapi.responses import FileResponse, Response
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 
-import google.generativeai as genai
+from app.api.v1.api import api_router
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.core.rate_limiter import setup_rate_limiting
+from app.core.errors import setup_exception_handlers
+from app.models.viewing_request import ViewingRequest   # noqa: F401
 
-# Import our custom modules (You must have these files: database.py, models.py, security.py)
-from database import engine, Base, get_db
-from models import (
-    User, Customer, Expense, Feedback, ServiceCredential,
-    UserCreate, Token, RegistrationRequest, FeedbackCreate,
-    CustomerResponse, CustomerUpdate, ExpenseCreate, ExpenseResponse,
-    CredentialsUpdate, DashboardStats, AIPlanAdvisorRequest,
-    AIReminderRequest, AIBusinessInsightsRequest,
-    ConfirmPaymentResponse
+# --- Optional Sentry error monitoring -------------------------------------
+# Only initialises if SENTRY_DSN is present in the environment, so local dev
+# and tests stay quiet. Add SENTRY_DSN to Render's env vars to switch it on.
+_SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
+if _SENTRY_DSN:
+    try:
+        import sentry_sdk
+
+        sentry_sdk.init(
+            dsn=_SENTRY_DSN,
+            # Keep tracing light/free-tier friendly; raise later if you want APM.
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0")),
+            send_default_pii=False,
+            environment=os.getenv("SENTRY_ENV", "production" if settings.PRODUCTION else "development"),
+        )
+    except Exception as exc:  # never let monitoring setup break startup
+        print(f"[startup] Sentry init skipped: {exc}")
+
+# --- Import ALL models before create_all so every table is registered -----
+from app.models.user import User                       # noqa: E402,F401
+from app.models.password_reset import PasswordResetToken  # noqa: E402,F401
+from app.models.listing import Listing                 # noqa: E402,F401
+from app.models.saved_listing import SavedListing      # noqa: E402,F401
+from app.models.report import Report                   # noqa: E402,F401
+from app.models.admin_models import (                  # noqa: E402,F401
+    Transaction, Escrow, Institution, Notification,
+    AuditLog, AdminNote, RolePermission,
 )
-from security import (
-    authenticate_user, create_access_token, get_password_hash,
-    get_current_active_user, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.models.listing_event import ListingEvent      # noqa: E402,F401
+from app.models.review import Review                 # noqa: E402,F401
+from app.models.trust_models import (                 # noqa: E402,F401
+    Verification, VerificationDocument, PropertyVerification,
+    FraudReport, RiskScore, TrustBanner,
 )
 
-# Load .env variables
-load_dotenv()
+# --- Create any missing tables (idempotent; safe on every startup) --------
+Base.metadata.create_all(bind=engine)
 
-# Configure Gemini AI
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    print("Warning: GOOGLE_API_KEY not set. AI features will be disabled.")
-    genai.configure(api_key="DUMMY_KEY")
-else:
-    genai.configure(api_key=GOOGLE_API_KEY)
+# One-time: add report-workflow / verification columns if missing.
+from sqlalchemy import text as _sql_text  # noqa: E402
 
-# --- FastAPI App Initialization ---
-app = FastAPI(title="Ali Subscription Express API")
+with engine.connect() as _conn:
+    for _ddl in [
+        "ALTER TABLE users ADD COLUMN verification_doc1_url VARCHAR",
+        "ALTER TABLE users ADD COLUMN verification_doc2_url VARCHAR",
+        "ALTER TABLE reports ADD COLUMN reported_user_id INTEGER",
+        "ALTER TABLE reports ADD COLUMN admin_note TEXT",
+        "ALTER TABLE reports ADD COLUMN resolution TEXT",
+        "ALTER TABLE reports ADD COLUMN handled_by INTEGER",
+        "ALTER TABLE reports ADD COLUMN handled_at TIMESTAMP",
+    ]:
+        try:
+            _conn.execute(_sql_text(_ddl))
+            _conn.commit()
+        except Exception:
+            pass  # column already exists
 
-# --- CORS Middleware ---
+
+def _ensure_columns():
+    """create_all() only CREATES missing tables; it never ALTERs existing ones.
+    The Listing table predates listing_type/latitude/longitude, so add them.
+    Postgres supports IF NOT EXISTS; SQLite doesn't, so catch the dup-column error."""
+    from sqlalchemy import text
+    cols = {"listing_type": "VARCHAR", "latitude": "FLOAT", "longitude": "FLOAT"}
+    is_pg = engine.dialect.name == "postgresql"
+    try:
+        with engine.begin() as conn:
+            for col, typ in cols.items():
+                if is_pg:
+                    conn.execute(text(f"ALTER TABLE listings ADD COLUMN IF NOT EXISTS {col} {typ}"))
+                else:
+                    try:
+                        conn.execute(text(f"ALTER TABLE listings ADD COLUMN {col} {typ}"))
+                    except Exception:
+                        pass
+    except Exception as e:  # never block startup on a migration hiccup
+        print(f"[startup] column ensure skipped: {e}")
+
+
+_ensure_columns()
+
+# --- Ensure static upload directories exist -------------------------------
+os.makedirs("static/uploads/properties",   exist_ok=True)
+os.makedirs("static/uploads/verification", exist_ok=True)
+
+
+# --- Security headers middleware ------------------------------------------
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Adds baseline security headers to every response. Cheap, no deps."""
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        # HSTS only matters over HTTPS; harmless to send and ignored on http.
+        if settings.PRODUCTION:
+            response.headers.setdefault(
+                "Strict-Transport-Security",
+                "max-age=31536000; includeSubDomains",
+            )
+        return response
+
+
+# --- App ------------------------------------------------------------------
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version="1.0.0",
+    # Consider setting docs_url=None / redoc_url=None in production.
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+# Rate limiting: attach the shared limiter + 429 handler.
+setup_rate_limiting(app)
+setup_exception_handlers(app)
+
+# Security headers on every response.
+app.add_middleware(SecurityHeadersMiddleware)
+
+# CORS â€” allow_credentials=True requires explicit origins; never use ["*"].
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
-# --- Database Setup ---
-@app.on_event("startup")
-async def on_startup():
-    async with engine.begin() as conn:
-        # await conn.run_sync(Base.metadata.drop_all) # Use this line ONLY if you need to force drop tables
-        await conn.run_sync(Base.metadata.create_all)
+# Static files (uploaded property images, verification docs).
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# =A_P_I_T_A_G_S=
-tags_auth = "1. Authentication"
-tags_public = "2. Public"
-tags_customers = "3. Admin: Customers"
-tags_dashboard = "4. Admin: Dashboard"
-tags_ai = "5. Admin: AI Tools"
+# API routes â€” "/api/v1" prefix added once here.
+app.include_router(api_router, prefix="/api/v1")
 
-# ==================================================
-# 1. AUTHENTICATION ENDPOINTS
-# ==================================================
 
-@app.post("/api/v1/auth/token", response_model=Token, tags=[tags_auth])
-async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: AsyncSession = Depends(get_db)
-):
-    user = await authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
-
-@app.post("/api/v1/auth/create-admin", status_code=status.HTTP_201_CREATED, tags=[tags_auth])
-async def create_admin_user(
-    user: UserCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    # Optional: Check if admin already exists
-    existing_user = await db.execute(select(User).filter(User.username == user.username))
-    if existing_user.scalars().first():
-        raise HTTPException(status_code=400, detail="Username already registered")
-
-    hashed_password = get_password_hash(user.password)
-    db_user = User(username=user.username, hashed_password=hashed_password)
-    db.add(db_user)
-    await db.commit()
-    await db.refresh(db_user)
-    return {"username": db_user.username, "message": "Admin user created successfully."}
-
-@app.get("/api/v1/auth/me", tags=[tags_auth])
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
-    return {"username": current_user.username}
-
-# ==================================================
-# 2. PUBLIC ENDPOINTS
-# ==================================================
-
-# --- *** UPDATED submit_registration *** ---
-@app.post("/api/v1/public/registrations", status_code=status.HTTP_201_CREATED, tags=[tags_public])
-async def submit_registration(
-    req: RegistrationRequest,
-    db: AsyncSession = Depends(get_db)
-):
-    due_date = datetime.datetime.utcnow() + datetime.timedelta(days=30 * req.months)
-
-    new_customer = Customer(
-        name=req.name,
-        email=req.email,
-        number=req.number,
-        # location=req.location, # <-- REMOVED
-        plan=req.plan,
-        due_date=due_date,
-        paid=0,
-        renewal_count=0,
-        renewal_history=[],
-        notes="Payment submitted by user, pending admin confirmation.",
-        has_discount=False,
-        payment_confirmed=False
-    )
-    db.add(new_customer)
-    await db.commit()
-    return {"message": "Registration submitted. Awaiting payment confirmation."}
-
-@app.post("/api/v1/public/feedback", status_code=status.HTTP_201_CREATED, tags=[tags_public])
-async def submit_feedback(
-    req: FeedbackCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    new_feedback = Feedback(message=req.message)
-    db.add(new_feedback)
-    await db.commit()
-    return {"message": "Feedback received. Thank you!"}
-
-# ==================================================
-# 3. ADMIN: CUSTOMER ENDPOINTS
-# ==================================================
-
-@app.get("/api/v1/admin/customers", response_model=List[CustomerResponse], tags=[tags_customers])
-async def get_all_customers(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    result = await db.execute(select(Customer).order_by(Customer.due_date))
-    return result.scalars().all()
-
-@app.post("/api/v1/admin/customers/{customer_id}/confirm-payment", response_model=ConfirmPaymentResponse, tags=[tags_customers])
-async def confirm_payment(
-    customer_id: int,
-    plan_price: float,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    result = await db.execute(select(Customer).filter(Customer.id == customer_id))
-    customer = result.scalars().first()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-
-    customer.payment_confirmed = True
-    customer.paid = (customer.paid or 0) + plan_price
-    customer.renewal_count = (customer.renewal_count or 0) + 1
-
-    new_history = {
-        "date": datetime.datetime.utcnow().isoformat(),
-        "amount": plan_price
+@app.get("/", tags=["Health"])
+def root():
+    return {
+        "status": "online",
+        "project": settings.PROJECT_NAME,
+        "api": "/api/v1",
+        "docs": "/docs",
     }
-    customer.renewal_history = (customer.renewal_history or []) + [new_history]
 
-    customer.notes = (customer.notes or "").replace(
-        'pending admin confirmation', 'Payment Confirmed.'
-    )
 
-    creds = {}
-    keys = ["netflixEmail", "netflixPassword", "spotifyInfo", "appleMusicInfo"]
-    for key in keys:
-        cred_result = await db.execute(select(ServiceCredential).filter(ServiceCredential.key == key))
-        cred = cred_result.scalars().first()
-        creds[key] = cred.value if cred else ""
+@app.get("/health", tags=["Health"])
+def health():
+    return {"status": "ok"}
 
-    message_lines = [
-        f"Payment confirmed for {customer.name}!",
-        "--- SIMULATING CREDENTIAL SEND ---",
-        f"Sending details to {customer.number}:"
-    ]
 
-    plan_name = customer.plan.lower()
-    sent_details = False
-    if "netflix" in plan_name:
-        message_lines.append(f"Netflix Email: {creds.get('netflixEmail', 'N/A')}")
-        message_lines.append(f"Netflix Pass: ********")
-        sent_details = True
-
-    if "spotify" in plan_name:
-        message_lines.append(f"Spotify Info: {creds.get('spotifyInfo', 'N/A')}")
-        sent_details = True
-
-    if "apple" in plan_name or "all-in-one" in plan_name:
-        message_lines.append(f"Apple Music Info: {creds.get('appleMusicInfo', 'N/A')}")
-        sent_details = True
-
-    if not sent_details:
-        message_lines.append("Plan name not recognized. Sending all details as a fallback:")
-        message_lines.append(f"Netflix Email: {creds.get('netflixEmail', 'N/A')}")
-        message_lines.append(f"Netflix Pass: ********")
-        message_lines.append(f"Spotify Info: {creds.get('spotifyInfo', 'N/A')}")
-        message_lines.append(f"Apple Music Info: {creds.get('appleMusicInfo', 'N/A')}")
-
-    message_lines.append("---------------------------------")
-
-    simulation_message = "\n".join(message_lines)
-
-    db.add(customer)
-    await db.commit()
-    await db.refresh(customer)
-
-    return ConfirmPaymentResponse(customer=customer, simulation_message=simulation_message)
-
-@app.post("/api/v1/admin/customers/{customer_id}/renew", response_model=CustomerResponse, tags=[tags_customers])
-async def renew_subscription(
-    customer_id: int,
-    months: int,
-    price: float,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    result = await db.execute(select(Customer).filter(Customer.id == customer_id))
-    customer = result.scalars().first()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-
-    current_due_date = customer.due_date or datetime.datetime.utcnow()
-    new_due_date = current_due_date + datetime.timedelta(days=30 * months)
-
-    customer.due_date = new_due_date
-    customer.paid = (customer.paid or 0) + price
-    customer.renewal_count = (customer.renewal_count or 0) + 1
-
-    new_history = {
-        "date": datetime.datetime.utcnow().isoformat(),
-        "amount": price
-    }
-    customer.renewal_history = (customer.renewal_history or []) + [new_history]
-    customer.notes = (customer.notes or "") + f" | Renewed on {datetime.date.today()}"
-
-    db.add(customer)
-    await db.commit()
-    await db.refresh(customer)
-    return customer
-
-# --- *** UPDATED update_customer_details *** ---
-@app.put("/api/v1/admin/customers/{customer_id}", response_model=CustomerResponse, tags=[tags_customers])
-async def update_customer_details(
-    customer_id: int,
-    req: CustomerUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    result = await db.execute(select(Customer).filter(Customer.id == customer_id))
-    customer = result.scalars().first()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-
-    customer.name = req.name
-    customer.email = req.email
-    customer.number = req.number
-    # customer.location = req.location # <-- REMOVED
-    customer.plan = req.plan
-    customer.notes = req.notes
-    customer.has_discount = req.has_discount
-
-    db.add(customer)
-    await db.commit()
-    await db.refresh(customer)
-    return customer
-
-# ==================================================
-# 4. ADMIN: DASHBOARD ENDPOINTS
-# ==================================================
-
-@app.get("/api/v1/admin/dashboard/stats", response_model=DashboardStats, tags=[tags_dashboard])
-async def get_dashboard_stats(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    now = datetime.datetime.utcnow()
-    one_week_from_now = now + datetime.timedelta(days=7)
-
-    total_revenue_result = await db.execute(select(func.sum(Customer.paid)).filter(Customer.payment_confirmed == True))
-    total_revenue = total_revenue_result.scalar() or 0.0
-
-    total_expense_result = await db.execute(select(func.sum(Expense.amount)))
-    total_expense = total_expense_result.scalar() or 0.0
-
-    true_profit = total_revenue - total_expense
-
-    customer_count_result = await db.execute(select(func.count(Customer.id)))
-    customer_count = customer_count_result.scalar() or 0
-
-    due_soon_count_result = await db.execute(
-        select(func.count(Customer.id)).filter(Customer.due_date > now, Customer.due_date <= one_week_from_now)
-    )
-    due_soon_count = due_soon_count_result.scalar() or 0
-
-    overdue_count_result = await db.execute(
-        select(func.count(Customer.id)).filter(Customer.due_date <= now)
-    )
-    overdue_count = overdue_count_result.scalar() or 0
-
-    loyal_customer_count_result = await db.execute(
-        select(func.count(Customer.id)).filter(Customer.renewal_count >= 3)
-    )
-    loyal_customer_count = loyal_customer_count_result.scalar() or 0
-
-    return DashboardStats(
-        totalRevenue=total_revenue,
-        trueProfit=true_profit,
-        customerCount=customer_count,
-        dueSoonCount=due_soon_count,
-        overdueCount=overdue_count,
-        loyalCustomerCount=loyal_customer_count
-    )
-
-@app.post("/api/v1/admin/expenses", response_model=ExpenseResponse, tags=[tags_dashboard])
-async def log_expense(
-    req: ExpenseCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    new_expense = Expense(month_year=req.month_year, amount=req.amount)
-    db.add(new_expense)
-    await db.commit()
-    await db.refresh(new_expense)
-    return new_expense
-
-@app.get("/api/v1/admin/expenses", response_model=List[ExpenseResponse], tags=[tags_dashboard])
-async def get_expenses(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    result = await db.execute(select(Expense).order_by(Expense.timestamp.desc()))
-    return result.scalars().all()
-
-@app.get("/api/v1/admin/credentials", response_model=CredentialsUpdate, tags=[tags_dashboard])
-async def get_credentials(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    keys = ["netflixEmail", "netflixPassword", "spotifyInfo", "appleMusicInfo"]
-    creds = {}
-    for key in keys:
-        result = await db.execute(select(ServiceCredential).filter(ServiceCredential.key == key))
-        cred = result.scalars().first()
-        creds[key] = cred.value if cred else ""
-    return CredentialsUpdate(**creds)
-
-@app.post("/api/v1/admin/credentials", tags=[tags_dashboard])
-async def save_credentials(
-    req: CredentialsUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    for key, value in req.dict().items():
-        result = await db.execute(select(ServiceCredential).filter(ServiceCredential.key == key))
-        cred = result.scalars().first()
-        if cred:
-            cred.value = value
-            db.add(cred)
-        else:
-            new_cred = ServiceCredential(key=key, value=value)
-            db.add(new_cred)
-    await db.commit()
-    return {"message": "Credentials saved successfully."}
-
-# ==================================================
-# 5. ADMIN: AI ENDPOINTS
-# ==================================================
-
-def get_gemini_model():
-    if GOOGLE_API_KEY == "DUMMY_KEY" or not GOOGLE_API_KEY:
-          raise HTTPException(
-              status_code=503,
-              detail="AI Service not configured. Please set GOOGLE_API_KEY in .env"
-          )
-    return genai.GenerativeModel('gemini-pro')
-
-@app.post("/api/v1/ai/recommendation", tags=[tags_ai])
-async def get_ai_recommendation(
-    req: AIPlanAdvisorRequest,
-    current_user: User = Depends(get_current_active_user)
-):
-    model = get_gemini_model()
-    prompt = f"""
-    A customer provided the following preferences for a streaming subscription service:
-    - Watches movies/shows: {req.q1}
-    - Importance of new music: {req.q2}
-    - Looking for long-term savings: {req.q3}
-
-    Our plans are:
-    - Netflix (Shared): K50/mo
-    - Netflix (Private): K100/mo
-    - Spotify: K50/mo
-    - Apple Music: K50/mo
-    - We offer 2 and 3 month discounts.
-
-    Based on their answers, recommend the best plan for them and briefly explain why. Be friendly and concise.
-    """
-    try:
-        response = await model.generate_content_async(prompt)
-        return {"recommendation": response.text}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")
-
-@app.post("/api/v1/ai/reminder", tags=[tags_ai])
-async def generate_ai_reminder(
-    req: AIReminderRequest,
-    current_user: User = Depends(get_current_active_user)
-):
-    model = get_gemini_model()
-    prompt = f"""
-    Generate a friendly and professional WhatsApp reminder message for a customer.
-    - Customer Name: {req.name}
-    - Plan: {req.plan}
-    - Due Date: {req.dueDate}
-
-    The message should:
-    1. Greet the customer by name.
-    2. Remind them their subscription is due.
-    3. Mention the payment details (Airtel: 0973404727, MTN: 0765158426).
-    4. Be polite and include a "thank you".
-    """
-    try:
-        response = await model.generate_content_async(prompt)
-        return {"message": response.text}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")
-
-@app.post("/api/v1/ai/insights", tags=[tags_ai])
-async def generate_business_insights(
-    req: AIBusinessInsightsRequest,
-    current_user: User = Depends(get_current_active_user)
-):
-    model = get_gemini_model()
-    prompt = f"""
-    I am the admin for 'Ali Subscription Express'. Here are my current business stats:
-    - Total Revenue: K{req.stats.totalRevenue}
-    - True Profit: K{req.stats.trueProfit}
-    - Total Customers: {req.stats.customerCount}
-    - Customers Due Soon: {req.stats.dueSoonCount}
-    - Customers Overdue: {req.stats.overdueCount}
-    - Loyal Customers (3+ renewals): {req.stats.loyalCustomerCount}
-
-    Here is the popularity of my plans:
-    {str(req.plans)}
-
-    Based ONLY on this data, provide 3 short, actionable business insights or suggestions.
-    Focus on growth, retention, or profitability.
-    """
-    try:
-        response = await model.generate_content_async(prompt)
-        return {"insights": response.text}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")
-
-# --- Run the App ---
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    import pathlib
+    favicon_path = pathlib.Path("static/favicon.ico")
+    if favicon_path.exists():
+        return FileResponse(str(favicon_path))
+    return Response(status_code=204)
