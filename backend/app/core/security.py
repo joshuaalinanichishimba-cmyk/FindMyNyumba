@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/core/security.py
 Password hashing and JWT creation utilities.
 """

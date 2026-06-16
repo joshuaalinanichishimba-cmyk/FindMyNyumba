@@ -34,7 +34,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import create_access_token, get_current_user
@@ -47,7 +47,7 @@ from app.core.rate_limiter import (
     FORGOT_PASSWORD_LIMIT,
     RESET_PASSWORD_LIMIT,
 )
-from app.core.security import verify_password, get_password_hash
+from app.core.security import verify_password, get_password_hash, validate_password_strength
 from app.models.user import User
 from app.models.password_reset import PasswordResetToken
 from app.schemas.user import UserResponse, UserCreate
@@ -119,6 +119,11 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def _password_strength(cls, v: str) -> str:
+        return validate_password_strength(v)
 
 
 class GoogleLoginRequest(BaseModel):
