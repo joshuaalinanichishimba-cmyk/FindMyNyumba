@@ -72,11 +72,22 @@ def _absolute_image_url(raw: Optional[str], request: Request) -> Optional[str]:
     return f"{base}/static/uploads/properties/{raw}"
 
 
+def _watermark(url):
+    """Add a FindMyNyumba watermark to a Cloudinary IMAGE url.
+    Idempotent; skips empties, non-Cloudinary urls, videos, and already-marked urls."""
+    if not url or "res.cloudinary.com" not in url or "/image/upload/" not in url:
+        return url
+    if "l_text:" in url:
+        return url
+    wm = "l_text:Arial_48_bold:FindMyNyumba,co_white,o_40,g_south_east,x_25,y_25"
+    return url.replace("/image/upload/", f"/image/upload/{wm}/", 1)
+
+
 def _media_response(m, request: Request) -> dict:
     return {
         "id": m.id,
         "listing_id": m.listing_id,
-        "media_url": _absolute_image_url(m.media_url, request),
+        "media_url": (_watermark(_absolute_image_url(m.media_url, request)) if m.media_type == "photo" else _absolute_image_url(m.media_url, request)),
         "media_type": m.media_type,
         "public_id": m.public_id,
         "width": m.width,
@@ -95,9 +106,9 @@ def _listing_card(l: Listing, request: Request) -> dict:
         "price":      l.price,
         "location":   l.location,
         "is_boosted": l.is_boosted,
-        "image_url":  _absolute_image_url(l.image_url, request),
+        "image_url":  _watermark(_absolute_image_url(l.image_url, request)),
         "media":      [_media_response(m, request) for m in (l.media or [])],
-        "cover_url":  _absolute_image_url(l.cover_url, request),
+        "cover_url":  _watermark(_absolute_image_url(l.cover_url, request)),
         "created_at": l.created_at.isoformat() if l.created_at else None,
     }
 
@@ -198,9 +209,9 @@ def get_listing_detail(
         "description": listing.description or "",
         "price":       listing.price,
         "location":    listing.location,
-        "image_url":   _absolute_image_url(listing.image_url, request),
+        "image_url":   _watermark(_absolute_image_url(listing.image_url, request)),
         "media":       [_media_response(m, request) for m in (listing.media or [])],
-        "cover_url":   _absolute_image_url(listing.cover_url, request),
+        "cover_url":   _watermark(_absolute_image_url(listing.cover_url, request)),
         "is_boosted":  listing.is_boosted,
         "status":      listing.status,
         "owner_id":    listing.owner_id,
