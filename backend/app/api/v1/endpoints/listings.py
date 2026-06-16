@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/api/v1/endpoints/listings.py
 
 Public listing endpoints used by browse.html, listing.html, and the
@@ -38,7 +38,7 @@ from app.models.user import User
 router = APIRouter(prefix="/properties", tags=["Properties"])
 
 
-# ── Request models ────────────────────────────────────────────────────────────
+# â”€â”€ Request models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class ReviewCreate(BaseModel):
     rating:  int            = Field(..., ge=1, le=5)
     comment: str            = Field(..., min_length=1, max_length=2000)
@@ -49,14 +49,14 @@ class ReportCreate(BaseModel):
     description: Optional[str]  = Field(None, max_length=2000)
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _absolute_image_url(raw: Optional[str], request: Request) -> Optional[str]:
     """
     Convert whatever is stored in Listing.image_url into an absolute URL the
     browser can use directly. Three input cases:
-      1. None / empty            → None (frontend uses placeholder)
-      2. Already a full URL      → returned as-is
-      3. Bare filename or path   → prefixed with the API host + static path
+      1. None / empty            â†’ None (frontend uses placeholder)
+      2. Already a full URL      â†’ returned as-is
+      3. Bare filename or path   â†’ prefixed with the API host + static path
     """
     if not raw:
         return None
@@ -102,7 +102,7 @@ def _listing_card(l: Listing, request: Request) -> dict:
     }
 
 
-# ── GET /properties ───────────────────────────────────────────────────────────
+# â”€â”€ GET /properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("")
 @router.get("/")
 def get_all_properties(
@@ -147,7 +147,7 @@ def get_all_properties(
     return [_listing_card(l, request) for l in listings]
 
 
-# ── GET /properties/{id} ──────────────────────────────────────────────────────
+# â”€â”€ GET /properties/{id} â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/{listing_id}")
 def get_listing_detail(
     listing_id: int,
@@ -168,7 +168,7 @@ def get_listing_detail(
 
     owner = db.query(User).filter(User.id == listing.owner_id).first()
 
-    # Fire-and-forget view tracking — never let it break the public page.
+    # Fire-and-forget view tracking â€” never let it break the public page.
     try:
         from app.models.listing_event import ListingEvent
         db.add(ListingEvent(listing_id=listing.id, kind="view"))
@@ -178,12 +178,17 @@ def get_listing_detail(
 
     owner_data = None
     if owner:
+        _listings_count = db.query(Listing).filter(
+            Listing.owner_id == owner.id, Listing.status == "active"
+        ).count()
         owner_data = {
             "id":                  owner.id,
             "full_name":           owner.full_name,
             "role":                owner.role,
             "verification_status": owner.verification_status or "unverified",
             "avatar_url":          owner.avatar_url,
+            "member_since":        owner.created_at.isoformat() if owner.created_at else None,
+            "listings_count":      _listings_count,
         }
 
     return {
@@ -203,7 +208,7 @@ def get_listing_detail(
     }
 
 
-# ── POST /properties/{id}/reviews ─────────────────────────────────────────────
+# â”€â”€ POST /properties/{id}/reviews â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.post("/{listing_id}/reviews", status_code=201)
 def post_review(
     listing_id: int,
@@ -226,7 +231,7 @@ def post_review(
 
 
 
-# ── POST /properties/{id}/report ──────────────────────────────────────────────
+# â”€â”€ POST /properties/{id}/report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.post("/{listing_id}/report", status_code=201)
 def report_property(
     listing_id: int,
