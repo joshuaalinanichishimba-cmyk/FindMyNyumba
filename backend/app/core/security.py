@@ -21,15 +21,6 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def validate_password_strength(password: str) -> str:
-    if len(password) < 10:
-        raise ValueError("Password must be at least 10 characters long.")
-    if password.isalpha() or password.isdigit():
-        raise ValueError("Password must include both letters and numbers.")
-    if password.lower() in {"password", "password1", "password123", "12345678", "qwerty123", "findmynyumba"}:
-        raise ValueError("That password is too common - please choose another.")
-    return password
-
 
 def validate_password_strength(password: str) -> str:
     """Reject weak passwords. Raises ValueError. Shared by register + reset."""
