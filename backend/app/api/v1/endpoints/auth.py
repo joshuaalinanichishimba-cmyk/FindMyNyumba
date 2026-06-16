@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/api/v1/endpoints/auth.py
 
 Full auth router.
@@ -15,7 +15,7 @@ WHAT CHANGED IN THIS VERSION
 
    NOTE: the lockout store is in-memory, so it is per-process. On a single
    Render web worker that's fine. If you scale to multiple workers, move this
-   to Redis or a DB table — the interface (`_register_failure` / `_is_locked`
+   to Redis or a DB table â€” the interface (`_register_failure` / `_is_locked`
    / `_clear_failures`) is small and easy to swap.
 
 Endpoints (behaviour otherwise unchanged):
@@ -53,7 +53,7 @@ from app.models.password_reset import PasswordResetToken
 from app.schemas.user import UserResponse, UserCreate
 from app.utils.email import send_password_reset_email
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 log = logging.getLogger("findmynyumba.auth")
 
 # Same vague message whether or not the email exists, so attackers can't
@@ -290,7 +290,7 @@ def google_login(request: Request, body: GoogleLoginRequest, db: Session = Depen
         info = id_token.verify_oauth2_token(
             body.credential,
             google_requests.Request(),
-            settings.GOOGLE_CLIENT_ID,   # audience check — must match login.html
+            settings.GOOGLE_CLIENT_ID,   # audience check â€” must match login.html
         )
     except ValueError:
         # Bad signature, wrong audience, or expired token.
