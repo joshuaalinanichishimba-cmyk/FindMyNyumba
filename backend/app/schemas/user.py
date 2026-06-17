@@ -3,6 +3,7 @@ from app.core.security import validate_password_strength
 from typing import Optional
 from datetime import datetime
 
+
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str
@@ -11,9 +12,16 @@ class UserBase(BaseModel):
     business_name: Optional[str] = None
     business_location: Optional[str] = None
 
+
 class UserCreate(UserBase):
     password: str
     id_number: Optional[str] = None
+
+    @field_validator("password")
+    @classmethod
+    def _password_strength(cls, v: str) -> str:
+        return validate_password_strength(v)
+
 
 class UserResponse(UserBase):
     id: int
