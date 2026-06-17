@@ -221,6 +221,7 @@ async def _process_media_uploads(
     for idx, (vm, data, fname) in enumerate(staged):
         res = _cloudinary_upload_media(data, vm)
         is_cover = make_first_cover and (not listing_has_cover) and idx == 0
+        img_hash = phash_bytes(data) if vm.media_type == MediaType.PHOTO else None
         row = ListingMedia(
             listing_id=listing_id,
             media_url=res.get("secure_url") or res.get("url"),
@@ -235,6 +236,7 @@ async def _process_media_uploads(
             duration=res.get("duration"),
             position=pos,
             is_cover=is_cover,
+            image_hash=img_hash,
         )
         db.add(row)
         created.append(row)
