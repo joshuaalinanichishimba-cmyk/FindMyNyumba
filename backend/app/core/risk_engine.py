@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/core/risk_engine.py
 
 Fraud risk scoring for FindMyNyumba.
@@ -44,11 +44,12 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.models.listing import Listing
+from app.models.listing_media import ListingMedia
 from app.models.trust_models import (
     FraudReport, RiskScore, Verification, VerificationDocument,
 )
 
-# ── Tunable weights (one place to change policy) ──────────────────────────────
+# â”€â”€ Tunable weights (one place to change policy) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 BASE_SCORE = 40            # neutral, unverified starting point
 
 W_PHONE_VERIFIED     = 10
@@ -89,7 +90,7 @@ def compute_user_risk(db: Session, user: User) -> dict:
     score = BASE_SCORE
     factors.append({"label": "Base score", "delta": BASE_SCORE})
 
-    # ── Positive signals ──────────────────────────────────────────────────────
+    # â”€â”€ Positive signals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Phone: a recorded phone number AND the latest verification marks it checked.
     latest_v: Optional[Verification] = (
         db.query(Verification)
@@ -136,7 +137,7 @@ def compute_user_risk(db: Session, user: User) -> dict:
         score += W_PROPERTY_VERIFIED
         factors.append({"label": "Verified property", "delta": W_PROPERTY_VERIFIED})
 
-    # ── Negative signals ──────────────────────────────────────────────────────
+    # â”€â”€ Negative signals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     scam_reports = (
         db.query(func.count(FraudReport.id))
         .filter(
@@ -210,6 +211,33 @@ def _duplicate_listing_count(db: Session, owner_id: int) -> int:
         ) or 0
         if other:
             collisions += 1
+
+    # Listing-photo reuse: does any of THIS owner's listing photos share a
+    # phash with a listing photo owned by a DIFFERENT user? That cross-owner
+    # match is the classic stolen-photo scam signal.
+    media_rows = (
+        db.query(ListingMedia.image_hash)
+        .join(Listing, Listing.id == ListingMedia.listing_id)
+        .filter(
+            Listing.owner_id == owner_id,
+            ListingMedia.image_hash.isnot(None),
+        )
+        .all()
+    )
+    media_hashes = {r[0] for r in media_rows if r[0]}
+    for h in media_hashes:
+        other_owner = (
+            db.query(func.count(ListingMedia.id))
+            .join(Listing, Listing.id == ListingMedia.listing_id)
+            .filter(
+                ListingMedia.image_hash == h,
+                Listing.owner_id != owner_id,
+            )
+            .scalar()
+        ) or 0
+        if other_owner:
+            collisions += 1
+
     return collisions
 
 
