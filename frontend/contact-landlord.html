@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -102,16 +102,16 @@
                     </div>
                     <div class="p-5">
                         <h1 id="prop-title" class="text-xl font-extrabold leading-snug">Loading...</h1>
-                        <p id="prop-price" class="text-brand text-2xl font-extrabold mt-1">—</p>
+                        <p id="prop-price" class="text-brand text-2xl font-extrabold mt-1">â€”</p>
 
                         <ul class="mt-4 space-y-2.5 text-sm">
                             <li class="flex items-start gap-2.5 text-gray-700">
                                 <i class="fas fa-location-dot text-gray-400 w-4 mt-0.5"></i>
-                                <span id="prop-location">—</span>
+                                <span id="prop-location">â€”</span>
                             </li>
                             <li class="flex items-start gap-2.5 text-gray-700">
                                 <i class="fas fa-graduation-cap text-gray-400 w-4 mt-0.5"></i>
-                                <span id="prop-distance">—</span>
+                                <span id="prop-distance">â€”</span>
                             </li>
                             <li class="flex items-start gap-2.5">
                                 <i class="fas fa-calendar-check text-gray-400 w-4 mt-0.5"></i>
@@ -119,14 +119,14 @@
                             </li>
                             <li class="flex items-start gap-2.5 text-gray-700">
                                 <i class="fas fa-venus-mars text-gray-400 w-4 mt-0.5"></i>
-                                <span id="prop-gender">—</span>
+                                <span id="prop-gender">â€”</span>
                             </li>
                             <li class="flex items-start gap-2.5 text-gray-700">
                                 <i class="fas fa-clock text-gray-400 w-4 mt-0.5"></i>
-                                <span id="prop-posted">—</span>
+                                <span id="prop-posted">â€”</span>
                             </li>
                         </ul>
-                        <p id="prop-ref" class="mt-4 text-[11px] font-semibold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">ID: —</p>
+                        <p id="prop-ref" class="mt-4 text-[11px] font-semibold text-gray-400 bg-gray-50 inline-block px-2.5 py-1 rounded-md">ID: â€”</p>
                     </div>
                 </div>
 
@@ -215,7 +215,7 @@
                         <!-- ABOUT -->
                         <div data-panel="about">
                             <p id="prop-summary" class="text-gray-700 text-sm leading-relaxed mb-5">
-                                A comfortable, secure home close to campus — perfect for students who want convenience and peace of mind.
+                                A comfortable, secure home close to campus â€” perfect for students who want convenience and peace of mind.
                             </p>
                         </div>
 
@@ -379,7 +379,7 @@
                 <div class="rounded-2xl shadow-sm border border-orange-100 p-5 bg-gradient-to-br from-orange-50 to-white">
                     <div class="flex items-center gap-2 mb-1">
                         <h3 class="font-extrabold text-base">Promote This Listing</h3>
-                        <span class="text-xl">🚀</span>
+                        <span class="text-xl">ðŸš€</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-4">Landlords, get more visibility and attract serious students.</p>
                     <ul class="space-y-2 text-sm text-gray-700 mb-4">
@@ -714,13 +714,13 @@
     /* ===== Details + Amenities panels ===== */
     function renderDetails(data) {
         const items = [
-            ['Property Type', pick(data, ['property_type', 'type'], '—'), 'fa-house'],
-            ['Bedrooms',      pick(data, ['bedrooms'], '—'), 'fa-bed'],
-            ['Bathrooms',     pick(data, ['bathrooms'], '—'), 'fa-bath'],
+            ['Property Type', pick(data, ['property_type', 'type'], 'â€”'), 'fa-house'],
+            ['Bedrooms',      pick(data, ['bedrooms'], 'â€”'), 'fa-bed'],
+            ['Bathrooms',     pick(data, ['bathrooms'], 'â€”'), 'fa-bath'],
             ['Furnished',     pick(data, ['furnished'], 'Yes'), 'fa-couch'],
             ['Water',         pick(data, ['water', 'water_available'], 'Yes'), 'fa-droplet'],
             ['Electricity',   pick(data, ['electricity'], 'Yes'), 'fa-bolt'],
-            ['Deposit',       data.deposit != null ? 'K' + Number(data.deposit).toLocaleString() : '—', 'fa-wallet'],
+            ['Deposit',       data.deposit != null ? 'K' + Number(data.deposit).toLocaleString() : 'â€”', 'fa-wallet'],
             ['Minimum Stay',  pick(data, ['minimum_stay', 'min_stay'], '6 Months'), 'fa-calendar-day'],
         ];
         document.getElementById('details-grid').innerHTML = items.map(([k, v, ic]) => `
@@ -762,7 +762,7 @@
         const grid = document.getElementById('similar-grid');
         const card = (p) => {
             const img = resolveImageUrl(pick(p, ['cover_url', 'image_url'], '')) || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400';
-            const price = p.price != null ? 'K' + Number(p.price).toLocaleString() : '—';
+            const price = p.price != null ? 'K' + Number(p.price).toLocaleString() : 'â€”';
             return `<a href="contact-landlord.html?id=${encodeURIComponent(p.id)}" class="block rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition">
                         <img src="${esc(img)}" class="w-full h-28 object-cover" alt="${esc(p.title || '')}"
                              onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'">
@@ -890,7 +890,7 @@
 
             // stats (TODO: backend member_since / active_listings / response_rate / response_time)
             document.getElementById('stat-member').textContent  = pick(owner, ['member_since'], '2025');
-            document.getElementById('stat-listings').textContent = pick(owner, ['active_listings', 'listings_count'], '—');
+            document.getElementById('stat-listings').textContent = pick(owner, ['active_listings', 'listings_count'], 'â€”');
             document.getElementById('stat-response').textContent = (pick(owner, ['response_rate'], 98)) + '%';
             const rt = pick(owner, ['response_time'], '10 minutes');
             document.getElementById('stat-time').innerHTML = `<i class="fas fa-bolt text-brand"></i> Replies within ${esc(rt)}`;
@@ -903,7 +903,7 @@
                 ['btn-call', 'btn-wa', 'btn-sms'].forEach(id => {
                     const b = document.getElementById(id);
                     b.classList.add('opacity-60');
-                    b.title = 'Phone not available — use in-app messaging';
+                    b.title = 'Phone not available â€” use in-app messaging';
                 });
             }
 
@@ -913,8 +913,8 @@
         } catch (e) {
             console.error('[contact-landlord] loadPropertyInfo:', e);
             document.getElementById('prop-title').textContent = 'Could not load property.';
-            document.getElementById('prop-location').textContent = '—';
-            document.getElementById('prop-price').textContent = '—';
+            document.getElementById('prop-location').textContent = 'â€”';
+            document.getElementById('prop-price').textContent = 'â€”';
         }
     }
 
