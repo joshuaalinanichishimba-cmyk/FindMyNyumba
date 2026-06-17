@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/api/v1/endpoints/landlords.py
 """
 
@@ -21,6 +21,7 @@ from app.core.security import get_password_hash, verify_password
 from app.models.listing import Listing
 from app.models.listing_media import ListingMedia, MediaType
 from app.core import media_validation as mv
+from app.core.image_hash import phash_bytes
 from app.models.message import Message
 from app.models.user import User
 
@@ -40,7 +41,7 @@ MAX_DOC_SIZE_MB   = 10
 MAX_IMAGE_SIZE_MB = 8
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
-# ── Verification document upload to Cloudinary (PERSISTENT) ───────────────────
+# â”€â”€ Verification document upload to Cloudinary (PERSISTENT) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Verification docs were previously saved to local disk, which Render wipes on
 # every deploy. This uploads them to Cloudinary instead so they survive.
 # NOTE (privacy): these land in a dedicated folder with unguessable URLs. The
@@ -78,7 +79,7 @@ PASSWORD_RULE_MSG = (
 )
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def require_landlord(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "landlord":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Landlord access required.")
@@ -150,6 +151,8 @@ async def _process_media_uploads(files: List[UploadFile], listing_id: int, db: S
     for idx, (vm, data, fname) in enumerate(staged):
         res = _cloudinary_upload_media(data, vm)
         is_cover = make_first_cover and (not has_cover) and idx == 0
+        # Perceptual hash for duplicate detection (photos only; never raises).
+        img_hash = phash_bytes(data) if vm.media_type == MediaType.PHOTO else None
         row = ListingMedia(
             listing_id=listing_id,
             media_url=res.get("secure_url") or res.get("url"),
@@ -159,6 +162,7 @@ async def _process_media_uploads(files: List[UploadFile], listing_id: int, db: S
             file_name=fname, file_size=vm.size_bytes, mime_type=vm.mime_type,
             width=res.get("width"), height=res.get("height"), duration=res.get("duration"),
             position=pos, is_cover=is_cover,
+            image_hash=img_hash,
         )
         db.add(row); created.append(row); pos += 1
         if is_cover: has_cover = True
@@ -190,7 +194,7 @@ async def _save_doc_upload(f: UploadFile, dest_dir: Path, user_id: int, prefix: 
     return safe_name
 
 
-# ── Dashboard Stats ───────────────────────────────────────────────────────────
+# â”€â”€ Dashboard Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/dashboard/stats")
 def get_stats(landlord: User = Depends(require_landlord), db: Session = Depends(get_db)):
     active_listings  = db.query(Listing).filter(Listing.owner_id == landlord.id, Listing.status == "active").count()
@@ -206,7 +210,7 @@ def get_stats(landlord: User = Depends(require_landlord), db: Session = Depends(
     }
 
 
-# ── Properties ────────────────────────────────────────────────────────────────
+# â”€â”€ Properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/properties")
 def get_properties(request: Request, landlord: User = Depends(require_landlord), db: Session = Depends(get_db)):
     listings = db.query(Listing).filter(Listing.owner_id == landlord.id).order_by(Listing.created_at.desc()).all()
@@ -297,7 +301,7 @@ async def update_property(
     listing.price       = price
     listing.location    = location.strip()
 
-    # Legacy images path (photos only) — used only when no `media` provided.
+    # Legacy images path (photos only) â€” used only when no `media` provided.
     if images and not media:
         for img in images[:10]:
             if not img.filename:
@@ -361,7 +365,7 @@ def boost_property(listing_id: int, landlord: User = Depends(require_landlord), 
     return {"status": "success", "boosted": listing.is_boosted}
 
 
-# ── Inquiries ─────────────────────────────────────────────────────────────────
+# â”€â”€ Inquiries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/inquiries")
 def get_inquiries(landlord: User = Depends(require_landlord), db: Session = Depends(get_db)):
     messages = db.query(Message).filter(Message.receiver_id == landlord.id).order_by(Message.created_at.desc()).limit(50).all()
@@ -391,7 +395,7 @@ def get_inquiries(landlord: User = Depends(require_landlord), db: Session = Depe
     return result
 
 
-# ── Verification ──────────────────────────────────────────────────────────────
+# â”€â”€ Verification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/verification")
 def get_verification(landlord: User = Depends(require_landlord)):
     return {"verification_status": landlord.verification_status or "unverified", "rejection_reason": landlord.verification_rejection_reason or None}
@@ -409,7 +413,7 @@ async def submit_verification(doc1: UploadFile = File(...), doc2: UploadFile = F
     return {"status": "success", "message": "Verification documents submitted."}
 
 
-# ── Profile ───────────────────────────────────────────────────────────────────
+# â”€â”€ Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class ProfileUpdate(BaseModel):
     full_name:     str           = Field(..., min_length=1, max_length=120)
     phone_number:  Optional[str] = Field(None, max_length=40)
@@ -430,7 +434,7 @@ def update_profile(payload: ProfileUpdate, landlord: User = Depends(require_land
     return {"status": "success", "message": "Profile updated successfully."}
 
 
-# ── Profile photo (avatar) ────────────────────────────────────────────────────
+# â”€â”€ Profile photo (avatar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def _upload_avatar_to_cloudinary(f: UploadFile) -> str:
     """Upload a profile photo to Cloudinary (square, face-aware crop)."""
     mime = (f.content_type or "").lower()
@@ -464,7 +468,7 @@ async def upload_profile_photo(
     return {"status": "success", "avatar_url": url}
 
 
-# ── Change Password ───────────────────────────────────────────────────────────
+# â”€â”€ Change Password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class PasswordChange(BaseModel):
     current_password: str
     new_password:     str
