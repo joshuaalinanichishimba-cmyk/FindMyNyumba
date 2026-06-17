@@ -14,18 +14,30 @@ def setup_exception_handlers(app: FastAPI):
             content={"success": False, "detail": exc.detail},
         )
 
+    def _clean_errors(exc):
+        """Pydantic v2 puts raw ValueError objects in ctx, which aren't JSON
+        serializable. Return the first readable message plus a safe list."""
+        out = []
+        for e in exc.errors():
+            msg = e.get("msg", "Invalid value")
+            field = e.get("loc", ["body"])[-1]
+            out.append({"field": str(field), "message": str(msg)})
+        return out
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        errs = _clean_errors(exc)
         return JSONResponse(
             status_code=422,
-            content={"success": False, "detail": exc.errors()},
+            content={"success": False, "detail": errs[0]["message"] if errs else "Invalid input", "errors": errs},
         )
 
     @app.exception_handler(CoreValidationError)
     async def pydantic_validation_handler(request: Request, exc: CoreValidationError):
+        errs = _clean_errors(exc)
         return JSONResponse(
             status_code=422,
-            content={"success": False, "detail": exc.errors()},
+            content={"success": False, "detail": errs[0]["message"] if errs else "Invalid input", "errors": errs},
         )
 
     @app.exception_handler(Exception)
