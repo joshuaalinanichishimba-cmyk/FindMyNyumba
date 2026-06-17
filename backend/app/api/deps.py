@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.user import User
+from app.core.sessions import is_session_active
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -62,4 +63,9 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account suspended.",
         )
+
+    sid = payload.get("sid")
+    if not is_session_active(db, int(sid) if sid else None):
+        raise credentials_exception
+
     return user
