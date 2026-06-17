@@ -20,6 +20,8 @@ def setup_exception_handlers(app: FastAPI):
         out = []
         for e in exc.errors():
             msg = e.get("msg", "Invalid value")
+            if isinstance(msg, str) and msg.startswith("Value error, "):
+                msg = msg[len("Value error, "):]
             field = e.get("loc", ["body"])[-1]
             out.append({"field": str(field), "message": str(msg)})
         return out
