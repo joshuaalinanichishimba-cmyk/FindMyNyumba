@@ -326,8 +326,9 @@ def google_login(request: Request, body: GoogleLoginRequest, db: Session = Depen
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account suspended.")
 
+    sid = create_session(db, user.id, request)
     token = create_access_token(
-        data={"sub": str(user.id)},
+        data={"sub": str(user.id), "sid": str(sid)},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     return {
