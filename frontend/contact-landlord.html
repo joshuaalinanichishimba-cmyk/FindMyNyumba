@@ -654,8 +654,11 @@
             showToast('Phone number not available. Use in-app messaging instead.', 'error');
             return false;
         }
-        const tel = LANDLORD_PHONE.replace(/[^\d+]/g, '');
-        const wa  = tel.replace(/^\+/, '');
+        let digits = LANDLORD_PHONE.replace(/\D/g, '');
+        if (digits.startsWith('0')) digits = '260' + digits.slice(1);
+        else if (!digits.startsWith('260')) digits = '260' + digits;
+        const wa  = digits;
+        const tel = '+' + digits;
         if (kind === 'call') window.location.href = 'tel:' + tel;
         if (kind === 'sms')  window.location.href = 'sms:' + tel;
         if (kind === 'wa')   window.open(`https://wa.me/${wa}`, '_blank');
