@@ -453,7 +453,7 @@ function hideAlert() {
     el.className = 'alert';
 }
 
-/* Form submit â€” calls /auth/login (shared endpoint, role checked server-side) */
+/* Form submit - calls /auth/login (shared endpoint, role checked server-side) */
 document.getElementById('admin-form').addEventListener('submit', async e => {
     e.preventDefault();
     hideAlert();
@@ -476,7 +476,7 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
     spinner.style.display = 'block';
 
     try {
-        /* Use the shared /auth/login endpoint â€” role is enforced below */
+        /* Use the shared /auth/login endpoint - role is enforced below */
         const res  = await fetch(`${API}/auth/login`, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },

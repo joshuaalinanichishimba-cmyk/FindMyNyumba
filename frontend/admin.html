@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin · FindMyNyumba</title>
+<title>Admin Â· FindMyNyumba</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1044,7 +1044,7 @@ async function loadReports(){
               <span class="font-extrabold text-slate-900 text-sm">${esc(r.listing_title || ('Listing #' + r.listing_id))}</span>
               <span class="pill ${statusPill[r.status] || 'bg-slate-100 text-slate-500'}">${esc(r.status)}</span>
             </div>
-            <div class="text-[11.5px] text-slate-400 mt-1">Report #${esc(r.id)} · by ${esc(r.reporter_name || ('User ' + r.reporter_id))}${r.reporter_email ? ' · ' + esc(r.reporter_email) : ''}</div>
+            <div class="text-[11.5px] text-slate-400 mt-1">Report #${esc(r.id)} Â· by ${esc(r.reporter_name || ('User ' + r.reporter_id))}${r.reporter_email ? ' Â· ' + esc(r.reporter_email) : ''}</div>
             <div class="mt-2 text-[13.5px] text-slate-700"><span class="font-bold">Reason:</span> ${esc(r.reason)}</div>
             ${r.description ? `<div class="mt-1 text-[13px] text-slate-500">${esc(r.description)}</div>` : ''}
           </div>
@@ -1294,7 +1294,7 @@ function exportCSV(kind){
    — full UI, clearly marked as not-yet-connected to a backend.
 ==================================================================== */
 function previewBanner(text){
-  return `<div class="preview-badge mb-5"><i class="fas fa-flask"></i>Preview · ${text}</div>`;
+  return `<div class="preview-badge mb-5"><i class="fas fa-flask"></i>Preview Â· ${text}</div>`;
 }
 function ghostKpi(label, icon){
   return `<div class="kpi opacity-90"><div class="flex items-start justify-between mb-3"><span class="ico-box bg-slate-100 text-slate-400"><i class="fas ${icon}"></i></span><span class="pill bg-amber-50 text-amber-700">Preview</span></div>
@@ -1342,7 +1342,7 @@ function buildModuleSections(){
        </div>
        <div class="card p-5">
          <h3 class="font-extrabold text-slate-900 text-[15px]">By Source</h3>
-         <p class="text-[12px] text-slate-400 font-medium">Verification · Featured · Boost · Escrow · Viewing</p>
+         <p class="text-[12px] text-slate-400 font-medium">Verification Â· Featured Â· Boost Â· Escrow Â· Viewing</p>
          <div class="h-[180px] mt-3 relative"><canvas id="revSourceChart"></canvas></div>
          <div id="rev-source-legend" class="grid grid-cols-2 gap-2 mt-3 text-[11px]"></div>
        </div>
@@ -1377,7 +1377,7 @@ function buildModuleSections(){
      <div class="card overflow-hidden">
        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
          <div><h3 class="font-extrabold text-slate-900 text-[15px]">Escrow Ledger</h3>
-           <p class="text-[12px] text-slate-400 font-medium">waiting → held → released · or refunded / disputed</p></div>
+           <p class="text-[12px] text-slate-400 font-medium">waiting → held → released Â· or refunded / disputed</p></div>
          <button class="btn btn-ghost" onclick="loadEscrow()"><i class="fas fa-rotate"></i>Refresh</button>
        </div>
        <div class="overflow-x-auto"><table class="w-full"><thead><tr>
@@ -1402,7 +1402,7 @@ function buildModuleSections(){
        </div>
        <div class="card p-5">
          <h3 class="font-extrabold text-slate-900 text-[15px]">High-Risk Landlords</h3>
-         <p class="text-[12px] text-slate-400 font-medium">Risk engine score 0–100</p>
+         <p class="text-[12px] text-slate-400 font-medium">Risk engine score 0-100</p>
          <div id="fraud-landlords" class="mt-3 space-y-2"></div>
        </div>
      </div>
@@ -1417,7 +1417,7 @@ function buildModuleSections(){
     `<div class="card overflow-hidden">
        <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-2.5">
          <div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Messages &amp; Support</h3>
-           <p class="text-[12px] text-slate-400 font-medium">Student↔Landlord · Student↔Support · Admin broadcasts</p></div>
+           <p class="text-[12px] text-slate-400 font-medium">Student↔Landlord Â· Student↔Support Â· Admin broadcasts</p></div>
          <select id="support-kind" class="fmn-input w-auto" onchange="renderSupport()">
            <option value="">All conversations</option><option value="student_support">Support tickets</option><option value="student_landlord">Student ↔ Landlord</option></select>
          <div class="relative"><i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
@@ -1765,7 +1765,7 @@ async function loadFraudExtras(){
 }
 
 /* ====================================================================
-   RBAC — role × permission matrix (Settings)
+   RBAC — role Ã— permission matrix (Settings)
 ==================================================================== */
 const RBAC_ROLES = [
   ['super_admin','Super Admin'], ['verification_officer','Verification Officer'], ['support_agent','Support Agent'],
@@ -1943,13 +1943,13 @@ function renderListingDetail(d){
   // reports
   const reps = (d.reports||[]);
   const reportsInner = reps.length
-    ? reps.map(r => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(r.category)}</div><div class="text-[11px] text-slate-400">by ${esc(r.reporter_name||'user')} · ${esc(r.created_at||'')}</div></div><span class="pill bg-orange-50 text-orange-600">${esc(r.status)}</span></div>`).join('')
+    ? reps.map(r => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(r.category)}</div><div class="text-[11px] text-slate-400">by ${esc(r.reporter_name||'user')} Â· ${esc(r.created_at||'')}</div></div><span class="pill bg-orange-50 text-orange-600">${esc(r.status)}</span></div>`).join('')
     : `<div class="text-[12px] text-slate-400 py-4 text-center">No reports on this listing.</div>`;
 
   // transactions
   const txns = (d.transactions||[]);
   const txnInner = txns.length
-    ? txns.map(t => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(TXN_TYPE_LABEL[t.type]||t.type)}</div><div class="text-[11px] text-slate-400">${esc(t.ref||'')} · ${esc(TXN_METHOD_LABEL[t.method]||t.method||'')}</div></div><div class="text-right"><div class="text-[12.5px] font-bold tabnum">${fmtK(t.amount)}</div>${txnStatusPill(t.status)}</div></div>`).join('')
+    ? txns.map(t => `<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"><div><div class="text-[12.5px] font-bold text-slate-700">${esc(TXN_TYPE_LABEL[t.type]||t.type)}</div><div class="text-[11px] text-slate-400">${esc(t.ref||'')} Â· ${esc(TXN_METHOD_LABEL[t.method]||t.method||'')}</div></div><div class="text-right"><div class="text-[12.5px] font-bold tabnum">${fmtK(t.amount)}</div>${txnStatusPill(t.status)}</div></div>`).join('')
     : `<div class="text-[12px] text-slate-400 py-4 text-center">No transactions yet.</div>`;
 
   // audit
@@ -1960,7 +1960,7 @@ function renderListingDetail(d){
 
   // admin notes
   const notes = (d.notes||[]);
-  const notesInner = `${notes.length ? notes.map(n => `<div class="bg-slate-50 rounded-lg px-3 py-2 mb-2"><div class="text-[12.5px] text-slate-700">${esc(n.text)}</div><div class="text-[11px] text-slate-400 mt-0.5">${esc(n.author||'admin')} · ${esc(n.created_at||'')}</div></div>`).join('') : '<div class="text-[12px] text-slate-400 mb-2">No notes yet.</div>'}
+  const notesInner = `${notes.length ? notes.map(n => `<div class="bg-slate-50 rounded-lg px-3 py-2 mb-2"><div class="text-[12.5px] text-slate-700">${esc(n.text)}</div><div class="text-[11px] text-slate-400 mt-0.5">${esc(n.author||'admin')} Â· ${esc(n.created_at||'')}</div></div>`).join('') : '<div class="text-[12px] text-slate-400 mb-2">No notes yet.</div>'}
     <div class="flex gap-2"><input id="ld-note-input" class="fmn-input" placeholder="Add an internal note…"><button class="btn btn-pri" onclick="addAdminNote('${esc(d.id)}')"><i class="fas fa-plus"></i></button></div>`;
 
   const suspended = d.status === 'suspended';
@@ -1970,7 +1970,7 @@ function renderListingDetail(d){
       <div class="min-w-0 flex-1">
         <div class="text-[11px] text-slate-400 font-semibold">Listings / Listing Details</div>
         <h2 class="text-[18px] font-extrabold text-slate-900 truncate">${esc(d.title)}</h2>
-        <div class="text-[12px] text-slate-400">${esc(d.location || [d.area,d.town].filter(Boolean).join(', ') || '—')} · Posted ${created} · ${esc(d.ref || ('#'+d.id))}</div>
+        <div class="text-[12px] text-slate-400">${esc(d.location || [d.area,d.town].filter(Boolean).join(', ') || '—')} Â· Posted ${created} Â· ${esc(d.ref || ('#'+d.id))}</div>
       </div>
       <button class="btn btn-ghost hidden sm:inline-flex" onclick="exportReport('listings','csv')"><i class="fas fa-file-csv"></i>Export CSV</button>
       ${d.status==='pending' ? `<button class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100" onclick="approveListing(${d.id});closeListingDetail()"><i class="fas fa-check"></i>Approve</button>` : ''}
@@ -2062,7 +2062,7 @@ function renderUserDetail(d){
       <div class="w-11 h-11 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center font-bold">${esc((d.full_name||'?')[0])}</div>
       <div class="min-w-0 flex-1">
         <h2 class="text-[18px] font-extrabold text-slate-900 truncate">${esc(d.full_name)}</h2>
-        <div class="text-[12px] text-slate-400">${esc(d.email)} · joined ${created}</div>
+        <div class="text-[12px] text-slate-400">${esc(d.email)} Â· joined ${created}</div>
       </div>
       ${roleBadge(d.role)}
       <button class="btn btn-ghost" onclick="openThread(${d.id}, '${esc((d.full_name||'').replace(/'/g,''))}')"><i class="fas fa-paper-plane"></i>Message</button>
@@ -2168,7 +2168,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeLightb
 let _reviews = [];
 async function loadReviews(){
   const sec = document.getElementById('tab-reviews');
-  sec.innerHTML = `<div class="card overflow-hidden"><div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5"><div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Reviews</h3><p class="text-[12px] text-slate-400 font-medium">Approve or reject student reviews before they show publicly</p></div><select id="review-status" class="fmn-input w-auto" onchange="fetchReviews()"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="">All</option></select></div><div id="reviews-list" class="divide-y divide-slate-50"><div class="px-5 py-10 text-center text-slate-400 text-sm">Loading�</div></div></div>`;
+  sec.innerHTML = `<div class="card overflow-hidden"><div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5"><div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Reviews</h3><p class="text-[12px] text-slate-400 font-medium">Approve or reject student reviews before they show publicly</p></div><select id="review-status" class="fmn-input w-auto" onchange="fetchReviews()"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="">All</option></select></div><div id="reviews-list" class="divide-y divide-slate-50"><div class="px-5 py-10 text-center text-slate-400 text-sm">Loading…</div></div></div>`;
   await fetchReviews();
 }
 async function fetchReviews(){
@@ -2176,7 +2176,7 @@ async function fetchReviews(){
   const el = document.getElementById('reviews-list');
   try {
     const r = await fetch(`${API}/admin/reviews${st ? '?status='+st : ''}`);
-    if (!r.ok){ el.innerHTML = `<div class="px-5 py-10 text-center text-red-500 text-sm">Couldn't load reviews � HTTP ${r.status}.</div>`; return; }
+    if (!r.ok){ el.innerHTML = `<div class="px-5 py-10 text-center text-red-500 text-sm">Couldn't load reviews — HTTP ${r.status}.</div>`; return; }
     _reviews = await r.json();
   } catch { el.innerHTML = `<div class="px-5 py-10 text-center text-red-500 text-sm">Network error.</div>`; return; }
   renderReviews();
@@ -2184,12 +2184,12 @@ async function fetchReviews(){
 function renderReviews(){
   const el = document.getElementById('reviews-list'); if (!el) return;
   if (!_reviews.length){ el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm">No reviews here.</div>`; return; }
-  const stars = n => '?'.repeat(n) + '?'.repeat(5-n);
-  el.innerHTML = _reviews.map(r => `<div class="px-5 py-4"><div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-slate-800 text-[13.5px]">${esc(r.user_name||'User')}</span><span class="text-amber-500 text-sm">${stars(r.rating||0)}</span><span class="pill ${r.status==='approved'?'bg-green-50 text-green-600':r.status==='rejected'?'bg-red-50 text-red-500':'bg-amber-50 text-amber-700'}">${esc(r.status)}</span><span class="text-[11px] text-slate-300 ml-auto">${esc(r.listing_title||'')}</span></div><p class="text-[13px] text-slate-600 mt-1.5">${esc(r.comment||'�')}</p><div class="flex gap-2 mt-2"><button onclick="moderateReview(${r.id},'approved')" class="btn btn-pri text-xs">Approve</button><button onclick="moderateReview(${r.id},'rejected')" class="btn text-xs border border-slate-200">Reject</button></div></div>`).join('');
+  const stars = n => '\u2605'.repeat(n) + '\u2606'.repeat(5-n);
+  el.innerHTML = _reviews.map(r => `<div class="px-5 py-4"><div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-slate-800 text-[13.5px]">${esc(r.user_name||'User')}</span><span class="text-amber-500 text-sm">${stars(r.rating||0)}</span><span class="pill ${r.status==='approved'?'bg-green-50 text-green-600':r.status==='rejected'?'bg-red-50 text-red-500':'bg-amber-50 text-amber-700'}">${esc(r.status)}</span><span class="text-[11px] text-slate-300 ml-auto">${esc(r.listing_title||'')}</span></div><p class="text-[13px] text-slate-600 mt-1.5">${esc(r.comment||'—')}</p><div class="flex gap-2 mt-2"><button onclick="moderateReview(${r.id},'approved')" class="btn btn-pri text-xs">Approve</button><button onclick="moderateReview(${r.id},'rejected')" class="btn text-xs border border-slate-200">Reject</button></div></div>`).join('');
 }
 async function moderateReview(id, status){
   try {
-    const r = await fetch(`${API}/admin/reviews/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ status }) });
+    const r = await fetch(`${API}/admin/reviews/${id}/${status === 'approved' ? 'approve' : 'reject'}`, { method:'PATCH' });
     if (r.ok){ showToast(`Review ${status}.`, 'success'); fetchReviews(); }
     else { showToast('Action failed.', 'error'); }
   } catch { showToast('Network error.', 'error'); }

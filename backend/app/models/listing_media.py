@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/models/listing_media.py
 
 Multi-media storage for listings (photos + videos).
@@ -54,7 +54,7 @@ class ListingMedia(Base):
         index=True,
     )
 
-    # Cloudinary delivery URL — what <img>/<video> render.
+    # Cloudinary delivery URL â€” what <img>/<video> render.
     media_url = Column(String, nullable=False)
 
     # Cloudinary public_id (e.g. "findmynyumba/properties/ab12cd34") and the
@@ -63,7 +63,7 @@ class ListingMedia(Base):
     public_id = Column(String, nullable=True, index=True)
     resource_type = Column(String, nullable=True)  # "image" | "video"
 
-    # "photo" | "video" — derived server-side from real bytes, never trusted
+    # "photo" | "video" â€” derived server-side from real bytes, never trusted
     # from the client.
     media_type = Column(String, nullable=False, default=MediaType.PHOTO.value)
 
@@ -74,6 +74,10 @@ class ListingMedia(Base):
     width = Column(Integer, nullable=True)           # px
     height = Column(Integer, nullable=True)          # px
     duration = Column(Float, nullable=True)          # seconds (videos only)
+
+    # Perceptual hash (dHash, hex) for duplicate/reused-photo detection.
+    # NULL for videos and legacy-backfilled rows. Indexed for fast lookups.
+    image_hash = Column(String(32), nullable=True, index=True)
 
     # Display order within a listing (0-based; lower shown first). Not unique:
     # ordering is owned by the application layer to keep reorder simple.

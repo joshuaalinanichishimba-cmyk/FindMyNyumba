@@ -642,7 +642,7 @@ function logout() {
     window.location.replace('login.html');
 }
 
-// Boot â€” guard prevents re-runs if browser re-executes script on tab focus/reload
+// Boot - guard prevents re-runs if browser re-executes script on tab focus/reload
 let _dashboardInitialised = false;
 async function initDashboard() {
     if (_dashboardInitialised) return;
@@ -678,7 +678,7 @@ async function initDashboard() {
     loadOverviewStats();
 }
 
-// Overview stats â€” _overviewLoaded prevents duplicate calls on page re-focus;
+// Overview stats - _overviewLoaded prevents duplicate calls on page re-focus;
 // the Retry button resets this flag before calling.
 let _overviewLoaded = false;
 async function loadOverviewStats(force = false) {
