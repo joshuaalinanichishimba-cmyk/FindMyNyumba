@@ -496,6 +496,12 @@
       ============================================================= -->
       <section id="tab-settings" class="tab-section">
         <div class="max-w-2xl">
+          <div class="card p-6 mb-5">
+            <h3 class="font-extrabold text-slate-900 text-[15px] mb-1"><i class="fas fa-shield-halved text-[#ea580c] mr-1.5"></i>Active Sessions</h3>
+            <p class="text-[12px] text-slate-400 font-medium mb-4">Devices currently signed in to your admin account. If you see something you do not recognize, log it out.</p>
+            <div id="sessions-list" class="space-y-3"><p class="text-[12px] text-slate-400">Loading...</p></div>
+            <button onclick="logoutAllOther()" class="mt-4 text-[12px] font-bold text-red-600 hover:text-red-700 hover:underline">Log out all other devices</button>
+          </div>
           <div class="card p-6">
             <h3 class="font-extrabold text-slate-900 text-[15px] mb-1">Platform Settings</h3>
             <p class="text-[12px] text-slate-400 font-medium mb-5">Global configuration for FindMyNyumba.</p>
@@ -690,6 +696,7 @@ function showTab(name){
   closeSidebar();
 
   if (name === 'users')         loadUsers();
+  if (name === 'settings')      loadSessions();
   if (name === 'listings')      loadListings();
   if (name === 'verifications') loadVerifications();
   if (name === 'trust')         loadReports();
@@ -2162,6 +2169,15 @@ async function sendThreadMessage(){
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeLightbox(); closeThread(); if (!document.getElementById('listing-detail').classList.contains('hidden')) closeListingDetail(); if (!document.getElementById('user-detail').classList.contains('hidden')) closeUserDetail(); } });
 </script>
+<script>
+function _adminToken(){return sessionStorage.getItem("adminToken")||localStorage.getItem("token");}
+function _uaLabel(ua){if(!ua)return "Unknown device";var os=/Windows/.test(ua)?"Windows":/Android/.test(ua)?"Android":/iPhone|iPad|iOS/.test(ua)?"iOS":/Mac OS X|Macintosh/.test(ua)?"Mac":/Linux/.test(ua)?"Linux":"device";var br=/Edg\//.test(ua)?"Edge":/Chrome\//.test(ua)?"Chrome":/Firefox\//.test(ua)?"Firefox":/Safari\//.test(ua)?"Safari":"browser";return br+" on "+os;}
+function _fmtWhen(iso){if(!iso)return "";try{return new Date(iso).toLocaleString();}catch(e){return iso;}}
+async function loadSessions(){var box=document.getElementById("sessions-list");if(!box)return;box.innerHTML='<p class="text-[12px] text-slate-400">Loading...</p>';try{var res=await fetch(`${API}/auth/sessions`,{headers:{'Authorization':`Bearer ${_adminToken()}`}});if(!res.ok)throw new Error("failed");var rows=await res.json();if(!rows.length){box.innerHTML='<p class="text-[12px] text-slate-400">No active sessions.</p>';return;}box.innerHTML=rows.map(function(s){var current=s.is_current?'<span class="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full">THIS DEVICE</span>':'<button onclick="revokeSession('+s.id+')" class="text-[11px] font-bold text-red-600 hover:underline">Log out</button>';return '<div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl"><div class="min-w-0"><p class="text-[12px] font-bold text-slate-900 truncate">'+_uaLabel(s.user_agent)+'</p><p class="text-[11px] text-slate-400 truncate">'+(s.ip||"unknown IP")+' &middot; '+_fmtWhen(s.last_seen)+'</p></div>'+current+'</div>';}).join("");}catch(e){box.innerHTML='<p class="text-[12px] text-red-500">Could not load sessions.</p>';}}
+async function revokeSession(id){try{await fetch(`${API}/auth/sessions/${id}/revoke`,{method:'POST',headers:{'Authorization':`Bearer ${_adminToken()}`}});if(typeof showToast==="function")showToast("Device logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out that device.","error");}}
+async function logoutAllOther(){try{var res=await fetch(`${API}/auth/logout-all`,{method:'POST',headers:{'Authorization':`Bearer ${_adminToken()}`}});var data=await res.json();if(typeof showToast==="function")showToast(data.message||"Other devices logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out other devices.","error");}}
+</script>
+
 </body>
 </html>
 <script>
