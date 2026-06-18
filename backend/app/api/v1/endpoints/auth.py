@@ -274,6 +274,10 @@ def reset_password(request: Request, body: ResetPasswordRequest, db: Session = D
     prt.used = True
     db.commit()
 
+    # Security: a password reset kills all existing sessions, so a compromised
+    # token cannot survive the reset. The user logs in fresh with the new password.
+    _revoke_all(db, user.id)
+
     # A successful reset clears any active lockout for this account.
     _clear_failures(_lock_key(user.email, request))
 

@@ -40,6 +40,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.core.sessions import revoke_all_for_user
 from app.core.security import get_password_hash, verify_password
 from app.models.listing import Listing
 from app.models.message import Message
@@ -151,6 +152,8 @@ def toggle_suspend(user_id: int, admin: User = Depends(require_admin), db: Sessi
         raise HTTPException(status_code=404, detail="User not found.")
     user.is_active = not user.is_active
     db.commit()
+    if not user.is_active:
+        revoke_all_for_user(db, user.id)
     action = "suspended" if not user.is_active else "reinstated"
     return {"status": "success", "message": f"User {action}.", "is_active": user.is_active}
 
