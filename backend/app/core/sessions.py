@@ -20,13 +20,24 @@ from sqlalchemy.orm import Session
 from app.models.user_session import UserSession
 
 
+def _client_ip(request):
+    """Real client IP, honoring X-Forwarded-For (Render and other proxies set
+    this header). Falls back to the direct socket IP. None if unavailable."""
+    if request is None:
+        return None
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.client.host if request.client else None
+
+
 def create_session(db: Session, user_id: int, request=None) -> int:
     """Create a session row for a fresh login. Returns the new session id."""
     ua = None
     ip = None
     if request is not None:
         ua = (request.headers.get("user-agent") or "")[:500] or None
-        ip = request.client.host if request.client else None
+        ip = _client_ip(request)
     s = UserSession(user_id=user_id, user_agent=ua, ip=ip, revoked=False)
     db.add(s)
     db.commit()
@@ -74,9 +85,7 @@ def maybe_alert_new_login(db, user_id: int, request, new_session_id: int) -> Non
     try:
         from app.core.notify import push_notification
 
-        ip = None
-        if request is not None and request.client:
-            ip = request.client.host
+        ip = _client_ip(request)
 
         # All of this user's sessions except the one just created.
         prior = (
