@@ -78,7 +78,24 @@ def revoke_all_for_user(db: Session, user_id: int, except_session_id: Optional[i
     return n
 
 
-def maybe_alert_new_login(db, user_id: int, request, new_session_id: int) -> None:
+def _device_label(ua):
+    """Short readable device label from a user-agent, e.g. 'Chrome on Windows'."""
+    if not ua:
+        return "an unrecognized device"
+    import re
+    os_name = ("Windows" if re.search("Windows", ua) else
+               "Android" if re.search("Android", ua) else
+               "iOS" if re.search("iPhone|iPad|iOS", ua) else
+               "Mac" if re.search("Mac OS X|Macintosh", ua) else
+               "Linux" if re.search("Linux", ua) else "device")
+    br = ("Edge" if re.search("Edg/", ua) else
+          "Chrome" if re.search("Chrome/", ua) else
+          "Firefox" if re.search("Firefox/", ua) else
+          "Safari" if re.search("Safari/", ua) else "browser")
+    return f"{br} on {os_name}"
+
+
+def maybe_alert_new_login(db, user, request, new_session_id: int) -> None:
     """If this login's IP has not been seen in the user's PRIOR sessions,
     create an in-app 'new sign-in' notification. Skips the user's very first
     login. Never raises - a notification failure must not break login."""
@@ -90,7 +107,7 @@ def maybe_alert_new_login(db, user_id: int, request, new_session_id: int) -> Non
         # All of this user's sessions except the one just created.
         prior = (
             db.query(UserSession)
-              .filter(UserSession.user_id == user_id, UserSession.id != new_session_id)
+              .filter(UserSession.user_id == user.id, UserSession.id != new_session_id)
               .all()
         )
         if not prior:
@@ -104,12 +121,25 @@ def maybe_alert_new_login(db, user_id: int, request, new_session_id: int) -> Non
         where = f" from {ip}" if ip else ""
         push_notification(
             db,
-            user_id,
+            user.id,
             "security.new_login",
             "New sign-in to your account",
             f"We noticed a new sign-in{where}. If this was you, you can ignore this. "
             f"If not, change your password and use 'Log out all other devices' in your settings.",
         )
+
+        # Best-effort security email - own try/except so an email failure does
+        # not undo the in-app notification already created above.
+        try:
+            from app.utils.email import send_login_alert_email
+            from datetime import datetime
+            ua = request.headers.get("user-agent") if request is not None else ""
+            device = _device_label(ua)
+            when = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+            if getattr(user, "email", None):
+                send_login_alert_email(user.email, getattr(user, "full_name", ""), device, ip, when)
+        except Exception:
+            pass
     except Exception:
         try:
             db.rollback()
