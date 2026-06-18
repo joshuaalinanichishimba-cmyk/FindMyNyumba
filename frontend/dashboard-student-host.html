@@ -690,6 +690,12 @@
         <div id="view-profile" class="dashboard-view hidden-view">
             <h2 class="text-xl font-black mb-5 text-gray-900">Profile &amp; Settings</h2>
             <div class="max-w-xl space-y-5">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <h4 class="text-sm font-black text-slate-900 mb-1 flex items-center gap-2"><i class="fas fa-shield-halved text-[#ea580c]"></i> Active Sessions</h4>
+                    <p class="text-xs text-slate-400 font-medium mb-4">Devices currently signed in to your account. If you see something you do not recognize, log it out.</p>
+                    <div id="sessions-list" class="space-y-3"><p class="text-xs text-slate-400">Loading...</p></div>
+                    <button onclick="logoutAllOther()" class="mt-4 text-xs font-bold text-red-600 hover:text-red-700 hover:underline">Log out all other devices</button>
+                </div>
                 <div class="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div class="relative w-16 h-16 shrink-0">
                         <img id="sh-avatar" src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff" class="w-16 h-16 rounded-full object-cover border border-gray-200">
@@ -832,6 +838,7 @@ function switchTab(tabId) {
         if (tabId === 'inquiries')    loadConversations();
         if (tabId === 'verification') loadVerification();
         if (tabId === 'profile')      loadProfile();
+        if (tabId === 'profile')      loadSessions();
     }
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('mobile-overlay').classList.add('hidden');
@@ -1329,6 +1336,14 @@ document.addEventListener("error", function(e){ if(e.target.tagName==="IMG") e.t
     setTimeout(upd, 400);
 })();
 </script>
+<script>
+function _uaLabel(ua){if(!ua)return "Unknown device";var os=/Windows/.test(ua)?"Windows":/Android/.test(ua)?"Android":/iPhone|iPad|iOS/.test(ua)?"iOS":/Mac OS X|Macintosh/.test(ua)?"Mac":/Linux/.test(ua)?"Linux":"device";var br=/Edg\//.test(ua)?"Edge":/Chrome\//.test(ua)?"Chrome":/Firefox\//.test(ua)?"Firefox":/Safari\//.test(ua)?"Safari":"browser";return br+" on "+os;}
+function _fmtWhen(iso){if(!iso)return "";try{return new Date(iso).toLocaleString();}catch(e){return iso;}}
+async function loadSessions(){var box=document.getElementById("sessions-list");if(!box)return;box.innerHTML='<p class="text-xs text-slate-400">Loading...</p>';try{var res=await fetch(`${API_BASE}/auth/sessions`,{headers:authHeaders()});if(!res.ok)throw new Error("failed");var rows=await res.json();if(!rows.length){box.innerHTML='<p class="text-xs text-slate-400">No active sessions.</p>';return;}box.innerHTML=rows.map(function(s){var current=s.is_current?'<span class="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full">THIS DEVICE</span>':'<button onclick="revokeSession('+s.id+')" class="text-[11px] font-bold text-red-600 hover:underline">Log out</button>';return '<div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl"><div class="min-w-0"><p class="text-xs font-bold text-slate-900 truncate">'+_uaLabel(s.user_agent)+'</p><p class="text-[11px] text-slate-400 truncate">'+(s.ip||"unknown IP")+' &middot; '+_fmtWhen(s.last_seen)+'</p></div>'+current+'</div>';}).join("");}catch(e){box.innerHTML='<p class="text-xs text-red-500">Could not load sessions.</p>';}}
+async function revokeSession(id){try{await fetch(`${API_BASE}/auth/sessions/${id}/revoke`,{method:'POST',headers:authHeaders()});if(typeof showToast==="function")showToast("Device logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out that device.","error");}}
+async function logoutAllOther(){try{var res=await fetch(`${API_BASE}/auth/logout-all`,{method:'POST',headers:authHeaders()});var data=await res.json();if(typeof showToast==="function")showToast(data.message||"Other devices logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out other devices.","error");}}
+</script>
+
 </body>
 </html>
 
