@@ -690,12 +690,6 @@
         <div id="view-profile" class="dashboard-view hidden-view">
             <h2 class="text-xl font-black mb-5 text-gray-900">Profile &amp; Settings</h2>
             <div class="max-w-xl space-y-5">
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                    <h4 class="text-sm font-black text-slate-900 mb-1 flex items-center gap-2"><i class="fas fa-shield-halved text-[#ea580c]"></i> Active Sessions</h4>
-                    <p class="text-xs text-slate-400 font-medium mb-4">Devices currently signed in to your account. If you see something you do not recognize, log it out.</p>
-                    <div id="sessions-list" class="space-y-3"><p class="text-xs text-slate-400">Loading...</p></div>
-                    <button onclick="logoutAllOther()" class="mt-4 text-xs font-bold text-red-600 hover:text-red-700 hover:underline">Log out all other devices</button>
-                </div>
                 <div class="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div class="relative w-16 h-16 shrink-0">
                         <img id="sh-avatar" src="https://ui-avatars.com/api/?name=S&background=ea580c&color=fff" class="w-16 h-16 rounded-full object-cover border border-gray-200">
@@ -743,6 +737,12 @@
                         </div>
                         <button type="submit" class="bg-gray-900 text-white px-8 py-3 rounded-xl font-black hover:bg-gray-800 transition text-sm">Update Password</button>
                     </form>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <h4 class="text-sm font-black text-slate-900 mb-1 flex items-center gap-2"><i class="fas fa-shield-halved text-[#ea580c]"></i> Active Sessions</h4>
+                    <p class="text-xs text-slate-400 font-medium mb-4">Devices currently signed in to your account. If you see something you do not recognize, log it out.</p>
+                    <div id="sessions-list" class="space-y-3"><p class="text-xs text-slate-400">Loading...</p></div>
+                    <button onclick="logoutAllOther()" class="mt-4 text-xs font-bold text-red-600 hover:text-red-700 hover:underline">Log out all other devices</button>
                 </div>
             </div>
         </div>
