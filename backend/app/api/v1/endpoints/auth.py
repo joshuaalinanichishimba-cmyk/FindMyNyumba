@@ -337,3 +337,74 @@ def google_login(request: Request, body: GoogleLoginRequest, db: Session = Depen
         "role": user.role,
         "user_id": user.id,
     }
+
+
+# ---------------------------------------------------------------------------
+# Session management endpoints (view / revoke / logout)
+# ---------------------------------------------------------------------------
+from app.models.user_session import UserSession as _UserSession
+from app.core.sessions import revoke_session as _revoke_session, revoke_all_for_user as _revoke_all
+from app.api.deps import get_current_session_id as _get_current_sid
+
+
+@router.get("/sessions")
+def list_sessions(
+    current_user: User = Depends(get_current_user),
+    current_sid: int = Depends(_get_current_sid),
+    db: Session = Depends(get_db),
+):
+    """List the current user's active (non-revoked) sessions."""
+    rows = (
+        db.query(_UserSession)
+          .filter(_UserSession.user_id == current_user.id, _UserSession.revoked == False)  # noqa: E712
+          .order_by(_UserSession.created_at.desc())
+          .all()
+    )
+    return [
+        {
+            "id": s.id,
+            "is_current": s.id == current_sid,
+            "user_agent": s.user_agent,
+            "ip": s.ip,
+            "created_at": s.created_at.isoformat() if s.created_at else None,
+            "last_seen": s.last_seen.isoformat() if s.last_seen else None,
+        }
+        for s in rows
+    ]
+
+
+@router.post("/sessions/{session_id}/revoke")
+def revoke_one_session(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Revoke a single session. You can only revoke your OWN sessions."""
+    s = db.query(_UserSession).filter(_UserSession.id == session_id).first()
+    if not s or s.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Session not found.")
+    _revoke_session(db, session_id)
+    return {"message": "Session revoked."}
+
+
+@router.post("/logout")
+def logout(
+    current_user: User = Depends(get_current_user),
+    current_sid: int = Depends(_get_current_sid),
+    db: Session = Depends(get_db),
+):
+    """Revoke the current session (log out this device)."""
+    if current_sid:
+        _revoke_session(db, current_sid)
+    return {"message": "Logged out."}
+
+
+@router.post("/logout-all")
+def logout_all_other(
+    current_user: User = Depends(get_current_user),
+    current_sid: int = Depends(_get_current_sid),
+    db: Session = Depends(get_db),
+):
+    """Revoke all of the user's other sessions, keeping the current one."""
+    n = _revoke_all(db, current_user.id, except_session_id=current_sid)
+    return {"message": f"Logged out {n} other session(s).", "revoked_count": n}

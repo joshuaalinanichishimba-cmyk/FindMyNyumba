@@ -69,3 +69,12 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+
+def get_current_session_id(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        sid = payload.get("sid")
+        return int(sid) if sid else None
+    except JWTError:
+        return None
