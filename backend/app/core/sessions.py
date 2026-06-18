@@ -65,3 +65,44 @@ def revoke_all_for_user(db: Session, user_id: int, except_session_id: Optional[i
         n += 1
     db.commit()
     return n
+
+
+def maybe_alert_new_login(db, user_id: int, request, new_session_id: int) -> None:
+    """If this login's IP has not been seen in the user's PRIOR sessions,
+    create an in-app 'new sign-in' notification. Skips the user's very first
+    login. Never raises - a notification failure must not break login."""
+    try:
+        from app.core.notify import push_notification
+
+        ip = None
+        if request is not None and request.client:
+            ip = request.client.host
+
+        # All of this user's sessions except the one just created.
+        prior = (
+            db.query(UserSession)
+              .filter(UserSession.user_id == user_id, UserSession.id != new_session_id)
+              .all()
+        )
+        if not prior:
+            return  # first login ever - do not alert
+
+        seen_ips = {s.ip for s in prior if s.ip}
+        if ip and ip in seen_ips:
+            return  # known IP - no alert
+
+        # New IP (or unknown IP) on a returning account -> alert.
+        where = f" from {ip}" if ip else ""
+        push_notification(
+            db,
+            user_id,
+            "security.new_login",
+            "New sign-in to your account",
+            f"We noticed a new sign-in{where}. If this was you, you can ignore this. "
+            f"If not, change your password and use 'Log out all other devices' in your settings.",
+        )
+    except Exception:
+        try:
+            db.rollback()
+        except Exception:
+            pass

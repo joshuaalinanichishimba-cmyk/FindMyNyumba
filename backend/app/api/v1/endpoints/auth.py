@@ -48,7 +48,7 @@ from app.core.rate_limiter import (
     RESET_PASSWORD_LIMIT,
 )
 from app.core.security import verify_password, get_password_hash, validate_password_strength
-from app.core.sessions import create_session
+from app.core.sessions import create_session, maybe_alert_new_login
 from app.models.user import User
 from app.models.password_reset import PasswordResetToken
 from app.schemas.user import UserResponse, UserCreate
@@ -159,6 +159,7 @@ def login(request: Request, body: LoginRequest, db: Session = Depends(get_db)):
 
     _clear_failures(key)  # successful login wipes the failure record
     sid = create_session(db, user.id, request)
+    maybe_alert_new_login(db, user.id, request, sid)
     token = create_access_token(
         data={"sub": str(user.id), "sid": str(sid)},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
@@ -331,6 +332,7 @@ def google_login(request: Request, body: GoogleLoginRequest, db: Session = Depen
         raise HTTPException(status_code=403, detail="Account suspended.")
 
     sid = create_session(db, user.id, request)
+    maybe_alert_new_login(db, user.id, request, sid)
     token = create_access_token(
         data={"sub": str(user.id), "sid": str(sid)},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
