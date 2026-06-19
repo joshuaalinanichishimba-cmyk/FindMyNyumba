@@ -383,6 +383,11 @@
                 <!--  PROFILE  -->
                 <div id="profile-section" class="dashboard-section hidden">
                     <div class="max-w-2xl">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm mb-5">
+                            <h4 class="text-sm font-black text-slate-900 mb-1 flex items-center gap-2"><i class="fas fa-id-card text-[#ea580c]"></i> Student Verification</h4>
+                            <p class="text-xs text-slate-400 font-medium mb-4">Verify your student status to build trust with landlords and unlock the Verified Student badge.</p>
+                            <div id="student-verify-body"><p class="text-xs text-slate-400">Loading...</p></div>
+                        </div>
 
                         <!-- Profile card header -->
                         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-5">
@@ -604,7 +609,7 @@ function switchTab(tab) {
     if (titleEl) titleEl.textContent = titles[tab] || tab;
     closeSidebar();
     if (tab === 'messages') loadConversations();
-    if (tab === 'profile')  loadProfileData();
+    if (tab === 'profile')  { loadProfileData(); loadStudentVerification(); }
     if (tab === 'saved')    loadSavedRooms();
     if (tab === 'settings') loadSessions();
 }
@@ -1057,6 +1062,51 @@ function _fmtWhen(iso){if(!iso)return "";try{return new Date(iso).toLocaleString
 async function loadSessions(){var box=document.getElementById("sessions-list");if(!box)return;box.innerHTML='<p class="text-xs text-slate-400">Loading...</p>';try{var res=await fetch(`${API}/auth/sessions`,{headers:{'Authorization':`Bearer ${getToken()}`}});if(!res.ok)throw new Error("failed");var rows=await res.json();if(!rows.length){box.innerHTML='<p class="text-xs text-slate-400">No active sessions.</p>';return;}box.innerHTML=rows.map(function(s){var current=s.is_current?'<span class="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full">THIS DEVICE</span>':'<button onclick="revokeSession('+s.id+')" class="text-[11px] font-bold text-red-600 hover:underline">Log out</button>';return '<div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl"><div class="min-w-0"><p class="text-xs font-bold text-slate-900 truncate">'+_uaLabel(s.user_agent)+'</p><p class="text-[11px] text-slate-400 truncate">'+(s.ip||"unknown IP")+' &middot; '+_fmtWhen(s.last_seen)+'</p></div>'+current+'</div>';}).join("");}catch(e){box.innerHTML='<p class="text-xs text-red-500">Could not load sessions.</p>';}}
 async function revokeSession(id){try{await fetch(`${API}/auth/sessions/${id}/revoke`,{method:'POST',headers:{'Authorization':`Bearer ${getToken()}`}});if(typeof showToast==="function")showToast("Device logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out that device.","error");}}
 async function logoutAllOther(){try{var res=await fetch(`${API}/auth/logout-all`,{method:'POST',headers:{'Authorization':`Bearer ${getToken()}`}});var data=await res.json();if(typeof showToast==="function")showToast(data.message||"Other devices logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out other devices.","error");}}
+</script>
+
+<script>
+async function loadStudentVerification(){
+  var box=document.getElementById("student-verify-body");
+  if(!box)return;
+  box.innerHTML='<p class="text-xs text-slate-400">Loading...</p>';
+  try{
+    var res=await fetch(`${API}/students/verification`,{headers:{'Authorization':`Bearer ${getToken()}`}});
+    var data=await res.json();
+    var status=(data.verification_status||"unverified");
+    if(status==="verified"){
+      box.innerHTML='<div class="flex items-center gap-2 p-4 bg-green-50 border border-green-100 rounded-xl"><i class="fas fa-circle-check text-green-600"></i><div><p class="text-sm font-black text-green-700">Verified Student</p><p class="text-[11px] text-green-600">Your student status has been confirmed.</p></div></div>';
+    }else if(status==="pending"){
+      box.innerHTML='<div class="flex items-center gap-2 p-4 bg-amber-50 border border-amber-100 rounded-xl"><i class="fas fa-clock text-amber-500"></i><div><p class="text-sm font-black text-amber-700">Under Review</p><p class="text-[11px] text-amber-600">Your documents are being reviewed. This usually takes 1-2 days.</p></div></div>';
+    }else{
+      var rej=(status==="rejected"&&data.rejection_reason)?'<div class="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl text-[12px] text-red-700"><i class="fas fa-circle-xmark mr-1"></i> Your previous submission was rejected: '+esc(data.rejection_reason)+'. Please re-submit clearer documents.</div>':'';
+      box.innerHTML=rej+
+        '<div class="space-y-3">'+
+        '<div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Student ID Card</label><input type="file" id="verify-doc1" accept="image/*,application/pdf" class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-[#ea580c] hover:file:bg-orange-100"></div>'+
+        '<div><label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Selfie Holding Your ID</label><input type="file" id="verify-doc2" accept="image/*" class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-[#ea580c] hover:file:bg-orange-100"></div>'+
+        '<button onclick="submitStudentVerification()" id="verify-submit-btn" class="bg-[#ea580c] text-white px-6 py-2.5 rounded-xl font-black hover:bg-orange-700 shadow transition text-sm">Submit for Verification</button>'+
+        '</div>';
+    }
+  }catch(e){box.innerHTML='<p class="text-xs text-red-500">Could not load verification status.</p>';}
+}
+async function submitStudentVerification(){
+  var d1=document.getElementById("verify-doc1");
+  var d2=document.getElementById("verify-doc2");
+  if(!d1||!d1.files[0]||!d2||!d2.files[0]){showToast("Please choose both your Student ID and a selfie.","error");return;}
+  var btn=document.getElementById("verify-submit-btn");
+  if(btn){btn.disabled=true;btn.textContent="Uploading...";}
+  try{
+    var fd=new FormData();
+    fd.append("doc1",d1.files[0]);
+    fd.append("doc2",d2.files[0]);
+    var res=await fetch(`${API}/students/verify`,{method:'POST',headers:{'Authorization':`Bearer ${getToken()}`},body:fd});
+    if(!res.ok){var err=await res.json().catch(function(){return {};});throw new Error(err.detail||"Upload failed");}
+    showToast("Documents submitted for review.");
+    loadStudentVerification();
+  }catch(e){
+    showToast(e.message||"Could not submit documents.","error");
+    if(btn){btn.disabled=false;btn.textContent="Submit for Verification";}
+  }
+}
 </script>
 
 </body>
