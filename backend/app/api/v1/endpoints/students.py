@@ -1,4 +1,4 @@
-"""app/api/v1/endpoints/students.py - Student dashboard endpoints.
+﻿"""app/api/v1/endpoints/students.py - Student dashboard endpoints.
 
 All endpoints require student role. SavedListing model ensures
 persistent saved listings across sessions and server restarts.
@@ -6,7 +6,7 @@ persistent saved listings across sessions and server restarts.
 import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -37,6 +37,42 @@ def require_student(current_user: User = Depends(get_current_user)) -> User:
             detail="Student access required.",
         )
     return current_user
+
+
+import os
+import cloudinary
+import cloudinary.uploader
+
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+    secure=True,
+)
+
+_ALLOWED_VERIFY_TYPES = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
+
+
+async def _upload_verify_doc(f: UploadFile, user_id: int, label: str) -> str:
+    """Upload a student verification document to Cloudinary; return secure URL."""
+    mime = (f.content_type or "").lower()
+    if mime not in _ALLOWED_VERIFY_TYPES:
+        raise HTTPException(status_code=400, detail="Document must be a JPG, PNG, WEBP, or PDF.")
+    data = await f.read()
+    if len(data) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Document must be under 10MB.")
+    resource_type = "raw" if mime == "application/pdf" else "image"
+    try:
+        result = cloudinary.uploader.upload(
+            data,
+            folder="findmynyumba/verification",
+            resource_type=resource_type,
+            public_id=f"student_{user_id}_{label}",
+            overwrite=True,
+        )
+        return result.get("secure_url") or result.get("url")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Document upload failed: {e}")
 
 
 def _resolve_image(raw: Optional[str]) -> Optional[str]:
@@ -240,3 +276,34 @@ def change_password(
     db.commit()
 
     return {"status": "success", "message": "Password updated successfully."}
+
+
+# ── Student verification (Student ID + selfie) ──────────────────────────────
+@router.post("/verify")
+async def submit_student_verification(
+    doc1: UploadFile = File(...),   # Student ID card
+    doc2: UploadFile = File(...),   # Selfie holding the ID
+    student: User = Depends(require_student),
+    db: Session = Depends(get_db),
+):
+    """Submit student verification documents (Student ID + selfie) for review."""
+    if student.verification_status == "pending":
+        raise HTTPException(
+            status_code=409,
+            detail="A verification request is already pending review.",
+        )
+    student.verification_doc1_url = await _upload_verify_doc(doc1, student.id, "doc1")
+    student.verification_doc2_url = await _upload_verify_doc(doc2, student.id, "doc2")
+    student.verification_status = "pending"
+    student.verification_rejection_reason = None
+    db.commit()
+    return {"status": "success", "message": "Verification documents submitted for review."}
+
+
+@router.get("/verification")
+def get_student_verification(student: User = Depends(require_student)):
+    """Return the student's current verification status."""
+    return {
+        "verification_status": student.verification_status or "unverified",
+        "rejection_reason": student.verification_rejection_reason or None,
+    }
