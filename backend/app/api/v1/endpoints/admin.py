@@ -109,7 +109,7 @@ def get_stats(admin: User = Depends(require_admin), db: Session = Depends(get_db
     pending_listings = db.query(Listing).filter(Listing.status == "pending").count()
     pending_verifs   = db.query(User).filter(
         User.verification_status == "pending",
-        User.role.in_(["landlord", "student_host"]),
+        User.role.in_(["landlord", "student_host", "student"]),
     ).count()
     pending_reports  = db.query(Report).filter(Report.status == "pending").count()
 
@@ -218,13 +218,13 @@ def get_verifications(
     db: Session = Depends(get_db),
 ):
     """
-    Return landlords and student_hosts with pending verification.
+    Return landlords, student_hosts, and students with pending verification.
     Document URLs are resolved by scanning the verification upload directory
     for files matching the user's ID pattern, so admins can actually open them.
     """
     users = db.query(User).filter(
         User.verification_status == "pending",
-        User.role.in_(["landlord", "student_host"]),
+        User.role.in_(["landlord", "student_host", "student"]),
     ).order_by(User.created_at.asc()).all()
 
     return [
