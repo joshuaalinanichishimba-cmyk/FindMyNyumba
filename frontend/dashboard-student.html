@@ -488,11 +488,10 @@
                 </div>
 
                 <div id="viewings-section" class="dashboard-section hidden">
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center max-w-xl mx-auto">
-                        <div class="w-16 h-16 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-calendar-day"></i></div>
-                        <h2 class="text-lg font-extrabold text-slate-900 mb-1">Viewings</h2>
-                        <p class="text-slate-400 text-sm font-medium mb-5">Scheduled property viewings will appear here.</p>
-                        <a href="browse.html" class="inline-block bg-[#ea580c] hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition">Browse Rooms</a>
+                    <div class="max-w-2xl">
+                        <h2 class="text-lg font-extrabold text-slate-900 mb-1">My Viewings</h2>
+                        <p class="text-slate-400 text-sm font-medium mb-5">Track your property viewing requests and show your code to the landlord at the viewing.</p>
+                        <div id="viewings-list"><p class="text-sm text-slate-400">Loading...</p></div>
                     </div>
                 </div>
 
@@ -611,6 +610,7 @@ function switchTab(tab) {
     if (tab === 'messages') loadConversations();
     if (tab === 'profile')  { loadProfileData(); loadStudentVerification(); }
     if (tab === 'saved')    loadSavedRooms();
+    if (tab === 'viewings') loadViewings();
     if (tab === 'settings') loadSessions();
 }
 
@@ -1105,6 +1105,65 @@ async function submitStudentVerification(){
   }catch(e){
     showToast(e.message||"Could not submit documents.","error");
     if(btn){btn.disabled=false;btn.textContent="Submit for Verification";}
+  }
+}
+</script>
+
+<script>
+function _vStatusBadge(status){
+  var map={
+    pending:    ['bg-amber-100 text-amber-700','Pending'],
+    accepted:   ['bg-green-100 text-green-700','Accepted'],
+    rescheduled:['bg-blue-100 text-blue-700','Rescheduled'],
+    completed:  ['bg-emerald-100 text-emerald-700','Completed'],
+    rejected:   ['bg-slate-100 text-slate-500','Declined'],
+    cancelled:  ['bg-slate-100 text-slate-500','Cancelled'],
+    missed:     ['bg-red-100 text-red-700','Missed']
+  };
+  var m=map[status]||['bg-slate-100 text-slate-500',status];
+  return '<span class="text-[10px] font-black px-2.5 py-1 rounded-full '+m[0]+'">'+m[1]+'</span>';
+}
+async function loadViewings(){
+  var box=document.getElementById("viewings-list");
+  if(!box)return;
+  box.innerHTML='<p class="text-sm text-slate-400">Loading...</p>';
+  try{
+    var res=await fetch(`${API}/viewing-requests/student`,{headers:{'Authorization':`Bearer ${getToken()}`}});
+    if(!res.ok)throw new Error("failed");
+    var rows=await res.json();
+    if(!Array.isArray(rows)||!rows.length){
+      box.innerHTML='<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center">'+
+        '<div class="w-16 h-16 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-calendar-day"></i></div>'+
+        '<p class="text-slate-400 text-sm font-medium mb-5">You have no viewing requests yet.</p>'+
+        '<a href="browse.html" class="inline-block bg-[#ea580c] hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition">Browse Rooms</a></div>';
+      return;
+    }
+    box.innerHTML=rows.map(function(v){
+      var when=esc((v.preferred_date||'')+' at '+(v.preferred_time||''));
+      var title=esc(v.listing_title||'Property');
+      var landlord=v.landlord_name?('<p class="text-[12px] text-slate-400">Landlord: '+esc(v.landlord_name)+'</p>'):'';
+      var codeBox='';
+      if(v.status==='accepted' && v.viewing_code){
+        codeBox='<div class="mt-3 p-4 bg-green-50 border border-green-200 rounded-xl text-center">'+
+          '<p class="text-[11px] font-bold text-green-700 uppercase tracking-wide mb-1">Your Viewing Code</p>'+
+          '<p class="text-2xl font-black text-green-800 tracking-widest">'+esc(v.viewing_code)+'</p>'+
+          '<p class="text-[11px] text-green-600 mt-1">Show this code to the landlord at your viewing.</p></div>';
+      }
+      var reschedule='';
+      if(v.status==='rescheduled' && v.rescheduled_date){
+        reschedule='<div class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-xl text-[12px] text-blue-700">'+
+          'Landlord proposed a new time: <strong>'+esc(v.rescheduled_date)+' at '+esc(v.rescheduled_time||'')+'</strong>. Please confirm via Messages.</div>';
+      }
+      var note=(v.status==='rejected'&&v.landlord_notes)?'<p class="mt-2 text-[12px] text-slate-500">Reason: '+esc(v.landlord_notes)+'</p>':'';
+      var completed=(v.status==='completed')?'<p class="mt-2 text-[12px] text-emerald-600"><i class="fas fa-circle-check mr-1"></i>This viewing was completed. You can now leave a review.</p>':'';
+      return '<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">'+
+        '<div class="flex items-start justify-between gap-3">'+
+        '<div><p class="font-extrabold text-slate-900 text-sm">'+title+'</p>'+
+        '<p class="text-[12px] text-slate-500 mt-0.5"><i class="far fa-calendar mr-1"></i>'+when+'</p>'+landlord+'</div>'+
+        _vStatusBadge(v.status)+'</div>'+codeBox+reschedule+note+completed+'</div>';
+    }).join("");
+  }catch(e){
+    box.innerHTML='<p class="text-sm text-red-500">Could not load your viewings. Please try again.</p>';
   }
 }
 </script>
