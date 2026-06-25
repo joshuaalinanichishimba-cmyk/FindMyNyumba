@@ -67,6 +67,7 @@ from app.models.admin_models import (                  # noqa: E402,F401
 )
 from app.models.listing_event import ListingEvent      # noqa: E402,F401
 from app.models.review import Review                 # noqa: E402,F401
+from app.models.student_review import StudentReview   # noqa: E402,F401
 from app.models.user_session import UserSession       # noqa: E402,F401
 from app.models.trust_models import (                 # noqa: E402,F401
     Verification, VerificationDocument, PropertyVerification,

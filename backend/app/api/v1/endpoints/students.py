@@ -17,6 +17,8 @@ from app.models.listing import Listing
 from app.models.message import Message
 from app.models.user import User
 from app.models.saved_listing import SavedListing
+from app.models.viewing_request import ViewingRequest, ViewingStatus
+from app.models.student_review import StudentReview
 
 router = APIRouter(prefix="/students", tags=["Students"])
 
@@ -306,4 +308,101 @@ def get_student_verification(student: User = Depends(require_student)):
     return {
         "verification_status": student.verification_status or "unverified",
         "rejection_reason": student.verification_rejection_reason or None,
+    }
+
+
+# -- Landlord -> Student reviews (two-way reputation) -------------------------
+# A landlord may review a student only after a COMPLETED viewing with them.
+# Completion required the landlord to verify the student's code in person, so
+# every student review traces back to a real, verified visit.
+class StudentReviewCreate(BaseModel):
+    rating: int
+    comment: str
+    viewing_id: Optional[int] = None
+
+
+@router.post("/{student_id}/reviews", status_code=status.HTTP_201_CREATED)
+def post_student_review(
+    student_id: int,
+    review: StudentReviewCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.role != "landlord":
+        raise HTTPException(status_code=403, detail="Only landlords can review students.")
+    if current_user.id == student_id:
+        raise HTTPException(status_code=400, detail="You cannot review yourself.")
+    if not (1 <= review.rating <= 5):
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5.")
+
+    student = db.query(User).filter(User.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    # GATE: this landlord must have a completed viewing with this student.
+    completed = (
+        db.query(ViewingRequest)
+          .filter(
+              ViewingRequest.landlord_id == current_user.id,
+              ViewingRequest.student_id == student_id,
+              ViewingRequest.status == ViewingStatus.COMPLETED.value,
+          )
+          .first()
+    )
+    if not completed:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only review a student after completing a viewing with them.",
+        )
+
+    # One review per completed viewing (if viewing_id given), else one per landlord-student pair.
+    dup_q = db.query(StudentReview).filter(
+        StudentReview.landlord_id == current_user.id,
+        StudentReview.student_id == student_id,
+    )
+    if review.viewing_id is not None:
+        dup_q = dup_q.filter(StudentReview.viewing_id == review.viewing_id)
+    if dup_q.first():
+        raise HTTPException(status_code=409, detail="You have already reviewed this student for this viewing.")
+
+    row = StudentReview(
+        student_id=student_id,
+        landlord_id=current_user.id,
+        viewing_id=review.viewing_id or (completed.id if completed else None),
+        landlord_name=current_user.full_name,
+        rating=review.rating,
+        comment=(review.comment or "").strip(),
+        status="pending",
+    )
+    db.add(row)
+    db.commit()
+    return {"status": "submitted", "message": "Thank you! Your review will appear after approval."}
+
+
+@router.get("/{student_id}/reviews")
+def list_student_reviews(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(StudentReview)
+          .filter(StudentReview.student_id == student_id, StudentReview.status == "approved")
+          .order_by(StudentReview.created_at.desc())
+          .all()
+    )
+    avg = round(sum(r.rating for r in rows) / len(rows), 1) if rows else None
+    return {
+        "count": len(rows),
+        "average": avg,
+        "reviews": [
+            {
+                "id": r.id,
+                "rating": r.rating,
+                "comment": r.comment,
+                "landlord_name": r.landlord_name,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in rows
+        ],
     }
