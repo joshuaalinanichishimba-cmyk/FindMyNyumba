@@ -1808,6 +1808,18 @@ function _lvBadge(status){
   var m=map[status]||['bg-slate-100 text-slate-500',status];
   return '<span class="text-[10px] font-black px-2.5 py-1 rounded-full '+m[0]+'">'+m[1]+'</span>';
 }
+function _fmtViewWhen(dateStr,timeStr){
+  try{
+    var d=new Date((dateStr||'')+'T'+(timeStr||'00:00'));
+    if(isNaN(d.getTime()))return esc((dateStr||'')+' '+(timeStr||''));
+    var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var h=d.getHours(),m=d.getMinutes();
+    var ampm=h>=12?'PM':'AM';var h12=h%12;if(h12===0)h12=12;
+    var mm=m<10?('0'+m):m;
+    return days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()+' &middot; '+h12+':'+mm+' '+ampm;
+  }catch(e){return esc((dateStr||'')+' '+(timeStr||''));}
+}
 async function loadLandlordViewings(){
   var box=document.getElementById("landlord-viewings-list");
   if(!box)return;
@@ -1821,38 +1833,52 @@ async function loadLandlordViewings(){
       return;
     }
     box.innerHTML=rows.map(function(v){
-      var when=esc((v.preferred_date||'')+' at '+(v.preferred_time||''));
+      var when=_fmtViewWhen(v.preferred_date,v.preferred_time);
       var title=esc(v.listing_title||'Property');
       var student=esc(v.student_name||'Student');
-      var phone=v.student_phone?('<p class="text-[12px] text-slate-400"><i class="fas fa-phone mr-1"></i>'+esc(v.student_phone)+'</p>'):'';
-      var notes=v.notes?('<p class="text-[12px] text-slate-500 mt-1 italic">"'+esc(v.notes)+'"</p>'):'';
+      var phone=v.student_phone?('<a href="tel:'+esc(v.student_phone)+'" class="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#ea580c] mt-1.5"><i class="fas fa-phone"></i>'+esc(v.student_phone)+'</a>'):'';
+      var notes=v.notes?('<p class="text-[12px] text-slate-500 mt-2 bg-slate-50 rounded-lg px-3 py-2 italic">&ldquo;'+esc(v.notes)+'&rdquo;</p>'):'';
       var actions='';
       if(v.status==='pending'){
-        actions='<div class="mt-3 flex flex-wrap gap-2">'+
-          '<button onclick="respondViewing('+v.id+',\'accepted\')" class="bg-green-600 hover:bg-green-700 text-white text-[12px] font-bold px-4 py-2 rounded-lg transition">Accept</button>'+
-          '<button onclick="respondViewing('+v.id+',\'rejected\')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-[12px] font-bold px-4 py-2 rounded-lg transition">Decline</button>'+
-          '<button onclick="rescheduleViewing('+v.id+')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-[12px] font-bold px-4 py-2 rounded-lg transition">Reschedule</button>'+
-          '</div>';
+        actions='<div class="mt-4 flex flex-wrap gap-2">'+
+          '<button onclick="respondViewing('+v.id+',\'accepted\')" class="flex-1 min-w-[90px] bg-green-600 hover:bg-green-700 text-white text-[13px] font-bold px-4 py-2.5 rounded-xl transition"><i class="fas fa-check mr-1.5"></i>Accept</button>'+
+          '<button onclick="respondViewing('+v.id+',\'rejected\')" class="flex-1 min-w-[90px] bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-bold px-4 py-2.5 rounded-xl transition">Decline</button>'+
+          '<button onclick="toggleReschedule('+v.id+')" class="flex-1 min-w-[90px] bg-blue-50 hover:bg-blue-100 text-blue-700 text-[13px] font-bold px-4 py-2.5 rounded-xl transition">Reschedule</button>'+
+          '</div>'+
+          '<div id="resched-'+v.id+'" class="hidden mt-3 p-3 bg-blue-50 rounded-xl">'+
+            '<p class="text-[12px] font-bold text-blue-800 mb-2">Propose a new date and time</p>'+
+            '<div class="flex flex-wrap gap-2 items-center">'+
+              '<input id="rdate-'+v.id+'" type="date" class="px-3 py-2 rounded-lg border border-blue-200 text-[13px]" />'+
+              '<input id="rtime-'+v.id+'" type="time" class="px-3 py-2 rounded-lg border border-blue-200 text-[13px]" />'+
+              '<button onclick="rescheduleViewing('+v.id+')" class="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold px-4 py-2 rounded-lg transition">Send</button>'+
+            '</div></div>';
       } else if(v.status==='accepted'||v.status==='rescheduled'){
-        actions='<div class="mt-3 p-3 bg-slate-50 rounded-xl">'+
-          '<p class="text-[11px] font-bold text-slate-600 mb-2">At the viewing, enter the code the student shows you:</p>'+
+        actions='<div class="mt-4 p-4 bg-orange-50 border border-orange-100 rounded-xl">'+
+          '<p class="text-[12px] font-bold text-slate-700 mb-1"><i class="fas fa-key text-[#ea580c] mr-1.5"></i>Verify the viewing</p>'+
+          '<p class="text-[11px] text-slate-500 mb-3">Ask the student for their code and enter it here to confirm the viewing happened.</p>'+
           '<div class="flex flex-wrap gap-2 items-center">'+
-          '<input id="vcode-'+v.id+'" type="text" placeholder="FMN-XXXXXX" maxlength="10" class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono uppercase w-36" />'+
-          '<button onclick="completeViewing('+v.id+')" class="bg-[#ea580c] hover:bg-orange-700 text-white text-[12px] font-bold px-4 py-2 rounded-lg transition">Mark Completed</button>'+
-          '<button onclick="markMissed('+v.id+')" class="bg-red-50 hover:bg-red-100 text-red-600 text-[12px] font-bold px-4 py-2 rounded-lg transition">No-show</button>'+
-          '</div></div>';
+          '<input id="vcode-'+v.id+'" type="text" placeholder="FMN-XXXXXX" maxlength="10" class="px-3 py-2.5 rounded-lg border border-slate-200 text-sm font-mono uppercase tracking-wider w-40 text-center" />'+
+          '<button onclick="completeViewing('+v.id+')" class="bg-[#ea580c] hover:bg-orange-700 text-white text-[13px] font-bold px-4 py-2.5 rounded-lg transition">Mark Completed</button>'+
+          '</div>'+
+          '<button onclick="markMissed('+v.id+')" class="mt-2 text-[12px] font-semibold text-red-500 hover:text-red-600 hover:underline">Student did not show up</button>'+
+          '</div>';
       } else if(v.status==='completed'){
-        actions='<p class="mt-2 text-[12px] text-emerald-600"><i class="fas fa-circle-check mr-1"></i>Completed'+(v.viewing_code?(' (code '+esc(v.viewing_code)+')'):'')+'</p>';
+        actions='<div class="mt-3 flex items-center gap-2 text-[13px] text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2"><i class="fas fa-circle-check"></i><span>Viewing completed'+(v.viewing_code?(' &middot; code '+esc(v.viewing_code)):'')+'</span></div>';
       }
       return '<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">'+
         '<div class="flex items-start justify-between gap-3">'+
-        '<div><p class="font-extrabold text-slate-900 text-sm">'+title+'</p>'+
-        '<p class="text-[12px] text-slate-500 mt-0.5">'+student+' &middot; <i class="far fa-calendar mr-1"></i>'+when+'</p>'+phone+notes+'</div>'+
+        '<div class="min-w-0"><p class="font-extrabold text-slate-900 text-[15px]">'+title+'</p>'+
+        '<p class="text-[13px] text-slate-600 font-semibold mt-1"><i class="fas fa-user-circle text-slate-300 mr-1"></i>'+student+'</p>'+
+        '<p class="text-[12px] text-slate-400 mt-0.5"><i class="far fa-calendar mr-1"></i>'+when+'</p>'+phone+notes+'</div>'+
         _lvBadge(v.status)+'</div>'+actions+'</div>';
     }).join("");
   }catch(e){
     box.innerHTML='<p class="text-sm text-red-500">Could not load viewing requests.</p>';
   }
+}
+function toggleReschedule(id){
+  var el=document.getElementById("resched-"+id);
+  if(el)el.classList.toggle("hidden");
 }
 async function respondViewing(id,status){
   try{
@@ -1863,8 +1889,9 @@ async function respondViewing(id,status){
   }catch(e){showToast(e.message||'Action failed.','error');}
 }
 async function rescheduleViewing(id){
-  var date=prompt("New date (YYYY-MM-DD):");if(!date)return;
-  var time=prompt("New time (HH:MM):");if(!time)return;
+  var dEl=document.getElementById("rdate-"+id),tEl=document.getElementById("rtime-"+id);
+  var date=dEl?dEl.value:"",time=tEl?tEl.value:"";
+  if(!date||!time){showToast("Pick a date and time.","error");return;}
   try{
     var res=await fetch(`${API}/viewing-requests/${id}/reschedule`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({rescheduled_date:date,rescheduled_time:time})});
     if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
