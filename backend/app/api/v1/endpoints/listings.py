@@ -33,6 +33,7 @@ from app.models.listing import Listing
 from app.models.listing_media import ListingMedia
 from app.models.report import Report
 from app.models.review import Review
+from app.models.viewing_request import ViewingRequest, ViewingStatus
 from app.models.user import User
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
@@ -233,6 +234,23 @@ def post_review(
         raise HTTPException(status_code=404, detail="Listing not found.")
     if listing.owner_id == current_user.id:
         raise HTTPException(status_code=400, detail="You cannot review your own listing.")
+    # GATE: a student may only review a property they actually completed a viewing for.
+    # Completion required the landlord to verify the student's code in person, so every
+    # review is tied to a real, verified visit (anti-fake-review core).
+    completed_viewing = (
+        db.query(ViewingRequest)
+          .filter(
+              ViewingRequest.student_id == current_user.id,
+              ViewingRequest.listing_id == listing_id,
+              ViewingRequest.status == ViewingStatus.COMPLETED.value,
+          )
+          .first()
+    )
+    if not completed_viewing:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only review a property after completing a viewing of it.",
+        )
     existing = db.query(Review).filter(Review.listing_id == listing_id, Review.user_id == current_user.id).first()
     if existing:
         raise HTTPException(status_code=409, detail="You have already reviewed this listing.")
