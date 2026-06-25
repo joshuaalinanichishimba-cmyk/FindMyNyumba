@@ -299,3 +299,40 @@ def report_property(
     db.add(new_report)
     db.commit()
     return {"status": "success", "message": "Report submitted. Our team will review it shortly."}
+
+
+# -- GET /properties/{id}/reviews (public, trust-enriched) -------------------
+# Returns APPROVED reviews for a listing, each enriched with reviewer trust
+# signals: verification badge, account age (member_since), avatar + id (for a
+# profile popup), and verified_viewing (true because reviews are gated on a
+# completed, code-verified viewing of THIS listing -> anti-fake signal).
+@router.get("/{listing_id}/reviews")
+def list_property_reviews(listing_id: int, db: Session = Depends(get_db)):
+    rows = (
+        db.query(Review)
+          .filter(Review.listing_id == listing_id, Review.status == "approved")
+          .order_by(Review.created_at.desc())
+          .all()
+    )
+    out = []
+    for r in rows:
+        u = db.query(User).filter(User.id == r.user_id).first()
+        visited = db.query(ViewingRequest).filter(
+            ViewingRequest.student_id == r.user_id,
+            ViewingRequest.listing_id == listing_id,
+            ViewingRequest.status == ViewingStatus.COMPLETED.value,
+        ).first() is not None
+        out.append({
+            "id": r.id,
+            "rating": r.rating,
+            "comment": r.comment,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+            "reviewer_id": r.user_id,
+            "reviewer_name": (u.full_name if u else r.user_name) or "Student",
+            "reviewer_verified": bool(u and ((u.verification_status == "approved") or u.is_verified)),
+            "reviewer_member_since": u.created_at.isoformat() if (u and u.created_at) else None,
+            "reviewer_avatar": u.avatar_url if u else None,
+            "verified_viewing": visited,
+        })
+    avg = round(sum(x["rating"] for x in out) / len(out), 1) if out else None
+    return {"count": len(out), "average": avg, "reviews": out}
