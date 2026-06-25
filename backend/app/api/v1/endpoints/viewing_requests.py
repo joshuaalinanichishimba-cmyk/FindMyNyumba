@@ -107,7 +107,7 @@ def _post_chat_message(db: Session, vr: ViewingRequest, text: str) -> None:
             pass
 
 
-def _serialize(v: ViewingRequest) -> dict:
+def _serialize(v: ViewingRequest, include_code: bool = False) -> dict:
     display_status = _LEGACY_MAP.get(v.status, v.status)
     return {
         "id": v.id,
@@ -126,7 +126,7 @@ def _serialize(v: ViewingRequest) -> dict:
         "notes": v.notes,
         "landlord_notes": v.landlord_notes,
         "status": display_status,
-        "viewing_code": v.viewing_code,
+        "viewing_code": (v.viewing_code if include_code else None),
         "code_verified": v.code_verified,
         "completed_at": v.completed_at.isoformat() if v.completed_at else None,
         "created_at": v.created_at.isoformat() if v.created_at else None,
@@ -249,7 +249,7 @@ def student_viewing_requests(
     )
     if any(_maybe_expire(v) for v in rows):
         db.commit()
-    return [_serialize(v) for v in rows]
+    return [_serialize(v, include_code=True) for v in rows]
 
 
 def _load_for_landlord(viewing_id: int, current_user: User, db: Session) -> ViewingRequest:
@@ -351,6 +351,10 @@ def reschedule_viewing(
     vr.status = ViewingStatus.RESCHEDULED.value
     vr.rescheduled_date = body.rescheduled_date
     vr.rescheduled_time = body.rescheduled_time
+    # A rescheduled viewing is still a confirmed slot the student will attend,
+    # so it needs a code too (generate once, stable thereafter).
+    if not vr.viewing_code:
+        vr.viewing_code = _generate_viewing_code(db)
     if body.landlord_notes is not None:
         vr.landlord_notes = body.landlord_notes.strip() or None
     db.commit()
