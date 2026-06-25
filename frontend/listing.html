@@ -216,6 +216,14 @@
                 </div>
             </div>
 
+            <!-- Reviews display (trust-enriched) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 mb-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xl font-bold text-gray-800">Reviews</h4>
+                    <div id="reviews-summary" class="text-sm font-bold text-gray-500"></div>
+                </div>
+                <div id="reviews-list"><p class="text-sm text-gray-400">Loading reviews...</p></div>
+            </div>
             <!-- Review card (existing functionality preserved) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
                 <h4 class="text-xl font-bold text-gray-800 mb-5">Leave a Review</h4>
@@ -783,6 +791,7 @@ async function loadData() {
 
         const data = await res.json();
         currentProperty = data;
+        loadPropertyReviews();
 
         document.getElementById('prop-title').innerText         = data.title       || 'Untitled';
         document.getElementById('prop-location-text').innerText = data.location    || 'Location not specified';
@@ -1000,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ rating: selectedRating, comment }),
             });
-            if (res.ok) { showToast('Review posted!', 'success'); document.getElementById('review-comment').value = ''; }
+            if (res.ok) { showToast('Review submitted! It will appear after approval.', 'success'); document.getElementById('review-comment').value = ''; loadPropertyReviews(); }
             else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to post review.', 'error'); }
         } catch { showToast('Network error.', 'error'); }
         finally { btn.disabled = false; btn.innerHTML = 'Post Review'; }
@@ -1035,5 +1044,65 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="assets/fmn-trust.js" data-page="property"></script>
 <script src="assets/fmn-report.js"></script>
+<script>
+function _revInitials(name){var p=(name||"S").trim().split(/\s+/);return ((p[0]||"S")[0]+((p[1]||"")[0]||"")).toUpperCase();}
+function _revMemberSince(iso){
+  if(!iso)return "";
+  try{var d=new Date(iso);var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return "Member since "+months[d.getMonth()]+" "+d.getFullYear();}catch(e){return "";}
+}
+function _revDate(iso){
+  if(!iso)return "";
+  try{var d=new Date(iso);var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return d.getDate()+" "+months[d.getMonth()]+" "+d.getFullYear();}catch(e){return "";}
+}
+function _revStars(n){var s="";for(var i=1;i<=5;i++){s+='<i class="fas fa-star '+(i<=n?'text-amber-400':'text-gray-200')+'"></i>';}return s;}
+function _revEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+async function loadPropertyReviews(){
+  var list=document.getElementById("reviews-list"), sum=document.getElementById("reviews-summary");
+  if(!list||!currentProperty)return;
+  try{
+    var res=await fetch(`${API_BASE}/properties/${currentProperty.id}/reviews`);
+    if(!res.ok)throw new Error("failed");
+    var data=await res.json();
+    var rows=data.reviews||[];
+    if(sum){ sum.innerHTML = data.count ? ('<i class="fas fa-star text-amber-400 mr-1"></i>'+data.average+' &middot; '+data.count+' review'+(data.count===1?'':'s')) : ''; }
+    if(!rows.length){ list.innerHTML='<p class="text-sm text-gray-400">No reviews yet. Reviews can only be left by students who completed a viewing of this property.</p>'; return; }
+    list.innerHTML=rows.map(function(r){
+      var name=_revEsc(r.reviewer_name||"Student");
+      var avatar=r.reviewer_avatar
+        ? '<img src="'+_revEsc(r.reviewer_avatar)+'" class="w-10 h-10 rounded-full object-cover" alt="">'
+        : '<div class="w-10 h-10 rounded-full bg-orange-100 text-[#ea580c] flex items-center justify-center font-black text-sm">'+_revInitials(r.reviewer_name)+'</div>';
+      var verified = r.reviewer_verified ? '<span class="inline-flex items-center gap-1 text-[10px] font-black text-green-700 bg-green-50 px-2 py-0.5 rounded-full"><i class="fas fa-circle-check"></i>Verified</span>' : '';
+      var visited = r.verified_viewing ? '<span class="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full"><i class="fas fa-location-dot"></i>Visited this property</span>' : '';
+      var since = _revMemberSince(r.reviewer_member_since);
+      return '<div class="border-b border-gray-100 py-4 last:border-0">'+
+        '<div class="flex items-start gap-3">'+
+        avatar+
+        '<div class="flex-1 min-w-0">'+
+        '<div class="flex flex-wrap items-center gap-2">'+
+          '<button onclick="showReviewerProfile('+r.reviewer_id+',\''+name.replace(/\x27/g,"")+'\','+(r.reviewer_verified?'true':'false')+',\''+_revEsc(r.reviewer_member_since||'')+'\')" class="font-bold text-gray-900 text-sm hover:text-[#ea580c] hover:underline">'+name+'</button>'+
+          verified+visited+
+        '</div>'+
+        (since?'<p class="text-[11px] text-gray-400 mt-0.5">'+since+'</p>':'')+
+        '<div class="text-sm mt-1.5">'+_revStars(r.rating)+'</div>'+
+        '<p class="text-[13px] text-gray-600 mt-1.5 leading-relaxed">'+_revEsc(r.comment)+'</p>'+
+        '<p class="text-[11px] text-gray-300 mt-1">'+_revDate(r.created_at)+'</p>'+
+        '</div></div></div>';
+    }).join("");
+  }catch(e){ list.innerHTML='<p class="text-sm text-gray-400">Could not load reviews.</p>'; }
+}
+function showReviewerProfile(id,name,verified,memberSince){
+  var since=_revMemberSince(memberSince);
+  var html='<div id="reviewer-modal" onclick="if(event.target.id===\'reviewer-modal\')this.remove()" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">'+
+    '<div style="background:#fff;border-radius:18px;max-width:340px;width:100%;padding:24px;text-align:center;">'+
+    '<div class="w-16 h-16 rounded-full bg-orange-100 text-[#ea580c] flex items-center justify-center font-black text-xl mx-auto mb-3">'+_revInitials(name)+'</div>'+
+    '<p class="font-extrabold text-gray-900">'+_revEsc(name)+'</p>'+
+    (verified?'<p class="text-[12px] font-bold text-green-700 mt-1"><i class="fas fa-circle-check mr-1"></i>Verified student</p>':'<p class="text-[12px] font-semibold text-gray-400 mt-1">Not yet verified</p>')+
+    (since?'<p class="text-[12px] text-gray-500 mt-1">'+since+'</p>':'')+
+    '<button onclick="document.getElementById(\'reviewer-modal\').remove()" class="mt-4 px-5 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold text-gray-600">Close</button>'+
+    '</div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+</script>
+
 </body>
 </html>
