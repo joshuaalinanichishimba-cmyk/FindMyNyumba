@@ -98,6 +98,7 @@
                 <i class="fas fa-envelope w-4 text-center"></i> Messages
                 <span id="unread-badge" class="ml-auto bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
             </button>
+            <button onclick="switchTab('viewings')" id="nav-viewings" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-calendar-check w-4 text-center"></i> Viewings</button>
             <button onclick="switchTab('verification')" id="nav-verification" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-shield-alt w-4 text-center"></i> Verification</button>
             <button onclick="switchTab('payments')" id="nav-payments" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-wallet w-4 text-center"></i> Monetization</button>
             <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-user-cog w-4 text-center"></i> Profile &amp; Settings</button>
@@ -654,6 +655,12 @@
             </div>
         </div>
 
+        <!-- Viewings -->
+        <div id="view-viewings" class="dashboard-view hidden-view">
+            <h2 class="text-xl font-black mb-2 text-gray-900">Viewing Requests</h2>
+            <p class="text-sm text-gray-400 mb-5">Manage viewing requests. Verify the student's code at the viewing to mark it completed.</p>
+            <div id="sh-viewings-list"><p class="text-sm text-gray-400">Loading...</p></div>
+        </div>
         <!-- Verification -->
         <div id="view-verification" class="dashboard-view hidden-view">
             <h2 class="text-xl font-black mb-2 text-gray-900">Verification Center</h2>
@@ -836,6 +843,7 @@ function switchTab(tabId) {
         if (tabId === 'overview')     loadOverview();
         if (tabId === 'listings')     loadListings();
         if (tabId === 'inquiries')    loadConversations();
+        if (tabId === 'viewings')     loadShViewings();
         if (tabId === 'verification') loadVerification();
         if (tabId === 'profile')      loadProfile();
         if (tabId === 'profile')      loadSessions();
@@ -1342,6 +1350,161 @@ function _fmtWhen(iso){if(!iso)return "";try{return new Date(iso).toLocaleString
 async function loadSessions(){var box=document.getElementById("sessions-list");if(!box)return;box.innerHTML='<p class="text-xs text-slate-400">Loading...</p>';try{var res=await fetch(`${API_BASE}/auth/sessions`,{headers:authHeaders()});if(!res.ok)throw new Error("failed");var rows=await res.json();if(!rows.length){box.innerHTML='<p class="text-xs text-slate-400">No active sessions.</p>';return;}box.innerHTML=rows.map(function(s){var current=s.is_current?'<span class="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full">THIS DEVICE</span>':'<button onclick="revokeSession('+s.id+')" class="text-[11px] font-bold text-red-600 hover:underline">Log out</button>';return '<div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl"><div class="min-w-0"><p class="text-xs font-bold text-slate-900 truncate">'+_uaLabel(s.user_agent)+'</p><p class="text-[11px] text-slate-400 truncate">'+(s.ip||"unknown IP")+' &middot; '+_fmtWhen(s.last_seen)+'</p></div>'+current+'</div>';}).join("");}catch(e){box.innerHTML='<p class="text-xs text-red-500">Could not load sessions.</p>';}}
 async function revokeSession(id){try{await fetch(`${API_BASE}/auth/sessions/${id}/revoke`,{method:'POST',headers:authHeaders()});if(typeof showToast==="function")showToast("Device logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out that device.","error");}}
 async function logoutAllOther(){try{var res=await fetch(`${API_BASE}/auth/logout-all`,{method:'POST',headers:authHeaders()});var data=await res.json();if(typeof showToast==="function")showToast(data.message||"Other devices logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out other devices.","error");}}
+</script>
+
+<script>
+function _shBadge(status){
+  var map={pending:['bg-amber-100 text-amber-700','Pending'],accepted:['bg-green-100 text-green-700','Accepted'],rescheduled:['bg-blue-100 text-blue-700','Rescheduled'],completed:['bg-emerald-100 text-emerald-700','Completed'],rejected:['bg-gray-100 text-gray-500','Declined'],cancelled:['bg-gray-100 text-gray-500','Cancelled'],missed:['bg-red-100 text-red-700','Missed']};
+  var m=map[status]||['bg-gray-100 text-gray-500',status];
+  return '<span class="text-[10px] font-black px-2.5 py-1 rounded-full '+m[0]+'">'+m[1]+'</span>';
+}
+function _shWhen(dateStr,timeStr){
+  try{
+    var d=new Date((dateStr||'')+'T'+(timeStr||'00:00'));
+    if(isNaN(d.getTime()))return ((dateStr||'')+' '+(timeStr||''));
+    var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var h=d.getHours(),m=d.getMinutes(),ampm=h>=12?'PM':'AM',h12=h%12;if(h12===0)h12=12;
+    var mm=m<10?('0'+m):m;
+    return days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()+' &middot; '+h12+':'+mm+' '+ampm;
+  }catch(e){return ((dateStr||'')+' '+(timeStr||''));}
+}
+function _shEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+async function loadShViewings(){
+  var box=document.getElementById("sh-viewings-list");
+  if(!box)return;
+  box.innerHTML='<p class="text-sm text-gray-400">Loading...</p>';
+  try{
+    var res=await fetch(`${API_BASE}/viewing-requests/landlord`,{headers:{'Authorization':`Bearer ${getToken()}`}});
+    if(!res.ok)throw new Error("failed");
+    var rows=await res.json();
+    if(!Array.isArray(rows)||!rows.length){
+      box.innerHTML='<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center"><div class="w-16 h-16 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-calendar-check"></i></div><p class="text-gray-400 text-sm font-medium">No viewing requests yet.</p></div>';
+      return;
+    }
+    box.innerHTML=rows.map(function(v){
+      var when=_shWhen(v.preferred_date,v.preferred_time);
+      var title=_shEsc(v.listing_title||'Property');
+      var student=_shEsc(v.student_name||'Student');
+      var phone=v.student_phone?('<a href="tel:'+_shEsc(v.student_phone)+'" class="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#ea580c] mt-1.5"><i class="fas fa-phone"></i>'+_shEsc(v.student_phone)+'</a>'):'';
+      var notes=v.notes?('<p class="text-[12px] text-gray-500 mt-2 bg-gray-50 rounded-lg px-3 py-2 italic">&ldquo;'+_shEsc(v.notes)+'&rdquo;</p>'):'';
+      var actions='';
+      if(v.status==='pending'){
+        actions='<div class="mt-4 flex flex-wrap gap-2">'+
+          '<button onclick="shRespond('+v.id+',\'accepted\')" class="flex-1 min-w-[90px] bg-green-600 hover:bg-green-700 text-white text-[13px] font-bold px-4 py-2.5 rounded-xl transition"><i class="fas fa-check mr-1.5"></i>Accept</button>'+
+          '<button onclick="shRespond('+v.id+',\'rejected\')" class="flex-1 min-w-[90px] bg-gray-100 hover:bg-gray-200 text-gray-600 text-[13px] font-bold px-4 py-2.5 rounded-xl transition">Decline</button>'+
+          '<button onclick="shToggleResched('+v.id+')" class="flex-1 min-w-[90px] bg-blue-50 hover:bg-blue-100 text-blue-700 text-[13px] font-bold px-4 py-2.5 rounded-xl transition">Reschedule</button>'+
+          '</div>'+
+          '<div id="sh-resched-'+v.id+'" class="hidden mt-3 p-3 bg-blue-50 rounded-xl">'+
+            '<p class="text-[12px] font-bold text-blue-800 mb-2">Propose a new date and time</p>'+
+            '<div class="flex flex-wrap gap-2 items-center">'+
+              '<input id="sh-rdate-'+v.id+'" type="date" class="px-3 py-2 rounded-lg border border-blue-200 text-[13px]" />'+
+              '<input id="sh-rtime-'+v.id+'" type="time" class="px-3 py-2 rounded-lg border border-blue-200 text-[13px]" />'+
+              '<button onclick="shReschedule('+v.id+')" class="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold px-4 py-2 rounded-lg transition">Send</button>'+
+            '</div></div>';
+      } else if(v.status==='accepted'||v.status==='rescheduled'){
+        actions='<div class="mt-4 p-4 bg-orange-50 border border-orange-100 rounded-xl">'+
+          '<p class="text-[12px] font-bold text-gray-700 mb-1"><i class="fas fa-key text-[#ea580c] mr-1.5"></i>Verify the viewing</p>'+
+          '<p class="text-[11px] text-gray-500 mb-3">Ask the student for their code and enter it here to confirm the viewing happened.</p>'+
+          '<div class="flex flex-wrap gap-2 items-center">'+
+          '<input id="sh-vcode-'+v.id+'" type="text" placeholder="FMN-XXXXXX" maxlength="10" class="px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-mono uppercase tracking-wider w-40 text-center" />'+
+          '<button onclick="shComplete('+v.id+')" class="bg-[#ea580c] hover:bg-orange-700 text-white text-[13px] font-bold px-4 py-2.5 rounded-lg transition">Mark Completed</button>'+
+          '</div>'+
+          '<button onclick="shMissed('+v.id+')" class="mt-2 text-[12px] font-semibold text-red-500 hover:text-red-600 hover:underline">Student did not show up</button>'+
+          '</div>';
+      } else if(v.status==='completed'){
+        actions='<div class="mt-3 flex items-center gap-2 text-[13px] text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2"><i class="fas fa-circle-check"></i><span>Viewing completed'+(v.viewing_code?(' &middot; code '+_shEsc(v.viewing_code)):'')+'</span></div>'+
+          '<button onclick="shToggleRate('+v.id+')" class="mt-2 text-[13px] font-bold text-[#ea580c] hover:underline"><i class="fas fa-star mr-1"></i>Rate this student</button>'+
+          '<div id="sh-rate-'+v.id+'" class="hidden mt-2 p-4 bg-amber-50 border border-amber-100 rounded-xl">'+
+            '<p class="text-[12px] font-bold text-gray-700 mb-2">How was '+student+'?</p>'+
+            '<div id="sh-stars-'+v.id+'" class="flex gap-1 mb-3 text-2xl text-amber-400" data-rating="5">'+
+              '<i class="fas fa-star cursor-pointer" data-val="1"></i><i class="fas fa-star cursor-pointer" data-val="2"></i><i class="fas fa-star cursor-pointer" data-val="3"></i><i class="fas fa-star cursor-pointer" data-val="4"></i><i class="fas fa-star cursor-pointer" data-val="5"></i>'+
+            '</div>'+
+            '<textarea id="sh-rcomment-'+v.id+'" rows="2" placeholder="How was this student as a viewer? (e.g. punctual, polite, serious)" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-[13px] mb-2"></textarea>'+
+            '<button onclick="shSubmitReview('+v.id+','+v.student_id+')" class="bg-[#ea580c] hover:bg-orange-700 text-white text-[13px] font-bold px-4 py-2 rounded-lg transition">Submit Review</button>'+
+          '</div>';
+      }
+      return '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">'+
+        '<div class="flex items-start justify-between gap-3">'+
+        '<div class="min-w-0"><p class="font-extrabold text-gray-900 text-[15px]">'+title+'</p>'+
+        '<p class="text-[13px] text-gray-600 font-semibold mt-1"><i class="fas fa-user-circle text-gray-300 mr-1"></i>'+student+'</p>'+
+        '<p class="text-[12px] text-gray-400 mt-0.5"><i class="far fa-calendar mr-1"></i>'+when+'</p>'+phone+notes+'</div>'+
+        _shBadge(v.status)+'</div>'+actions+'</div>';
+    }).join("");
+  }catch(e){box.innerHTML='<p class="text-sm text-red-500">Could not load viewing requests.</p>';}
+}
+function shToggleResched(id){var el=document.getElementById("sh-resched-"+id);if(el)el.classList.toggle("hidden");}
+async function shRespond(id,status){
+  try{
+    var res=await fetch(`${API_BASE}/viewing-requests/${id}/respond`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({status:status})});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast(status==='accepted'?'Viewing accepted. Code generated for the student.':'Viewing declined.');
+    loadShViewings();
+  }catch(e){showToast(e.message||'Action failed.','error');}
+}
+async function shReschedule(id){
+  var d=document.getElementById("sh-rdate-"+id),t=document.getElementById("sh-rtime-"+id);
+  var date=d?d.value:"",time=t?t.value:"";
+  if(!date||!time){showToast("Pick a date and time.","error");return;}
+  try{
+    var res=await fetch(`${API_BASE}/viewing-requests/${id}/reschedule`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({rescheduled_date:date,rescheduled_time:time})});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast('New time proposed to the student.');
+    loadShViewings();
+  }catch(e){showToast(e.message||'Reschedule failed.','error');}
+}
+async function shComplete(id){
+  var inp=document.getElementById("sh-vcode-"+id);
+  var code=inp?inp.value.trim():"";
+  if(!code){showToast("Enter the student's viewing code.","error");return;}
+  try{
+    var res=await fetch(`${API_BASE}/viewing-requests/${id}/complete`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({code:code})});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast('Viewing marked completed.');
+    loadShViewings();
+  }catch(e){showToast(e.message||'Could not complete. Check the code.','error');}
+}
+async function shMissed(id){
+  if(!confirm("Mark this viewing as a no-show?"))return;
+  try{
+    var res=await fetch(`${API_BASE}/viewing-requests/${id}/missed`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`}});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast('Viewing marked as missed.');
+    loadShViewings();
+  }catch(e){showToast(e.message||'Action failed.','error');}
+}
+function shToggleRate(id){
+  var el=document.getElementById("sh-rate-"+id);
+  if(!el)return;
+  el.classList.toggle("hidden");
+  var stars=document.getElementById("sh-stars-"+id);
+  if(stars && !stars.dataset.wired){
+    stars.dataset.wired="1";
+    stars.querySelectorAll("i").forEach(function(star){
+      star.addEventListener("click",function(){
+        var val=parseInt(star.getAttribute("data-val"),10);
+        stars.setAttribute("data-rating",val);
+        stars.querySelectorAll("i").forEach(function(s){
+          var vv=parseInt(s.getAttribute("data-val"),10);
+          s.style.color = vv<=val ? "#f59e0b" : "#d1d5db";
+        });
+      });
+    });
+  }
+}
+async function shSubmitReview(viewingId,studentId){
+  var stars=document.getElementById("sh-stars-"+viewingId);
+  var rating=stars?parseInt(stars.getAttribute("data-rating"),10):5;
+  var comment=(document.getElementById("sh-rcomment-"+viewingId)||{}).value||"";
+  comment=comment.trim();
+  if(!comment){showToast("Add a short comment.","error");return;}
+  try{
+    var res=await fetch(`${API_BASE}/students/${studentId}/reviews`,{method:'POST',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({rating:rating,comment:comment,viewing_id:viewingId})});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast("Review submitted! It will appear after approval.");
+    var box=document.getElementById("sh-rate-"+viewingId);if(box)box.classList.add("hidden");
+  }catch(e){showToast(e.message||"Could not submit review.","error");}
+}
 </script>
 
 </body>
