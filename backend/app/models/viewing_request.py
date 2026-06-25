@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/models/viewing_request.py
 
 A student's request to physically view a listing before committing -- the
@@ -40,7 +40,7 @@ MIGRATION (existing table already created by create_all):
 """
 import enum
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -56,6 +56,8 @@ class ViewingStatus(str, enum.Enum):
     REJECTED    = "rejected"
     CANCELLED   = "cancelled"
     EXPIRED     = "expired"
+    COMPLETED   = "completed"
+    MISSED      = "missed"
 
 
 class ViewingRequest(Base):
@@ -78,6 +80,13 @@ class ViewingRequest(Base):
     rescheduled_time = Column(String, nullable=True)  # landlord-proposed new time
 
     status     = Column(String, nullable=False, default=ViewingStatus.PENDING.value, index=True)
+
+    # Viewing code + completion tracking (Feature 5). Code is generated when the
+    # landlord ACCEPTS, shown to the student, and verified by the landlord at the
+    # physical viewing to mark it completed (the trust signal that gates reviews).
+    viewing_code  = Column(String, nullable=True, unique=True, index=True)  # "FMN-XXXXXX"
+    code_verified = Column(Boolean, nullable=False, server_default="false", default=False)
+    completed_at  = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
