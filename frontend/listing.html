@@ -599,7 +599,7 @@ async function requestViewing() {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/viewings`, {
+        const res = await fetch(`${API_BASE}/viewing-requests`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -607,8 +607,8 @@ async function requestViewing() {
             },
             body: JSON.stringify({
                 listing_id: currentProperty.id,
-                date: date,
-                time: time,
+                preferred_date: date,
+                preferred_time: time,
                 notes: notes,
             }),
         });
