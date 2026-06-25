@@ -111,6 +111,7 @@
                     <button id="nav-overview" onclick="switchTab('overview')" class="nav-link nav-link-active w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-[#ea580c]"><i class="fas fa-table-columns w-4 text-center"></i> Overview <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
                     <button id="nav-properties" onclick="switchTab('properties')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-building w-4 text-center"></i> My Properties <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
                     <button id="nav-messages" onclick="switchTab('messages')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-comments w-4 text-center"></i> Messages <span id="unread-badge" class="hidden ml-auto bg-[#ea580c] text-white text-[10px] font-black px-2 py-0.5 rounded-full"></span><i class="fas fa-chevron-right ml-2 text-xs text-slate-300"></i></button>
+                    <button id="nav-viewings" onclick="switchTab('viewings')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-calendar-check w-4 text-center"></i> Viewings <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
                     <button id="nav-profile" onclick="switchTab('profile')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-user w-4 text-center"></i> Profile <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
                     <button id="nav-settings" onclick="switchTab('settings')" class="nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left font-semibold text-sm transition-all text-slate-600 hover:bg-slate-50 hover:text-[#ea580c]"><i class="fas fa-cog w-4 text-center"></i> Settings <i class="fas fa-chevron-right ml-auto text-xs text-slate-300"></i></button>
                 </div>
@@ -693,6 +694,14 @@
                     </div>
                 </div>
 
+                <!-- VIEWINGS -->
+                <div id="viewings-section" class="dashboard-section hidden">
+                    <div class="max-w-3xl">
+                        <h2 class="text-lg font-extrabold text-slate-900 mb-1">Viewing Requests</h2>
+                        <p class="text-slate-400 text-sm font-medium mb-5">Manage viewing requests. Verify the student's code at the viewing to mark it completed.</p>
+                        <div id="landlord-viewings-list"><p class="text-sm text-slate-400">Loading...</p></div>
+                    </div>
+                </div>
                 <!-- PROFILE -->
                 <div id="profile-section" class="dashboard-section hidden">
                     <div class="max-w-2xl">
@@ -864,13 +873,14 @@ function switchTab(tab) {
     const navBtn  = document.getElementById(`nav-${tab}`);
     if (section) section.classList.remove('hidden');
     if (navBtn)  { navBtn.classList.add('nav-link-active', 'text-[#ea580c]'); navBtn.classList.remove('text-slate-600'); }
-    const titles = { overview: 'Overview', properties: 'My Properties', messages: 'Messages', profile: 'Profile', settings: 'Settings' };
+    const titles = { overview: 'Overview', properties: 'My Properties', viewings: 'Viewings', messages: 'Messages', profile: 'Profile', settings: 'Settings' };
     const titleEl = document.getElementById('page-title');
     if (titleEl) titleEl.textContent = titles[tab] || tab;
     closeSidebar();
     if (tab === 'messages')   loadConversations();
     if (tab === 'profile')    loadProfileData();
     if (tab === 'properties') loadProperties();
+    if (tab === 'viewings')   loadLandlordViewings();
     if (tab === 'settings')   loadSessions();
 }
 
@@ -1789,6 +1799,98 @@ async function logoutAllOther() {
     } catch (e) {
         if (typeof showToast === "function") showToast("Could not log out other devices.", "error");
     }
+}
+</script>
+
+<script>
+function _lvBadge(status){
+  var map={pending:['bg-amber-100 text-amber-700','Pending'],accepted:['bg-green-100 text-green-700','Accepted'],rescheduled:['bg-blue-100 text-blue-700','Rescheduled'],completed:['bg-emerald-100 text-emerald-700','Completed'],rejected:['bg-slate-100 text-slate-500','Declined'],cancelled:['bg-slate-100 text-slate-500','Cancelled'],missed:['bg-red-100 text-red-700','Missed']};
+  var m=map[status]||['bg-slate-100 text-slate-500',status];
+  return '<span class="text-[10px] font-black px-2.5 py-1 rounded-full '+m[0]+'">'+m[1]+'</span>';
+}
+async function loadLandlordViewings(){
+  var box=document.getElementById("landlord-viewings-list");
+  if(!box)return;
+  box.innerHTML='<p class="text-sm text-slate-400">Loading...</p>';
+  try{
+    var res=await fetch(`${API}/viewing-requests/landlord`,{headers:{'Authorization':`Bearer ${getToken()}`}});
+    if(!res.ok)throw new Error("failed");
+    var rows=await res.json();
+    if(!Array.isArray(rows)||!rows.length){
+      box.innerHTML='<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center"><div class="w-16 h-16 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-calendar-check"></i></div><p class="text-slate-400 text-sm font-medium">No viewing requests yet.</p></div>';
+      return;
+    }
+    box.innerHTML=rows.map(function(v){
+      var when=esc((v.preferred_date||'')+' at '+(v.preferred_time||''));
+      var title=esc(v.listing_title||'Property');
+      var student=esc(v.student_name||'Student');
+      var phone=v.student_phone?('<p class="text-[12px] text-slate-400"><i class="fas fa-phone mr-1"></i>'+esc(v.student_phone)+'</p>'):'';
+      var notes=v.notes?('<p class="text-[12px] text-slate-500 mt-1 italic">"'+esc(v.notes)+'"</p>'):'';
+      var actions='';
+      if(v.status==='pending'){
+        actions='<div class="mt-3 flex flex-wrap gap-2">'+
+          '<button onclick="respondViewing('+v.id+',\'accepted\')" class="bg-green-600 hover:bg-green-700 text-white text-[12px] font-bold px-4 py-2 rounded-lg transition">Accept</button>'+
+          '<button onclick="respondViewing('+v.id+',\'rejected\')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-[12px] font-bold px-4 py-2 rounded-lg transition">Decline</button>'+
+          '<button onclick="rescheduleViewing('+v.id+')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-[12px] font-bold px-4 py-2 rounded-lg transition">Reschedule</button>'+
+          '</div>';
+      } else if(v.status==='accepted'||v.status==='rescheduled'){
+        actions='<div class="mt-3 p-3 bg-slate-50 rounded-xl">'+
+          '<p class="text-[11px] font-bold text-slate-600 mb-2">At the viewing, enter the code the student shows you:</p>'+
+          '<div class="flex flex-wrap gap-2 items-center">'+
+          '<input id="vcode-'+v.id+'" type="text" placeholder="FMN-XXXXXX" maxlength="10" class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono uppercase w-36" />'+
+          '<button onclick="completeViewing('+v.id+')" class="bg-[#ea580c] hover:bg-orange-700 text-white text-[12px] font-bold px-4 py-2 rounded-lg transition">Mark Completed</button>'+
+          '<button onclick="markMissed('+v.id+')" class="bg-red-50 hover:bg-red-100 text-red-600 text-[12px] font-bold px-4 py-2 rounded-lg transition">No-show</button>'+
+          '</div></div>';
+      } else if(v.status==='completed'){
+        actions='<p class="mt-2 text-[12px] text-emerald-600"><i class="fas fa-circle-check mr-1"></i>Completed'+(v.viewing_code?(' (code '+esc(v.viewing_code)+')'):'')+'</p>';
+      }
+      return '<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">'+
+        '<div class="flex items-start justify-between gap-3">'+
+        '<div><p class="font-extrabold text-slate-900 text-sm">'+title+'</p>'+
+        '<p class="text-[12px] text-slate-500 mt-0.5">'+student+' &middot; <i class="far fa-calendar mr-1"></i>'+when+'</p>'+phone+notes+'</div>'+
+        _lvBadge(v.status)+'</div>'+actions+'</div>';
+    }).join("");
+  }catch(e){
+    box.innerHTML='<p class="text-sm text-red-500">Could not load viewing requests.</p>';
+  }
+}
+async function respondViewing(id,status){
+  try{
+    var res=await fetch(`${API}/viewing-requests/${id}/respond`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({status:status})});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast(status==='accepted'?'Viewing accepted. Code generated for the student.':'Viewing declined.');
+    loadLandlordViewings();
+  }catch(e){showToast(e.message||'Action failed.','error');}
+}
+async function rescheduleViewing(id){
+  var date=prompt("New date (YYYY-MM-DD):");if(!date)return;
+  var time=prompt("New time (HH:MM):");if(!time)return;
+  try{
+    var res=await fetch(`${API}/viewing-requests/${id}/reschedule`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({rescheduled_date:date,rescheduled_time:time})});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast('New time proposed to the student.');
+    loadLandlordViewings();
+  }catch(e){showToast(e.message||'Reschedule failed.','error');}
+}
+async function completeViewing(id){
+  var inp=document.getElementById("vcode-"+id);
+  var code=inp?inp.value.trim():"";
+  if(!code){showToast("Enter the student's viewing code.","error");return;}
+  try{
+    var res=await fetch(`${API}/viewing-requests/${id}/complete`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`,'Content-Type':'application/json'},body:JSON.stringify({code:code})});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast('Viewing marked completed.');
+    loadLandlordViewings();
+  }catch(e){showToast(e.message||'Could not complete. Check the code.','error');}
+}
+async function markMissed(id){
+  if(!confirm("Mark this viewing as a no-show?"))return;
+  try{
+    var res=await fetch(`${API}/viewing-requests/${id}/missed`,{method:'PATCH',headers:{'Authorization':`Bearer ${getToken()}`}});
+    if(!res.ok){var e=await res.json().catch(function(){return{};});throw new Error(e.detail||"failed");}
+    showToast('Viewing marked as missed.');
+    loadLandlordViewings();
+  }catch(e){showToast(e.message||'Action failed.','error');}
 }
 </script>
 
