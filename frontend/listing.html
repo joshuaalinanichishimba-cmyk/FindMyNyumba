@@ -1118,7 +1118,7 @@ async function loadPropertyReviews(){
         (since?'<p class="text-[11px] text-gray-400 mt-0.5">'+since+'</p>':'')+
         '<div class="text-sm mt-1.5">'+_revStars(r.rating)+'</div>'+
         '<p class="text-[13px] text-gray-600 mt-1.5 leading-relaxed">'+_revEsc(r.comment)+'</p>'+
-        '<p class="text-[11px] text-gray-300 mt-1">'+_revDate(r.created_at)+'</p>'+
+        '<div class="flex items-center justify-between mt-1">'+        '<p class="text-[11px] text-gray-300">'+_revDate(r.created_at)+'</p>'+        '<button onclick="reportReview('+r.id+')" class="text-[11px] text-gray-300 hover:text-red-500"><i class="fas fa-flag mr-1"></i>Report</button>'+        '</div>'+
         '</div></div></div>';
     }).join("");
   }catch(e){ list.innerHTML='<p class="text-sm text-gray-400">Could not load reviews.</p>'; }
@@ -1153,6 +1153,20 @@ document.addEventListener("DOMContentLoaded", function(){
   if(ta) ta.addEventListener("input", updateReviewFormState);
   updateReviewFormState();
 });
+</script>
+
+<script>
+async function reportReview(id){
+  if(!confirm("Report this review as fake, offensive, or inappropriate? Our team will review it."))return;
+  var token=getToken();
+  if(!token){ showToast("Please log in to report a review.","info"); return; }
+  try{
+    var res=await fetch(`${API_BASE}/properties/reviews/${id}/report`,{method:'POST',headers:{'Authorization':'Bearer '+token}});
+    var d=await res.json().catch(function(){return{};});
+    if(res.ok){ showToast(d.message||"Thank you. Our team will review this.","success"); loadPropertyReviews(); }
+    else { showToast(typeof d.detail==='string'?d.detail:"Could not submit report.","error"); }
+  }catch(e){ showToast("Network error.","error"); }
+}
 </script>
 
 </body>
