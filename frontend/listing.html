@@ -228,18 +228,24 @@
             </div>
             <!-- Review card (existing functionality preserved) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
-                <h4 class="text-xl font-bold text-gray-800 mb-5">Leave a Review</h4>
+                <h4 class="text-xl font-bold text-gray-800 mb-1">Leave a Review</h4>
+                <p class="text-[12px] text-gray-400 mb-4"><i class="fas fa-circle-check text-green-500 mr-1"></i>Only students who completed a viewing of this property can post a review.</p>
                 <div class="bg-gray-50 p-5 rounded-xl border border-gray-100">
-                    <div class="flex gap-2 text-3xl mb-4" id="star-container">
-                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
-                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
-                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
-                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
-                        <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#ea580c"></i>
+                    <p class="text-[13px] font-semibold text-gray-600 mb-2">Your rating</p>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="flex gap-1.5 text-3xl" id="star-container">
+                            <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#d1d5db"></i>
+                            <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#d1d5db"></i>
+                            <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#d1d5db"></i>
+                            <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#d1d5db"></i>
+                            <i class="fas fa-star cursor-pointer hover:scale-110 transition-transform" style="color:#d1d5db"></i>
+                        </div>
+                        <span id="rating-label" class="text-[13px] font-semibold text-gray-400">Tap to rate</span>
                     </div>
-                    <textarea id="review-comment" placeholder="How was your experience with this property?" rows="3"
-                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand outline-none resize-none mb-3 text-sm"></textarea>
-                    <button id="post-review-btn" class="px-6 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all text-sm">Post Review</button>
+                    <textarea id="review-comment" placeholder="Share your honest experience: was it as described? How was the area and the host?" rows="3" maxlength="2000"
+                        class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand outline-none resize-none mb-1 text-sm"></textarea>
+                    <p class="text-[11px] text-gray-300 text-right mb-3" id="review-charcount">0 / 2000</p>
+                    <button id="post-review-btn" disabled class="px-6 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all text-sm disabled:opacity-40 disabled:cursor-not-allowed">Post Review</button>
                 </div>
             </div>
 
@@ -446,7 +452,7 @@ const API_BASE_FALLBACK = FMN.API_HOST.includes('127.0.0.1')
     : 'https://findmynyumba.onrender.com/api/v1';
 
 let currentProperty = null;
-let selectedRating  = 5;
+let selectedRating  = 0;
 let leafletMap      = null;
 let toastTimer;
 let LANDLORD_PHONE  = null;
@@ -960,7 +966,7 @@ function initStars() {
     stars.forEach((s, i) => {
         s.addEventListener('mouseover', () => stars.forEach((x, j) => x.style.color = j <= i ? '#ea580c' : '#d1d5db'));
         s.addEventListener('mouseout',  () => stars.forEach((x, j) => x.style.color = j < selectedRating ? '#ea580c' : '#d1d5db'));
-        s.addEventListener('click',     () => { selectedRating = i + 1; stars.forEach((x, j) => x.style.color = j < selectedRating ? '#ea580c' : '#d1d5db'); });
+        s.addEventListener('click',     () => { selectedRating = i + 1; stars.forEach((x, j) => x.style.color = j < selectedRating ? '#ea580c' : '#d1d5db'); updateReviewFormState(); });
     });
 }
 
@@ -1025,6 +1031,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const comment = document.getElementById('review-comment').value.trim();
         if (!token)           { showToast('Please log in to post a review.', 'info'); return; }
         if (!currentProperty) return;
+        if (!selectedRating)  { showToast('Please tap a star rating first.', 'info'); return; }
         if (!comment)         { showToast('Please write your review first.', 'info'); return; }
         const btn = document.getElementById('post-review-btn');
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Posting...';
@@ -1128,6 +1135,24 @@ function showReviewerProfile(id,name,verified,memberSince){
     '</div></div>';
   document.body.insertAdjacentHTML("beforeend",html);
 }
+</script>
+
+<script>
+const _ratingWords = {0:"Tap to rate",1:"Poor",2:"Fair",3:"Okay",4:"Good",5:"Excellent"};
+function updateReviewFormState(){
+  var label=document.getElementById("rating-label");
+  var btn=document.getElementById("post-review-btn");
+  var ta=document.getElementById("review-comment");
+  var cc=document.getElementById("review-charcount");
+  if(label) label.textContent = (typeof selectedRating!=="undefined" && selectedRating>0) ? (selectedRating+" / 5 - "+_ratingWords[selectedRating]) : "Tap to rate";
+  if(ta && cc) cc.textContent = (ta.value.length)+" / 2000";
+  if(btn) btn.disabled = !(typeof selectedRating!=="undefined" && selectedRating>0 && ta && ta.value.trim().length>0);
+}
+document.addEventListener("DOMContentLoaded", function(){
+  var ta=document.getElementById("review-comment");
+  if(ta) ta.addEventListener("input", updateReviewFormState);
+  updateReviewFormState();
+});
 </script>
 
 </body>
