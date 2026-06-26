@@ -46,6 +46,7 @@ from app.models.listing import Listing
 from app.models.message import Message
 from app.models.report import Report
 from app.models.review import Review
+from app.models.student_review import StudentReview
 from app.models.user import User
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -577,3 +578,51 @@ def admin_list_conversations(admin: User = Depends(require_admin), db: Session =
             threads[key]["unread"] += 1
 
     return list(threads.values())
+
+
+# ==================================================
+# STUDENT REVIEWS MODERATION (host -> student, two-way reputation)
+# Mirrors the property-review moderation so approved student reviews surface.
+# ==================================================
+@router.get("/student-reviews")
+def admin_list_student_reviews(status: str = "pending", admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    q = db.query(StudentReview)
+    if status:
+        q = q.filter(StudentReview.status == status)
+    rows = q.order_by(StudentReview.created_at.desc()).all()
+    out = []
+    for r in rows:
+        student = db.query(User).filter(User.id == r.student_id).first()
+        out.append({
+            "id": r.id,
+            "student_id": r.student_id,
+            "student_name": student.full_name if student else None,
+            "landlord_id": r.landlord_id,
+            "landlord_name": r.landlord_name,
+            "viewing_id": r.viewing_id,
+            "rating": r.rating,
+            "comment": r.comment,
+            "status": r.status,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        })
+    return out
+
+
+@router.patch("/student-reviews/{review_id}/approve")
+def admin_approve_student_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    r = db.query(StudentReview).filter(StudentReview.id == review_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Student review not found")
+    r.status = "approved"
+    db.commit()
+    return {"id": r.id, "status": r.status}
+
+
+@router.patch("/student-reviews/{review_id}/reject")
+def admin_reject_student_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    r = db.query(StudentReview).filter(StudentReview.id == review_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Student review not found")
+    r.status = "rejected"
+    db.commit()
+    return {"id": r.id, "status": r.status}
