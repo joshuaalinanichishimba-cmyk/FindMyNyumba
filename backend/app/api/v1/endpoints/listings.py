@@ -333,6 +333,8 @@ def list_property_reviews(listing_id: int, db: Session = Depends(get_db)):
             "reviewer_member_since": u.created_at.isoformat() if (u and u.created_at) else None,
             "reviewer_avatar": u.avatar_url if u else None,
             "verified_viewing": visited,
+            "reply_text": r.reply_text,
+            "reply_at": r.reply_at.isoformat() if r.reply_at else None,
         })
     avg = round(sum(x["rating"] for x in out) / len(out), 1) if out else None
     return {"count": len(out), "average": avg, "reviews": out}
@@ -358,3 +360,37 @@ def report_review(
     r.status = "flagged"
     db.commit()
     return {"status": "reported", "message": "Thank you. Our team will review this report."}
+
+
+# -- POST /properties/reviews/{id}/reply ------------------------------------
+# The listing OWNER (the host being reviewed) may post one public reply per
+# review (editable). This gives the paying side a fair right of response and
+# signals an engaged, real host. Ownership: the review's listing.owner_id must
+# match the caller.
+class ReplyBody(BaseModel):
+    text: str
+
+
+@router.post("/reviews/{review_id}/reply", status_code=200)
+def reply_to_review(
+    review_id: int,
+    body: ReplyBody,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    r = db.query(Review).filter(Review.id == review_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Review not found.")
+    listing = db.query(Listing).filter(Listing.id == r.listing_id).first()
+    if not listing or listing.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the listing owner can reply to this review.")
+    text = (body.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Reply cannot be empty.")
+    if len(text) > 1000:
+        raise HTTPException(status_code=400, detail="Reply is too long (max 1000 characters).")
+    from datetime import datetime, timezone
+    r.reply_text = text
+    r.reply_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"status": "ok", "reply_text": r.reply_text, "reply_at": r.reply_at.isoformat()}

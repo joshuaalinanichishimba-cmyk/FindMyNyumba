@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/models/review.py
 
 A rating + written comment a student leaves on a listing.
@@ -34,3 +34,5 @@ class Review(Base):
     comment     = Column(Text)
     status      = Column(String, nullable=False, default="pending", index=True)
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
+    reply_text  = Column(Text, nullable=True)        # host's public reply to this review
+    reply_at    = Column(DateTime(timezone=True), nullable=True)
