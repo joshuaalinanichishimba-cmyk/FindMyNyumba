@@ -456,6 +456,7 @@ let selectedRating  = 0;
 let leafletMap      = null;
 let toastTimer;
 let LANDLORD_PHONE  = null;
+let currentUserId   = null;
 
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 const getRole  = () => localStorage.getItem('role')  || sessionStorage.getItem('role');
@@ -822,7 +823,7 @@ async function loadData() {
 
         const data = await res.json();
         currentProperty = data;
-        loadPropertyReviews();
+        fetchCurrentUserThenReviews();
 
         document.getElementById('prop-title').innerText         = data.title       || 'Untitled';
         document.getElementById('prop-location-text').innerText = data.location    || 'Location not specified';
@@ -1119,6 +1120,8 @@ async function loadPropertyReviews(){
         '<div class="text-sm mt-1.5">'+_revStars(r.rating)+'</div>'+
         '<p class="text-[13px] text-gray-600 mt-1.5 leading-relaxed">'+_revEsc(r.comment)+'</p>'+
         '<div class="flex items-center justify-between mt-1">'+        '<p class="text-[11px] text-gray-300">'+_revDate(r.created_at)+'</p>'+        '<button onclick="reportReview('+r.id+')" class="text-[11px] text-gray-300 hover:text-red-500"><i class="fas fa-flag mr-1"></i>Report</button>'+        '</div>'+
+        _replyBlock(r)+
+        _ownerReplyUI(r)+
         '</div></div></div>';
     }).join("");
   }catch(e){ list.innerHTML='<p class="text-sm text-gray-400">Could not load reviews.</p>'; }
@@ -1165,6 +1168,57 @@ async function reportReview(id){
     var d=await res.json().catch(function(){return{};});
     if(res.ok){ showToast(d.message||"Thank you. Our team will review this.","success"); loadPropertyReviews(); }
     else { showToast(typeof d.detail==='string'?d.detail:"Could not submit report.","error"); }
+  }catch(e){ showToast("Network error.","error"); }
+}
+</script>
+
+<script>
+async function fetchCurrentUserThenReviews(){
+  var token=getToken();
+  if(token){
+    try{
+      var res=await fetch(`${API_BASE}/auth/me`,{headers:{'Authorization':'Bearer '+token}});
+      if(res.ok){ var u=await res.json(); currentUserId = u.id; }
+    }catch(e){}
+  }
+  loadPropertyReviews();
+}
+function _replyBlock(r){
+  // host's public reply, shown under the review
+  if(r.reply_text){
+    return '<div class="mt-2 ml-6 pl-3 border-l-2 border-orange-200 bg-orange-50 rounded-r-lg py-2 pr-3">'+
+      '<p class="text-[11px] font-black text-[#ea580c] uppercase tracking-wide"><i class="fas fa-reply mr-1"></i>Response from the host</p>'+
+      '<p class="text-[13px] text-gray-700 mt-1 leading-relaxed">'+_revEsc(r.reply_text)+'</p>'+
+      (r.reply_at?'<p class="text-[10px] text-gray-300 mt-1">'+_revDate(r.reply_at)+'</p>':'')+
+      '</div>';
+  }
+  return '';
+}
+function _ownerReplyUI(r){
+  // only the listing owner sees a reply control
+  if(!currentProperty || currentUserId !== currentProperty.owner_id) return '';
+  var label = r.reply_text ? 'Edit response' : 'Reply';
+  return '<div class="mt-1 ml-6">'+
+    '<button onclick="toggleReplyBox('+r.id+')" class="text-[11px] font-bold text-[#ea580c] hover:underline"><i class="fas fa-reply mr-1"></i>'+label+'</button>'+
+    '<div id="replybox-'+r.id+'" class="hidden mt-2">'+
+      '<textarea id="replytext-'+r.id+'" rows="2" maxlength="1000" placeholder="Write a public response to this review..." class="w-full p-3 border border-gray-200 rounded-lg text-[13px] resize-none mb-2">'+(r.reply_text?_revEsc(r.reply_text):'')+'</textarea>'+
+      '<button onclick="submitReviewReply('+r.id+')" class="px-4 py-1.5 bg-[#ea580c] hover:bg-brand-dark text-white text-[12px] font-bold rounded-lg">Post Response</button>'+
+    '</div></div>';
+}
+function toggleReplyBox(id){
+  var el=document.getElementById("replybox-"+id);
+  if(el) el.classList.toggle("hidden");
+}
+async function submitReviewReply(id){
+  var ta=document.getElementById("replytext-"+id);
+  var text=ta?ta.value.trim():"";
+  if(!text){ showToast("Write a response first.","info"); return; }
+  var token=getToken();
+  try{
+    var res=await fetch(`${API_BASE}/properties/reviews/${id}/reply`,{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({text:text})});
+    var d=await res.json().catch(function(){return{};});
+    if(res.ok){ showToast("Response posted.","success"); loadPropertyReviews(); }
+    else { showToast(typeof d.detail==='string'?d.detail:"Could not post response.","error"); }
   }catch(e){ showToast("Network error.","error"); }
 }
 </script>
