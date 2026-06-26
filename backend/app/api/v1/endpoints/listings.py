@@ -336,3 +336,25 @@ def list_property_reviews(listing_id: int, db: Session = Depends(get_db)):
         })
     avg = round(sum(x["rating"] for x in out) / len(out), 1) if out else None
     return {"count": len(out), "average": avg, "reviews": out}
+
+
+# -- POST /properties/reviews/{id}/report -----------------------------------
+# Any logged-in user can flag a review as fake/abusive. Sets status to
+# "flagged" -> immediately hidden from public (GET returns only "approved")
+# and surfaced in the admin queue (GET /admin/reviews?status=flagged) for a
+# human decision (re-approve if legit, reject if genuinely bad).
+@router.post("/reviews/{review_id}/report", status_code=200)
+def report_review(
+    review_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    r = db.query(Review).filter(Review.id == review_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Review not found.")
+    # Don't let someone "report" to escalate their own already-removed review, etc.
+    if r.status == "flagged":
+        return {"status": "reported", "message": "This review is already under review."}
+    r.status = "flagged"
+    db.commit()
+    return {"status": "reported", "message": "Thank you. Our team will review this report."}
