@@ -428,3 +428,37 @@ def reply_to_review(
     r.reply_at = datetime.now(timezone.utc)
     db.commit()
     return {"status": "ok", "reply_text": r.reply_text, "reply_at": r.reply_at.isoformat()}
+
+@router.get("/{listing_id}/history")
+def get_property_history(listing_id: int, db: Session = Depends(get_db)):
+    """Public, transparency-focused timeline. Real dated events only (no reports)."""
+    listing = db.query(Listing).filter(Listing.id == listing_id, Listing.status == "active").first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    owner = db.query(User).filter(User.id == listing.owner_id).first()
+    events = []
+    if listing.created_at:
+        events.append({"date": listing.created_at.isoformat(), "icon": "calendar-plus",
+                       "label": "Listed on FindMyNyumba", "kind": "listed"})
+    if owner and owner.created_at:
+        events.append({"date": owner.created_at.isoformat(), "icon": "user-plus",
+                       "label": "Host joined FindMyNyumba", "kind": "host_joined"})
+    fr = (db.query(Review).filter(Review.listing_id == listing_id, Review.status == "approved")
+            .order_by(Review.created_at.asc()).first())
+    if fr and fr.created_at:
+        events.append({"date": fr.created_at.isoformat(), "icon": "star",
+                       "label": "First verified review received", "kind": "first_review"})
+    completed = (db.query(ViewingRequest)
+                   .filter(ViewingRequest.listing_id == listing_id,
+                           ViewingRequest.status == ViewingStatus.COMPLETED.value)
+                   .all())
+    if completed:
+        n = len(completed)
+        dated = [c.completed_at for c in completed if c.completed_at]
+        when = max(dated).isoformat() if dated else listing.created_at.isoformat()
+        events.append({"date": when, "icon": "handshake",
+                       "label": str(n) + (" viewings completed" if n != 1 else " viewing completed"),
+                       "kind": "viewings"})
+    events.sort(key=lambda e: e["date"])
+    return {"events": events,
+            "host_verified": bool(owner and (owner.verification_status or "") == "verified")}
