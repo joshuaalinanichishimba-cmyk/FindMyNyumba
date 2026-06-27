@@ -511,6 +511,9 @@
             const safeLoc   = esc(p.location || '');
             const idStr     = esc(String(p.id));
             const isSaved   = saved.indexOf(String(p.id)) >= 0;
+            const freshAgo  = browseFreshAgo(p.created_at);
+            const taken     = p.availability_status === 'taken';
+            const spotsLeft = (p.total_spots > 1) ? (p.available_spots != null ? p.available_spots : p.total_spots) : null;
 
             const beds  = num(p.bedrooms, p.beds, p.bedroom_count, p.no_of_bedrooms);
             const baths = num(p.bathrooms, p.baths, p.bathroom_count, p.no_of_bathrooms);
@@ -552,6 +555,7 @@
                         <i class="fas fa-map-marker-alt text-[#16a34a] mt-0.5 flex-shrink-0"></i>
                         <span class="line-clamp-1">${safeLoc}</span>
                     </p>
+                    ${(freshAgo || taken || spotsLeft != null) ? `<div class="flex items-center gap-2 text-[10.5px] font-semibold text-gray-400 mb-2">${freshAgo ? `<span><i class="far fa-clock mr-1"></i>${freshAgo}</span>` : ''}${taken ? `<span class="text-red-500"><i class="fas fa-circle-xmark mr-1"></i>Taken</span>` : (spotsLeft != null ? `<span class="text-green-600"><i class="fas fa-bed mr-1"></i>${spotsLeft} left</span>` : '')}</div>` : ''}
                     ${amenities.length ? `<div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500 font-semibold mb-3">${amenities.join('')}</div>` : '<div class="mb-1"></div>'}
                     <a href="listing.html?id=${encodeURIComponent(p.id)}"
                        class="mt-auto w-full inline-flex items-center justify-center bg-[#0f172a] text-white px-3 py-2.5 rounded-xl font-extrabold hover:bg-[#16a34a] transition-colors text-xs">
@@ -616,5 +620,19 @@
     </script>
 <script src="assets/fmn-trust.js" data-page="listings"></script>
 <script src="assets/fmn-report.js"></script>
+<script>
+function browseFreshAgo(iso){
+  if(!iso)return "";
+  try{
+    var d=new Date(iso), days=Math.floor((Date.now()-d)/86400000);
+    if(days<=0)return "Today";
+    if(days===1)return "1d ago";
+    if(days<7)return days+"d ago";
+    if(days<30)return Math.floor(days/7)+"w ago";
+    return Math.floor(days/30)+"mo ago";
+  }catch(e){return "";}
+}
+</script>
+
 </body>
 </html>
