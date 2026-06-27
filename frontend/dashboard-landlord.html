@@ -194,6 +194,20 @@
                         </div>
                     </div>
 
+                    <!-- Response Quality (Feature 12) -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-9 h-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center"><i class="fas fa-gauge-high"></i></div>
+                            <h3 class="text-base font-extrabold text-slate-900">Response Quality</h3>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div><p id="rq-rate" class="text-2xl font-black text-slate-900">—</p><p class="text-[11px] text-slate-400 font-bold uppercase mt-1">Response Rate</p></div>
+                            <div class="border-x border-slate-100"><p id="rq-time" class="text-2xl font-black text-slate-900">—</p><p class="text-[11px] text-slate-400 font-bold uppercase mt-1">Typical Reply</p></div>
+                            <div><p id="rq-comm" class="text-2xl font-black text-slate-900">—</p><p class="text-[11px] text-slate-400 font-bold uppercase mt-1">Communication</p></div>
+                        </div>
+                        <p id="rq-note" class="text-[11px] text-slate-400 font-medium mt-3 text-center"></p>
+                    </div>
+
                     <!-- quick action -->
                     <button onclick="switchTab('properties')" class="w-full text-left rounded-2xl p-5 mb-6 flex items-center gap-4 shadow-lg shadow-orange-200 transition hover:opacity-95" style="background:linear-gradient(135deg,#ea580c,#c2410c);">
                         <span class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center text-xl"><i class="fas fa-plus"></i></span>
@@ -952,6 +966,7 @@ async function initDashboard() {
             return;
         }
         window._currentUser = user;
+        if (user && user.id) loadResponseQuality(user.id);
         const initials  = (user.full_name || 'L').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
         const avatarSrc = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=ea580c&color=fff`;
         const set = (id, val) => { const el = document.getElementById(id); if (el) el[el.tagName === 'IMG' ? 'src' : 'textContent'] = val; };
@@ -2039,6 +2054,35 @@ async function submitMyReply(id){
     if(res.ok){ showToast("Response posted.","success"); loadMyReviews(); }
     else { showToast(typeof d.detail==="string"?d.detail:"Could not post response.","error"); }
   }catch(e){ showToast("Network error.","error"); }
+}
+</script>
+
+<script>
+function _rqHumanize(s){
+  if(s==null)return "—";
+  if(s<3600)return "~"+Math.max(1,Math.round(s/60))+"min";
+  if(s<86400)return "~"+Math.round(s/3600)+"h";
+  return "~"+Math.round(s/86400)+"d";
+}
+async function loadResponseQuality(ownerId){
+  if(!ownerId)return;
+  try{
+    var res=await fetch(`${API}/properties/host/${ownerId}/response-stats`);
+    if(!res.ok)return;
+    var d=await res.json();
+    function set(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+    set("rq-rate", d.response_rate!=null ? d.response_rate+"%" : "—");
+    set("rq-time", d.median_response_seconds!=null ? _rqHumanize(d.median_response_seconds) : "—");
+    set("rq-comm", d.communication_quality!=null ? d.communication_quality+"/5" : "—");
+    var note=document.getElementById("rq-note");
+    if(note){
+      if(d.enough_data){
+        note.textContent="Based on "+d.total_inquiries+" inquiries. These stats are shown publicly on your listings.";
+      } else {
+        note.textContent="Based on "+d.total_inquiries+" inquir"+(d.total_inquiries===1?"y":"ies")+" — not shown publicly until you reach 3+.";
+      }
+    }
+  }catch(e){}
 }
 </script>
 
