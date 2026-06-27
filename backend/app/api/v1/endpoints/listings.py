@@ -114,6 +114,10 @@ def _listing_card(l: Listing, request: Request) -> dict:
         "media":      [_media_response(m, request) for m in (l.media or [])],
         "cover_url":  _watermark(_absolute_image_url(l.cover_url, request)),
         "created_at": l.created_at.isoformat() if l.created_at else None,
+        "available_spots": l.available_spots,
+        "total_spots": l.total_spots,
+        "availability_status": l.availability_status,
+        "view_count": getattr(l, "_view_count", 0),
     }
 
 
@@ -159,6 +163,18 @@ def get_all_properties(
              .all()
     )
 
+    # Batch view counts (one grouped query for the whole page) -> attach _view_count
+    _ids = [l.id for l in listings]
+    if _ids:
+        from app.models.listing_event import ListingEvent
+        from sqlalchemy import func as _func
+        _counts = dict(
+            db.query(ListingEvent.listing_id, _func.count(ListingEvent.id))
+              .filter(ListingEvent.listing_id.in_(_ids), ListingEvent.kind == "view")
+              .group_by(ListingEvent.listing_id).all()
+        )
+        for _l in listings:
+            _l._view_count = _counts.get(_l.id, 0)
     return [_listing_card(l, request) for l in listings]
 
 
@@ -221,6 +237,10 @@ def get_listing_detail(
         "owner_id":    listing.owner_id,
         "owner":       owner_data,
         "created_at":  listing.created_at.isoformat() if listing.created_at else None,
+        "available_spots":     listing.available_spots,
+        "total_spots":         listing.total_spots,
+        "availability_status": listing.availability_status,
+        "view_count":          _detail_view_count,
     }
 
 
