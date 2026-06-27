@@ -404,7 +404,39 @@
           <div id="reports-list" class="divide-y divide-slate-50"></div>
         </div>
       </section>
-      <section id="tab-reviews" class="tab-section"></section>
+      <section id="tab-reviews" class="tab-section">
+        <div class="mb-5">
+          <h2 class="text-[19px] font-extrabold text-slate-900">Reviews Moderation</h2>
+          <p class="text-[12px] text-slate-400 font-medium">Approve or reject property reviews (incl. reported ones) and host-to-student reviews</p>
+        </div>
+
+        <!-- Property reviews -->
+        <div class="bg-white rounded-2xl border border-slate-200 mb-6">
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+            <span class="font-extrabold text-slate-800 text-sm"><i class="fas fa-building text-slate-300 mr-2"></i>Property Reviews</span>
+            <select id="prop-review-filter" onchange="loadReviews()" class="text-[12px] font-semibold border border-slate-200 rounded-lg px-2 py-1 text-slate-600">
+              <option value="pending">Pending</option>
+              <option value="flagged">Reported / Flagged</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div id="prop-reviews-list" class="divide-y divide-slate-100"></div>
+        </div>
+
+        <!-- Student reviews -->
+        <div class="bg-white rounded-2xl border border-slate-200">
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+            <span class="font-extrabold text-slate-800 text-sm"><i class="fas fa-user-graduate text-slate-300 mr-2"></i>Student Reviews <span class="text-[11px] font-medium text-slate-400">(host &rarr; student)</span></span>
+            <select id="student-review-filter" onchange="loadReviews()" class="text-[12px] font-semibold border border-slate-200 rounded-lg px-2 py-1 text-slate-600">
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div id="student-reviews-list" class="divide-y divide-slate-100"></div>
+        </div>
+      </section>
 
       <!-- ============================================================
            FRAUD CENTER (PREVIEW)
@@ -2181,33 +2213,82 @@ async function logoutAllOther(){try{var res=await fetch(`${API}/auth/logout-all`
 </body>
 </html>
 <script>
-let _reviews = [];
+/* ====================================================================
+   REVIEWS MODERATION — property reviews + student (host->student) reviews
+==================================================================== */
 async function loadReviews(){
-  const sec = document.getElementById('tab-reviews');
-  sec.innerHTML = `<div class="card overflow-hidden"><div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5"><div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Reviews</h3><p class="text-[12px] text-slate-400 font-medium">Approve or reject student reviews before they show publicly</p></div><select id="review-status" class="fmn-input w-auto" onchange="fetchReviews()"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="">All</option></select></div><div id="reviews-list" class="divide-y divide-slate-50"><div class="px-5 py-10 text-center text-slate-400 text-sm">Loading…</div></div></div>`;
-  await fetchReviews();
+  loadPropertyReviewsAdmin();
+  loadStudentReviewsAdmin();
 }
-async function fetchReviews(){
-  const st = document.getElementById('review-status')?.value ?? 'pending';
-  const el = document.getElementById('reviews-list');
-  try {
-    const r = await fetch(`${API}/admin/reviews${st ? '?status='+st : ''}`);
-    if (!r.ok){ el.innerHTML = `<div class="px-5 py-10 text-center text-red-500 text-sm">Couldn't load reviews — HTTP ${r.status}.</div>`; return; }
-    _reviews = await r.json();
-  } catch { el.innerHTML = `<div class="px-5 py-10 text-center text-red-500 text-sm">Network error.</div>`; return; }
-  renderReviews();
+
+function _revActionBtns(kind, id, status){
+  // kind: 'reviews' (property) or 'student-reviews'
+  var btns = '';
+  if (status !== 'approved') btns += '<button onclick="moderateReview(\'' + kind + '\',' + id + ',\'approve\')" class="btn btn-ghost px-3 py-1.5 text-[12px] text-emerald-600">Approve</button>';
+  if (status !== 'rejected') btns += '<button onclick="moderateReview(\'' + kind + '\',' + id + ',\'reject\')" class="btn btn-ghost px-3 py-1.5 text-[12px] text-red-600">Reject</button>';
+  return btns;
 }
-function renderReviews(){
-  const el = document.getElementById('reviews-list'); if (!el) return;
-  if (!_reviews.length){ el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm">No reviews here.</div>`; return; }
-  const stars = n => '\u2605'.repeat(n) + '\u2606'.repeat(5-n);
-  el.innerHTML = _reviews.map(r => `<div class="px-5 py-4"><div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-slate-800 text-[13.5px]">${esc(r.user_name||'User')}</span><span class="text-amber-500 text-sm">${stars(r.rating||0)}</span><span class="pill ${r.status==='approved'?'bg-green-50 text-green-600':r.status==='rejected'?'bg-red-50 text-red-500':'bg-amber-50 text-amber-700'}">${esc(r.status)}</span><span class="text-[11px] text-slate-300 ml-auto">${esc(r.listing_title||'')}</span></div><p class="text-[13px] text-slate-600 mt-1.5">${esc(r.comment||'—')}</p><div class="flex gap-2 mt-2"><button onclick="moderateReview(${r.id},'approved')" class="btn btn-pri text-xs">Approve</button><button onclick="moderateReview(${r.id},'rejected')" class="btn text-xs border border-slate-200">Reject</button></div></div>`).join('');
+
+function _revStars(n){ var s=''; for(var i=1;i<=5;i++){ s+='<i class="fas fa-star '+(i<=n?'text-amber-400':'text-slate-200')+'"></i>'; } return s; }
+
+async function loadPropertyReviewsAdmin(){
+  var el = document.getElementById('prop-reviews-list');
+  var status = (document.getElementById('prop-review-filter')||{}).value || 'pending';
+  el.innerHTML = '<div class="px-5 py-8 text-center text-slate-300 text-sm">Loading...</div>';
+  try{
+    var res = await fetch(`${API}/admin/reviews?status=${status}`);
+    if(!res.ok) throw new Error();
+    var rows = await res.json();
+    if(!rows.length){ el.innerHTML = '<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-check text-2xl text-emerald-400 mb-2 block"></i>No '+esc(status)+' property reviews.</div>'; return; }
+    el.innerHTML = rows.map(function(r){
+      return '<div class="px-5 py-4 hover:bg-slate-50 transition">'+
+        '<div class="flex flex-wrap items-start justify-between gap-3">'+
+          '<div class="min-w-0">'+
+            '<div class="flex items-center gap-2 flex-wrap">'+
+              '<span class="font-extrabold text-slate-900 text-sm">'+esc(r.listing_title || ('Listing #'+r.listing_id))+'</span>'+
+              '<span class="text-[13px]">'+_revStars(r.rating)+'</span>'+
+            '</div>'+
+            '<div class="text-[11.5px] text-slate-400 mt-1">Review #'+esc(r.id)+' &middot; by '+esc(r.user_name || ('User '+r.user_id))+'</div>'+
+            (r.comment?'<div class="mt-2 text-[13.5px] text-slate-700">'+esc(r.comment)+'</div>':'')+
+          '</div>'+
+          '<div class="flex gap-1 flex-shrink-0">'+_revActionBtns('reviews', r.id, r.status)+'</div>'+
+        '</div></div>';
+    }).join('');
+  }catch(e){ el.innerHTML = errorBlock('Failed to load property reviews.'); }
 }
-async function moderateReview(id, status){
-  try {
-    const r = await fetch(`${API}/admin/reviews/${id}/${status === 'approved' ? 'approve' : 'reject'}`, { method:'PATCH' });
-    if (r.ok){ showToast(`Review ${status}.`, 'success'); fetchReviews(); }
-    else { showToast('Action failed.', 'error'); }
-  } catch { showToast('Network error.', 'error'); }
+
+async function loadStudentReviewsAdmin(){
+  var el = document.getElementById('student-reviews-list');
+  var status = (document.getElementById('student-review-filter')||{}).value || 'pending';
+  el.innerHTML = '<div class="px-5 py-8 text-center text-slate-300 text-sm">Loading...</div>';
+  try{
+    var res = await fetch(`${API}/admin/student-reviews?status=${status}`);
+    if(!res.ok) throw new Error();
+    var rows = await res.json();
+    if(!rows.length){ el.innerHTML = '<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-check text-2xl text-emerald-400 mb-2 block"></i>No '+esc(status)+' student reviews.</div>'; return; }
+    el.innerHTML = rows.map(function(r){
+      return '<div class="px-5 py-4 hover:bg-slate-50 transition">'+
+        '<div class="flex flex-wrap items-start justify-between gap-3">'+
+          '<div class="min-w-0">'+
+            '<div class="flex items-center gap-2 flex-wrap">'+
+              '<span class="font-extrabold text-slate-900 text-sm">'+esc(r.student_name || ('Student #'+r.student_id))+'</span>'+
+              '<span class="text-[13px]">'+_revStars(r.rating)+'</span>'+
+            '</div>'+
+            '<div class="text-[11.5px] text-slate-400 mt-1">Review #'+esc(r.id)+' &middot; by host '+esc(r.landlord_name || ('User '+r.landlord_id))+'</div>'+
+            (r.comment?'<div class="mt-2 text-[13.5px] text-slate-700">'+esc(r.comment)+'</div>':'')+
+          '</div>'+
+          '<div class="flex gap-1 flex-shrink-0">'+_revActionBtns('student-reviews', r.id, r.status)+'</div>'+
+        '</div></div>';
+    }).join('');
+  }catch(e){ el.innerHTML = errorBlock('Failed to load student reviews.'); }
 }
+
+async function moderateReview(kind, id, action){
+  try{
+    var res = await fetch(`${API}/admin/${kind}/${id}/${action}`, { method:'PATCH' });
+    if(res.ok){ showToast('Review '+action+'d.'); loadReviews(); }
+    else { showToast('Could not '+action+' review.', 'error'); }
+  }catch(e){ showToast('Network error.', 'error'); }
+}
+
 </script>
