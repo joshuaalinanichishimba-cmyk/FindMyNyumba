@@ -84,3 +84,17 @@ Admin Reviews moderation tab (property+student, flagged filter); host reply from
 
 ### ALL session-notes open items now RESOLVED. No known student-facing gaps.
 ### Optional future ideas only: helpful-votes on reviews; review photo uploads (deferred - moderation/CSAM risk).
+
+## SESSION (2026-06-27 cont.) — Listing freshness signals + incident note
+
+### Shipped: listing freshness/availability signals (browse + detail)
+- Backend (listings.py): _listing_card() now returns available_spots, total_spots, availability_status, view_count (getattr l._view_count). Browse endpoint batches view counts in ONE grouped ListingEvent query (kind="view") and attaches _l._view_count before serializing. get_listing_detail returns same fields + _detail_view_count (single-listing count, defined with guaranteed `=0` default BEFORE the return).
+- Frontend detail (listing.html): #freshness-signals container after price; renderFreshness(data) + _freshAgo()/_freshChip(); wired after renderSafetyCues. Shows posted-date always, availability/spots (only "N of M spots left" if total_spots>1, else "Available", "Taken" if status==taken), views ONLY if view_count>=5 (so quiet marketplace never shows "1 view").
+- Frontend browse (browse.html): freshness vars (freshAgo/taken/spotsLeft) + browseFreshAgo() helper; compact row on cards (clock + Taken/N-left). Short forms ("2w ago","3 left").
+
+### INCIDENT (resolved): listing detail 500 for ~stretch
+- Root cause: in commit 43930cb the return dict referenced _detail_view_count but its DEFINITION was lost (Ctrl+C during edit). The line USING it committed; the line DEFINING it did not. IMPORTS OK does NOT catch this (runtime NameError inside endpoint body). The immediate post-push 200 check passed only due to Render deploy lag serving old code = false all-clear.
+- Fix (commit 808e1bb): define `_detail_view_count = 0` then try/except count, placed BEFORE the return. Verified live with detail-18/detail-17 both 200 + view_count present.
+- LESSON: for changes that add a variable used in a response, re-hit the LIVE endpoint ~2 min after deploy (not immediately). IMPORTS OK is insufficient for runtime NameErrors.
+
+### Commit chain: 43930cb freshness backend (introduced bug) -> 1331569 detail frontend -> d449d78 browse frontend -> 808e1bb FIX _detail_view_count
