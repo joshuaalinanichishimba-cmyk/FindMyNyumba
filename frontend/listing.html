@@ -256,6 +256,12 @@
                 </div>
             </div>
 
+            <!-- Property History timeline (Feature 11) -->
+            <div id="property-history-card" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 hidden">
+                <h4 class="text-xl font-bold text-gray-800 mb-1 flex items-center gap-2"><i class="fas fa-clock-rotate-left text-brand"></i> Property History</h4>
+                <p class="text-[12px] text-gray-400 mb-4">A transparent record of this listing on FindMyNyumba.</p>
+                <div id="property-history-timeline"></div>
+            </div>
             <!-- SECTION 10: Similar properties (TODO: Requires Similar Listings Endpoint) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                 <div class="flex items-center justify-between mb-4">
@@ -831,6 +837,7 @@ async function loadData() {
 
         const data = await res.json();
         currentProperty = data;
+        loadPropertyHistory(data.id);
         fetchCurrentUserThenReviews();
 
         document.getElementById('prop-title').innerText         = data.title       || 'Untitled';
@@ -1298,6 +1305,41 @@ function renderFreshness(data){
     chips.push(_freshChip("fa-eye", data.view_count+" views"));
   }
   box.innerHTML=chips.join("");
+}
+</script>
+
+<script>
+function _histIcon(n){var ok=["calendar-plus","user-plus","star","handshake"];return ok.indexOf(n)>=0?n:"circle";}
+function _histEsc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function _histDate(iso){if(!iso)return "";try{var d=new Date(iso),m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return d.getDate()+" "+m[d.getMonth()]+" "+d.getFullYear();}catch(e){return "";}}
+async function loadPropertyHistory(id){
+  var card=document.getElementById("property-history-card");
+  var box=document.getElementById("property-history-timeline");
+  if(!card||!box||!id)return;
+  try{
+    var res=await fetch(`${API_BASE}/properties/${id}/history`);
+    if(!res.ok)return;
+    var data=await res.json();
+    var events=data.events||[];
+    if(!events.length && !data.host_verified)return;
+    var rows=events.map(function(e,i){
+      var last=(i===events.length-1);
+      return '<div class="flex gap-3">'+
+        '<div class="flex flex-col items-center">'+
+          '<div class="w-8 h-8 rounded-full bg-orange-50 text-brand flex items-center justify-center text-sm"><i class="fas fa-'+_histIcon(e.icon)+'"></i></div>'+
+          (last?'':'<div class="w-px flex-grow bg-gray-200 my-1"></div>')+
+        '</div>'+
+        '<div class="pb-4">'+
+          '<p class="text-[13.5px] font-bold text-gray-800">'+_histEsc(e.label)+'</p>'+
+          '<p class="text-[11.5px] text-gray-400">'+_histDate(e.date)+'</p>'+
+        '</div></div>';
+    }).join("");
+    var verifiedBadge=data.host_verified
+      ? '<div class="mt-1 inline-flex items-center gap-1.5 text-[12px] font-bold text-green-700 bg-green-50 border border-green-100 rounded-full px-3 py-1"><i class="fas fa-circle-check"></i> Verified host</div>'
+      : '';
+    box.innerHTML=rows+verifiedBadge;
+    card.classList.remove("hidden");
+  }catch(e){}
 }
 </script>
 
