@@ -462,3 +462,45 @@ def get_property_history(listing_id: int, db: Session = Depends(get_db)):
     events.sort(key=lambda e: e["date"])
     return {"events": events,
             "host_verified": bool(owner and (owner.verification_status or "") == "verified")}
+
+@router.get("/host/{owner_id}/response-stats")
+def get_host_response_stats(owner_id: int, db: Session = Depends(get_db)):
+    """Public, fully-transparent host response metrics. Threshold-gated for integrity."""
+    from app.models.message import Message
+    import statistics as _stats
+    msgs = (db.query(Message)
+              .filter((Message.sender_id == owner_id) | (Message.receiver_id == owner_id))
+              .order_by(Message.created_at.asc()).all())
+    threads = {}
+    for m in msgs:
+        other = m.receiver_id if m.sender_id == owner_id else m.sender_id
+        threads.setdefault(other, []).append((m.sender_id, m.created_at))
+    total_inquiries = 0
+    responded = 0
+    response_times = []
+    for student_id, events in threads.items():
+        inquiry_at = next((t for (s, t) in events if s == student_id), None)
+        if not inquiry_at:
+            continue
+        total_inquiries += 1
+        reply_at = next((t for (s, t) in events if s == owner_id and t and t > inquiry_at), None)
+        if reply_at:
+            responded += 1
+            response_times.append((reply_at - inquiry_at).total_seconds())
+    owner_listing_ids = [l.id for l in db.query(Listing.id).filter(Listing.owner_id == owner_id).all()]
+    comm_vals = []
+    if owner_listing_ids:
+        rows = (db.query(Review.rating_landlord)
+                  .filter(Review.listing_id.in_(owner_listing_ids),
+                          Review.status == "approved",
+                          Review.rating_landlord.isnot(None)).all())
+        comm_vals = [r[0] for r in rows if r[0]]
+    median_secs = _stats.median(response_times) if response_times else None
+    return {
+        "enough_data": total_inquiries >= 3,
+        "total_inquiries": total_inquiries,
+        "response_rate": round(100 * responded / total_inquiries) if total_inquiries else None,
+        "median_response_seconds": int(median_secs) if median_secs is not None else None,
+        "communication_quality": round(sum(comm_vals)/len(comm_vals), 1) if comm_vals else None,
+        "communication_count": len(comm_vals),
+    }
