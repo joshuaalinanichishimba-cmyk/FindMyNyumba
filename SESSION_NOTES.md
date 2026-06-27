@@ -70,3 +70,17 @@ afe4743 reviews GET -> c69ba13 trust cards -> 5c65890 trust badge+cues -> 4eb994
 
 ### Commit chain (this session)
 2b31810 admin reviews tab -> [landlord reviews backend 599b571] -> 03bfb3e/landlord dash -> 6d1c78e student-host dash -> f345740 contact-landlord sticky removal -> dbe79a9 fmn-trust dedupe -> fec5703 review categories backend -> 510f51b review categories frontend
+
+## SESSION (2026-06-27 cont.) — Cleanup wrap-up
+
+- contact-landlord.html: confirmed ORPHANED (every student entry point - browse.html, browse.js, student-dashboard.js, dashboard-student.html, listing.html similar-listings - links to listing.html?id=; only contact-landlord.html self-referenced). DELETED (commit 553b573). The desktop "Request a Viewing covered" issue was on this unreachable page, so not student-facing. Recoverable via git: `git show 510f51b:frontend/contact-landlord.html`.
+- Cleaned stale "contact-landlord.html" mention in dashboard-student.html comment (923288d).
+
+### Student journey - all live & working
+browse -> listing.html (trust badge, scam cues, verified-host) -> reviews (verified/visited badges, category breakdown, host replies, reporter profile popup) -> message / request viewing -> viewing code -> completion -> leave review (overall + Accuracy/Landlord/Value, gated on completed viewing) -> report fake reviews.
+
+### Admin/host tooling - all live
+Admin Reviews moderation tab (property+student, flagged filter); host reply from both dashboards; StudentReview moderation; structured ratings full stack.
+
+### ALL session-notes open items now RESOLVED. No known student-facing gaps.
+### Optional future ideas only: helpful-votes on reviews; review photo uploads (deferred - moderation/CSAM risk).
