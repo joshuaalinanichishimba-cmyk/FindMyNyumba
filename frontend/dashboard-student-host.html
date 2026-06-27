@@ -101,6 +101,7 @@
             <button onclick="switchTab('viewings')" id="nav-viewings" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-calendar-check w-4 text-center"></i> Viewings</button>
             <button onclick="switchTab('verification')" id="nav-verification" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-shield-alt w-4 text-center"></i> Verification</button>
             <button onclick="switchTab('payments')" id="nav-payments" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-wallet w-4 text-center"></i> Monetization</button>
+            <button onclick="switchTab('reviews')" id="nav-reviews" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-star w-4 text-center"></i> Reviews</button>
             <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full text-left px-5 py-3 text-sm font-semibold flex items-center gap-3 text-gray-600"><i class="fas fa-user-cog w-4 text-center"></i> Profile &amp; Settings</button>
         </nav>
 
@@ -694,6 +695,16 @@
         </div>
 
         <!-- Profile -->
+        <div id="view-reviews" class="dashboard-view hidden-view">
+          <div class="max-w-3xl">
+            <div class="flex items-center justify-between mb-1">
+              <h2 class="text-lg font-extrabold text-gray-900">Reviews</h2>
+              <span id="sh-reviews-summary" class="text-sm font-bold text-gray-500"></span>
+            </div>
+            <p class="text-gray-400 text-sm font-medium mb-5">See what students say about your spaces and respond publicly.</p>
+            <div id="sh-reviews-list"><p class="text-sm text-gray-400">Loading...</p></div>
+          </div>
+        </div>
         <div id="view-profile" class="dashboard-view hidden-view">
             <h2 class="text-xl font-black mb-5 text-gray-900">Profile &amp; Settings</h2>
             <div class="max-w-xl space-y-5">
@@ -845,6 +856,7 @@ function switchTab(tabId) {
         if (tabId === 'inquiries')    loadConversations();
         if (tabId === 'viewings')     loadShViewings();
         if (tabId === 'verification') loadVerification();
+        if (tabId === 'reviews')      loadShReviews();
         if (tabId === 'profile')      loadProfile();
         if (tabId === 'profile')      loadSessions();
     }
@@ -1504,6 +1516,53 @@ async function shSubmitReview(viewingId,studentId){
     showToast("Review submitted! It will appear after approval.");
     var box=document.getElementById("sh-rate-"+viewingId);if(box)box.classList.add("hidden");
   }catch(e){showToast(e.message||"Could not submit review.","error");}
+}
+</script>
+
+<script>
+function _shEsc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function _shStars(n){var s="";for(var i=1;i<=5;i++){s+='<i class="fas fa-star '+(i<=n?"text-amber-400":"text-gray-200")+'"></i>';}return s;}
+function _shDate(iso){if(!iso)return "";try{var d=new Date(iso),m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return d.getDate()+" "+m[d.getMonth()]+" "+d.getFullYear();}catch(e){return "";}}
+function _shStatusPill(s){var map={approved:"bg-green-50 text-green-600",pending:"bg-amber-50 text-amber-700",flagged:"bg-red-50 text-red-500",rejected:"bg-gray-100 text-gray-400"};return '<span class="text-[10px] font-black px-2 py-0.5 rounded-full '+(map[s]||"bg-gray-100 text-gray-400")+'">'+_shEsc(s)+'</span>';}
+async function loadShReviews(){
+  var list=document.getElementById("sh-reviews-list"), sum=document.getElementById("sh-reviews-summary");
+  if(!list)return;
+  list.innerHTML='<p class="text-sm text-gray-400">Loading...</p>';
+  try{
+    var res=await fetch(`${API_BASE}/student-host/reviews`,{headers:{"Authorization":"Bearer "+getToken()}});
+    if(!res.ok)throw new Error();
+    var data=await res.json();
+    if(sum)sum.innerHTML=data.count?('<i class="fas fa-star text-amber-400 mr-1"></i>'+data.average+" \u00b7 "+data.count+" review"+(data.count===1?"":"s")):"";
+    var rows=data.reviews||[];
+    if(!rows.length){ list.innerHTML='<div class="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm"><i class="fas fa-star text-2xl text-gray-200 mb-2 block"></i>No reviews on your spaces yet.</div>'; return; }
+    list.innerHTML=rows.map(function(r){
+      var reply=r.reply_text?'<div class="mt-2 ml-4 pl-3 border-l-2 border-orange-200 bg-orange-50 rounded-r-lg py-2 pr-3"><p class="text-[11px] font-black text-[#ea580c] uppercase"><i class="fas fa-reply mr-1"></i>Your response</p><p class="text-[13px] text-gray-700 mt-1">'+_shEsc(r.reply_text)+'</p>'+(r.reply_at?'<p class="text-[10px] text-gray-300 mt-1">'+_shDate(r.reply_at)+'</p>':'')+'</div>':'';
+      var btnLabel=r.reply_text?"Edit response":"Reply";
+      return '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-3">'+
+        '<div class="flex items-start justify-between gap-2 flex-wrap">'+
+          '<div class="min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="font-extrabold text-gray-900 text-sm">'+_shEsc(r.listing_title)+'</span>'+_shStatusPill(r.status)+'</div>'+
+          '<div class="text-[11.5px] text-gray-400 mt-0.5">by '+_shEsc(r.reviewer_name)+' \u00b7 '+_shDate(r.created_at)+'</div></div>'+
+          '<div class="text-sm">'+_shStars(r.rating)+'</div>'+
+        '</div>'+
+        (r.comment?'<p class="text-[13.5px] text-gray-600 mt-2">'+_shEsc(r.comment)+'</p>':'')+
+        reply+
+        '<div class="mt-2 ml-4"><button onclick="toggleShReplyBox('+r.id+')" class="text-[11px] font-bold text-[#ea580c] hover:underline"><i class="fas fa-reply mr-1"></i>'+btnLabel+'</button>'+
+          '<div id="shreplybox-'+r.id+'" class="hidden mt-2"><textarea id="shreplytext-'+r.id+'" rows="2" maxlength="1000" placeholder="Write a public response..." class="w-full p-3 border border-gray-200 rounded-lg text-[13px] resize-none mb-2">'+(r.reply_text?_shEsc(r.reply_text):"")+'</textarea>'+
+          '<button onclick="submitShReply('+r.id+')" class="px-4 py-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-[12px] font-bold rounded-lg">Post Response</button></div>'+
+        '</div></div>';
+    }).join("");
+  }catch(e){ list.innerHTML='<div class="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm">Could not load reviews.</div>'; }
+}
+function toggleShReplyBox(id){var el=document.getElementById("shreplybox-"+id);if(el)el.classList.toggle("hidden");}
+async function submitShReply(id){
+  var ta=document.getElementById("shreplytext-"+id);var text=ta?ta.value.trim():"";
+  if(!text){ if(window.showToast)showToast("Write a response first.","info"); else alert("Write a response first."); return; }
+  try{
+    var res=await fetch(`${API_BASE}/properties/reviews/${id}/reply`,{method:"POST",headers:{"Authorization":"Bearer "+getToken(),"Content-Type":"application/json"},body:JSON.stringify({text:text})});
+    var d=await res.json().catch(function(){return{};});
+    if(res.ok){ if(window.showToast)showToast("Response posted.","success"); loadShReviews(); }
+    else { var m=typeof d.detail==="string"?d.detail:"Could not post response."; if(window.showToast)showToast(m,"error"); else alert(m); }
+  }catch(e){ if(window.showToast)showToast("Network error.","error"); }
 }
 </script>
 
