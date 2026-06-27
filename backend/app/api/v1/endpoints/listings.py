@@ -223,6 +223,14 @@ def get_listing_detail(
             "phone_number":        owner.phone_number,
         }
 
+    _detail_view_count = 0
+    try:
+        from sqlalchemy import func as _func
+        _detail_view_count = db.query(_func.count(ListingEvent.id)).filter(
+            ListingEvent.listing_id == listing.id, ListingEvent.kind == "view"
+        ).scalar() or 0
+    except Exception:
+        _detail_view_count = 0
     return {
         "id":          listing.id,
         "title":       listing.title,
