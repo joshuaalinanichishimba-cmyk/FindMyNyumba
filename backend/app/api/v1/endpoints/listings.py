@@ -43,6 +43,9 @@ router = APIRouter(prefix="/properties", tags=["Properties"])
 class ReviewCreate(BaseModel):
     rating:  int            = Field(..., ge=1, le=5)
     comment: str            = Field(..., min_length=1, max_length=2000)
+    rating_accuracy: Optional[int] = Field(None, ge=1, le=5)
+    rating_landlord: Optional[int] = Field(None, ge=1, le=5)
+    rating_value:    Optional[int] = Field(None, ge=1, le=5)
 
 
 class ReportCreate(BaseModel):
@@ -254,7 +257,7 @@ def post_review(
     existing = db.query(Review).filter(Review.listing_id == listing_id, Review.user_id == current_user.id).first()
     if existing:
         raise HTTPException(status_code=409, detail="You have already reviewed this listing.")
-    row = Review(listing_id=listing_id, user_id=current_user.id, user_name=current_user.full_name, rating=review.rating, comment=review.comment.strip(), status="pending")
+    row = Review(listing_id=listing_id, user_id=current_user.id, user_name=current_user.full_name, rating=review.rating, comment=review.comment.strip(), status="pending", rating_accuracy=review.rating_accuracy, rating_landlord=review.rating_landlord, rating_value=review.rating_value)
     db.add(row)
     db.commit()
     return {"status": "submitted", "message": "Thank you! Your review will appear after approval."}
@@ -335,6 +338,9 @@ def list_property_reviews(listing_id: int, db: Session = Depends(get_db)):
             "verified_viewing": visited,
             "reply_text": r.reply_text,
             "reply_at": r.reply_at.isoformat() if r.reply_at else None,
+            "rating_accuracy": r.rating_accuracy,
+            "rating_landlord": r.rating_landlord,
+            "rating_value": r.rating_value,
         })
     avg = round(sum(x["rating"] for x in out) / len(out), 1) if out else None
     return {"count": len(out), "average": avg, "reviews": out}

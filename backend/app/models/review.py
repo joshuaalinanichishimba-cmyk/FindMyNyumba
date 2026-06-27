@@ -36,3 +36,6 @@ class Review(Base):
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
     reply_text  = Column(Text, nullable=True)        # host's public reply to this review
     reply_at    = Column(DateTime(timezone=True), nullable=True)
+    rating_accuracy      = Column(Integer, nullable=True)  # was it as described?
+    rating_landlord      = Column(Integer, nullable=True)  # communication / helpfulness
+    rating_value         = Column(Integer, nullable=True)  # worth the price

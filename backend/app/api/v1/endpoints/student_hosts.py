@@ -756,6 +756,9 @@ def student_host_reviews(
             "created_at": r.created_at.isoformat() if r.created_at else None,
             "reply_text": r.reply_text,
             "reply_at": r.reply_at.isoformat() if r.reply_at else None,
+            "rating_accuracy": r.rating_accuracy,
+            "rating_landlord": r.rating_landlord,
+            "rating_value": r.rating_value,
         })
     avg = round(sum(approved_ratings) / len(approved_ratings), 1) if approved_ratings else None
     return {"count": len(approved_ratings), "average": avg, "reviews": out}
