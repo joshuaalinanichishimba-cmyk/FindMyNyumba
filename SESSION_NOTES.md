@@ -52,3 +52,21 @@ reviews ARE moderated via /admin/reviews.) Consider adding StudentReview to admi
 
 ### Commit chain (this session)
 afe4743 reviews GET -> c69ba13 trust cards -> 5c65890 trust badge+cues -> 4eb9943 unbiased form -> 51e4c8a toast CSS -> 55d44bc report endpoint -> 91401bf report UI -> d6ed7d6 host-reply backend -> ed3d6fe host-reply UI -> e6ac92b student-review moderation
+
+## SESSION (2026-06-27) — Closed remaining open items + structured ratings
+
+### Done this session
+- Admin Reviews moderation tab (admin.html): filled the empty #tab-reviews. Two panels - Property Reviews (filter: pending/flagged/approved/rejected; "flagged" surfaces report-a-review reports) + Student Reviews (host->student). loadReviews()/moderateReview(kind,id,action). Removed old duplicate single-review loadReviews block.
+- Host reply from dashboards: GET /landlord/reviews + GET /student-host/reviews (all reviews across owned listings w/ status+reply+categories). Reviews tab added to dashboard-landlord.html (loadMyReviews) and dashboard-student-host.html (loadShReviews, uses API_BASE + inline _shEsc). Inline reply reuses POST /properties/reviews/{id}/reply.
+- Removed duplicate assets/js/fmn-trust.js (all pages load assets/fmn-trust.js; were byte-identical). Only one copy now.
+- Structured rating categories (Accuracy/Landlord/Value, all optional, nullable):
+  - Review model: rating_accuracy, rating_landlord, rating_value (Integer nullable). Migration 20260627_review_categories (head).
+  - ReviewCreate + post_review accept them (Field None ge=1 le=5). Included in public GET + landlord + student-host payloads.
+  - listing.html review form: 3 optional cat-stars rows (catRatings{}), initCategoryStars(), sent in POST, reset after submit. _catBreakdown(r) renders chips on review cards.
+
+### Still open
+1. contact-landlord.html desktop layout: user reports Request-a-Viewing card looks covered/behind Contact Landlord card on laptop. Investigated: grid is correct (3+6+3 col-span, proper section close, no sticky/absolute/hidden on viewing card after removing lg:sticky). Likely browser cache OR narrow viewport (mobile layout) OR just below-the-fold scroll. NEEDS full-width maximized screenshot to confirm if real bug. NOTE: dashboard-landlord showToast uses bottom-5 right-4 (that's the bottom-right toast seen earlier).
+2. (optional) helpful-votes on reviews; photo uploads in reviews (deferred - moderation/CSAM risk).
+
+### Commit chain (this session)
+2b31810 admin reviews tab -> [landlord reviews backend 599b571] -> 03bfb3e/landlord dash -> 6d1c78e student-host dash -> f345740 contact-landlord sticky removal -> dbe79a9 fmn-trust dedupe -> fec5703 review categories backend -> 510f51b review categories frontend
