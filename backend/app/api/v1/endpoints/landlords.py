@@ -23,6 +23,7 @@ from app.models.listing_media import ListingMedia, MediaType
 from app.core import media_validation as mv
 from app.core.image_hash import phash_bytes
 from app.models.message import Message
+from app.models.review import Review
 from app.models.user import User
 
 router = APIRouter(prefix="/landlord", tags=["Landlord"])
@@ -485,3 +486,43 @@ def change_password(payload: PasswordChange, landlord: User = Depends(require_la
     landlord.hashed_password = get_password_hash(payload.new_password)
     db.commit()
     return {"status": "success", "message": "Password updated successfully."}
+
+
+# -- GET /landlord/reviews --------------------------------------------------
+# All reviews across listings this landlord owns, newest first, each with the
+# listing title, reviewer name, rating, comment, status, and any existing
+# host reply. Lets the host see and reply to reviews from their dashboard.
+@router.get("/reviews")
+def landlord_reviews(
+    current_user: User = Depends(require_landlord),
+    db: Session = Depends(get_db),
+):
+    listing_ids = [lid for (lid,) in db.query(Listing.id).filter(Listing.owner_id == current_user.id).all()]
+    if not listing_ids:
+        return {"count": 0, "average": None, "reviews": []}
+    titles = {l.id: l.title for l in db.query(Listing).filter(Listing.id.in_(listing_ids)).all()}
+    rows = (
+        db.query(Review)
+          .filter(Review.listing_id.in_(listing_ids))
+          .order_by(Review.created_at.desc())
+          .all()
+    )
+    out = []
+    approved_ratings = []
+    for r in rows:
+        if r.status == "approved":
+            approved_ratings.append(r.rating)
+        out.append({
+            "id": r.id,
+            "listing_id": r.listing_id,
+            "listing_title": titles.get(r.listing_id, f"Listing #{r.listing_id}"),
+            "reviewer_name": r.user_name or "Student",
+            "rating": r.rating,
+            "comment": r.comment,
+            "status": r.status,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+            "reply_text": r.reply_text,
+            "reply_at": r.reply_at.isoformat() if r.reply_at else None,
+        })
+    avg = round(sum(approved_ratings) / len(approved_ratings), 1) if approved_ratings else None
+    return {"count": len(approved_ratings), "average": avg, "reviews": out}
