@@ -942,6 +942,7 @@ async function loadData() {
         renderNearby(data);
         renderVerification(data);
         renderStats(owner);
+        loadHostResponseStats(owner && owner.id);
         loadSimilar(id);
 
         /* Map: real coords or geocoded from the location text */
@@ -1339,6 +1340,39 @@ async function loadPropertyHistory(id){
       : '';
     box.innerHTML=rows+verifiedBadge;
     card.classList.remove("hidden");
+  }catch(e){}
+}
+</script>
+
+<script>
+function _humanizeSecs(s){
+  if(s==null)return "";
+  if(s<3600)return "~"+Math.max(1,Math.round(s/60))+" min";
+  if(s<86400)return "~"+Math.round(s/3600)+"h";
+  return "~"+Math.round(s/86400)+"d";
+}
+async function loadHostResponseStats(ownerId){
+  if(!ownerId)return;
+  try{
+    var res=await fetch(`${API_BASE}/properties/host/${ownerId}/response-stats`);
+    if(!res.ok)return;
+    var d=await res.json();
+    var rEl=document.getElementById("stat-response");
+    var tEl=document.getElementById("stat-time");
+    if(d.enough_data){
+      if(rEl)rEl.textContent=(d.response_rate!=null?d.response_rate+"%":"—");
+      if(tEl){
+        var t=_humanizeSecs(d.median_response_seconds);
+        tEl.innerHTML='<i class="fas fa-bolt text-brand"></i> Typically replies in '+t;
+      }
+    } else {
+      if(rEl)rEl.textContent="—";
+      if(tEl)tEl.innerHTML='<i class="fas fa-circle-info text-gray-300"></i> Not enough data yet';
+    }
+    // Communication quality (from Landlord review category) - only if rated
+    if(d.communication_count>0 && d.communication_quality!=null && tEl){
+      tEl.innerHTML += '<br><span class="text-[11px] text-gray-400"><i class="fas fa-comments text-brand"></i> Communication '+d.communication_quality+'/5 ('+d.communication_count+')</span>';
+    }
   }catch(e){}
 }
 </script>
