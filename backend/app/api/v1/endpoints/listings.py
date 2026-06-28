@@ -175,6 +175,19 @@ def get_all_properties(
         )
         for _l in listings:
             _l._view_count = _counts.get(_l.id, 0)
+    # Anonymous search logging (analytics) - only real searches, never break browse.
+    if q or university or (min_price is not None) or (max_price is not None):
+        try:
+            from app.models.search_log import SearchLog
+            db.add(SearchLog(
+                query=(q.strip() if q else None),
+                university=(university.strip() if university else None),
+                min_price=min_price, max_price=max_price,
+                results_count=len(listings),
+            ))
+            db.commit()
+        except Exception:
+            db.rollback()
     return [_listing_card(l, request) for l in listings]
 
 
