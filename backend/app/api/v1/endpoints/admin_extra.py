@@ -969,3 +969,63 @@ def admin_moderate_review(review_id: int, body: ReviewModerate, admin: User = De
     review.status = new_status
     db.commit()
     return {"status": "success", "review_id": review_id, "new_status": new_status}
+
+@router.get("/admin/area-insights")
+def admin_area_insights(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    """Factual per-area counts (founder intel, admin-only). No scores, no judgments."""
+    from app.models.viewing_request import ViewingRequest, ViewingStatus
+    from sqlalchemy import func as _F
+
+    listings = db.query(Listing).filter(Listing.status == "active").all()
+
+    def area_key(l):
+        if l.nearest_institution and l.nearest_institution.strip():
+            return l.nearest_institution.strip()
+        loc = (l.location or "").strip()
+        if "," in loc:
+            parts = [p.strip() for p in loc.split(",") if p.strip()]
+            return parts[1] if len(parts) >= 2 else parts[0]
+        return loc or "Unknown"
+
+    # Verified owners set (one query)
+    verified_owner_ids = set(
+        oid for (oid,) in db.query(User.id).filter(
+            (User.verification_status == "verified")
+        ).all()
+    )
+
+    areas = {}
+    for l in listings:
+        k = area_key(l)
+        a = areas.setdefault(k, {"area": k, "listings": 0, "verified_hosts": set(),
+                                 "listing_ids": []})
+        a["listings"] += 1
+        a["listing_ids"].append(l.id)
+        if l.owner_id in verified_owner_ids:
+            a["verified_hosts"].add(l.owner_id)
+
+    # Per-area counts for reviews, completed viewings, scam reports
+    out = []
+    for k, a in areas.items():
+        ids = a["listing_ids"]
+        reviews = (db.query(_F.count(Review.id))
+                     .filter(Review.listing_id.in_(ids), Review.status == "approved").scalar() or 0) if ids else 0
+        viewings = (db.query(_F.count(ViewingRequest.id))
+                      .filter(ViewingRequest.listing_id.in_(ids),
+                              ViewingRequest.status == ViewingStatus.COMPLETED.value).scalar() or 0) if ids else 0
+        reports = (db.query(_F.count(Report.id))
+                     .filter(Report.listing_id.in_(ids)).scalar() or 0) if ids else 0
+        scam_reports = (db.query(_F.count(Report.id))
+                          .filter(Report.listing_id.in_(ids),
+                                  Report.reason.ilike("%scam%")).scalar() or 0) if ids else 0
+        out.append({
+            "area": k,
+            "listings": a["listings"],
+            "verified_hosts": len(a["verified_hosts"]),
+            "approved_reviews": int(reviews),
+            "completed_viewings": int(viewings),
+            "total_reports": int(reports),
+            "scam_reports": int(scam_reports),
+        })
+    out.sort(key=lambda x: x["listings"], reverse=True)
+    return {"areas": out}
