@@ -120,3 +120,16 @@ Admin Reviews moderation tab (property+student, flagged filter); host reply from
 ### Feature 9 — Area Safety Score: NOT BUILT. Flagged risky (defamation/liability assigning public 1-10 safety scores to real neighbourhoods on thin data). To discuss reframing as factual counts before any build.
 
 ### Commit chain: 2ce7f9e history -> e5a41fe/e910143 response-stats -> a4f565d dash RQ -> 502ead8 SearchLog -> 7fe0dba(removed) -> 1dd61bb analytics wired+dedupe
+
+## SESSION (2026-06-28 cont.) — Feature 9 reframed: Area Insights (admin-only)
+
+### Feature 9 — Area Insights (DONE, reframed from "Safety Score")
+- User agreed to reframe risky public 1-10 safety score -> FACTUAL COUNTS, and further chose ADMIN-ONLY (no public) because data too sparse (only 16 listings; nearest_institution set on just 5/16 - CBU x4, LMMU x1; rest null).
+- GET /admin/area-insights (admin_extra.py): groups active listings by area_key = nearest_institution if set, else 2nd comma-segment of location (neighbourhood-ish), else location. Per area returns: listings, verified_hosts (distinct verified owners), approved_reviews, completed_viewings, total_reports, scam_reports (Report.reason ilike %scam%). All REAL counts, NO score, NO judgment.
+- Frontend: admin "Growth & Demand" tab (#tab-analytics) - Area Insights table; loadAreaInsights() uses _adminToken(); wired into showTab('analytics') alongside loadAnalytics/loadSearchGeo. Scam column red when >0.
+- NOT public (no defamation risk; would be thin "1 listing" insights anyway). Public listing-page version DEFERRED until listing density exists.
+
+### ALL 4 requested features now done: 11 (history), 12 (response quality), 13 (analytics), 9 (area insights/reframed).
+### Data-reality caveat across all: most show thin/empty states at current volume (16 listings, few reviews/viewings/messages). Value is LATENT - pays off with real usage. Highest-leverage next step remains getting real students/listings on + email setup (Resend), not more features.
+
+### Commit chain: c1a8f4e notes -> fcf60af area-insights backend -> 4d7e051 area-insights frontend
