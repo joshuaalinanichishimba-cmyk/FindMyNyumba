@@ -98,3 +98,25 @@ Admin Reviews moderation tab (property+student, flagged filter); host reply from
 - LESSON: for changes that add a variable used in a response, re-hit the LIVE endpoint ~2 min after deploy (not immediately). IMPORTS OK is insufficient for runtime NameErrors.
 
 ### Commit chain: 43930cb freshness backend (introduced bug) -> 1331569 detail frontend -> d449d78 browse frontend -> 808e1bb FIX _detail_view_count
+
+## SESSION (2026-06-28) — Features 11, 12, 13 (Property History, Response Quality, Analytics)
+
+### Feature 11 — Property History Timeline (DONE)
+- GET /properties/{id}/history (listings.py) - real dated events ONLY: listed, host-joined, first approved review, completed-viewings milestone. host_verified as a STATE (no verified_at column exists, so NO fake date). NO reports exposed publicly (unfair/abusable). Verified live on listing 18.
+- Frontend: #property-history-card on listing.html (before "Students Also Viewed"), loadPropertyHistory() + _histIcon/_histEsc/_histDate; hidden until real data exists.
+
+### Feature 12 — Response Quality (DONE, user chose FULL public transparency)
+- GET /properties/host/{owner_id}/response-stats (listings.py): response_rate, median_response_seconds, communication_quality (= avg Review.rating_landlord), total_inquiries. Only counts threads where STUDENT messaged first; reply must be AFTER inquiry; median (robust). Threshold: enough_data = total_inquiries>=3 (below = "Not enough data yet" - integrity, not hiding).
+- Public: listing.html contact card #stat-response + #stat-time (replaced static "Usually replies quickly"); loadHostResponseStats(owner.id). Below threshold -> "Not enough data yet".
+- Private: landlord dashboard Response Quality card (rq-rate/rq-time/rq-comm/rq-note); shown ALWAYS with sample-size + public-threshold note.
+
+### Feature 13 — Analytics & BI (DONE; GA skipped by choice; geo heatmap deferred)
+- NEW model SearchLog (app/models/search_log.py, Base from app.core.database) - ANONYMOUS (no user_id). Migration 20260628_search_logs (head). Fire-and-forget logging in browse get_all_properties (only when q/university/price filter present).
+- Rewired EXISTING /admin/analytics/search (admin_extra.py) to query SearchLog -> returns {areas:[{area,count}]} (universities + query terms). Feeds EXISTING loadSearchGeo() / "Growth & Demand" admin tab. Falls back to {areas:[]} honest empty state.
+- Removed my own redundant /admin/analytics from admin.py (existing /admin/stats + /admin/analytics/growth already cover BI). NO duplicate.
+- GA snippet: SKIPPED deliberately (privacy - keep data in-app). Geo heatmap (/admin/analytics/geo): still stub, deferred until volume.
+- Also deleted stray duplicate app/models/trust_models (1).py.
+
+### Feature 9 — Area Safety Score: NOT BUILT. Flagged risky (defamation/liability assigning public 1-10 safety scores to real neighbourhoods on thin data). To discuss reframing as factual counts before any build.
+
+### Commit chain: 2ce7f9e history -> e5a41fe/e910143 response-stats -> a4f565d dash RQ -> 502ead8 SearchLog -> 7fe0dba(removed) -> 1dd61bb analytics wired+dedupe
