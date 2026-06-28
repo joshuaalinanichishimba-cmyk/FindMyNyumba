@@ -478,6 +478,11 @@
           <div class="h-[280px] mt-4"><canvas id="analyticsChart"></canvas></div>
         </div>
         <div id="demand-preview"></div>
+        <div class="card p-5 mt-5">
+          <h3 class="font-extrabold text-slate-900 text-[15px]">Area Insights</h3>
+          <p class="text-[12px] text-slate-400 font-medium mb-3">Factual counts per area — for planning, not a safety rating.</p>
+          <div id="area-insights-table" class="overflow-x-auto"><p class="text-[12px] text-slate-400">Loading…</p></div>
+        </div>
       </section>
 
       <!-- ============================================================
@@ -739,7 +744,7 @@ function showTab(name){
   if (name === 'institutions')  loadInstitutions();
   if (name === 'support')       loadSupport();
   if (name === 'reviews')       loadReviews();
-  if (name === 'analytics')     { loadAnalytics(); loadSearchGeo(); }
+  if (name === 'analytics')     { loadAnalytics(); loadSearchGeo(); loadAreaInsights(); }
   if (name === 'system')        loadSystemHealth();
   if (name === 'settings')      loadRoles();
 }
@@ -2208,6 +2213,41 @@ function _fmtWhen(iso){if(!iso)return "";try{return new Date(iso).toLocaleString
 async function loadSessions(){var box=document.getElementById("sessions-list");if(!box)return;box.innerHTML='<p class="text-[12px] text-slate-400">Loading...</p>';try{var res=await fetch(`${API}/auth/sessions`,{headers:{'Authorization':`Bearer ${_adminToken()}`}});if(!res.ok)throw new Error("failed");var rows=await res.json();if(!rows.length){box.innerHTML='<p class="text-[12px] text-slate-400">No active sessions.</p>';return;}box.innerHTML=rows.map(function(s){var current=s.is_current?'<span class="text-[10px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full">THIS DEVICE</span>':'<button onclick="revokeSession('+s.id+')" class="text-[11px] font-bold text-red-600 hover:underline">Log out</button>';return '<div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl"><div class="min-w-0"><p class="text-[12px] font-bold text-slate-900 truncate">'+_uaLabel(s.user_agent)+'</p><p class="text-[11px] text-slate-400 truncate">'+(s.ip||"unknown IP")+' &middot; '+_fmtWhen(s.last_seen)+'</p></div>'+current+'</div>';}).join("");}catch(e){box.innerHTML='<p class="text-[12px] text-red-500">Could not load sessions.</p>';}}
 async function revokeSession(id){try{await fetch(`${API}/auth/sessions/${id}/revoke`,{method:'POST',headers:{'Authorization':`Bearer ${_adminToken()}`}});if(typeof showToast==="function")showToast("Device logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out that device.","error");}}
 async function logoutAllOther(){try{var res=await fetch(`${API}/auth/logout-all`,{method:'POST',headers:{'Authorization':`Bearer ${_adminToken()}`}});var data=await res.json();if(typeof showToast==="function")showToast(data.message||"Other devices logged out.");loadSessions();}catch(e){if(typeof showToast==="function")showToast("Could not log out other devices.","error");}}
+</script>
+
+<script>
+async function loadAreaInsights(){
+  var box=document.getElementById("area-insights-table");
+  if(!box)return;
+  box.innerHTML='<p class="text-[12px] text-slate-400">Loading…</p>';
+  try{
+    var res=await fetch(`${API}/admin/area-insights`,{headers:{'Authorization':`Bearer ${_adminToken()}`}});
+    if(!res.ok)throw new Error("failed");
+    var data=await res.json();
+    var areas=data.areas||[];
+    if(!areas.length){ box.innerHTML='<p class="text-[12px] text-slate-400">No area data yet.</p>'; return; }
+    var rows=areas.map(function(a){
+      var scam=a.scam_reports>0
+        ? '<span class="text-red-600 font-black">'+a.scam_reports+'</span>'
+        : '<span class="text-slate-400">0</span>';
+      return '<tr class="border-b border-slate-50">'+
+        '<td class="py-2 pr-4 font-bold text-slate-800 text-[12.5px]">'+_aiEsc(a.area)+'</td>'+
+        '<td class="py-2 px-3 text-center tabnum">'+a.listings+'</td>'+
+        '<td class="py-2 px-3 text-center tabnum text-green-700">'+a.verified_hosts+'</td>'+
+        '<td class="py-2 px-3 text-center tabnum">'+a.approved_reviews+'</td>'+
+        '<td class="py-2 px-3 text-center tabnum">'+a.completed_viewings+'</td>'+
+        '<td class="py-2 px-3 text-center tabnum">'+a.total_reports+'</td>'+
+        '<td class="py-2 pl-3 text-center tabnum">'+scam+'</td>'+
+        '</tr>';
+    }).join("");
+    box.innerHTML='<table class="w-full text-[12px]"><thead><tr class="text-[10px] uppercase font-black text-slate-400 border-b border-slate-100">'+
+      '<th class="text-left py-2 pr-4">Area</th>'+
+      '<th class="px-3">Listings</th><th class="px-3">Verified</th><th class="px-3">Reviews</th>'+
+      '<th class="px-3">Viewings</th><th class="px-3">Reports</th><th class="pl-3">Scam</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){ box.innerHTML='<p class="text-[12px] text-red-500">Could not load area insights.</p>'; }
+}
+function _aiEsc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 </script>
 
 </body>
