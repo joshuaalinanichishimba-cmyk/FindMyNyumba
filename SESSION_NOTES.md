@@ -133,3 +133,20 @@ Admin Reviews moderation tab (property+student, flagged filter); host reply from
 ### Data-reality caveat across all: most show thin/empty states at current volume (16 listings, few reviews/viewings/messages). Value is LATENT - pays off with real usage. Highest-leverage next step remains getting real students/listings on + email setup (Resend), not more features.
 
 ### Commit chain: c1a8f4e notes -> fcf60af area-insights backend -> 4d7e051 area-insights frontend
+
+## RELIABILITY (2026-06-28) — outage + fixes
+
+### INCIDENT: full production outage
+- Supabase project unreachable: `FATAL: (ENOTFOUND) tenant/user postgres.nternkltoqadmwfwynzl not found` from BOTH Render and local. App died at Base.metadata.create_all() on boot. NOT caused by code (our migrations were additive only). Cause: free-tier Supabase project paused/unreachable. Recovered on its own (backend later returned 200; data intact).
+
+### FIX SHIPPED: real /health endpoint (commit cf15515)
+- OLD: `@app.get("/health")` returned `{"status":"ok"}` UNCONDITIONALLY - never touched the DB. It would have reported "healthy" through the entire outage. A monitor watching it would never alert.
+- NEW: executes `SELECT 1` via engine; returns 200 + {"status":"ok","api":"ok","database":"ok"} when healthy, and **503** + {"status":"degraded","database":"unreachable","error_type":<ExcName>} when the DB is down. Only exception TYPE exposed (never credentials).
+- Verified: local TestClient 200/ok, prod https://findmynyumba.onrender.com/health -> 200 {"database":"ok"}.
+
+### TODO (operational, not code — Joshua must do):
+1. Set up free uptime monitor (UptimeRobot / Better Stack) on https://findmynyumba.onrender.com/health, alert when status != 200, timeout 30s+ (Render free tier cold starts are slow).
+2. Supabase: free tier PAUSES on inactivity -> unannounced outages. Fine pre-launch. MUST resolve (paid tier / non-pausing provider) BEFORE real students depend on FMN. Check current Supabase pricing directly - do not rely on remembered numbers.
+3. Email delivery (Resend + domain + MAIL_FROM on Render) still dormant - blocks password resets & notifications for real users.
+
+### These 3 operational items matter MORE than any additional feature right now.
