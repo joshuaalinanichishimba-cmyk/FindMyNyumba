@@ -187,7 +187,30 @@ def root():
 
 @app.get("/health", tags=["Health"])
 def health():
-    return {"status": "ok"}
+    """Real health check: verifies the API AND the database.
+
+    Returns 503 when the database is unreachable so uptime monitors actually
+    alert when FindMyNyumba is down. (The old version returned 200 always,
+    which meant a monitor would report "healthy" during a full outage.)
+    Only the exception TYPE is exposed - never credentials or connection strings.
+    """
+    from fastapi.responses import JSONResponse as _JSONResponse
+    db_ok = False
+    err_type = None
+    try:
+        with engine.connect() as conn:
+            conn.execute(_sql_text("SELECT 1"))
+        db_ok = True
+    except Exception as e:
+        err_type = type(e).__name__
+    payload = {
+        "status": "ok" if db_ok else "degraded",
+        "api": "ok",
+        "database": "ok" if db_ok else "unreachable",
+    }
+    if err_type:
+        payload["error_type"] = err_type
+    return _JSONResponse(status_code=(200 if db_ok else 503), content=payload)
 
 
 @app.get("/favicon.ico", include_in_schema=False)
