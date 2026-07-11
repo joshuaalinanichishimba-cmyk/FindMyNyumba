@@ -505,11 +505,29 @@
                 </div>
 
                 <div id="payments-section" class="dashboard-section hidden">
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center max-w-xl mx-auto">
-                        <div class="w-16 h-16 rounded-full bg-orange-50 text-[#ea580c] flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-credit-card"></i></div>
-                        <h2 class="text-lg font-extrabold text-slate-900 mb-1">Payments</h2>
-                        <p class="text-slate-400 text-sm font-medium mb-5">Your reservation deposits and payment history will appear here.</p>
-                        <a href="browse.html" class="inline-block bg-[#ea580c] hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition">Browse Rooms</a>
+                    <h2 class="text-lg font-extrabold text-slate-900 mb-4">Payments</h2>
+                    <!-- Verified Access card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-5 max-w-2xl">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-shield-halved text-[#ea580c] text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-extrabold text-slate-900">Verified Access</h3>
+                                    <span id="va-status-badge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Not active</span>
+                                </div>
+                                <p class="text-[12.5px] text-slate-500 font-medium mb-3">A one-time ZMW 50 fee to request viewings and unlock verified listing details. Paid to FindMyNyumba - never to a landlord. Rent is always paid directly to your landlord.</p>
+                                <a href="pay-verified-access.html" id="va-cta" class="inline-flex items-center gap-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-sm px-4 py-2.5 rounded-xl">
+                                    <i class="fas fa-credit-card"></i> Get Verified Access - ZMW 50
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Payment history -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 max-w-2xl">
+                        <h3 class="font-extrabold text-slate-900 text-sm mb-3">Payment history</h3>
+                        <div id="payment-history"><p class="text-[12.5px] text-slate-400">No payments yet.</p></div>
                     </div>
                 </div>
 
