@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verified Access Payment · FindMyNyumba</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  .fmn-navy { color:#0f172a; }
+  .fmn-orange { color:#ea580c; }
+  .step-pane { display:none; }
+  .step-pane.active { display:block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .stepper-dot { transition: all .3s ease; }
+  @media (prefers-reduced-motion: reduce){ .step-pane.active{ animation:none; } }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- Top bar with logo -->
+<header class="bg-[#0f172a] text-white">
+  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2">
+    <a href="dashboard-student.html" class="flex items-center gap-2" style="text-decoration:none;">
+      <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10"><i class="fas fa-house-chimney text-[#ea580c]"></i></span>
+      <span class="font-extrabold text-lg tracking-tight">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
+    </a>
+    <span class="ml-auto text-[11px] font-semibold text-white/50 flex items-center gap-1.5">
+      <i class="fas fa-lock"></i> Secure payment
+    </span>
+  </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- Preview / backend-not-connected banner (honest state; hidden once Stage 2 is live) -->
+  <div id="preview-banner" class="hidden mb-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[12.5px] font-semibold px-4 py-3 flex items-start gap-2">
+    <i class="fas fa-circle-info mt-0.5"></i>
+    <span>Preview mode — the payment service isn’t connected yet. You can walk through the screens, but no real payment will be processed.</span>
+  </div>
+
+  <!-- Stepper -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between max-w-md mx-auto">
+      <!-- dots injected by JS -->
+      <div id="stepper" class="flex items-center justify-between w-full"></div>
+    </div>
+  </div>
+
+  <!-- ============ STEP 1: SUMMARY ============ -->
+  <section class="step-pane active" data-step="1">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <h1 class="text-xl font-extrabold text-slate-900 mb-1">Payment summary</h1>
+      <p class="text-[13px] text-slate-400 font-medium mb-5">Verified Access lets you request viewings and unlock verified listing details.</p>
+
+      <div class="rounded-xl border border-slate-100 bg-slate-50/60 p-4 mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[13px] font-semibold text-slate-500">Verified Access</span>
+          <span class="text-[11px] font-bold text-green-600 bg-green-50 border border-green-100 rounded-full px-2 py-0.5">One-time</span>
+        </div>
+        <div class="flex items-center justify-between text-[13px]">
+          <span class="text-slate-500">Service fee</span>
+          <span class="font-semibold text-slate-800" id="sum-fee">ZMW 50.00</span>
+        </div>
+        <div class="border-t border-slate-100 my-3"></div>
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-slate-900">Total</span>
+          <span class="font-extrabold text-lg text-[#ea580c]" id="sum-total">ZMW 50.00</span>
+        </div>
+      </div>
+
+      <ul class="text-[12.5px] text-slate-500 space-y-1.5 mb-5">
+        <li><i class="fas fa-check text-green-500 mr-2"></i>Paid once — not per listing</li>
+        <li><i class="fas fa-check text-green-500 mr-2"></i>Paid directly to FindMyNyumba (never to a landlord)</li>
+        <li><i class="fas fa-check text-green-500 mr-2"></i>Rent is always paid directly to your landlord — never through us</li>
+      </ul>
+
+      <button onclick="goStep(2)" class="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold py-3 rounded-xl transition-colors">
+        Continue <i class="fas fa-arrow-right ml-1 text-sm"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ STEP 2: METHOD ============ -->
+  <section class="step-pane" data-step="2">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <h1 class="text-xl font-extrabold text-slate-900 mb-1">Payment method</h1>
+      <p class="text-[13px] text-slate-400 font-medium mb-5">Choose how you’d like to pay.</p>
+
+      <div class="space-y-3 mb-6">
+        <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-[#ea580c] bg-orange-50/40 cursor-pointer">
+          <input type="radio" name="method" value="mtn_money" checked class="accent-[#ea580c]">
+          <span class="w-10 h-10 rounded-lg bg-yellow-400 flex items-center justify-center font-black text-[11px] text-slate-900">MTN</span>
+          <span class="flex-1">
+            <span class="block font-bold text-slate-900 text-[14px]">MTN Mobile Money</span>
+            <span class="block text-[11.5px] text-slate-400">Approve on your phone with your MoMo PIN</span>
+          </span>
+          <i class="fas fa-circle-check text-[#ea580c]"></i>
+        </label>
+
+        <label class="flex items-center gap-3 p-4 rounded-xl border border-slate-100 opacity-55 cursor-not-allowed">
+          <input type="radio" name="method" value="airtel_money" disabled class="accent-slate-300">
+          <span class="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center font-black text-[10px] text-white">Airtel</span>
+          <span class="flex-1">
+            <span class="block font-bold text-slate-900 text-[14px]">Airtel Money</span>
+            <span class="block text-[11.5px] text-slate-400">Coming soon</span>
+          </span>
+        </label>
+
+        <label class="flex items-center gap-3 p-4 rounded-xl border border-slate-100 opacity-55 cursor-not-allowed">
+          <input type="radio" name="method" value="bank_transfer" disabled class="accent-slate-300">
+          <span class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-500"><i class="fas fa-building-columns"></i></span>
+          <span class="flex-1">
+            <span class="block font-bold text-slate-900 text-[14px]">Bank Transfer</span>
+            <span class="block text-[11.5px] text-slate-400">Coming soon</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="goStep(1)" class="flex-1 border border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50">Back</button>
+        <button onclick="goStep(3)" class="flex-1 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold py-3 rounded-xl">Continue</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 3: NUMBER ============ -->
+  <section class="step-pane" data-step="3">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <h1 class="text-xl font-extrabold text-slate-900 mb-1">Enter mobile number</h1>
+      <p class="text-[13px] text-slate-400 font-medium mb-5">The MTN MoMo number you’ll approve the payment on.</p>
+
+      <label class="block text-[12px] font-bold text-slate-600 mb-1.5">MTN Mobile Money number</label>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="px-3 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm">+260</span>
+        <input id="msisdn" type="tel" inputmode="numeric" maxlength="9" placeholder="97 123 4567"
+               class="flex-1 px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-200 text-sm">
+      </div>
+      <p id="msisdn-err" class="text-[11.5px] text-red-500 font-semibold mb-4 h-4"></p>
+
+      <div class="flex gap-3">
+        <button onclick="goStep(2)" class="flex-1 border border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50">Back</button>
+        <button id="pay-btn" onclick="initiatePayment()" class="flex-1 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold py-3 rounded-xl">Pay ZMW 50</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 4: REQUEST SENT ============ -->
+  <section class="step-pane" data-step="4">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center">
+      <div class="w-16 h-16 mx-auto rounded-full bg-orange-50 flex items-center justify-center mb-4">
+        <i class="fas fa-mobile-screen-button text-2xl text-[#ea580c]"></i>
+      </div>
+      <h1 class="text-xl font-extrabold text-slate-900 mb-1">Approve on your phone</h1>
+      <p class="text-[13px] text-slate-500 font-medium mb-4">A payment request was sent to <span id="req-number" class="font-bold text-slate-800"></span>. Enter your MoMo PIN to approve.</p>
+      <div class="text-3xl font-black text-[#ea580c] mb-1" id="countdown">02:00</div>
+      <p class="text-[11.5px] text-slate-400 mb-5">Waiting for approval…</p>
+      <button onclick="startPolling()" class="text-[12px] font-bold text-[#ea580c] hover:underline">I’ve approved it — check now</button>
+    </div>
+  </section>
+
+  <!-- ============ STEP 5: PROCESSING ============ -->
+  <section class="step-pane" data-step="5">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+      <div class="w-14 h-14 mx-auto mb-4">
+        <i class="fas fa-spinner fa-spin text-4xl text-[#ea580c]"></i>
+      </div>
+      <h1 class="text-xl font-extrabold text-slate-900 mb-1">Processing payment</h1>
+      <p class="text-[13px] text-slate-500 font-medium">Confirming your payment. This can take a few seconds.</p>
+    </div>
+  </section>
+
+  <!-- ============ STEP 6: SUCCESS ============ -->
+  <section class="step-pane" data-step="6">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+      <div class="w-16 h-16 mx-auto rounded-full bg-green-50 flex items-center justify-center mb-4">
+        <i class="fas fa-check text-3xl text-green-600"></i>
+      </div>
+      <h1 class="text-xl font-extrabold text-slate-900 mb-1">Payment successful</h1>
+      <p class="text-[13px] text-slate-500 font-medium mb-5">Your Verified Access is now active.</p>
+      <button onclick="goStep(7)" class="w-full bg-[#0f172a] hover:bg-slate-800 text-white font-bold py-3 rounded-xl">View receipt</button>
+    </div>
+  </section>
+
+  <!-- ============ STEP 7: RECEIPT ============ -->
+  <section class="step-pane" data-step="7">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <div class="text-center mb-5">
+        <span class="font-extrabold text-lg">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
+        <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Payment receipt</p>
+      </div>
+      <div class="space-y-2.5 text-[13px] mb-6">
+        <div class="flex justify-between"><span class="text-slate-400 font-medium">Transaction ID</span><span class="font-bold text-slate-800" id="rc-ref">—</span></div>
+        <div class="flex justify-between"><span class="text-slate-400 font-medium">Service</span><span class="font-semibold text-slate-800">Verified Access</span></div>
+        <div class="flex justify-between"><span class="text-slate-400 font-medium">Amount</span><span class="font-semibold text-slate-800" id="rc-amount">ZMW 50.00</span></div>
+        <div class="flex justify-between"><span class="text-slate-400 font-medium">Method</span><span class="font-semibold text-slate-800">MTN Mobile Money</span></div>
+        <div class="flex justify-between"><span class="text-slate-400 font-medium">Date</span><span class="font-semibold text-slate-800" id="rc-date">—</span></div>
+        <div class="flex justify-between"><span class="text-slate-400 font-medium">Status</span><span class="font-bold text-green-600" id="rc-status">Successful</span></div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="window.print()" class="flex-1 border border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50"><i class="fas fa-download mr-1.5"></i>Download</button>
+        <a href="dashboard-student.html" class="flex-1 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold py-3 rounded-xl text-center">Done</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAILURE ============ -->
+  <section class="step-pane" data-step="fail">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+      <div class="w-16 h-16 mx-auto rounded-full bg-red-50 flex items-center justify-center mb-4">
+        <i class="fas fa-xmark text-3xl text-red-500"></i>
+      </div>
+      <h1 class="text-xl font-extrabold text-slate-900 mb-1">Payment not completed</h1>
+      <p class="text-[13px] text-slate-500 font-medium mb-5" id="fail-msg">The payment wasn’t approved. You can try again.</p>
+      <button onclick="goStep(3)" class="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold py-3 rounded-xl">Try again</button>
+    </div>
+  </section>
+
+  <p class="text-center text-[11px] text-slate-400 font-medium mt-6">
+    <i class="fas fa-shield-halved mr-1"></i> Rent is always paid directly to your landlord. FindMyNyumba only collects the one-time Verified Access fee.
+  </p>
+</main>
+
+<script>
+// ── API base (matches other student pages) ──────────────────────────────
+const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
+const API_BASE = (isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com') + '/api/v1';
+const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+// Server is the source of truth for the amount. This ZMW 50 is display only.
+const DISPLAY_FEE = 'ZMW 50.00';
+
+const STEPS = [1,2,3,4,5,6,7];
+let currentTxnId = null;
+let pollTimer = null;
+let countdownTimer = null;
+
+// ── Stepper render ──────────────────────────────────────────────────────
+function renderStepper(active){
+  const labels = ['Summary','Method','Number','Approve','Processing','Done'];
+  const box = document.getElementById('stepper');
+  // collapse 6+7 visually into "Done"
+  const shown = [1,2,3,4,5,6];
+  box.innerHTML = shown.map(function(n,i){
+    const reached = (active>=n) || (active===7 && n===6);
+    const dot = '<div class="stepper-dot w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black '
+      + (reached ? 'bg-[#ea580c] text-white' : 'bg-slate-200 text-slate-400') + '">' + n + '</div>';
+    const line = i < shown.length-1 ? '<div class="flex-1 h-0.5 '+(active>n?'bg-[#ea580c]':'bg-slate-200')+'"></div>' : '';
+    return '<div class="flex items-center '+(i<shown.length-1?'flex-1':'')+'">'+dot+line+'</div>';
+  }).join('');
+}
+
+function goStep(step){
+  document.querySelectorAll('.step-pane').forEach(p=>p.classList.remove('active'));
+  const pane = document.querySelector('.step-pane[data-step="'+step+'"]');
+  if(pane) pane.classList.add('active');
+  if(typeof step === 'number') renderStepper(step);
+  if(step!==4 && countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── Phone validation (Zambian MTN: 96/76/97/77 etc., 9 digits after +260) ─
+function validMsisdn(v){
+  const digits = v.replace(/\D/g,'');
+  return /^(9|7)\d{8}$/.test(digits);   // 9 digits starting 9 or 7
+}
+
+// ── Initiate: POST /payments/verified-access/initiate  { msisdn } ───────
+// NOTE: no amount sent — the server sets it (VERIFIED_ACCESS_FEE). Stage 2.
+async function initiatePayment(){
+  const raw = document.getElementById('msisdn').value.trim();
+  const err = document.getElementById('msisdn-err');
+  if(!validMsisdn(raw)){ err.textContent = 'Enter a valid MTN number (9 digits, e.g. 97 123 4567).'; return; }
+  err.textContent = '';
+  const msisdn = '260' + raw.replace(/\D/g,'');
+  document.getElementById('req-number').textContent = '+' + msisdn;
+
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch(API_BASE + '/payments/verified-access/initiate', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + (getToken()||'') },
+      body: JSON.stringify({ msisdn })   // amount intentionally omitted — server-set
+    });
+    if(res.status === 404){ showPreview(); goStep(4); startCountdown(); return; } // backend not built yet
+    if(!res.ok) throw new Error('initiate failed ' + res.status);
+    const data = await res.json();
+    currentTxnId = data.transaction_id || data.id;
+    goStep(4); startCountdown();
+  } catch(e){
+    // Network/other error — show preview state rather than a fake success
+    showPreview(); goStep(4); startCountdown();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Pay ZMW 50';
+  }
+}
+
+function startCountdown(){
+  let secs = 120;
+  const el = document.getElementById('countdown');
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(function(){
+    secs--;
+    const m = String(Math.floor(secs/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    el.textContent = m+':'+s;
+    if(secs<=0){ clearInterval(countdownTimer); }
+  }, 1000);
+  // auto-begin polling after a short delay too
+  setTimeout(startPolling, 4000);
+}
+
+// ── Poll: GET /payments/{id}/status  → pending|successful|failed ─────────
+async function startPolling(){
+  goStep(5);
+  if(!currentTxnId){ // preview mode — no backend
+    setTimeout(function(){ showPreviewReceipt(); }, 1500);
+    return;
+  }
+  let tries = 0;
+  clearInterval(pollTimer);
+  const poll = async function(){
+    tries++;
+    try {
+      const res = await fetch(API_BASE + '/payments/' + currentTxnId + '/status', {
+        headers:{ 'Authorization':'Bearer ' + (getToken()||'') }
+      });
+      if(res.ok){
+        const d = await res.json();
+        if(d.status === 'successful' || d.status === 'success'){ clearInterval(pollTimer); onSuccess(d); return; }
+        if(d.status === 'failed'){ clearInterval(pollTimer); onFail(d.reason || ''); return; }
+      }
+    } catch(e){ /* keep polling */ }
+    if(tries >= 20){ clearInterval(pollTimer); onFail('Timed out waiting for approval.'); }
+  };
+  pollTimer = setInterval(poll, 3000);
+  poll();
+}
+
+function onSuccess(d){
+  document.getElementById('rc-ref').textContent = (d && (d.ref || d.transaction_ref)) || currentTxnId || '—';
+  document.getElementById('rc-amount').textContent = (d && d.amount_display) || DISPLAY_FEE;
+  document.getElementById('rc-date').textContent = new Date().toLocaleString('en-GB', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  goStep(6);
+}
+function onFail(msg){
+  document.getElementById('fail-msg').textContent = msg || 'The payment wasn’t approved. You can try again.';
+  goStep('fail');
+}
+
+// ── Preview helpers (backend not connected) — honest, not a fake success ─
+function showPreview(){ document.getElementById('preview-banner').classList.remove('hidden'); }
+function showPreviewReceipt(){
+  // In preview we do NOT claim success. Show the failure/notice pane.
+  document.getElementById('fail-msg').textContent = 'Preview mode: the payment service isn’t connected yet, so nothing was charged. This flow will work once payments go live.';
+  goStep('fail');
+}
+
+// init
+renderStepper(1);
+
+// live number formatting (light)
+document.getElementById('msisdn').addEventListener('input', function(){
+  document.getElementById('msisdn-err').textContent='';
+});
+</script>
+</body>
+</html>
