@@ -39,6 +39,19 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str              = ""          # Required in production
     MAIL_FROM: str                   = "onboarding@resend.dev"
     MAIL_FROM_NAME: str              = "FindMyNyumba"
+    # -- Mobile Money (MTN MoMo Collections) ------------------------------------
+    # Sandbox: MOMO_SUBSCRIPTION_KEY = Collections Primary Key from
+    # momodeveloper.mtn.com. MOMO_API_USER / MOMO_API_KEY are generated via the
+    # sandbox provisioning step and set as env vars - never committed to code.
+    MOMO_BASE_URL: str          = "https://sandbox.momodeveloper.mtn.com"
+    MOMO_TARGET_ENV: str        = "sandbox"
+    MOMO_CURRENCY: str          = "EUR"
+    MOMO_SUBSCRIPTION_KEY: str  = ""
+    MOMO_API_USER: str          = ""
+    MOMO_API_KEY: str           = ""
+    MOMO_CALLBACK_HOST: str     = "findmynyumba.onrender.com"
+    VERIFIED_ACCESS_FEE_ZMW: float = 50.0
+    VERIFIED_ACCESS_FEE_EUR: float = 1.0
 
     # -- Cloudinary (image hosting) --------------------------------------------
     # Sign up free at https://cloudinary.com â†’ Dashboard â†’ API Keys

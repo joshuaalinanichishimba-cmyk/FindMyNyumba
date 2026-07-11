@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/models/admin_models.py
 
 New tables that power the admin platform's financial, audit, and operational
@@ -14,7 +14,7 @@ Conventions match the existing models:
 
 After adding this file, register the models before create_all (see main.py
 patch in the wiring notes). Base.metadata.create_all then creates the tables
-on next startup — no Alembic migration needed for the dev cycle.
+on next startup â€” no Alembic migration needed for the dev cycle.
 """
 from sqlalchemy import (
     Column, Integer, BigInteger, String, Float, Boolean, DateTime, Text,
@@ -25,7 +25,7 @@ from sqlalchemy.sql import func
 from app.core.database import Base
 
 
-# ── Transactions ──────────────────────────────────────────────────────────────
+# â”€â”€ Transactions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class Transaction(Base):
     __tablename__ = "transactions"
     __table_args__ = {"extend_existing": True}
@@ -44,13 +44,15 @@ class Transaction(Base):
     method      = Column(String, nullable=False)
     # pending | success | failed | refunded
     status      = Column(String, nullable=False, default="pending", index=True)
-    provider_ref = Column(String, nullable=True)                 # mobile-money/bank ref
+    provider_ref = Column(String, nullable=True)                 # mobile-money/bank ref (e.g. MTN financialTransactionId)
+    momo_ref_id = Column(String, nullable=True, unique=True, index=True)      # X-Reference-Id sent to MTN
+    idempotency_key = Column(String, nullable=True, unique=True, index=True)  # our own double-submit guard
 
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
     updated_at  = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
-# ── Escrow ────────────────────────────────────────────────────────────────────
+# â”€â”€ Escrow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class Escrow(Base):
     __tablename__ = "escrow"
     __table_args__ = {"extend_existing": True}
@@ -73,7 +75,7 @@ class Escrow(Base):
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# ── Institutions ──────────────────────────────────────────────────────────────
+# â”€â”€ Institutions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class Institution(Base):
     __tablename__ = "institutions"
     __table_args__ = {"extend_existing": True}
@@ -85,7 +87,7 @@ class Institution(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# ── Notifications ─────────────────────────────────────────────────────────────
+# â”€â”€ Notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class Notification(Base):
     __tablename__ = "notifications"
     __table_args__ = {"extend_existing": True}
@@ -101,7 +103,7 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# ── Audit log (append-only by convention; revoke UPDATE/DELETE in prod) ────────
+# â”€â”€ Audit log (append-only by convention; revoke UPDATE/DELETE in prod) â”€â”€â”€â”€â”€â”€â”€â”€
 class AuditLog(Base):
     __tablename__ = "audit_logs"
     __table_args__ = {"extend_existing": True}
@@ -118,7 +120,7 @@ class AuditLog(Base):
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# ── Internal admin notes on a listing ──────────────────────────────────────────
+# â”€â”€ Internal admin notes on a listing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class AdminNote(Base):
     __tablename__ = "admin_notes"
     __table_args__ = {"extend_existing": True}
@@ -130,7 +132,7 @@ class AdminNote(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# ── RBAC: one row per (role, permission) ────────────────────────────────────────
+# â”€â”€ RBAC: one row per (role, permission) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class RolePermission(Base):
     __tablename__ = "role_permissions"
     __table_args__ = {"extend_existing": True}
