@@ -347,7 +347,7 @@ function onSuccess(d){
   goStep(6);
 }
 function onFail(msg){
-  document.getElementById('fail-msg').textContent = msg || 'The payment wasn't approved. You can try again.';
+  document.getElementById('fail-msg').textContent = msg || 'The payment was not approved. You can try again.';
   goStep('fail');
 }
 
@@ -355,7 +355,7 @@ function onFail(msg){
 function showPreview(){ document.getElementById('preview-banner').classList.remove('hidden'); }
 function showPreviewReceipt(){
   // In preview we do NOT claim success. Show the failure/notice pane.
-  document.getElementById('fail-msg').textContent = 'Preview mode: the payment service isn't connected yet, so nothing was charged. This flow will work once payments go live.';
+  document.getElementById('fail-msg').textContent = 'Preview mode: the payment service is not connected yet, so nothing was charged. This flow will work once payments go live.';
   goStep('fail');
 }
 
