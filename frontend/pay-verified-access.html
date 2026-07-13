@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verified Access Payment Â· FindMyNyumba</title>
+<title>Verified Access Payment · FindMyNyumba</title>
 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,7 +24,8 @@
 <header class="bg-[#0f172a] text-white">
   <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2">
     <a href="dashboard-student.html" class="flex items-center gap-2" style="text-decoration:none;">
-      <img src="logo.png" alt="FindMyNyumba" class="h-9 w-auto bg-white rounded-lg px-1.5 py-1" />
+      <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/10"><i class="fas fa-house-chimney text-[#ea580c]"></i></span>
+      <span class="font-extrabold text-lg tracking-tight">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
     </a>
     <span class="ml-auto text-[11px] font-semibold text-white/50 flex items-center gap-1.5">
       <i class="fas fa-lock"></i> Secure payment
@@ -187,7 +188,7 @@
   <section class="step-pane" data-step="7">
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
       <div class="text-center mb-5">
-        <img src="logo.png" alt="FindMyNyumba" class="h-10 w-auto mx-auto mb-1" />
+        <span class="font-extrabold text-lg">FindMy<span class="text-[#ea580c]">Nyumba</span></span>
         <p class="text-[11px] text-slate-400 font-semibold mt-0.5">Payment receipt</p>
       </div>
       <div class="space-y-2.5 text-[13px] mb-6">
@@ -223,7 +224,7 @@
 </main>
 
 <script>
-// â"€â"€ API base (matches other student pages) â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+// ── API base (matches other student pages) ──────────────────────────────
 const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
 const API_BASE = (isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com') + '/api/v1';
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -236,7 +237,7 @@ let currentTxnId = null;
 let pollTimer = null;
 let countdownTimer = null;
 
-// â"€â"€ Stepper render â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+// ── Stepper render ──────────────────────────────────────────────────────
 function renderStepper(active){
   const labels = ['Summary','Method','Number','Approve','Processing','Done'];
   const box = document.getElementById('stepper');
@@ -260,13 +261,13 @@ function goStep(step){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-// â"€â"€ Phone validation (Zambian MTN: 96/76/97/77 etc., 9 digits after +260) â"€
+// ── Phone validation (Zambian MTN: 96/76/97/77 etc., 9 digits after +260) ─
 function validMsisdn(v){
   const digits = v.replace(/\D/g,'');
   return /^(9|7)\d{8}$/.test(digits);   // 9 digits starting 9 or 7
 }
 
-// â"€â"€ Initiate: POST /payments/verified-access/initiate  { msisdn } â"€â"€â"€â"€â"€â"€â"€
+// ── Initiate: POST /payments/verified-access/initiate  { msisdn } ───────
 // NOTE: no amount sent - the server sets it (VERIFIED_ACCESS_FEE). Stage 2.
 async function initiatePayment(){
   const raw = document.getElementById('msisdn').value.trim();
@@ -313,7 +314,7 @@ function startCountdown(){
   setTimeout(startPolling, 4000);
 }
 
-// â"€â"€ Poll: GET /payments/{id}/status  â†' pending|successful|failed â"€â"€â"€â"€â"€â"€â"€â"€â"€
+// ── Poll: GET /payments/{id}/status  → pending|successful|failed ─────────
 async function startPolling(){
   goStep(5);
   if(!currentTxnId){ // preview mode - no backend
@@ -351,7 +352,7 @@ function onFail(msg){
   goStep('fail');
 }
 
-// â"€â"€ Preview helpers (backend not connected) - honest, not a fake success â"€
+// ── Preview helpers (backend not connected) - honest, not a fake success ─
 function showPreview(){ document.getElementById('preview-banner').classList.remove('hidden'); }
 function showPreviewReceipt(){
   // In preview we do NOT claim success. Show the failure/notice pane.
