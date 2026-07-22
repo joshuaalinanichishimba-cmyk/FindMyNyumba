@@ -469,6 +469,7 @@ let selectedRating  = 0;
 let leafletMap      = null;
 let toastTimer;
 let LANDLORD_PHONE  = null;
+let CONTACT_LOCKED  = false;
 let currentUserId   = null;
 
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -588,7 +589,29 @@ function toggleFav() {
 }
 
 /* ---- Contact buttons (call/sms/whatsapp) ---- */
+function applyContactPaywall() {
+    var callBtn = document.getElementById('btn-call');
+    var waBtn = document.getElementById('btn-wa');
+    var smsBtn = document.getElementById('btn-sms');
+    [callBtn, waBtn, smsBtn].forEach(function(b){ if(b) b.style.display = 'none'; });
+    var container = callBtn ? callBtn.parentElement : null;
+    if (container && !document.getElementById('contact-paywall')) {
+        var div = document.createElement('div');
+        div.id = 'contact-paywall';
+        div.className = 'w-full';
+        div.innerHTML =
+            '<div class="rounded-xl border border-orange-200 bg-orange-50 p-4 text-center">' +
+              '<div class="text-orange-600 text-xl mb-1"><i class="fas fa-lock"></i></div>' +
+              '<p class="font-bold text-slate-900 text-sm mb-1">Contact details are locked</p>' +
+              '<p class="text-[12px] text-slate-500 mb-3">Get Verified Access to see the landlord\'s phone number and contact them directly.</p>' +
+              '<a href="pay-verified-access.html" class="inline-block w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-sm py-2.5 rounded-xl">Get Verified Access - ZMW 50</a>' +
+            '</div>';
+        container.appendChild(div);
+    }
+}
+
 function contactGuard(kind) {
+    if (CONTACT_LOCKED) { window.location.href = 'pay-verified-access.html'; return false; }
     if (!LANDLORD_PHONE) { showToast('Phone not available. Use in-app messaging instead.', 'info'); return false; }
     const tel = LANDLORD_PHONE.replace(/[^\d+]/g, '');
     if (kind === 'call') window.location.href = 'tel:' + tel;
@@ -929,9 +952,12 @@ async function loadData() {
 
             /* phone for call/sms/whatsapp */
             LANDLORD_PHONE = pick(owner, ['phone', 'phone_number'], pick(data, ['owner_phone', 'contact_phone'], null));
+            CONTACT_LOCKED = (owner && owner.contact_locked === true);
         }
-        if (!LANDLORD_PHONE) {
-            ['btn-call', 'btn-wa', 'btn-sms'].forEach(bid => { const b = document.getElementById(bid); b.classList.add('opacity-60'); b.title = 'Phone not available - use in-app messaging'; });
+        if (CONTACT_LOCKED) {
+            applyContactPaywall();
+        } else if (!LANDLORD_PHONE) {
+            ['btn-call', 'btn-wa', 'btn-sms'].forEach(bid => { const b = document.getElementById(bid); if(b){ b.classList.add('opacity-60'); b.title = 'Phone not available - use in-app messaging'; } });
         }
 
         /* New mockup sections */
