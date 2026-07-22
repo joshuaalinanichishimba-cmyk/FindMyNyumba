@@ -27,7 +27,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_current_user_optional
 from app.core.database import get_db
 from app.models.listing import Listing
 from app.models.listing_media import ListingMedia
@@ -192,10 +192,27 @@ def get_all_properties(
 
 
 # â”€â”€ GET /properties/{id} â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+def _student_has_paid_access(db, user_id) -> bool:
+    """True if the user has a successful verification_fee payment in the last 30 days."""
+    if not user_id:
+        return False
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    from app.models.admin_models import Transaction
+    cutoff = _dt.now(_tz.utc) - _td(days=30)
+    txn = db.query(Transaction).filter(
+        Transaction.user_id == user_id,
+        Transaction.type == "verification_fee",
+        Transaction.status == "success",
+        Transaction.created_at >= cutoff,
+    ).first()
+    return txn is not None
+
+
 @router.get("/{listing_id}")
 def get_listing_detail(
     listing_id: int,
     request:    Request,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db),
 ):
     """
@@ -233,8 +250,15 @@ def get_listing_detail(
             "avatar_url":          owner.avatar_url,
             "member_since":        owner.created_at.isoformat() if owner.created_at else None,
             "listings_count":      _listings_count,
-            "phone_number":        owner.phone_number,
         }
+        _uid = current_user.id if current_user else None
+        _can_see_contact = (
+            _student_has_paid_access(db, _uid)
+            or (_uid is not None and _uid == owner.id)
+            or (current_user is not None and getattr(current_user, "role", "") == "admin")
+        )
+        owner_data["phone_number"] = owner.phone_number if _can_see_contact else None
+        owner_data["contact_locked"] = not _can_see_contact
 
     _detail_view_count = 0
     try:

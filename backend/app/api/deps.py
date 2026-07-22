@@ -78,3 +78,35 @@ def get_current_session_id(token: str = Depends(oauth2_scheme)):
         return int(sid) if sid else None
     except JWTError:
         return None
+
+
+# -- Optional auth: returns User if a valid token is present, else None --------
+# Used by public endpoints (e.g. listing detail) that must stay viewable by
+# anonymous users but need to know the viewer when logged in (e.g. to check
+# paid access before revealing landlord contact details).
+from fastapi import Request as _Request
+
+def get_current_user_optional(
+    request: _Request,
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+    auth = request.headers.get("Authorization") or request.headers.get("authorization")
+    if not auth or not auth.lower().startswith("bearer "):
+        return None
+    token = auth.split(" ", 1)[1].strip()
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+    except JWTError:
+        return None
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if user is None or not user.is_active:
+        return None
+    sid = payload.get("sid")
+    if not is_session_active(db, int(sid) if sid else None):
+        return None
+    return user
