@@ -8,14 +8,15 @@ must NOT include "/api/v1" in its own prefix.
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import auth, admin, listings, messages, landlords, student_hosts, students, notifications
-from app.api.v1.endpoints import trust, verification, fraud, admin_trust, admin_extra, viewing_requests
+from app.api.v1.endpoints import trust, verification, fraud, admin_trust, admin_extra, viewing_requests, payments
 
 api_router = APIRouter()
 
 # â”€â”€ Public / Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 api_router.include_router(auth.router)         # /api/v1/auth/...
 api_router.include_router(listings.router)     # /api/v1/properties/...
-api_router.include_router(messages.router)     # /api/v1/messages/...
+api_router.include_router(messages.router)
+api_router.include_router(payments.router)         # /api/v1/payments/...     # /api/v1/messages/...
 
 # â”€â”€ Role dashboards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 api_router.include_router(landlords.router)    # /api/v1/landlord/...
