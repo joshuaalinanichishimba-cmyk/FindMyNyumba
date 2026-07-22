@@ -68,6 +68,8 @@ class Settings(BaseSettings):
         "http://localhost:5500,"
         "http://127.0.0.1:5500,"
         "https://find-my-nyumba-original.vercel.app,"
+        "https://findmynyumba.com,"
+        "https://www.findmynyumba.com,"
         "https://nyumba-web.vercel.app"
     )
 
