@@ -15,6 +15,21 @@ from app.core.config import settings
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.message import Message
+
+
+def _has_paid_access(db, user_id) -> bool:
+    """True if user has a successful verification/tier payment in the last 30 days."""
+    if not user_id:
+        return False
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    from app.models.admin_models import Transaction
+    cutoff = _dt.now(_tz.utc) - _td(days=30)
+    return db.query(Transaction).filter(
+        Transaction.user_id == user_id,
+        Transaction.type == "verification_fee",
+        Transaction.status == "success",
+        Transaction.created_at >= cutoff,
+    ).first() is not None
 from app.models.listing import Listing
 
 from slowapi import Limiter
@@ -42,6 +57,14 @@ async def send_message(
 ):
     if current_user.id == receiver_id:
         raise HTTPException(status_code=400, detail="You cannot message yourself.")
+    # Messaging paywall (toggle-gated). Students need paid access; landlords reply free.
+    if (settings.PAYWALL_ENABLED
+            and getattr(current_user, "role", "") == "student"
+            and not _has_paid_access(db, current_user.id)):
+        raise HTTPException(
+            status_code=403,
+            detail="Verified Access required. Get Verified Access to message landlords.",
+        )
 
     receiver = db.query(User).filter(User.id == receiver_id).first()
     if not receiver:

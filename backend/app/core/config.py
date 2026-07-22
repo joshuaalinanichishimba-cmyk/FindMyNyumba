@@ -50,8 +50,16 @@ class Settings(BaseSettings):
     MOMO_API_USER: str          = ""
     MOMO_API_KEY: str           = ""
     MOMO_CALLBACK_HOST: str     = "findmynyumba.onrender.com"
-    VERIFIED_ACCESS_FEE_ZMW: float = 50.0
+    VERIFIED_ACCESS_FEE_ZMW: float = 150.0
     VERIFIED_ACCESS_FEE_EUR: float = 1.0
+    # Access tiers (server-authoritative prices; client only sends the tier key)
+    TIER_STUDENT_CONNECT_ZMW: float = 150.0   # 30 days access, self-service
+    TIER_ASSISTED_MOVE_ZMW: float   = 300.0   # up to 60 days, managed service
+    TIER_ESCORT_ASSIST_ZMW: float   = 400.0   # per trip, on-ground support
+    # Master paywall toggle. OFF until MTN payments are live, so the site stays
+    # usable. Flip to true (via Render env var PAYWALL_ENABLED=true) to enforce
+    # contact + messaging paywalls once students can actually pay.
+    PAYWALL_ENABLED: bool = False
 
     # -- Cloudinary (image hosting) --------------------------------------------
     # Sign up free at https://cloudinary.com â†’ Dashboard â†’ API Keys

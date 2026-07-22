@@ -252,7 +252,10 @@ def get_listing_detail(
             "listings_count":      _listings_count,
         }
         _uid = current_user.id if current_user else None
+        from app.core.config import settings as _settings
         _can_see_contact = (
+            (not _settings.PAYWALL_ENABLED)  # paywall off => everyone sees contact
+            or
             _student_has_paid_access(db, _uid)
             or (_uid is not None and _uid == owner.id)
             or (current_user is not None and getattr(current_user, "role", "") == "admin")
