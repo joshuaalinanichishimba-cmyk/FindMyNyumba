@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verified Access Payment Â· FindMyNyumba</title>
+<title>Verified Access Payment · FindMyNyumba</title>
 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -223,7 +223,7 @@
 </main>
 
 <script>
-// â”€â”€ API base (matches other student pages) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── API base (matches other student pages) ──────────────────────────────
 const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
 const API_BASE = (isLocal ? 'http://127.0.0.1:8000' : 'https://findmynyumba.onrender.com') + '/api/v1';
 const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -236,7 +236,7 @@ let currentTxnId = null;
 let pollTimer = null;
 let countdownTimer = null;
 
-// â”€â”€ Stepper render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Stepper render ──────────────────────────────────────────────────────
 function renderStepper(active){
   const labels = ['Summary','Method','Number','Approve','Processing','Done'];
   const box = document.getElementById('stepper');
@@ -260,13 +260,13 @@ function goStep(step){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-// â”€â”€ Phone validation (Zambian MTN: 96/76/97/77 etc., 9 digits after +260) â”€
+// ── Phone validation (Zambian MTN: 96/76/97/77 etc., 9 digits after +260) ─
 function validMsisdn(v){
   const digits = v.replace(/\D/g,'');
   return /^(9|7)\d{8}$/.test(digits);   // 9 digits starting 9 or 7
 }
 
-// â”€â”€ Initiate: POST /payments/verified-access/initiate  { msisdn } â”€â”€â”€â”€â”€â”€â”€
+// ── Initiate: POST /payments/verified-access/initiate  { msisdn } ───────
 // NOTE: no amount sent - the server sets it (VERIFIED_ACCESS_FEE). Stage 2.
 async function initiatePayment(){
   const raw = document.getElementById('msisdn').value.trim();
@@ -313,7 +313,7 @@ function startCountdown(){
   setTimeout(startPolling, 4000);
 }
 
-// â”€â”€ Poll: GET /payments/{id}/status  â†’ pending|successful|failed â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Poll: GET /payments/{id}/status  → pending|successful|failed ─────────
 async function startPolling(){
   goStep(5);
   if(!currentTxnId){ // preview mode - no backend
@@ -347,15 +347,15 @@ function onSuccess(d){
   goStep(6);
 }
 function onFail(msg){
-  document.getElementById('fail-msg').textContent = msg || 'The payment was not approved. You can try again.';
+  document.getElementById('fail-msg').textContent = msg || 'The payment wasn't approved. You can try again.';
   goStep('fail');
 }
 
-// â”€â”€ Preview helpers (backend not connected) - honest, not a fake success â”€
+// ── Preview helpers (backend not connected) - honest, not a fake success ─
 function showPreview(){ document.getElementById('preview-banner').classList.remove('hidden'); }
 function showPreviewReceipt(){
   // In preview we do NOT claim success. Show the failure/notice pane.
-  document.getElementById('fail-msg').textContent = 'Preview mode: the payment service is not connected yet, so nothing was charged. This flow will work once payments go live.';
+  document.getElementById('fail-msg').textContent = 'Preview mode: the payment service isn't connected yet, so nothing was charged. This flow will work once payments go live.';
   goStep('fail');
 }
 
