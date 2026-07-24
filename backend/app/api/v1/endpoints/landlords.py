@@ -87,6 +87,19 @@ def require_landlord(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
+def require_landlord_or_creator(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Landlords (own listings) OR staff holding listings.create, so the Landlord
+    Acquisition Lead can add properties on a landlord's behalf.
+    """
+    from app.core.permissions import has_permission
+    if current_user.role == "landlord":
+        return current_user
+    if has_permission(getattr(current_user, "role", ""), "listings.create"):
+        return current_user
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Landlord access required.")
+
+
 def _absolute_image_url(raw: Optional[str], request: Request) -> Optional[str]:
     if not raw:
         return None
@@ -240,9 +253,20 @@ async def create_property(
     description: str = Form(..., min_length=5, max_length=4000),
     images:      Optional[List[UploadFile]] = File(None),
     media:       Optional[List[UploadFile]] = File(None),
-    landlord:    User    = Depends(require_landlord),
+    owner_id:    Optional[int] = Form(None),
+    landlord:    User    = Depends(require_landlord_or_creator),
     db:          Session = Depends(get_db),
 ):
+    # Staff with listings.create may file a property under an existing landlord.
+    _target_owner_id = landlord.id
+    if owner_id is not None and owner_id != landlord.id:
+        from app.core.permissions import has_permission
+        if not has_permission(getattr(landlord, "role", ""), "listings.create"):
+            raise HTTPException(status_code=403, detail="Not allowed to create listings for another user.")
+        _target = db.query(User).filter(User.id == owner_id, User.role == "landlord").first()
+        if not _target:
+            raise HTTPException(status_code=404, detail="Landlord not found.")
+        _target_owner_id = _target.id
     # Backward compatible: legacy `images` (photos only) still works and is used
     # only when the new `media` field (photos + videos) is absent.
     first_image_url = None
@@ -261,7 +285,7 @@ async def create_property(
         location    = location.strip(),
         image_url   = first_image_url,
         status      = "pending",
-        owner_id    = landlord.id,
+        owner_id    = _target_owner_id,
     )
     db.add(listing)
     db.commit()
@@ -290,9 +314,20 @@ async def update_property(
     description: str = Form(..., min_length=5, max_length=4000),
     images:      Optional[List[UploadFile]] = File(None),
     media:       Optional[List[UploadFile]] = File(None),
-    landlord:    User    = Depends(require_landlord),
+    owner_id:    Optional[int] = Form(None),
+    landlord:    User    = Depends(require_landlord_or_creator),
     db:          Session = Depends(get_db),
 ):
+    # Staff with listings.create may file a property under an existing landlord.
+    _target_owner_id = landlord.id
+    if owner_id is not None and owner_id != landlord.id:
+        from app.core.permissions import has_permission
+        if not has_permission(getattr(landlord, "role", ""), "listings.create"):
+            raise HTTPException(status_code=403, detail="Not allowed to create listings for another user.")
+        _target = db.query(User).filter(User.id == owner_id, User.role == "landlord").first()
+        if not _target:
+            raise HTTPException(status_code=404, detail="Landlord not found.")
+        _target_owner_id = _target.id
     listing = db.query(Listing).filter(Listing.id == listing_id, Listing.owner_id == landlord.id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Property not found.")
