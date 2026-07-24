@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_current_user_optional
+from app.core.contact_guard import mask_numbers as _mask_contacts
 from app.core.database import get_db
 from app.models.listing import Listing
 from app.models.listing_media import ListingMedia
@@ -238,6 +239,7 @@ def get_listing_detail(
         db.rollback()
 
     owner_data = None
+    _can_see_contact = True   # default; narrowed below when an owner exists
     if owner:
         _listings_count = db.query(Listing).filter(
             Listing.owner_id == owner.id, Listing.status == "active"
@@ -274,7 +276,11 @@ def get_listing_detail(
     return {
         "id":          listing.id,
         "title":       listing.title,
-        "description": listing.description or "",
+        "description": (
+            (listing.description or "")
+            if _can_see_contact
+            else _mask_contacts(listing.description or "")
+        ),
         "price":       listing.price,
         "location":    listing.location,
         "image_url":   _watermark(_absolute_image_url(listing.image_url, request)),
