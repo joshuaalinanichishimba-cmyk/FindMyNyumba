@@ -590,7 +590,18 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div class="sm:col-span-2">
               <label class="block text-[12px] font-bold text-slate-600 mb-1">Landlord</label>
-              <select id="al-owner" class="fmn-input w-full"><option value="">Loading...</option></select>
+              <select id="al-owner" class="fmn-input w-full" onchange="_alOwnerChanged()"><option value="">Loading...</option></select>
+            </div>
+            <div id="al-new-landlord" class="sm:col-span-2 hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-orange-50 border border-orange-100">
+              <div>
+                <label class="block text-[12px] font-bold text-slate-600 mb-1">Landlord name</label>
+                <input id="al-nl-name" class="fmn-input w-full" placeholder="Mr Banda">
+              </div>
+              <div>
+                <label class="block text-[12px] font-bold text-slate-600 mb-1">Landlord phone</label>
+                <input id="al-nl-phone" class="fmn-input w-full" placeholder="0971234567">
+              </div>
+              <p class="sm:col-span-2 text-[11px] text-slate-500">A landlord record will be created so this property has an owner. They can claim the account later.</p>
             </div>
             <div class="sm:col-span-2">
               <label class="block text-[12px] font-bold text-slate-600 mb-1">Title</label>
@@ -628,13 +639,15 @@
               <label class="block text-[12px] font-bold text-slate-600 mb-1">Type</label>
               <select id="al-type" class="fmn-input w-full">
                 <option value="">Select type</option>
+                <option value="boarding-house">Boarding House</option>
+                <option value="hostel">Hostel</option>
                 <option value="self-contained">Self-Contained</option>
                 <option value="bedsitter">Bedsitter</option>
                 <option value="room">Single Room</option>
                 <option value="shared">Shared Room</option>
+                <option value="annex">Annex / Outside Room</option>
                 <option value="flat">Flat / Apartment</option>
                 <option value="house">House</option>
-                <option value="studio">Studio</option>
               </select>
             </div>
             <div>
@@ -2453,7 +2466,7 @@ async function openAddListing(){
       _alLandlords = d.landlords || [];
     } catch(e){ _alLandlords = []; }
   }
-  var html = '<option value="">Select a landlord</option>';
+  var html = '<option value="">Select a landlord</option><option value="__new__">+ New landlord (not registered yet)</option>';
   for (var i = 0; i < _alLandlords.length; i++){
     var l = _alLandlords[i];
     var label = (l.full_name || 'Unnamed');
@@ -2461,6 +2474,15 @@ async function openAddListing(){
     html = html + '<option value="' + l.id + '">' + label + '</option>';
   }
   sel.innerHTML = html;
+  _alOwnerChanged();
+}
+
+function _alOwnerChanged(){
+  var sel = document.getElementById('al-owner');
+  var box = document.getElementById('al-new-landlord');
+  if (!sel || !box) return;
+  if (sel.value === '__new__') box.classList.remove('hidden');
+  else box.classList.add('hidden');
 }
 
 function closeAddListing(){
@@ -2483,6 +2505,23 @@ async function submitAddListing(){
   function fail(msg){ err.textContent = msg; err.classList.remove('hidden'); }
   err.classList.add('hidden');
   if (!owner) { fail('Choose the landlord this property belongs to.'); return; }
+  if (owner === '__new__'){
+    var nlName = _alVal('al-nl-name').trim();
+    var nlPhone = _alVal('al-nl-phone').trim();
+    if (nlName.length < 2) { fail('Enter the landlord name.'); return; }
+    if (nlPhone.length < 9) { fail('Enter the landlord phone number.'); return; }
+    try {
+      var lr = await fetch(API + '/admin/landlords/quick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: nlName, phone_number: nlPhone })
+      });
+      var ld = await lr.json();
+      if (!lr.ok) { fail(ld.detail || 'Could not add the landlord.'); return; }
+      owner = String(ld.id);
+      _alLandlords = null;
+    } catch(e){ fail('Could not add the landlord.'); return; }
+  }
   if (title.length < 2) { fail('Enter a title.'); return; }
   if (!price || Number(price) < 0) { fail('Enter a valid price.'); return; }
   if (location.length < 2) { fail('Enter the location.'); return; }
