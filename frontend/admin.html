@@ -701,10 +701,12 @@
             </div>
             <div>
               <label class="block text-[12px] font-bold text-slate-600 mb-1">Curfew</label>
-              <select id="al-curfew" class="fmn-input w-full">
-                <option value="none">No curfew</option><option value="22:00">10:00 PM</option>
-                <option value="23:00">11:00 PM</option><option value="00:00">12:00 AM</option>
-              </select>
+              <div class="flex items-center gap-2">
+                <input id="al-curfew" type="time" class="fmn-input w-full">
+                <label class="flex items-center gap-1 text-[11px] font-bold text-slate-500 whitespace-nowrap">
+                  <input type="checkbox" id="al-curfew-none" class="accent-[#ea580c]" onchange="_alCurfewNone()"> None
+                </label>
+              </div>
             </div>
           </div>
 
@@ -2429,7 +2431,7 @@ function initAddListingButton(){
 }
 
 var _AL_INSTITUTIONS = ['Copperbelt University','University of Zambia','Mulungushi University','Levy Mwanawasa Medical University','Kwame Nkrumah University','Chalimbana University','Mukuba University','Zambia Catholic University','Northrise University','Cavendish University','Texila American University','Lusaka Apex Medical University','Other'];
-var _AL_AMENITIES = ['WiFi','Water Available','Electricity','Security Guard','CCTV','Parking','Borehole','Kitchen','Study Area','Near Campus','Balcony','Laundry Area','Maid Service','Laundry Service','Meals Provided','Water Tank','Backup Power','Fenced Yard'];
+var _AL_AMENITIES = ['WiFi','Water Available','Electricity','Security Guard','CCTV','Parking','Borehole','Kitchen','Study Area','Near Campus','Balcony','Laundry Area','Maid Service','Laundry Service','Water Tank','Backup Power','Fenced Yard'];
 var _alChosen = [];
 
 function _alRenderAmenities(){
@@ -2495,6 +2497,14 @@ function closeAddListing(){
 
 function _alVal(id){ var el = document.getElementById(id); return el ? el.value : ''; }
 
+function _alCurfewNone(){
+  var cb = document.getElementById('al-curfew-none');
+  var inp = document.getElementById('al-curfew');
+  if (!cb || !inp) return;
+  inp.disabled = cb.checked;
+  if (cb.checked) inp.value = '';
+}
+
 async function submitAddListing(){
   var err = document.getElementById('al-error');
   var btn = document.getElementById('al-submit');
@@ -2551,7 +2561,8 @@ async function submitAddListing(){
   fd.append('electricity', _alVal('al-electricity'));
   fd.append('parking', _alVal('al-parking'));
   fd.append('gender_preference', _alVal('al-gender'));
-  fd.append('curfew', _alVal('al-curfew'));
+  var _cbNone = document.getElementById('al-curfew-none');
+  fd.append('curfew', (_cbNone && _cbNone.checked) ? 'none' : _alVal('al-curfew'));
   fd.append('amenities', JSON.stringify(picked));
   for (var j = 0; j < files.length; j++) fd.append('media', files[j]);
 
