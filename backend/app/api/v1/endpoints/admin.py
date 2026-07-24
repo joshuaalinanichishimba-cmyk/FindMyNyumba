@@ -152,7 +152,7 @@ def get_users(admin: User = Depends(require_admin), db: Session = Depends(get_db
 
 # â”€â”€ POST /admin/users/{id}/suspend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.post("/users/{user_id}/suspend")
-def toggle_suspend(user_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def toggle_suspend(user_id: int, admin: User = Depends(require("users.suspend")), db: Session = Depends(get_db)):
     if user_id == admin.id:
         raise HTTPException(status_code=400, detail="Cannot suspend your own account.")
     user = db.query(User).filter(User.id == user_id).first()
@@ -187,7 +187,7 @@ def get_all_listings(admin: User = Depends(require_admin), db: Session = Depends
 
 # â”€â”€ PATCH /admin/listings/{id}/approve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/listings/{listing_id}/approve")
-def approve_listing(listing_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def approve_listing(listing_id: int, admin: User = Depends(require("listings.approve")), db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
@@ -198,7 +198,7 @@ def approve_listing(listing_id: int, admin: User = Depends(require_admin), db: S
 
 # â”€â”€ PATCH /admin/listings/{id}/reject â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/listings/{listing_id}/reject")
-def reject_listing(listing_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def reject_listing(listing_id: int, admin: User = Depends(require("listings.reject")), db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
@@ -209,7 +209,7 @@ def reject_listing(listing_id: int, admin: User = Depends(require_admin), db: Se
 
 # â”€â”€ DELETE /admin/listings/{id} â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.delete("/listings/{listing_id}")
-def delete_listing(listing_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def delete_listing(listing_id: int, admin: User = Depends(require("listings.delete")), db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
@@ -250,7 +250,7 @@ def get_verifications(
 
 # â”€â”€ POST /admin/verifications/{id}/approve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.post("/verifications/{user_id}/approve")
-def approve_verification(user_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def approve_verification(user_id: int, admin: User = Depends(require("verification.approve")), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -328,7 +328,7 @@ def get_reports(
 
 # â”€â”€ PATCH /admin/reports/{id}/investigate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/reports/{report_id}/investigate")
-def investigate_report(report_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def investigate_report(report_id: int, admin: User = Depends(require("reports.investigate")), db: Session = Depends(get_db)):
     report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found.")
@@ -341,7 +341,7 @@ def investigate_report(report_id: int, admin: User = Depends(require_admin), db:
 
 # â”€â”€ PATCH /admin/reports/{id}/resolve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/reports/{report_id}/resolve")
-def resolve_report(report_id: int, body: ResolveBody, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def resolve_report(report_id: int, body: ResolveBody, admin: User = Depends(require("reports.resolve")), db: Session = Depends(get_db)):
     report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found.")
@@ -355,7 +355,7 @@ def resolve_report(report_id: int, body: ResolveBody, admin: User = Depends(requ
 
 # â”€â”€ PATCH /admin/reports/{id}/dismiss â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/reports/{report_id}/dismiss")
-def dismiss_report(report_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def dismiss_report(report_id: int, admin: User = Depends(require("reports.dismiss")), db: Session = Depends(get_db)):
     report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found.")
@@ -368,7 +368,7 @@ def dismiss_report(report_id: int, admin: User = Depends(require_admin), db: Ses
 
 # â”€â”€ GET /admin/analytics/growth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/analytics/growth")
-def get_growth(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def get_growth(admin: User = Depends(require("analytics.view")), db: Session = Depends(get_db)):
     """
     Returns monthly user and listing registration counts for the last 6 months.
     Uses Python-side grouping for cross-DB compatibility.
@@ -531,7 +531,7 @@ def admin_list_reviews(status: str = "pending", admin: User = Depends(require_ad
 
 
 @router.patch("/reviews/{review_id}/approve")
-def admin_approve_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_approve_review(review_id: int, admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     r = db.query(Review).filter(Review.id == review_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Review not found")
@@ -541,7 +541,7 @@ def admin_approve_review(review_id: int, admin: User = Depends(require_admin), d
 
 
 @router.patch("/reviews/{review_id}/reject")
-def admin_reject_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_reject_review(review_id: int, admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     r = db.query(Review).filter(Review.id == review_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Review not found")
@@ -616,7 +616,7 @@ def admin_list_student_reviews(status: str = "pending", admin: User = Depends(re
 
 
 @router.patch("/student-reviews/{review_id}/approve")
-def admin_approve_student_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_approve_student_review(review_id: int, admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     r = db.query(StudentReview).filter(StudentReview.id == review_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Student review not found")
@@ -626,7 +626,7 @@ def admin_approve_student_review(review_id: int, admin: User = Depends(require_a
 
 
 @router.patch("/student-reviews/{review_id}/reject")
-def admin_reject_student_review(review_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_reject_student_review(review_id: int, admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     r = db.query(StudentReview).filter(StudentReview.id == review_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Student review not found")

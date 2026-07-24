@@ -1,4 +1,4 @@
-"""
+﻿"""
 app/core/permissions.py
 
 Shared role guards. The existing codebase defines `require_admin` separately in
@@ -8,7 +8,7 @@ routers reuse this single source so the policy lives in one place.
 We add a `moderator` concept: a Trust & Safety reviewer who can action
 verifications and reports but is NOT a full admin (can't touch payments, can't
 change settings). If you don't want a separate role yet, moderators simply
-don't exist and `require_staff` collapses to admin-only — nothing breaks.
+don't exist and `require_staff` collapses to admin-only â€” nothing breaks.
 
 All guards build on app.api.deps.get_current_user, which decodes the JWT
 (sub = user id) and already rejects suspended accounts.
@@ -34,7 +34,7 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
 
 
 def require_staff(current_user: User = Depends(get_current_user)) -> User:
-    """Admin OR moderator — the Trust & Safety review team."""
+    """Admin OR moderator â€” the Trust & Safety review team."""
     if current_user.role not in STAFF_ROLES:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -72,16 +72,16 @@ ROLE_PERMISSIONS = {
     ROLE_TRUST: {
         "listings.view", "listings.approve", "listings.reject",
         "listings.suspend", "verification.*", "reports.*",
-        "users.suspend", "trust.*",
+        "users.suspend", "trust.*", "reviews.*",
     },
     ROLE_FINANCE: {
-        "finance.*", "payments.*", "reports.financial",
+        "finance.*", "payments.*", "reports.financial", "analytics.view",
     },
     ROLE_MARKETING: {
         "analytics.view", "marketing.*", "content.*",
     },
     ROLE_SUPPORT: {
-        "students.view", "messages.view", "tickets.*", "support.*",
+        "students.view", "messages.view", "tickets.*", "support.*", "reports.*",
     },
     ROLE_OPERATIONS: {
         "staff.*", "documents.*", "tasks.*", "meetings.*", "announcements.*",
