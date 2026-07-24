@@ -1,16 +1,16 @@
-"""
+﻿"""
 app/models/listing.py
 
-FIX: status default changed from "active" → "pending".
+FIX: status default changed from "active" â†’ "pending".
      All new listings must go through admin review before going live.
 
 ADDED (Student Host Phase):
   - nearest_institution : which university/college the bedspace is near
   - availability_status : "available" | "taken" (independent of admin approval status)
   - total_spots         : how many bedspaces the host is offering in this listing
-  - available_spots     : how many are still open (≤ total_spots)
+  - available_spots     : how many are still open (â‰¤ total_spots)
 """
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -48,20 +48,32 @@ class Listing(Base):
     owner_id    = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     owner       = relationship("User", back_populates="listings")
 
-    # ── Student Host bedspace fields ──────────────────────────────────────────
+    # â”€â”€ Student Host bedspace fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Which institution the bedspace is near (e.g. "UNZA", "CBU")
     nearest_institution = Column(String, nullable=True, index=True)
 
-    # Availability toggle — host can mark a listing as taken without deleting
+    # Availability toggle â€” host can mark a listing as taken without deleting
     # This is separate from admin "status" (pending/active/rejected).
     # "available" means spots are open; "taken" means fully occupied.
     availability_status = Column(String, default="available", nullable=False)
 
-    # Spot management — how many bedspaces in this listing
+    # Spot management â€” how many bedspaces in this listing
     total_spots     = Column(Integer, default=1, nullable=False)
+
+    # Student facing property attributes (all optional)
+    bedrooms            = Column(Integer, nullable=True)
+    bathrooms           = Column(Integer, nullable=True)
+    furnished           = Column(String, nullable=True)   # yes, semi, no
+    water_supply        = Column(String, nullable=True)   # yes, borehole, mains, no
+    electricity         = Column(String, nullable=True)   # prepaid, postpaid, solar, none
+    parking             = Column(String, nullable=True)   # yes, no
+    curfew              = Column(String, nullable=True)   # none, 22:00, 23:00, 00:00
+    gender_preference   = Column(String, nullable=True)   # mixed, female, male
+    distance_to_campus  = Column(String, nullable=True)   # free text, e.g. 1.2 km
+    amenities           = Column(Text, nullable=True)     # JSON list of strings
     available_spots = Column(Integer, default=1, nullable=False)
 
-    # ── Multi-media (NEW) ─────────────────────────────────────────────────────
+    # â”€â”€ Multi-media (NEW) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Ordered photos/videos. selectin avoids N+1 by batch-loading media.
     media = relationship(
         "ListingMedia",
