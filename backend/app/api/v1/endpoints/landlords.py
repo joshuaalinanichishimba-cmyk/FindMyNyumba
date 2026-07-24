@@ -256,6 +256,17 @@ async def create_property(
     owner_id:    Optional[int] = Form(None),
     nearest_institution: Optional[str] = Form(None),
     availability_status: Optional[str] = Form(None),
+    listing_type:        Optional[str] = Form(None),
+    bedrooms:            Optional[int] = Form(None),
+    bathrooms:           Optional[int] = Form(None),
+    furnished:           Optional[str] = Form(None),
+    water_supply:        Optional[str] = Form(None),
+    electricity:         Optional[str] = Form(None),
+    parking:             Optional[str] = Form(None),
+    curfew:              Optional[str] = Form(None),
+    gender_preference:   Optional[str] = Form(None),
+    distance_to_campus:  Optional[str] = Form(None),
+    amenities:           Optional[str] = Form(None),
     landlord:    User    = Depends(require_landlord_or_creator),
     db:          Session = Depends(get_db),
 ):
@@ -290,6 +301,17 @@ async def create_property(
         owner_id    = _target_owner_id,
         nearest_institution = (nearest_institution or "").strip() or None,
         availability_status = (availability_status or "available").strip() or "available",
+        listing_type        = (listing_type or "").strip() or None,
+        bedrooms            = bedrooms,
+        bathrooms           = bathrooms,
+        furnished           = (furnished or "").strip() or None,
+        water_supply        = (water_supply or "").strip() or None,
+        electricity         = (electricity or "").strip() or None,
+        parking             = (parking or "").strip() or None,
+        curfew              = (curfew or "").strip() or None,
+        gender_preference   = (gender_preference or "").strip() or None,
+        distance_to_campus  = (distance_to_campus or "").strip() or None,
+        amenities           = (amenities or "").strip() or None,
     )
     db.add(listing)
     db.commit()
@@ -321,6 +343,17 @@ async def update_property(
     owner_id:    Optional[int] = Form(None),
     nearest_institution: Optional[str] = Form(None),
     availability_status: Optional[str] = Form(None),
+    listing_type:        Optional[str] = Form(None),
+    bedrooms:            Optional[int] = Form(None),
+    bathrooms:           Optional[int] = Form(None),
+    furnished:           Optional[str] = Form(None),
+    water_supply:        Optional[str] = Form(None),
+    electricity:         Optional[str] = Form(None),
+    parking:             Optional[str] = Form(None),
+    curfew:              Optional[str] = Form(None),
+    gender_preference:   Optional[str] = Form(None),
+    distance_to_campus:  Optional[str] = Form(None),
+    amenities:           Optional[str] = Form(None),
     landlord:    User    = Depends(require_landlord_or_creator),
     db:          Session = Depends(get_db),
 ):
@@ -346,6 +379,18 @@ async def update_property(
         listing.nearest_institution = nearest_institution.strip() or None
     if availability_status:
         listing.availability_status = availability_status.strip()
+    for _f, _v in (("listing_type", listing_type), ("furnished", furnished),
+                   ("water_supply", water_supply), ("electricity", electricity),
+                   ("parking", parking), ("curfew", curfew),
+                   ("gender_preference", gender_preference),
+                   ("distance_to_campus", distance_to_campus),
+                   ("amenities", amenities)):
+        if _v is not None:
+            setattr(listing, _f, _v.strip() or None)
+    if bedrooms is not None:
+        listing.bedrooms = bedrooms
+    if bathrooms is not None:
+        listing.bathrooms = bathrooms
 
     # Legacy images path (photos only) â€” used only when no `media` provided.
     if images and not media:

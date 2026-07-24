@@ -65,3 +65,7 @@ build/
 show_perms.py
 
 test_rbac.py
+
+test_attrs.py
+
+test_update_attrs.py
