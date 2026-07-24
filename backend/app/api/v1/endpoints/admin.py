@@ -791,3 +791,29 @@ def create_quick_landlord(
 
     return {"status": "success", "message": "Landlord added.",
             "id": user.id, "full_name": user.full_name, "existing": False}
+
+
+# Trust and Safety: listings with a phone number embedded in the description.
+# Live-computed flag for the review queue. Landlords sometimes paste
+# "Call 097..." into the description to dodge the contact paywall. This scans
+# the raw description (never modified) so the reviewer can ask them to remove
+# it before approving. No schema change; recomputes on every request.
+@router.get("/contact-flags")
+def admin_listing_contact_flags(
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    from app.core import contact_guard
+    rows = db.query(Listing).filter(Listing.status.in_(["pending", "active"])).all()
+    flagged = {}
+    for l in rows:
+        nums = contact_guard.find_numbers(l.description or "")
+        if nums:
+            flagged[str(l.id)] = {
+                "listing_id": l.id,
+                "title": l.title,
+                "status": l.status,
+                "count": len(nums),
+                "samples": nums[:3],
+            }
+    return {"count": len(flagged), "flagged": flagged}
