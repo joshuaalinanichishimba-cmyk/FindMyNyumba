@@ -702,3 +702,25 @@ def assign_role(
 
     return {"status": "success", "message": f"{target.email} is now {ROLE_LABELS.get(new_role, new_role)}.",
             "user_id": target.id, "old_role": old_role, "new_role": new_role}
+
+
+# -- Landlord picker for the admin listing form ------------------------------
+@router.get("/landlords")
+def admin_list_landlords(
+    actor: User = Depends(require("landlords.view")),
+    db: Session = Depends(get_db),
+):
+    """Landlords available to file a property under."""
+    rows = db.query(User).filter(User.role == "landlord").order_by(User.full_name).all()
+    out = []
+    for u in rows:
+        count = db.query(Listing).filter(Listing.owner_id == u.id).count()
+        out.append({
+            "id": u.id,
+            "full_name": u.full_name,
+            "phone_number": getattr(u, "phone_number", None),
+            "email": u.email,
+            "verification_status": getattr(u, "verification_status", None) or "unverified",
+            "listings_count": count,
+        })
+    return {"landlords": out}
