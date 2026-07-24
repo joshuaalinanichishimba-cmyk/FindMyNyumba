@@ -254,6 +254,8 @@ async def create_property(
     images:      Optional[List[UploadFile]] = File(None),
     media:       Optional[List[UploadFile]] = File(None),
     owner_id:    Optional[int] = Form(None),
+    nearest_institution: Optional[str] = Form(None),
+    availability_status: Optional[str] = Form(None),
     landlord:    User    = Depends(require_landlord_or_creator),
     db:          Session = Depends(get_db),
 ):
@@ -286,6 +288,8 @@ async def create_property(
         image_url   = first_image_url,
         status      = "pending",
         owner_id    = _target_owner_id,
+        nearest_institution = (nearest_institution or "").strip() or None,
+        availability_status = (availability_status or "available").strip() or "available",
     )
     db.add(listing)
     db.commit()
@@ -315,6 +319,8 @@ async def update_property(
     images:      Optional[List[UploadFile]] = File(None),
     media:       Optional[List[UploadFile]] = File(None),
     owner_id:    Optional[int] = Form(None),
+    nearest_institution: Optional[str] = Form(None),
+    availability_status: Optional[str] = Form(None),
     landlord:    User    = Depends(require_landlord_or_creator),
     db:          Session = Depends(get_db),
 ):
