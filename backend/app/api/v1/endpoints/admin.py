@@ -651,7 +651,7 @@ ROLE_LABELS = {
     "moderator":            "Moderator (legacy)",
 }
 
-@router.get("/roles")
+@router.get("/team-roles")
 def list_roles(admin: User = Depends(require_admin)):
     """Team roles available for assignment, with their permissions."""
     from app.core.permissions import ROLE_PERMISSIONS
