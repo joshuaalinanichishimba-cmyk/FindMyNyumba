@@ -342,6 +342,10 @@ async def update_property(
     listing.description = description.strip()
     listing.price       = price
     listing.location    = location.strip()
+    if nearest_institution is not None:
+        listing.nearest_institution = nearest_institution.strip() or None
+    if availability_status:
+        listing.availability_status = availability_status.strip()
 
     # Legacy images path (photos only) â€” used only when no `media` provided.
     if images and not media:
