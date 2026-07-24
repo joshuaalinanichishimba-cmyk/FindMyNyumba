@@ -724,3 +724,70 @@ def admin_list_landlords(
             "listings_count": count,
         })
     return {"landlords": out}
+
+
+# -- Quick landlord creation for field acquisition ---------------------------
+class QuickLandlordPayload(BaseModel):
+    full_name: str
+    phone_number: str
+
+
+@router.post("/landlords/quick")
+def create_quick_landlord(
+    payload: QuickLandlordPayload,
+    request: Request,
+    actor: User = Depends(require("landlords.create")),
+    db: Session = Depends(get_db),
+):
+    """
+    Create a minimal landlord record so staff can file a property for a landlord
+    who has not registered. The landlord can claim the account later.
+    """
+    from app.core.security import get_password_hash
+    import secrets
+
+    name = (payload.full_name or "").strip()
+    phone = (payload.phone_number or "").strip()
+    if len(name) < 2:
+        raise HTTPException(status_code=400, detail="Enter the landlord name.")
+    if len(phone) < 9:
+        raise HTTPException(status_code=400, detail="Enter a valid phone number.")
+
+    existing = db.query(User).filter(User.phone_number == phone, User.role == "landlord").first()
+    if existing:
+        return {"status": "success", "message": "Landlord already exists.",
+                "id": existing.id, "full_name": existing.full_name, "existing": True}
+
+    digits = "".join(ch for ch in phone if ch.isdigit())
+    email = "landlord." + digits + "@unclaimed.findmynyumba.com"
+    if db.query(User).filter(User.email == email).first():
+        email = "landlord." + digits + "." + secrets.token_hex(3) + "@unclaimed.findmynyumba.com"
+
+    user = User(
+        full_name=name,
+        email=email,
+        hashed_password=get_password_hash(secrets.token_urlsafe(24)),
+        role="landlord",
+        phone_number=phone,
+        is_active=True,
+        is_verified=False,
+        verification_status="unverified",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    try:
+        db.add(AuditLog(
+            actor_id=actor.id, actor_role=actor.role,
+            action="landlord.quick_create", entity_type="user", entity_id=str(user.id),
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            meta=_json_rbac.dumps({"full_name": name, "phone": phone, "email": email}),
+        ))
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    return {"status": "success", "message": "Landlord added.",
+            "id": user.id, "full_name": user.full_name, "existing": False}

@@ -69,3 +69,5 @@ test_rbac.py
 test_attrs.py
 
 test_update_attrs.py
+
+test_quick_landlord.py
