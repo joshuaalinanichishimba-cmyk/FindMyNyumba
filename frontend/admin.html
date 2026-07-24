@@ -582,22 +582,126 @@
       </div>
 
       <div id="add-listing-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
-        <div class="card w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div class="card w-full max-w-2xl p-6 max-h-[92vh] overflow-y-auto">
           <h3 class="font-extrabold text-slate-900 text-lg mb-1">Add Listing</h3>
           <p class="text-[12px] text-slate-400 font-medium mb-4">Filed under a landlord and sent for Trust and Safety review.</p>
-          <label class="block text-[12px] font-bold text-slate-600 mb-1">Landlord</label>
-          <select id="al-owner" class="fmn-input w-full mb-3"><option value="">Loading...</option></select>
-          <label class="block text-[12px] font-bold text-slate-600 mb-1">Title</label>
-          <input id="al-title" class="fmn-input w-full mb-3" placeholder="2 bedroom self contained">
-          <label class="block text-[12px] font-bold text-slate-600 mb-1">Price (ZMW per month)</label>
-          <input id="al-price" type="number" min="0" class="fmn-input w-full mb-3" placeholder="1500">
-          <label class="block text-[12px] font-bold text-slate-600 mb-1">Location</label>
-          <input id="al-location" class="fmn-input w-full mb-3" placeholder="Riverside, Kitwe">
+
+          <p class="text-[11px] font-black uppercase tracking-wide text-slate-400 mb-2">Landlord and basics</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div class="sm:col-span-2">
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Landlord</label>
+              <select id="al-owner" class="fmn-input w-full"><option value="">Loading...</option></select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Title</label>
+              <input id="al-title" class="fmn-input w-full" placeholder="2 bedroom self contained">
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Price (ZMW per month)</label>
+              <input id="al-price" type="number" min="0" class="fmn-input w-full" placeholder="1500">
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Availability</label>
+              <select id="al-availability" class="fmn-input w-full">
+                <option value="available">Available</option>
+                <option value="limited">Limited spots</option>
+                <option value="taken">Taken</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Location</label>
+              <input id="al-location" class="fmn-input w-full" placeholder="Riverside, Kitwe, Copperbelt">
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Nearest institution</label>
+              <select id="al-institution" class="fmn-input w-full"></select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Distance to campus</label>
+              <input id="al-distance" class="fmn-input w-full" placeholder="1.2 km">
+            </div>
+          </div>
+
+          <p class="text-[11px] font-black uppercase tracking-wide text-slate-400 mb-2">Property details</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Type</label>
+              <select id="al-type" class="fmn-input w-full">
+                <option value="">Select type</option>
+                <option value="self-contained">Self-Contained</option>
+                <option value="bedsitter">Bedsitter</option>
+                <option value="room">Single Room</option>
+                <option value="shared">Shared Room</option>
+                <option value="flat">Flat / Apartment</option>
+                <option value="house">House</option>
+                <option value="studio">Studio</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Bedrooms</label>
+              <select id="al-bedrooms" class="fmn-input w-full">
+                <option value="1">1</option><option value="2" selected>2</option>
+                <option value="3">3</option><option value="4">4</option><option value="5">5+</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Bathrooms</label>
+              <select id="al-bathrooms" class="fmn-input w-full">
+                <option value="1" selected>1</option><option value="2">2</option>
+                <option value="3">3</option><option value="4">4+</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Furnished</label>
+              <select id="al-furnished" class="fmn-input w-full">
+                <option value="yes">Yes</option><option value="semi">Semi-furnished</option><option value="no">No</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Water</label>
+              <select id="al-water" class="fmn-input w-full">
+                <option value="yes">Yes</option><option value="borehole">Borehole</option>
+                <option value="mains">Mains</option><option value="no">No</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Electricity</label>
+              <select id="al-electricity" class="fmn-input w-full">
+                <option value="prepaid">Prepaid</option><option value="postpaid">Postpaid</option>
+                <option value="solar">Solar</option><option value="none">None</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Parking</label>
+              <select id="al-parking" class="fmn-input w-full">
+                <option value="yes">Yes</option><option value="no">No</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Gender</label>
+              <select id="al-gender" class="fmn-input w-full">
+                <option value="mixed">Mixed</option><option value="female">Female only</option><option value="male">Male only</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] font-bold text-slate-600 mb-1">Curfew</label>
+              <select id="al-curfew" class="fmn-input w-full">
+                <option value="none">No curfew</option><option value="22:00">10:00 PM</option>
+                <option value="23:00">11:00 PM</option><option value="00:00">12:00 AM</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="text-[11px] font-black uppercase tracking-wide text-slate-400 mb-2">Amenities</p>
+          <div id="al-amenities" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4"></div>
+
           <label class="block text-[12px] font-bold text-slate-600 mb-1">Description</label>
           <textarea id="al-desc" rows="4" class="fmn-input w-full mb-3" placeholder="Rooms, water, electricity, security, distance to campus"></textarea>
+
           <label class="block text-[12px] font-bold text-slate-600 mb-1">Photos and videos</label>
           <input id="al-media" type="file" multiple accept="image/*,video/*" class="fmn-input w-full mb-1">
           <p class="text-[11px] text-slate-400 mb-4">First photo becomes the cover image.</p>
+
           <p id="al-error" class="text-[12px] font-semibold text-red-500 mb-3 hidden"></p>
           <div class="flex justify-end gap-2">
             <button class="btn btn-ghost" onclick="closeAddListing()">Cancel</button>
@@ -2308,11 +2412,39 @@ function initAddListingButton(){
   if (b && _alCan()) b.classList.remove('hidden');
 }
 
+var _AL_INSTITUTIONS = ['Copperbelt University','University of Zambia','Mulungushi University','Levy Mwanawasa Medical University','Kwame Nkrumah University','Chalimbana University','Mukuba University','Zambia Catholic University','Northrise University','Cavendish University','Texila American University','Lusaka Apex Medical University','Other'];
+var _AL_AMENITIES = ['WiFi','Water Available','Electricity','Security Guard','CCTV','Parking','Borehole','Kitchen','Study Area','Near Campus','Balcony','Laundry Area'];
+var _alChosen = [];
+
+function _alRenderAmenities(){
+  var box = document.getElementById('al-amenities');
+  if (!box) return;
+  var html = '';
+  for (var i = 0; i < _AL_AMENITIES.length; i++){
+    var a = _AL_AMENITIES[i];
+    html += '<label class="flex items-center gap-2 text-[12px] font-semibold text-slate-600 border border-slate-200 rounded-lg px-2 py-2 cursor-pointer">'
+          + '<input type="checkbox" class="al-amen accent-[#ea580c]" value="' + a + '"> ' + a + '</label>';
+  }
+  box.innerHTML = html;
+}
+
+function _alFillInstitutions(){
+  var sel = document.getElementById('al-institution');
+  if (!sel) return;
+  var html = '<option value="">Select institution</option>';
+  for (var i = 0; i < _AL_INSTITUTIONS.length; i++){
+    html += '<option value="' + _AL_INSTITUTIONS[i] + '">' + _AL_INSTITUTIONS[i] + '</option>';
+  }
+  sel.innerHTML = html;
+}
+
 async function openAddListing(){
   var m = document.getElementById('add-listing-modal');
   if (!m) return;
   m.classList.remove('hidden');
   document.getElementById('al-error').classList.add('hidden');
+  _alFillInstitutions();
+  _alRenderAmenities();
   var sel = document.getElementById('al-owner');
   if (!_alLandlords){
     try {
@@ -2336,14 +2468,16 @@ function closeAddListing(){
   if (m) m.classList.add('hidden');
 }
 
+function _alVal(id){ var el = document.getElementById(id); return el ? el.value : ''; }
+
 async function submitAddListing(){
   var err = document.getElementById('al-error');
   var btn = document.getElementById('al-submit');
-  var owner = document.getElementById('al-owner').value;
-  var title = document.getElementById('al-title').value.trim();
-  var price = document.getElementById('al-price').value;
-  var location = document.getElementById('al-location').value.trim();
-  var desc = document.getElementById('al-desc').value.trim();
+  var owner = _alVal('al-owner');
+  var title = _alVal('al-title').trim();
+  var price = _alVal('al-price');
+  var location = _alVal('al-location').trim();
+  var desc = _alVal('al-desc').trim();
   var files = document.getElementById('al-media').files;
 
   function fail(msg){ err.textContent = msg; err.classList.remove('hidden'); }
@@ -2354,13 +2488,30 @@ async function submitAddListing(){
   if (location.length < 2) { fail('Enter the location.'); return; }
   if (desc.length < 5) { fail('Add a short description.'); return; }
 
+  var picked = [];
+  var boxes = document.querySelectorAll('.al-amen');
+  for (var i = 0; i < boxes.length; i++){ if (boxes[i].checked) picked.push(boxes[i].value); }
+
   var fd = new FormData();
   fd.append('owner_id', owner);
   fd.append('title', title);
   fd.append('price', price);
   fd.append('location', location);
   fd.append('description', desc);
-  for (var i = 0; i < files.length; i++) fd.append('media', files[i]);
+  fd.append('availability_status', _alVal('al-availability'));
+  fd.append('nearest_institution', _alVal('al-institution'));
+  fd.append('distance_to_campus', _alVal('al-distance').trim());
+  fd.append('listing_type', _alVal('al-type'));
+  fd.append('bedrooms', _alVal('al-bedrooms'));
+  fd.append('bathrooms', _alVal('al-bathrooms'));
+  fd.append('furnished', _alVal('al-furnished'));
+  fd.append('water_supply', _alVal('al-water'));
+  fd.append('electricity', _alVal('al-electricity'));
+  fd.append('parking', _alVal('al-parking'));
+  fd.append('gender_preference', _alVal('al-gender'));
+  fd.append('curfew', _alVal('al-curfew'));
+  fd.append('amenities', JSON.stringify(picked));
+  for (var j = 0; j < files.length; j++) fd.append('media', files[j]);
 
   btn.disabled = true; btn.textContent = 'Submitting...';
   try {
@@ -2368,7 +2519,9 @@ async function submitAddListing(){
     var d = await r.json();
     if (!r.ok) throw new Error(d.detail || 'Could not create the listing.');
     closeAddListing();
-    ['al-title','al-price','al-location','al-desc'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['al-title','al-price','al-location','al-desc','al-distance'].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
     document.getElementById('al-media').value = '';
     if (typeof showToast === 'function') showToast('Listing submitted for review.');
     if (typeof loadListings === 'function') loadListings();
@@ -2378,7 +2531,6 @@ async function submitAddListing(){
     btn.disabled = false; btn.textContent = 'Submit for review';
   }
 }
-
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(initAddListingButton, 1200); });
 </script>
 </body>
