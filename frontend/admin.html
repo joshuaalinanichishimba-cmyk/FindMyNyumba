@@ -1812,22 +1812,36 @@ async function loadFraudExtras(){
    RBAC — role Ã— permission matrix (Settings)
 ==================================================================== */
 const RBAC_ROLES = [
-  ['super_admin','Super Admin'], ['verification_officer','Verification Officer'], ['support_agent','Support Agent'],
-  ['finance_officer','Finance Officer'], ['content_moderator','Content Moderator'], ['analytics_manager','Analytics Mgr'],
+  ['ceo','CEO'], ['trust_safety','Trust & Safety'], ['landlord_acquisition','Landlord Acq.'],
+  ['finance','Finance'], ['marketing','Marketing'], ['customer_support','Support'], ['admin_operations','Admin & Ops'],
 ];
 const RBAC_PERMS = [
-  ['dashboard.view','Dashboard'], ['listing.moderate','Listings: approve/reject'], ['verification.review','Verification & docs'],
-  ['user.moderate','Users: suspend/ban'], ['report.handle','Reports & complaints'], ['txn.view','Transactions: view'],
-  ['txn.refund','Transactions: refund'], ['escrow.manage','Escrow: release/refund'], ['revenue.view','Revenue dashboard'],
-  ['analytics.view','Search/Geo analytics'], ['broadcast.send','Broadcast'], ['audit.view','Audit log'], ['rbac.manage','RBAC / settings'],
+  ['dashboard.view','Dashboard'],
+  ['listings.create','Listings: create'], ['listings.submit','Listings: submit for review'],
+  ['listings.approve','Listings: approve'], ['listings.reject','Listings: reject'],
+  ['listings.suspend','Listings: suspend'], ['listings.delete','Listings: delete'],
+  ['verification.approve','Verification: approve'], ['verification.review','Verification: review docs'],
+  ['users.suspend','Users: suspend/ban'],
+  ['reports.investigate','Reports: investigate'], ['reports.resolve','Reports: resolve'],
+  ['reviews.moderate','Reviews: moderate'],
+  ['finance.view','Finance: view'], ['finance.manage','Finance: manage'],
+  ['payments.view','Payments: view'], ['payments.refund','Payments: refund'],
+  ['revenue.view','Revenue dashboard'], ['analytics.view','Analytics'],
+  ['marketing.manage','Marketing & campaigns'], ['content.manage','Content management'],
+  ['students.view','Students: view'], ['messages.view','Messages: view'],
+  ['tickets.manage','Support tickets'], ['broadcast.send','Broadcast'],
+  ['staff.view','Staff: view'], ['documents.manage','Documents & SOPs'],
+  ['tasks.manage','Tasks'], ['meetings.manage','Meetings'],
+  ['audit.view','Audit log'], ['roles.assign','Roles: assign'],
 ];
 const RBAC_DEFAULTS = {
-  super_admin: RBAC_PERMS.map(p=>p[0]),
-  verification_officer: ['dashboard.view','verification.review','audit.view'],
-  support_agent: ['dashboard.view','report.handle','user.moderate','broadcast.send','audit.view'],
-  finance_officer: ['dashboard.view','txn.view','txn.refund','escrow.manage','revenue.view','audit.view'],
-  content_moderator: ['dashboard.view','listing.moderate','user.moderate','report.handle','audit.view'],
-  analytics_manager: ['dashboard.view','revenue.view','analytics.view','audit.view'],
+  ceo: RBAC_PERMS.map(p=>p[0]),
+  trust_safety: ['dashboard.view','listings.approve','listings.reject','listings.suspend','verification.approve','verification.review','reports.investigate','reports.resolve','reviews.moderate','users.suspend','audit.view'],
+  landlord_acquisition: ['dashboard.view','listings.create','listings.submit'],
+  finance: ['dashboard.view','finance.view','finance.manage','payments.view','payments.refund','revenue.view','analytics.view','audit.view'],
+  marketing: ['dashboard.view','analytics.view','marketing.manage','content.manage','broadcast.send'],
+  customer_support: ['dashboard.view','students.view','messages.view','tickets.manage','reports.investigate','reports.resolve','broadcast.send'],
+  admin_operations: ['dashboard.view','staff.view','documents.manage','tasks.manage','meetings.manage','audit.view'],
 };
 let _rbac = null;
 async function loadRoles(){
