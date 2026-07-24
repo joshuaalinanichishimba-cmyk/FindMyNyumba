@@ -815,19 +815,25 @@ def admin_audit(admin: User = Depends(require_admin), db: Session = Depends(get_
 #  RBAC  (role Ãƒâ€” permission matrix)
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 RBAC_DEFAULTS = {
-    "super_admin": ["dashboard.view", "listing.moderate", "verification.review",
-                    "user.moderate", "report.handle", "txn.view", "txn.refund",
-                    "escrow.manage", "revenue.view", "analytics.view",
-                    "broadcast.send", "audit.view", "rbac.manage"],
-    "verification_officer": ["dashboard.view", "verification.review", "audit.view"],
-    "support_agent": ["dashboard.view", "report.handle", "user.moderate",
-                      "broadcast.send", "audit.view"],
-    "finance_officer": ["dashboard.view", "txn.view", "txn.refund",
-                        "escrow.manage", "revenue.view", "audit.view"],
-    "content_moderator": ["dashboard.view", "listing.moderate", "user.moderate",
-                          "report.handle", "audit.view"],
-    "analytics_manager": ["dashboard.view", "revenue.view", "analytics.view",
-                          "audit.view"],
+    "ceo": ["*"],
+    "trust_safety": ["dashboard.view", "listings.approve", "listings.reject",
+                     "listings.suspend", "verification.approve", "verification.review",
+                     "reports.investigate", "reports.resolve", "reports.dismiss",
+                     "reviews.moderate", "users.suspend", "audit.view"],
+    "landlord_acquisition": ["dashboard.view", "listings.create", "listings.edit_own",
+                             "listings.submit", "listings.media", "landlords.view",
+                             "landlords.create", "visits.schedule"],
+    "finance": ["dashboard.view", "finance.view", "finance.manage", "payments.view",
+                "payments.refund", "revenue.view", "reports.financial",
+                "analytics.view", "audit.view"],
+    "marketing": ["dashboard.view", "analytics.view", "marketing.manage",
+                  "content.manage", "broadcast.send"],
+    "customer_support": ["dashboard.view", "students.view", "messages.view",
+                         "tickets.manage", "support.manage", "reports.investigate",
+                         "reports.resolve", "broadcast.send"],
+    "admin_operations": ["dashboard.view", "staff.view", "documents.manage",
+                         "tasks.manage", "meetings.manage", "announcements.create",
+                         "audit.view"],
 }
 
 

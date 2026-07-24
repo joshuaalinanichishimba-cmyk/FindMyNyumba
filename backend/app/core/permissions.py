@@ -91,8 +91,36 @@ ROLE_PERMISSIONS = {
 RBAC_ROLES = set(ROLE_PERMISSIONS.keys())
 
 
+def _granted_for(role):
+    """
+    Permissions for a role. Reads the RolePermission table first so the admin
+    matrix UI is the single source of truth; falls back to ROLE_PERMISSIONS
+    when the table is empty (fresh install).
+    """
+    role = (role or "").lower()
+    try:
+        from app.core.database import SessionLocal
+        from app.models.admin_models import RolePermission
+        db = SessionLocal()
+        try:
+            rows = db.query(RolePermission).filter(RolePermission.role == role).all()
+            if rows:
+                return {r.permission for r in rows}
+        finally:
+            db.close()
+    except Exception:
+        pass
+    try:
+        from app.api.v1.endpoints.admin_extra import RBAC_DEFAULTS
+        if role in RBAC_DEFAULTS:
+            return set(RBAC_DEFAULTS[role])
+    except Exception:
+        pass
+    return ROLE_PERMISSIONS.get(role, set())
+
+
 def has_permission(role, permission):
-    granted = ROLE_PERMISSIONS.get((role or "").lower(), set())
+    granted = _granted_for(role)
     if "*" in granted or permission in granted:
         return True
     for g in granted:
