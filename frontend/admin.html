@@ -1529,84 +1529,6 @@ function buildModuleSections(){
        </div>
      </div>`;
 
-  /* ---------------- ADD LISTING (staff with listings.create) ---------------- */
-let _alLandlords = null;
-
-function _alCan(){
-  const role = (window.ADMIN_ROLE || localStorage.getItem('role') || '').toLowerCase();
-  return ['ceo','admin','landlord_acquisition'].includes(role);
-}
-
-function initAddListingButton(){
-  const b = document.getElementById('btn-add-listing');
-  if (b && _alCan()) b.classList.remove('hidden');
-}
-
-async function openAddListing(){
-  const m = document.getElementById('add-listing-modal');
-  if (!m) return;
-  m.classList.remove('hidden');
-  document.getElementById('al-error').classList.add('hidden');
-  const sel = document.getElementById('al-owner');
-  if (!_alLandlords){
-    try {
-      const r = await fetch(`${API}/admin/landlords`);
-      const d = await r.json();
-      _alLandlords = d.landlords || [];
-    } catch(e){ _alLandlords = []; }
-  }
-  sel.innerHTML = '<option value="">Select a landlord</option>' +
-    _alLandlords.map(l => `<option value="${l.id}">${l.full_name || 'Unnamed'}${l.phone_number ? ' - ' + l.phone_number : ''}</option>`).join('');
-}
-
-function closeAddListing(){
-  const m = document.getElementById('add-listing-modal');
-  if (m) m.classList.add('hidden');
-}
-
-async function submitAddListing(){
-  const err = document.getElementById('al-error');
-  const btn = document.getElementById('al-submit');
-  const owner = document.getElementById('al-owner').value;
-  const title = document.getElementById('al-title').value.trim();
-  const price = document.getElementById('al-price').value;
-  const location = document.getElementById('al-location').value.trim();
-  const desc = document.getElementById('al-desc').value.trim();
-  const files = document.getElementById('al-media').files;
-
-  function fail(msg){ err.textContent = msg; err.classList.remove('hidden'); }
-  err.classList.add('hidden');
-  if (!owner) return fail('Choose the landlord this property belongs to.');
-  if (title.length < 2) return fail('Enter a title.');
-  if (!price || Number(price) < 0) return fail('Enter a valid price.');
-  if (location.length < 2) return fail('Enter the location.');
-  if (desc.length < 5) return fail('Add a short description.');
-
-  const fd = new FormData();
-  fd.append('owner_id', owner);
-  fd.append('title', title);
-  fd.append('price', price);
-  fd.append('location', location);
-  fd.append('description', desc);
-  for (let i = 0; i < files.length; i++) fd.append('media', files[i]);
-
-  btn.disabled = true; btn.textContent = 'Submitting...';
-  try {
-    const r = await fetch(`${API}/landlord/properties`, { method: 'POST', body: fd });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Could not create the listing.');
-    closeAddListing();
-    ['al-title','al-price','al-location','al-desc'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('al-media').value = '';
-    if (typeof showToast === 'function') showToast('Listing submitted for review.');
-    if (typeof loadListings === 'function') loadListings();
-  } catch(e){
-    fail(e.message);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Submit for review';
-  }
-}
-
 /* ---------------- RBAC (injected into Settings) ---------------- */
   const settingsWrap = document.querySelector('#tab-settings .max-w-2xl');
   if (settingsWrap && !document.getElementById('rbac-card')){
@@ -2372,6 +2294,93 @@ async function loadAreaInsights(){
 function _aiEsc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 </script>
 
+<script>
+/* ---------------- ADD LISTING (staff with listings.create) ---------------- */
+var _alLandlords = null;
+
+function _alCan(){
+  var role = (window.ADMIN_ROLE || sessionStorage.getItem('adminRole') || '').toLowerCase();
+  return ['ceo','admin','landlord_acquisition'].indexOf(role) !== -1;
+}
+
+function initAddListingButton(){
+  var b = document.getElementById('btn-add-listing');
+  if (b && _alCan()) b.classList.remove('hidden');
+}
+
+async function openAddListing(){
+  var m = document.getElementById('add-listing-modal');
+  if (!m) return;
+  m.classList.remove('hidden');
+  document.getElementById('al-error').classList.add('hidden');
+  var sel = document.getElementById('al-owner');
+  if (!_alLandlords){
+    try {
+      var r = await fetch(API + '/admin/landlords');
+      var d = await r.json();
+      _alLandlords = d.landlords || [];
+    } catch(e){ _alLandlords = []; }
+  }
+  var html = '<option value="">Select a landlord</option>';
+  for (var i = 0; i < _alLandlords.length; i++){
+    var l = _alLandlords[i];
+    var label = (l.full_name || 'Unnamed');
+    if (l.phone_number) label = label + ' - ' + l.phone_number;
+    html = html + '<option value="' + l.id + '">' + label + '</option>';
+  }
+  sel.innerHTML = html;
+}
+
+function closeAddListing(){
+  var m = document.getElementById('add-listing-modal');
+  if (m) m.classList.add('hidden');
+}
+
+async function submitAddListing(){
+  var err = document.getElementById('al-error');
+  var btn = document.getElementById('al-submit');
+  var owner = document.getElementById('al-owner').value;
+  var title = document.getElementById('al-title').value.trim();
+  var price = document.getElementById('al-price').value;
+  var location = document.getElementById('al-location').value.trim();
+  var desc = document.getElementById('al-desc').value.trim();
+  var files = document.getElementById('al-media').files;
+
+  function fail(msg){ err.textContent = msg; err.classList.remove('hidden'); }
+  err.classList.add('hidden');
+  if (!owner) { fail('Choose the landlord this property belongs to.'); return; }
+  if (title.length < 2) { fail('Enter a title.'); return; }
+  if (!price || Number(price) < 0) { fail('Enter a valid price.'); return; }
+  if (location.length < 2) { fail('Enter the location.'); return; }
+  if (desc.length < 5) { fail('Add a short description.'); return; }
+
+  var fd = new FormData();
+  fd.append('owner_id', owner);
+  fd.append('title', title);
+  fd.append('price', price);
+  fd.append('location', location);
+  fd.append('description', desc);
+  for (var i = 0; i < files.length; i++) fd.append('media', files[i]);
+
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  try {
+    var r = await fetch(API + '/landlord/properties', { method: 'POST', body: fd });
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Could not create the listing.');
+    closeAddListing();
+    ['al-title','al-price','al-location','al-desc'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('al-media').value = '';
+    if (typeof showToast === 'function') showToast('Listing submitted for review.');
+    if (typeof loadListings === 'function') loadListings();
+  } catch(e){
+    fail(e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit for review';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(initAddListingButton, 1200); });
+</script>
 </body>
 </html>
 <script>
