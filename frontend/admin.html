@@ -349,6 +349,7 @@
               <h3 class="font-extrabold text-slate-900 text-[15px]">Listings <span id="listing-count-badge" class="ml-1 text-[12px] font-semibold text-slate-400"></span></h3>
               <p class="text-[12px] text-slate-400 font-medium">Manage every property on the platform</p>
             </div>
+            <button id="btn-add-listing" onclick="openAddListing()" class="btn btn-pri hidden"><i class="fas fa-plus"></i>Add Listing</button>
             <select id="listing-status-filter" class="fmn-input w-auto" onchange="renderListings()">
               <option value="">All statuses</option>
               <option value="active">Active</option>
@@ -580,6 +581,31 @@
         </div>
       </div>
 
+      <div id="add-listing-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+        <div class="card w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+          <h3 class="font-extrabold text-slate-900 text-lg mb-1">Add Listing</h3>
+          <p class="text-[12px] text-slate-400 font-medium mb-4">Filed under a landlord and sent for Trust and Safety review.</p>
+          <label class="block text-[12px] font-bold text-slate-600 mb-1">Landlord</label>
+          <select id="al-owner" class="fmn-input w-full mb-3"><option value="">Loading...</option></select>
+          <label class="block text-[12px] font-bold text-slate-600 mb-1">Title</label>
+          <input id="al-title" class="fmn-input w-full mb-3" placeholder="2 bedroom self contained">
+          <label class="block text-[12px] font-bold text-slate-600 mb-1">Price (ZMW per month)</label>
+          <input id="al-price" type="number" min="0" class="fmn-input w-full mb-3" placeholder="1500">
+          <label class="block text-[12px] font-bold text-slate-600 mb-1">Location</label>
+          <input id="al-location" class="fmn-input w-full mb-3" placeholder="Riverside, Kitwe">
+          <label class="block text-[12px] font-bold text-slate-600 mb-1">Description</label>
+          <textarea id="al-desc" rows="4" class="fmn-input w-full mb-3" placeholder="Rooms, water, electricity, security, distance to campus"></textarea>
+          <label class="block text-[12px] font-bold text-slate-600 mb-1">Photos and videos</label>
+          <input id="al-media" type="file" multiple accept="image/*,video/*" class="fmn-input w-full mb-1">
+          <p class="text-[11px] text-slate-400 mb-4">First photo becomes the cover image.</p>
+          <p id="al-error" class="text-[12px] font-semibold text-red-500 mb-3 hidden"></p>
+          <div class="flex justify-end gap-2">
+            <button class="btn btn-ghost" onclick="closeAddListing()">Cancel</button>
+            <button id="al-submit" class="btn btn-pri" onclick="submitAddListing()">Submit for review</button>
+          </div>
+        </div>
+      </div>
+
       <div id="change-pwd-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
         <div class="card w-full max-w-md p-6">
           <h3 class="font-extrabold text-slate-900 text-lg mb-4">Change Password</h3>
@@ -678,12 +704,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (res.status === 401 || res.status === 403) { logout(); return; }
     if (!res.ok) throw new Error();
     const me = await res.json();
-    if (me.role !== 'admin') {
+    const STAFF_ROLES = ['admin','ceo','trust_safety','landlord_acquisition','finance','marketing','customer_support','admin_operations','moderator'];
+    if (!STAFF_ROLES.includes((me.role || '').toLowerCase())) {
       ['adminToken','adminRole','adminName'].forEach(k => sessionStorage.removeItem(k));
       const fallback = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html' }[me.role] || 'login.html';
       window.location.replace(fallback); return;
     }
     if (!sessionStorage.getItem('adminName')) sessionStorage.setItem('adminName', me.full_name || 'Admin');
+    sessionStorage.setItem('adminRole', me.role || '');
+    window.ADMIN_ROLE = me.role || '';
+    if (typeof initAddListingButton === 'function') initAddListingButton();
   } catch { logout(); return; }
 
   const name = sessionStorage.getItem('adminName') || 'Admin';
@@ -1499,7 +1529,85 @@ function buildModuleSections(){
        </div>
      </div>`;
 
-  /* ---------------- RBAC (injected into Settings) ---------------- */
+  /* ---------------- ADD LISTING (staff with listings.create) ---------------- */
+let _alLandlords = null;
+
+function _alCan(){
+  const role = (window.ADMIN_ROLE || localStorage.getItem('role') || '').toLowerCase();
+  return ['ceo','admin','landlord_acquisition'].includes(role);
+}
+
+function initAddListingButton(){
+  const b = document.getElementById('btn-add-listing');
+  if (b && _alCan()) b.classList.remove('hidden');
+}
+
+async function openAddListing(){
+  const m = document.getElementById('add-listing-modal');
+  if (!m) return;
+  m.classList.remove('hidden');
+  document.getElementById('al-error').classList.add('hidden');
+  const sel = document.getElementById('al-owner');
+  if (!_alLandlords){
+    try {
+      const r = await fetch(`${API}/admin/landlords`);
+      const d = await r.json();
+      _alLandlords = d.landlords || [];
+    } catch(e){ _alLandlords = []; }
+  }
+  sel.innerHTML = '<option value="">Select a landlord</option>' +
+    _alLandlords.map(l => `<option value="${l.id}">${l.full_name || 'Unnamed'}${l.phone_number ? ' - ' + l.phone_number : ''}</option>`).join('');
+}
+
+function closeAddListing(){
+  const m = document.getElementById('add-listing-modal');
+  if (m) m.classList.add('hidden');
+}
+
+async function submitAddListing(){
+  const err = document.getElementById('al-error');
+  const btn = document.getElementById('al-submit');
+  const owner = document.getElementById('al-owner').value;
+  const title = document.getElementById('al-title').value.trim();
+  const price = document.getElementById('al-price').value;
+  const location = document.getElementById('al-location').value.trim();
+  const desc = document.getElementById('al-desc').value.trim();
+  const files = document.getElementById('al-media').files;
+
+  function fail(msg){ err.textContent = msg; err.classList.remove('hidden'); }
+  err.classList.add('hidden');
+  if (!owner) return fail('Choose the landlord this property belongs to.');
+  if (title.length < 2) return fail('Enter a title.');
+  if (!price || Number(price) < 0) return fail('Enter a valid price.');
+  if (location.length < 2) return fail('Enter the location.');
+  if (desc.length < 5) return fail('Add a short description.');
+
+  const fd = new FormData();
+  fd.append('owner_id', owner);
+  fd.append('title', title);
+  fd.append('price', price);
+  fd.append('location', location);
+  fd.append('description', desc);
+  for (let i = 0; i < files.length; i++) fd.append('media', files[i]);
+
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  try {
+    const r = await fetch(`${API}/landlord/properties`, { method: 'POST', body: fd });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Could not create the listing.');
+    closeAddListing();
+    ['al-title','al-price','al-location','al-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('al-media').value = '';
+    if (typeof showToast === 'function') showToast('Listing submitted for review.');
+    if (typeof loadListings === 'function') loadListings();
+  } catch(e){
+    fail(e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit for review';
+  }
+}
+
+/* ---------------- RBAC (injected into Settings) ---------------- */
   const settingsWrap = document.querySelector('#tab-settings .max-w-2xl');
   if (settingsWrap && !document.getElementById('rbac-card')){
     const rbac = document.createElement('div');
