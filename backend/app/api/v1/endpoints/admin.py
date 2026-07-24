@@ -44,6 +44,12 @@ from app.core.sessions import revoke_all_for_user
 from app.core.security import get_password_hash, verify_password
 from app.models.listing import Listing
 from app.models.message import Message
+from app.models.admin_models import AuditLog
+from app.core.permissions import require
+import json as _json_rbac
+from app.models.admin_models import AuditLog
+from app.core.permissions import require
+import json as _json_rbac
 from app.models.report import Report
 from app.models.review import Review
 from app.models.student_review import StudentReview
@@ -627,3 +633,72 @@ def admin_reject_student_review(review_id: int, admin: User = Depends(require_ad
     r.status = "rejected"
     db.commit()
     return {"id": r.id, "status": r.status}
+
+
+# -- Team role assignment (CEO / legacy admin only) --------------------------
+class RoleAssignPayload(BaseModel):
+    role: str
+
+ROLE_LABELS = {
+    "ceo":                  "CEO",
+    "landlord_acquisition": "Landlord Acquisition Lead",
+    "trust_safety":         "Trust and Safety Lead",
+    "finance":              "Finance Lead",
+    "marketing":            "Marketing and Growth Lead",
+    "customer_support":     "Customer Support Lead",
+    "admin_operations":     "Administration and Operations Lead",
+    "admin":                "Administrator (legacy)",
+    "moderator":            "Moderator (legacy)",
+}
+
+@router.get("/roles")
+def list_roles(admin: User = Depends(require_admin)):
+    """Team roles available for assignment, with their permissions."""
+    from app.core.permissions import ROLE_PERMISSIONS
+    return {"roles": [
+        {"value": r, "label": ROLE_LABELS.get(r, r), "permissions": sorted(ROLE_PERMISSIONS.get(r, []))}
+        for r in ROLE_PERMISSIONS
+    ]}
+
+
+@router.post("/users/{user_id}/role")
+def assign_role(
+    user_id: int,
+    payload: RoleAssignPayload,
+    request: Request,
+    actor: User = Depends(require("roles.assign")),
+    db: Session = Depends(get_db),
+):
+    """Assign a team role to a user. Only CEO or legacy admin may do this."""
+    from app.core.permissions import ROLE_PERMISSIONS
+    new_role = (payload.role or "").strip().lower()
+    if new_role not in ROLE_PERMISSIONS:
+        raise HTTPException(status_code=400, detail="Unknown role.")
+
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if target.id == actor.id:
+        raise HTTPException(status_code=400, detail="You cannot change your own role.")
+
+    old_role = target.role
+    target.role = new_role
+    db.commit()
+
+    try:
+        db.add(AuditLog(
+            actor_id=actor.id,
+            actor_role=actor.role,
+            action="user.role_change",
+            entity_type="user",
+            entity_id=str(target.id),
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            meta=_json_rbac.dumps({"old_role": old_role, "new_role": new_role, "email": target.email}),
+        ))
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    return {"status": "success", "message": f"{target.email} is now {ROLE_LABELS.get(new_role, new_role)}.",
+            "user_id": target.id, "old_role": old_role, "new_role": new_role}
