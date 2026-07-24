@@ -61,3 +61,7 @@ static/uploads/verification/*
 dist/
 build/
 *.egg-info/
+
+show_perms.py
+
+test_rbac.py

@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     MOMO_API_USER: str          = ""
     MOMO_API_KEY: str           = ""
     MOMO_CALLBACK_HOST: str     = "findmynyumba.onrender.com"
+    # MoneyUnify aggregator (MTN + Airtel + Zamtel via one API)
+    MONEYUNIFY_AUTH_ID: str     = ""
+    MONEYUNIFY_BASE_URL: str    = "https://api.moneyunify.one"
+    PAYMENT_PROVIDER: str       = "moneyunify"  # or "momo"
     VERIFIED_ACCESS_FEE_ZMW: float = 150.0
     VERIFIED_ACCESS_FEE_EUR: float = 1.0
     # Access tiers (server-authoritative prices; client only sends the tier key)
