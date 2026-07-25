@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/api/v1/endpoints/listings.py
 
 Public listing endpoints used by browse.html, listing.html, and the
@@ -21,6 +21,7 @@ FIXES vs original:
   (pending) report per listing, preventing trivial spam.
 """
 
+import json
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -119,7 +120,32 @@ def _listing_card(l: Listing, request: Request) -> dict:
         "total_spots": l.total_spots,
         "availability_status": l.availability_status,
         "view_count": getattr(l, "_view_count", 0),
+        "bedrooms":           l.bedrooms,
+        "bathrooms":          l.bathrooms,
+        "furnished":          l.furnished,
+        "water_supply":       l.water_supply,
+        "electricity":        l.electricity,
+        "parking":            l.parking,
+        "curfew":             l.curfew,
+        "gender_preference":  l.gender_preference,
+        "distance_to_campus": l.distance_to_campus,
+        "amenities":          _parse_amenities(l.amenities),
     }
+
+
+def _parse_amenities(raw):
+    """amenities is stored as a JSON list of strings in a Text column.
+    Return a real list for the frontend; tolerate nulls and legacy formats."""
+    if not raw:
+        return []
+    try:
+        val = json.loads(raw)
+        if isinstance(val, list):
+            return [str(x) for x in val]
+    except Exception:
+        pass
+    # legacy fallback: comma-separated string
+    return [s.strip() for s in str(raw).split(",") if s.strip()]
 
 
 # â”€â”€ GET /properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
