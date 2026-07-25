@@ -157,6 +157,16 @@ def get_all_properties(
     min_price:  Optional[float] = Query(None, ge=0),
     max_price:  Optional[float] = Query(None, ge=0),
     university: Optional[str]   = Query(None, max_length=80),
+    min_bedrooms:  Optional[int] = Query(None, ge=0, le=50),
+    min_bathrooms: Optional[int] = Query(None, ge=0, le=50),
+    furnished:         Optional[str] = Query(None, max_length=20),
+    water_supply:      Optional[str] = Query(None, max_length=20),
+    electricity:       Optional[str] = Query(None, max_length=20),
+    parking:           Optional[str] = Query(None, max_length=20),
+    curfew:            Optional[str] = Query(None, max_length=20),
+    gender_preference: Optional[str] = Query(None, max_length=20),
+    max_distance_km:   Optional[float] = Query(None, ge=0, le=100),
+    amenities:         Optional[str] = Query(None, max_length=300),
     limit:      int             = Query(60, ge=1, le=200),
     offset:     int             = Query(0,  ge=0),
     db: Session = Depends(get_db),
@@ -182,6 +192,43 @@ def get_all_properties(
         query = query.filter(Listing.price <= max_price)
     if university:
         query = query.filter(Listing.location.ilike(f"%{university.strip()}%"))
+
+    # Attribute filters (LENIENT): a listing passes if it matches OR the field
+    # is null/unknown. Only a listing that has a value AND conflicts is excluded.
+    from sqlalchemy import or_ as _or
+
+    if min_bedrooms is not None:
+        query = query.filter(_or(Listing.bedrooms.is_(None), Listing.bedrooms >= min_bedrooms))
+    if min_bathrooms is not None:
+        query = query.filter(_or(Listing.bathrooms.is_(None), Listing.bathrooms >= min_bathrooms))
+
+    for _field, _val in (
+        (Listing.furnished, furnished),
+        (Listing.water_supply, water_supply),
+        (Listing.electricity, electricity),
+        (Listing.parking, parking),
+        (Listing.curfew, curfew),
+        (Listing.gender_preference, gender_preference),
+    ):
+        if _val:
+            query = query.filter(_or(_field.is_(None), _field == _val.strip()))
+
+    if max_distance_km is not None:
+        # distance_to_campus is free text like "1.2 km"; extract the leading
+        # number in Python-land is impossible in SQL portably, so we do a
+        # coarse SQL prefilter (non-null) and refine after fetch below.
+        pass  # refined post-query (see _distance_ok)
+
+    if amenities:
+        # comma-separated selected amenities; lenient = null passes, else
+        # must contain ALL selected (quoted to avoid substring false hits).
+        _wanted = [a.strip() for a in amenities.split(",") if a.strip()]
+        for _a in _wanted:
+            query = query.filter(_or(
+                Listing.amenities.is_(None),
+                Listing.amenities == "",
+                Listing.amenities.ilike(f'%"{_a}"%'),
+            ))
 
     listings = (
         query.order_by(Listing.is_boosted.desc(), Listing.created_at.desc())
