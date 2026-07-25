@@ -37,7 +37,7 @@ from sqlalchemy.orm import Session
 from app.core.audit import record_audit
 from app.core.database import get_db
 from app.core.notify import push_notification
-from app.core.permissions import require_staff, require_admin
+from app.core.permissions import require_staff, require_admin, require
 from app.core.risk_engine import persist_user_risk
 from app.models.listing import Listing
 from app.models.user import User
@@ -106,7 +106,7 @@ def dashboard(staff: User = Depends(require_staff), db: Session = Depends(get_db
 # ── Verification queue ────────────────────────────────────────────────────────
 @router.get("/verifications", response_model=list[VerificationOut])
 def list_verifications(status_filter: str = "review",
-                       staff: User = Depends(require_staff),
+                       staff: User = Depends(require("verification.review")),
                        db: Session = Depends(get_db)):
     q = db.query(Verification)
     if status_filter and status_filter != "all":
@@ -115,7 +115,7 @@ def list_verifications(status_filter: str = "review",
 
 
 @router.get("/verifications/{vid}")
-def verification_detail(vid: int, staff: User = Depends(require_staff),
+def verification_detail(vid: int, staff: User = Depends(require("verification.review")),
                         db: Session = Depends(get_db)):
     v = db.query(Verification).filter(Verification.id == vid).first()
     if v is None:
@@ -137,7 +137,7 @@ def verification_detail(vid: int, staff: User = Depends(require_staff),
 
 @router.post("/verifications/{vid}/decision", response_model=VerificationOut)
 def decide_verification(vid: int, body: VerificationDecision, request: Request,
-                        staff: User = Depends(require_staff),
+                        staff: User = Depends(require("verification.approve")),
                         db: Session = Depends(get_db)):
     v = db.query(Verification).filter(Verification.id == vid).first()
     if v is None:
@@ -182,7 +182,7 @@ def decide_verification(vid: int, body: VerificationDecision, request: Request,
 # ── Property verification queue ───────────────────────────────────────────────
 @router.get("/property-verifications", response_model=list[PropertyVerificationOut])
 def list_property_verifications(status_filter: str = "pending",
-                                staff: User = Depends(require_staff),
+                                staff: User = Depends(require("verification.review")),
                                 db: Session = Depends(get_db)):
     q = db.query(PropertyVerification)
     if status_filter and status_filter != "all":
@@ -193,7 +193,7 @@ def list_property_verifications(status_filter: str = "pending",
 @router.post("/property-verifications/{pid}/decision",
              response_model=PropertyVerificationOut)
 def decide_property(pid: int, body: PropertyVerificationDecision, request: Request,
-                    staff: User = Depends(require_staff),
+                    staff: User = Depends(require("verification.approve")),
                     db: Session = Depends(get_db)):
     pv = db.query(PropertyVerification).filter(PropertyVerification.id == pid).first()
     if pv is None:
@@ -229,7 +229,7 @@ def decide_property(pid: int, body: PropertyVerificationDecision, request: Reque
 # ── Fraud report workflow ─────────────────────────────────────────────────────
 @router.get("/reports", response_model=list[FraudReportOut])
 def list_reports(status_filter: str = "submitted",
-                 staff: User = Depends(require_staff),
+                 staff: User = Depends(require("reports.investigate")),
                  db: Session = Depends(get_db)):
     q = db.query(FraudReport)
     if status_filter and status_filter != "all":
@@ -239,7 +239,7 @@ def list_reports(status_filter: str = "submitted",
 
 @router.post("/reports/{rid}/assign", response_model=FraudReportOut)
 def assign_report(rid: int, body: FraudReportAssign, request: Request,
-                  staff: User = Depends(require_staff),
+                  staff: User = Depends(require("reports.investigate")),
                   db: Session = Depends(get_db)):
     r = db.query(FraudReport).filter(FraudReport.id == rid).first()
     if r is None:
@@ -258,7 +258,7 @@ def assign_report(rid: int, body: FraudReportAssign, request: Request,
 
 @router.post("/reports/{rid}/status", response_model=FraudReportOut)
 def update_report_status(rid: int, body: StatusUpdate, request: Request,
-                         staff: User = Depends(require_staff),
+                         staff: User = Depends(require("reports.investigate")),
                          db: Session = Depends(get_db)):
     r = db.query(FraudReport).filter(FraudReport.id == rid).first()
     if r is None:
@@ -274,7 +274,7 @@ def update_report_status(rid: int, body: StatusUpdate, request: Request,
 
 @router.post("/reports/{rid}/resolve", response_model=FraudReportOut)
 def resolve_report(rid: int, body: FraudReportResolve, request: Request,
-                   staff: User = Depends(require_staff),
+                   staff: User = Depends(require("reports.resolve")),
                    db: Session = Depends(get_db)):
     r = db.query(FraudReport).filter(FraudReport.id == rid).first()
     if r is None:
@@ -298,7 +298,7 @@ def resolve_report(rid: int, body: FraudReportResolve, request: Request,
 
 # ── Risk scores ───────────────────────────────────────────────────────────────
 @router.get("/risk/high", response_model=list[RiskScoreOut])
-def high_risk_accounts(staff: User = Depends(require_staff),
+def high_risk_accounts(staff: User = Depends(require("verification.review")),
                        db: Session = Depends(get_db)):
     return (
         db.query(RiskScore)
@@ -377,7 +377,7 @@ def delete_banner(bid: int, request: Request,
 
 # ── Duplicate image report ────────────────────────────────────────────────────
 @router.get("/duplicates")
-def duplicate_groups(staff: User = Depends(require_staff),
+def duplicate_groups(staff: User = Depends(require("verification.review")),
                      db: Session = Depends(get_db)):
     """
     Group verification documents by identical perceptual hash and return any
