@@ -617,7 +617,7 @@ def admin_delete_institution(inst_id: int, request: Request,
 #  SUPPORT / CONVERSATIONS  (stubbed until Message schema is wired)
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 @router.get("/admin/conversations")
-def admin_conversations(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_conversations(admin: User = Depends(require("messages.view")), db: Session = Depends(get_db)):
     """Group the messages table into conversations (one per user-pair)."""
     msgs = db.query(Message).order_by(Message.created_at.desc()).all()
     name_cache, role_cache = {}, {}
@@ -665,7 +665,7 @@ def _msg_dict(m, admin_id):
 
 
 @router.get("/admin/conversations/{conv_id}/messages")
-def admin_conversation_thread(conv_id: str, admin: User = Depends(require_admin),
+def admin_conversation_thread(conv_id: str, admin: User = Depends(require("messages.view")),
                               db: Session = Depends(get_db)):
     """Read a thread for a 'a-b' user pair (from the Support inbox)."""
     try:
@@ -684,7 +684,7 @@ def admin_conversation_thread(conv_id: str, admin: User = Depends(require_admin)
 
 
 @router.get("/admin/messages/{user_id}")
-def admin_thread_with_user(user_id: int, admin: User = Depends(require_admin),
+def admin_thread_with_user(user_id: int, admin: User = Depends(require("messages.view")),
                            db: Session = Depends(get_db)):
     """The admin's own thread with one user (for the 'Message user' panel)."""
     u = db.query(User).filter(User.id == user_id).first()
@@ -710,7 +710,7 @@ class SendMessageBody(BaseModel):
 
 @router.post("/admin/messages", status_code=201)
 def admin_send_message(body: SendMessageBody, request: Request,
-                       admin: User = Depends(require_admin),
+                       admin: User = Depends(require("messages.view")),
                        db: Session = Depends(get_db)):
     content = (body.content or "").strip()
     if not content:
@@ -747,7 +747,7 @@ def admin_risk_landlords(admin: User = Depends(require_admin), db: Session = Dep
 #  ANALYTICS:  search demand + geo  (empty until search-event tracking exists)
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 @router.get("/admin/analytics/search")
-def admin_analytics_search(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_analytics_search(admin: User = Depends(require("analytics.view")), db: Session = Depends(get_db)):
     """Real search demand from SearchLog. Aggregates universities + query terms as 'areas'."""
     try:
         from app.models.search_log import SearchLog
@@ -770,7 +770,7 @@ def admin_analytics_search(admin: User = Depends(require_admin), db: Session = D
 
 
 @router.get("/admin/analytics/geo")
-def admin_analytics_geo(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_analytics_geo(admin: User = Depends(require("analytics.view")), db: Session = Depends(get_db)):
     return {"points": []}
 
 
@@ -796,7 +796,7 @@ def admin_fraud_signals(admin: User = Depends(require_admin), db: Session = Depe
 #  AUDIT LOG
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 @router.get("/admin/audit")
-def admin_audit(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_audit(admin: User = Depends(require("audit.view")), db: Session = Depends(get_db)):
     rows = db.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(200).all()
     cache = {}
 
@@ -957,7 +957,7 @@ class ReviewModerate(_ReviewBaseModel):
     status: str
 
 @router.get("/admin/reviews")
-def admin_list_reviews(status: Optional[str] = None, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_list_reviews(status: Optional[str] = None, admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     q = db.query(Review)
     if status:
         q = q.filter(Review.status == status)
@@ -970,7 +970,7 @@ def admin_list_reviews(status: Optional[str] = None, admin: User = Depends(requi
     return [{"id": r.id, "listing_id": r.listing_id, "listing_title": titles.get(r.listing_id, f"Listing #{r.listing_id}"), "user_name": r.user_name, "rating": r.rating, "comment": r.comment, "status": r.status, "created_at": r.created_at.isoformat() if r.created_at else None} for r in rows]
 
 @router.patch("/admin/reviews/{review_id}")
-def admin_moderate_review(review_id: int, body: ReviewModerate, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_moderate_review(review_id: int, body: ReviewModerate, admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     new_status = (body.status or "").lower().strip()
     if new_status not in {"approved", "rejected", "pending"}:
         raise HTTPException(status_code=400, detail="status must be approved, rejected, or pending.")

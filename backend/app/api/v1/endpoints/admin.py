@@ -226,7 +226,7 @@ def delete_listing(listing_id: int, admin: User = Depends(require("listings.dele
 @router.get("/verifications")
 def get_verifications(
     request: Request,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require("verification.review")),
     db: Session = Depends(get_db),
 ):
     """
@@ -276,7 +276,7 @@ class RejectPayload(BaseModel):
 def reject_verification(
     user_id: int,
     payload: RejectPayload,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require("verification.approve")),
     db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.id == user_id).first()
@@ -293,7 +293,7 @@ def reject_verification(
 @router.get("/reports")
 def get_reports(
     status_filter: Optional[str] = None,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require("reports.investigate")),
     db: Session = Depends(get_db),
 ):
     q = db.query(Report).order_by(Report.created_at.desc())
@@ -512,7 +512,7 @@ async def migrate_broken_images(db: Session = Depends(get_db)):
 # REVIEWS MODERATION
 # ==================================================
 @router.get("/reviews")
-def admin_list_reviews(status: str = "pending", admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_list_reviews(status: str = "pending", admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     q = db.query(Review)
     if status:
         q = q.filter(Review.status == status)
@@ -558,7 +558,7 @@ def admin_reject_review(review_id: int, admin: User = Depends(require("reviews.m
 # SUPPORT / CONVERSATIONS
 # ==================================================
 @router.get("/conversations")
-def admin_list_conversations(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_list_conversations(admin: User = Depends(require("messages.view")), db: Session = Depends(get_db)):
     msgs = db.query(Message).order_by(Message.created_at.desc()).all()
     threads = {}
     name_cache = {}
@@ -596,7 +596,7 @@ def admin_list_conversations(admin: User = Depends(require_admin), db: Session =
 # Mirrors the property-review moderation so approved student reviews surface.
 # ==================================================
 @router.get("/student-reviews")
-def admin_list_student_reviews(status: str = "pending", admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def admin_list_student_reviews(status: str = "pending", admin: User = Depends(require("reviews.moderate")), db: Session = Depends(get_db)):
     q = db.query(StudentReview)
     if status:
         q = q.filter(StudentReview.status == status)
