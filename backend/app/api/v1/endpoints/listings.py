@@ -368,6 +368,16 @@ def get_listing_detail(
         "total_spots":         listing.total_spots,
         "availability_status": listing.availability_status,
         "view_count":          _detail_view_count,
+        "bedrooms":           listing.bedrooms,
+        "bathrooms":          listing.bathrooms,
+        "furnished":          listing.furnished,
+        "water_supply":       listing.water_supply,
+        "electricity":        listing.electricity,
+        "parking":            listing.parking,
+        "curfew":             listing.curfew,
+        "gender_preference":  listing.gender_preference,
+        "distance_to_campus": listing.distance_to_campus,
+        "amenities":          _parse_amenities(listing.amenities),
     }
 
 
