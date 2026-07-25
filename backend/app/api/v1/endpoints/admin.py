@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/api/v1/endpoints/admin_router.py
 
 FULL IMPLEMENTATION.
@@ -62,8 +62,12 @@ VERIFY_DIR = Path("static/uploads/verification")
 
 # â”€â”€ Role guard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    from app.core.permissions import is_staff
-    if not is_staff(getattr(current_user, "role", "")):
+    # Admin-only (admin + ceo). Previously this called is_staff(), which
+    # admitted EVERY team role - a privilege leak (e.g. finance could read
+    # the full user list). Now it means what its name says. Per-endpoint
+    # permission guards (require("...")) handle finer-grained staff access.
+    _role = (getattr(current_user, "role", "") or "").lower()
+    if _role not in ("admin", "ceo"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required.",
