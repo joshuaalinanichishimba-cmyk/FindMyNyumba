@@ -36,6 +36,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.permissions import require
 from app.core.database import get_db
 from app.models.user import User
 from app.models.review import Review
@@ -436,7 +437,7 @@ def admin_user_detail(user_id: int, request: Request,
 #  TRANSACTIONS  &  REVENUE
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 @router.get("/admin/transactions")
-def admin_transactions(admin: User = Depends(require_admin),
+def admin_transactions(admin: User = Depends(require("payments.view")),
                        db: Session = Depends(get_db)):
     rows = db.query(Transaction).order_by(Transaction.created_at.desc()).all()
     names = {}
@@ -456,7 +457,7 @@ def admin_transactions(admin: User = Depends(require_admin),
 
 @router.post("/admin/transactions/{txn_id}/refund")
 def admin_refund(txn_id: int, body: ReasonBody, request: Request,
-                 admin: User = Depends(require_admin),
+                 admin: User = Depends(require("payments.refund")),
                  db: Session = Depends(get_db)):
     t = db.query(Transaction).filter(Transaction.id == txn_id).first()
     if not t:
@@ -472,7 +473,7 @@ def admin_refund(txn_id: int, body: ReasonBody, request: Request,
 
 @router.get("/admin/revenue")
 def admin_revenue(period: str = "monthly",
-                  admin: User = Depends(require_admin),
+                  admin: User = Depends(require("revenue.view")),
                   db: Session = Depends(get_db)):
     txns = db.query(Transaction).filter(Transaction.status == "success").all()
     now = datetime.now(timezone.utc)
