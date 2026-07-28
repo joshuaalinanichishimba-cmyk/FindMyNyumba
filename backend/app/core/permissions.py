@@ -68,6 +68,8 @@ ROLE_PERMISSIONS = {
         "listings.create", "listings.edit_own", "listings.submit",
         "listings.media", "landlords.view", "landlords.create",
         "visits.schedule",
+        # LA also reviews and approves listings from landlords they onboard.
+        "listings.view", "listings.approve", "listings.reject",
     },
     ROLE_TRUST: {
         "listings.view", "listings.approve", "listings.reject",
