@@ -189,6 +189,43 @@ def get_all_listings(admin: User = Depends(require_admin), db: Session = Depends
     ]
 
 
+# -- GET /admin/pending-listings -----------------------------------------
+# Purpose-built feed for the Landlord Acquisition lead: only listings
+# awaiting review, guarded by listings.approve (LA, trust, admin, ceo).
+# Keeps /admin/all-listings admin-only while giving LA exactly what they
+# need to act on. Includes owner name so the reviewer sees whose listing it is.
+@router.get("/pending-listings")
+def get_pending_listings(admin: User = Depends(require("listings.approve")),
+                         db: Session = Depends(get_db)):
+    listings = (
+        db.query(Listing)
+        .filter(Listing.status == "pending")
+        .order_by(Listing.created_at.desc())
+        .all()
+    )
+    owner_ids = {l.owner_id for l in listings if l.owner_id}
+    owners = {}
+    if owner_ids:
+        for u in db.query(User).filter(User.id.in_(owner_ids)).all():
+            owners[u.id] = u
+    out = []
+    for l in listings:
+        o = owners.get(l.owner_id)
+        out.append({
+            "id":            l.id,
+            "title":         l.title,
+            "location":      l.location,
+            "price":         l.price,
+            "status":        l.status,
+            "owner_id":      l.owner_id,
+            "owner_name":    (o.full_name if o else None),
+            "owner_email":   (o.email if o else None),
+            "owner_verified": (o.verification_status if o else None),
+            "created_at":    l.created_at.isoformat() if l.created_at else None,
+        })
+    return out
+
+
 # â”€â”€ PATCH /admin/listings/{id}/approve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/listings/{listing_id}/approve")
 def approve_listing(listing_id: int, admin: User = Depends(require("listings.approve")), db: Session = Depends(get_db)):
