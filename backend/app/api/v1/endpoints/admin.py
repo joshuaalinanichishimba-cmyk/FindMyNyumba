@@ -858,3 +858,35 @@ def admin_listing_contact_flags(
                 "samples": nums[:3],
             }
     return {"count": len(flagged), "flagged": flagged}
+
+
+# -- POST /admin/users/{id}/reset-password : CEO sets a new temp password ------
+class AdminResetPwPayload(BaseModel):
+    new_password: str
+
+@router.post("/users/{user_id}/reset-password")
+def admin_reset_password(user_id: int, payload: AdminResetPwPayload,
+                         admin: User = Depends(require("users.suspend")),
+                         db: Session = Depends(get_db)):
+    import re as _re
+    from app.core import security as _sec
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    pw = payload.new_password or ""
+    if not _re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$", pw):
+        raise HTTPException(status_code=400,
+            detail="Password must be 8+ characters with uppercase, lowercase, number, and special character.")
+    # reuse whichever hasher the codebase defines
+    _hash = getattr(_sec, "get_password_hash", None) or getattr(_sec, "hash_password", None)
+    if _hash is None:
+        raise HTTPException(status_code=500, detail="Password hasher unavailable.")
+    user.hashed_password = _hash(pw)
+    db.commit()
+    # log the user out everywhere so they must use the new password
+    try:
+        revoke_all_for_user(db, user.id)
+    except Exception:
+        pass
+    return {"status": "success", "message": f"Password reset for {user.email}."}
+
