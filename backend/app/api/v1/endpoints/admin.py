@@ -890,3 +890,18 @@ def admin_reset_password(user_id: int, payload: AdminResetPwPayload,
         pass
     return {"status": "success", "message": f"Password reset for {user.email}."}
 
+
+# -- POST /admin/users/{id}/force-logout : revoke all sessions, keep account active --
+@router.post("/users/{user_id}/force-logout")
+def admin_force_logout(user_id: int,
+                       admin: User = Depends(require("users.suspend")),
+                       db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    try:
+        revoke_all_for_user(db, user.id)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Could not revoke sessions.")
+    return {"status": "success", "message": f"{user.email} logged out of all devices."}
+
