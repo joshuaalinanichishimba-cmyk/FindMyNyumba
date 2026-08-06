@@ -414,3 +414,17 @@ def logout_all_other(
     """Revoke all of the user's other sessions, keeping the current one."""
     n = _revoke_all(db, current_user.id, except_session_id=current_sid)
     return {"message": f"Logged out {n} other session(s).", "revoked_count": n}
+
+
+# -- POST /auth/heartbeat : keep the current session marked as recently active --
+@router.post("/heartbeat")
+def heartbeat(session_id = Depends(get_current_session_id),
+              db: Session = Depends(get_db)):
+    from datetime import datetime, timezone
+    from app.models.user_session import UserSession as _US
+    s = db.query(_US).filter(_US.id == session_id).first()
+    if s and not s.revoked:
+        s.last_seen = datetime.now(timezone.utc)
+        db.commit()
+    return {"ok": True}
+

@@ -905,3 +905,76 @@ def admin_force_logout(user_id: int,
         raise HTTPException(status_code=500, detail="Could not revoke sessions.")
     return {"status": "success", "message": f"{user.email} logged out of all devices."}
 
+
+# -- GET /admin/staff-activity : CEO view of who is online, last seen, device, IP --
+@router.get("/staff-activity")
+def staff_activity(admin: User = Depends(require("users.suspend")),
+                   db: Session = Depends(get_db)):
+    from datetime import datetime, timezone, timedelta
+    from app.models.user_session import UserSession
+
+    STAFF_ROLES = ("ceo","admin","moderator","finance","trust_safety",
+                   "customer_support","marketing","landlord_acquisition","admin_operations")
+    now = datetime.now(timezone.utc)
+
+    def _aware(dt):
+        if dt is None: return None
+        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+    def _device(ua):
+        ua = (ua or "").lower()
+        browser = ("Edge" if "edg" in ua else "Chrome" if "chrome" in ua else
+                   "Firefox" if "firefox" in ua else "Safari" if "safari" in ua else "Browser")
+        osn = ("Windows" if "windows" in ua else "Android" if "android" in ua else
+               "iOS" if ("iphone" in ua or "ipad" in ua) else "Mac" if "mac" in ua else
+               "Linux" if "linux" in ua else "Unknown")
+        return browser + " on " + osn
+
+    staff = db.query(User).filter(User.role.in_(STAFF_ROLES)).all()
+    out = []
+    for u in staff:
+        sess = (db.query(UserSession)
+                  .filter(UserSession.user_id == u.id)
+                  .order_by(UserSession.last_seen.desc())
+                  .all())
+        active = [s for s in sess if not s.revoked]
+        latest = active[0] if active else (sess[0] if sess else None)
+
+        status = "offline"; ip = None; device = None; last_seen = None; has_active = False
+        if latest:
+            ls = _aware(latest.last_seen)
+            last_seen = ls.isoformat() if ls else None
+            ip = latest.ip
+            device = _device(latest.user_agent)
+            has_active = any(not s.revoked for s in sess)
+            if has_active and ls:
+                age = (now - ls).total_seconds()
+                status = "online" if age < 120 else ("idle" if age < 900 else "offline")
+
+        # last logout = most recent revoked session's last_seen
+        revoked_sessions = [s for s in sess if s.revoked]
+        last_logout = None
+        if revoked_sessions:
+            ll = _aware(revoked_sessions[0].last_seen)
+            last_logout = ll.isoformat() if ll else None
+
+        ll_login = _aware(u.last_login)
+        out.append({
+            "id": u.id,
+            "name": u.full_name,
+            "email": u.email,
+            "role": u.role,
+            "is_active": u.is_active,
+            "status": status,
+            "last_login": ll_login.isoformat() if ll_login else None,
+            "last_logout": last_logout,
+            "device": device,
+            "ip": ip,
+            "last_seen": last_seen,
+            "active_session": has_active,
+        })
+    # online first, then idle, then offline
+    order = {"online":0,"idle":1,"offline":2}
+    out.sort(key=lambda x: (order.get(x["status"],3), x["name"] or ""))
+    return out
+
