@@ -38,6 +38,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import create_access_token, get_current_user
+from app.api.deps import get_current_session_id
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.rate_limiter import (
