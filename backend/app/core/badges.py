@@ -47,9 +47,9 @@ def user_badge(db: Session, user: User) -> dict:
 
     # Fully approved landlord/host -> green.
     if (getattr(user, "verification_status", None) == "approved"
-            or getattr(user, "is_verified", False) and user.role in ("landlord", "student_host")) \
+            or getattr(user, "is_verified", False) and user.role in ("landlord", "student_host", "accommodation_assistant")) \
             or (latest and latest.status == "approved"):
-        if user.role in ("landlord", "student_host"):
+        if user.role in ("landlord", "student_host", "accommodation_assistant"):
             return _badge("verified_landlord")
 
     # Documents submitted, under review -> yellow.

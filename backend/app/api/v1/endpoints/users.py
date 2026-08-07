@@ -38,7 +38,7 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
 
         # SECURITY: never trust role from the client. Public signup can only
         # create student / student_host / landlord — never admin/staff.
-        _allowed_roles = {"student", "student_host", "landlord"}
+        _allowed_roles = {"student", "student_host", "accommodation_assistant", "landlord"}
         _safe_role = user_in.role if user_in.role in _allowed_roles else "student"
 
         new_user = User(

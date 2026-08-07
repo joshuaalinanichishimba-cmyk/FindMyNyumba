@@ -181,7 +181,7 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
 # Roles a self-registering user is allowed to choose. Anything else
 # (especially "admin") is forced to "student" so nobody can grant
 # themselves staff access by tampering with the request body.
-SELF_SIGNUP_ROLES = {"student", "student_host", "landlord"}
+SELF_SIGNUP_ROLES = {"student", "student_host", "accommodation_assistant", "landlord"}
 
 
 @router.post("/register", response_model=UserResponse)

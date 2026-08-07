@@ -328,7 +328,7 @@ def post_student_review(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if current_user.role not in ("landlord", "student_host"):
+    if current_user.role not in ("landlord", "student_host", "accommodation_assistant"):
         raise HTTPException(status_code=403, detail="Only hosts can review students.")
     if current_user.id == student_id:
         raise HTTPException(status_code=400, detail="You cannot review yourself.")
