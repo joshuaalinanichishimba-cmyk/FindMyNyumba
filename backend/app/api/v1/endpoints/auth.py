@@ -194,6 +194,8 @@ def register(request: Request, user_in: UserCreate, db: Session = Depends(get_db
     # SECURITY: never trust the role from the client. Admin/staff accounts
     # are created by an existing admin, never through public registration.
     safe_role = user_in.role if user_in.role in SELF_SIGNUP_ROLES else "student"
+    if safe_role == "student_host":  # legacy value -> canonical
+        safe_role = "accommodation_assistant"
 
     new_user = User(
         email=user_in.email.lower(),
