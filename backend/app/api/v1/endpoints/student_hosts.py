@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/api/v1/endpoints/student_hosts.py
 
 FIXES vs previous version:
@@ -35,7 +35,7 @@ from app.models.message import Message
 from app.models.review import Review
 from app.models.user import User
 
-router = APIRouter(tags=["Accommodation Assistant"])
+router = APIRouter(prefix="/student-host", tags=["Student Host"])
 
 cloudinary.config(
     cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
@@ -762,3 +762,107 @@ def student_host_reviews(
         })
     avg = round(sum(approved_ratings) / len(approved_ratings), 1) if approved_ratings else None
     return {"count": len(approved_ratings), "average": avg, "reviews": out}
+
+
+# ── Assistant profile: reputation + public profile ────────────────────────────
+from app.models.assistant_profile import AssistantProfile
+
+_ALLOWED_STATUS = ("available", "busy", "offline")
+
+
+class AssistantProfileUpdate(BaseModel):
+    bio: Optional[str] = Field(None, max_length=2000)
+    areas_covered: Optional[List[str]] = None
+    languages: Optional[List[str]] = None
+    current_status: Optional[str] = None
+
+
+def _get_or_create_profile(db: Session, user_id: int) -> AssistantProfile:
+    prof = db.query(AssistantProfile).filter(AssistantProfile.user_id == user_id).first()
+    if not prof:
+        prof = AssistantProfile(user_id=user_id)
+        db.add(prof)
+        db.commit()
+        db.refresh(prof)
+    return prof
+
+
+def _profile_dict(prof: AssistantProfile, user: User = None) -> dict:
+    d = {
+        "user_id": prof.user_id,
+        "bio": prof.bio,
+        "areas_covered": prof.areas_covered or [],
+        "languages": prof.languages or [],
+        "current_status": prof.current_status,
+        "trust_score": prof.trust_score,
+        "rating": float(prof.rating) if prof.rating is not None else 0.0,
+        "rating_count": prof.rating_count,
+        "successful_placements": prof.successful_placements,
+        "cancelled_placements": prof.cancelled_placements,
+        "response_rate": float(prof.response_rate) if prof.response_rate is not None else 0.0,
+        "avg_response_seconds": prof.avg_response_seconds,
+        "years_active": float(prof.years_active) if prof.years_active is not None else 0.0,
+        "profile_completeness": prof.profile_completeness,
+    }
+    if user is not None:
+        d.update({
+            "name": user.full_name,
+            "email": user.email,
+            "phone_number": getattr(user, "phone_number", None),
+            "avatar_url": getattr(user, "avatar_url", None),
+            "verification_status": getattr(user, "verification_status", None),
+            "is_verified": getattr(user, "is_verified", False),
+        })
+    return d
+
+
+@router.get("/profile-details")
+def get_profile_details(host: User = Depends(require_student_host),
+                        db: Session = Depends(get_db)):
+    """The logged-in assistant's own profile + reputation. Auto-creates on first access."""
+    prof = _get_or_create_profile(db, host.id)
+    return _profile_dict(prof, host)
+
+
+@router.put("/profile-details")
+def update_profile_details(payload: AssistantProfileUpdate,
+                           host: User = Depends(require_student_host),
+                           db: Session = Depends(get_db)):
+    """Update the editable profile fields. Reputation fields are system-computed, not settable here."""
+    prof = _get_or_create_profile(db, host.id)
+    if payload.bio is not None:
+        prof.bio = payload.bio.strip()
+    if payload.areas_covered is not None:
+        prof.areas_covered = [a.strip() for a in payload.areas_covered if a and a.strip()][:20]
+    if payload.languages is not None:
+        prof.languages = [l.strip() for l in payload.languages if l and l.strip()][:15]
+    if payload.current_status is not None:
+        st = payload.current_status.strip().lower()
+        if st not in _ALLOWED_STATUS:
+            raise HTTPException(status_code=400, detail="Status must be available, busy, or offline.")
+        prof.current_status = st
+
+    # profile completeness: simple heuristic over the fields the assistant controls
+    filled = sum([
+        bool(prof.bio), bool(prof.areas_covered), bool(prof.languages),
+        bool(getattr(host, "avatar_url", None)), bool(getattr(host, "phone_number", None)),
+    ])
+    prof.profile_completeness = int(filled / 5 * 100)
+
+    db.commit()
+    db.refresh(prof)
+    return _profile_dict(prof, host)
+
+
+@router.get("/directory/{user_id}/public")
+def public_profile(user_id: int, db: Session = Depends(get_db)):
+    """Public view of an assistant's profile (for the profile page and search). No auth."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user or user.role not in ("student_host", "accommodation_assistant"):
+        raise HTTPException(status_code=404, detail="Assistant not found.")
+    prof = _get_or_create_profile(db, user_id)
+    data = _profile_dict(prof, user)
+    # public view omits private contact until later policy work
+    data.pop("email", None)
+    return data
+
