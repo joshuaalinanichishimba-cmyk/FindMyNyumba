@@ -4,6 +4,7 @@ from app.models.listing import Listing
 from app.models.saved_listing import SavedListing
 from app.models.report import Report
 from app.models.listing_media import ListingMedia
+from app.models.assistant_profile import AssistantProfile
 
 __all__ = [
     "User",
@@ -11,4 +12,5 @@ __all__ = [
     "SavedListing",
     "Report",
     "ListingMedia",
+    "AssistantProfile",
 ]
