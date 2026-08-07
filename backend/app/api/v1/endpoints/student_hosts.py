@@ -35,7 +35,7 @@ from app.models.message import Message
 from app.models.review import Review
 from app.models.user import User
 
-router = APIRouter(tags=["Accommodation Assistant"])
+router = APIRouter(prefix="/student-host", tags=["Student Host"])
 
 cloudinary.config(
     cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
