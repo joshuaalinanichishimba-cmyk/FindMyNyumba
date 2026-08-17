@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -177,6 +177,74 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Furnished</label>
+                        <select id="furnished-filter"
+                                class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#16a34a] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                            <option value="">Any</option>
+                            <option value="yes">Furnished</option>
+                            <option value="semi">Semi-furnished</option>
+                            <option value="no">Unfurnished</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amenities</label>
+                        <div id="amenities-chips" class="flex flex-wrap gap-2">
+                            <button type="button" data-amenity="wifi"     class="amenity-chip px-3 py-1.5 rounded-full border border-gray-200 text-xs font-semibold text-gray-600 bg-white">WiFi</button>
+                            <button type="button" data-amenity="parking"  class="amenity-chip px-3 py-1.5 rounded-full border border-gray-200 text-xs font-semibold text-gray-600 bg-white">Parking</button>
+                            <button type="button" data-amenity="water tank" class="amenity-chip px-3 py-1.5 rounded-full border border-gray-200 text-xs font-semibold text-gray-600 bg-white">Water Tank</button>
+                            <button type="button" data-amenity="security" class="amenity-chip px-3 py-1.5 rounded-full border border-gray-200 text-xs font-semibold text-gray-600 bg-white">Security</button>
+                            <button type="button" data-amenity="borehole" class="amenity-chip px-3 py-1.5 rounded-full border border-gray-200 text-xs font-semibold text-gray-600 bg-white">Borehole</button>
+                            <button type="button" data-amenity="tiled"    class="amenity-chip px-3 py-1.5 rounded-full border border-gray-200 text-xs font-semibold text-gray-600 bg-white">Tiled</button>
+                        </div>
+                    </div>
+
+                    <details class="group">
+                        <summary class="cursor-pointer list-none flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider py-1 select-none">
+                            <span><i class="fas fa-sliders-h mr-1.5"></i>More filters</span>
+                            <i class="fas fa-chevron-down text-[10px] transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="space-y-4 mt-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Bathrooms (min)</label>
+                                <select id="bathrooms-filter" class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#16a34a] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                                    <option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Water Supply</label>
+                                <select id="water-filter" class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#16a34a] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                                    <option value="">Any</option><option value="yes">Yes</option><option value="mains">Mains</option><option value="borehole">Borehole</option><option value="no">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Electricity</label>
+                                <select id="electricity-filter" class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#16a34a] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                                    <option value="">Any</option><option value="prepaid">Prepaid</option><option value="postpaid">Postpaid</option><option value="solar">Solar</option><option value="none">None</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Parking</label>
+                                <select id="parking-filter" class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#16a34a] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                                    <option value="">Any</option><option value="yes">Yes</option><option value="no">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Curfew</label>
+                                <select id="curfew-filter" class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#16a34a] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                                    <option value="">Any</option><option value="none">No curfew</option><option value="22:00">22:00</option><option value="23:00">23:00</option><option value="00:00">00:00</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Gender Preference</label>
+                                <select id="gender-filter" class="w-full p-3 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-[#16a34a] focus:border-transparent outline-none font-semibold bg-white text-sm">
+                                    <option value="">Any</option><option value="mixed">Mixed</option><option value="female">Female only</option><option value="male">Male only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Price Range (ZMW)</label>
                         <div class="space-y-2">
                             <input type="number" id="min-price" placeholder="Min Price" min="0"
@@ -337,7 +405,7 @@
         if (!token || !role) return;
         const routes = {
             student:      'dashboard-student.html',
-            student_host: 'dashboard-student-host.html',
+            student_host: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html',
             landlord:     'dashboard-landlord.html',
             admin:        'admin.html',
         };
@@ -573,23 +641,53 @@
         });
     }
 
-    /* Filters -> backend (university, price, keyword); type/bedrooms refine client-side. */
-    function applyFilters() {
-        const uni     = document.getElementById('university-filter').value;
-        const min     = document.getElementById('min-price').value.trim();
-        const max     = document.getElementById('max-price').value.trim();
-        const keyword = (document.getElementById('keyword-search')?.value || '').trim();
+    /* Selected amenity chips (multi-select). */
+    function selectedAmenities() {
+        return Array.from(document.querySelectorAll('.amenity-chip.is-on'))
+                    .map(b => b.getAttribute('data-amenity'));
+    }
 
+    /* Filters -> backend. All attribute filters are server-side and lenient. */
+    function applyFilters() {
+        const val = id => (document.getElementById(id)?.value || '').trim();
         const params = new URLSearchParams();
-        if (uni)     params.append('university', uni);
-        if (min)     params.append('min_price',  min);
-        if (max)     params.append('max_price',  max);
-        if (keyword) params.append('q',          keyword);
+
+        const uni = val('university-filter'); if (uni) params.append('university', uni);
+        const min = val('min-price');         if (min) params.append('min_price', min);
+        const max = val('max-price');         if (max) params.append('max_price', max);
+        const kw  = (document.getElementById('keyword-search')?.value || '').trim();
+        if (kw) params.append('q', kw);
+
+        const beds  = val('bedrooms-filter');    if (beds)  params.append('min_bedrooms', beds);
+        const baths = val('bathrooms-filter');   if (baths) params.append('min_bathrooms', baths);
+        const furn  = val('furnished-filter');   if (furn)  params.append('furnished', furn);
+        const water = val('water-filter');       if (water) params.append('water_supply', water);
+        const elec  = val('electricity-filter'); if (elec)  params.append('electricity', elec);
+        const park  = val('parking-filter');     if (park)  params.append('parking', park);
+        const curf  = val('curfew-filter');      if (curf)  params.append('curfew', curf);
+        const gen   = val('gender-filter');      if (gen)   params.append('gender_preference', gen);
+
+        const ams = selectedAmenities();
+        if (ams.length) params.append('amenities', ams.join(','));
 
         buildAreaChips();
         fetchListings(params.toString() ? `?${params}` : '');
         closeSidebar();
     }
+
+    /* Chip toggle: tap to select/deselect an amenity. */
+    document.addEventListener('click', e => {
+        const chip = e.target.closest('.amenity-chip');
+        if (!chip) return;
+        chip.classList.toggle('is-on');
+        if (chip.classList.contains('is-on')) {
+            chip.classList.remove('border-gray-200','text-gray-600','bg-white');
+            chip.classList.add('border-[#16a34a]','text-white','bg-[#16a34a]');
+        } else {
+            chip.classList.add('border-gray-200','text-gray-600','bg-white');
+            chip.classList.remove('border-[#16a34a]','text-white','bg-[#16a34a]');
+        }
+    });
 
     /* Map button: open the current search area in Google Maps. */
     document.getElementById('map-btn')?.addEventListener('click', () => {

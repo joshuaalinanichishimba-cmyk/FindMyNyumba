@@ -169,7 +169,7 @@
 
         function redirectUser(role) {
             const routes = {
-                student_host: 'dashboard-student-host.html',
+                student_host: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html',
                 landlord:     'dashboard-landlord.html',
                 student:      'dashboard-student.html',
                 admin:        'admin.html'
@@ -204,6 +204,13 @@
                     throw new Error(data.detail || 'Invalid email or password. Please try again.');
                 }
 
+                // Staff accounts must use the admin portal, not this public login.
+                const STAFF_ROLES = ['ceo','admin','moderator','trust_safety','finance','marketing','customer_support','landlord_acquisition','admin_operations'];
+                if (STAFF_ROLES.includes((data.role || '').toLowerCase())) {
+                    showError('Staff accounts sign in at the admin portal. Redirecting...');
+                    setTimeout(function () { window.location.href = '/admin'; }, 1200);
+                    return;
+                }
                 storeSession(data.access_token, data.role);
                 redirectUser(data.role);
 

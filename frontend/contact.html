@@ -251,7 +251,7 @@
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
     if (!token || !role) return;
-    const routes = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html', admin:'admin.html' };
+    const routes = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', landlord:'dashboard-landlord.html', admin:'admin.html' };
     ['nav-dashboard-desk','nav-dashboard-mob'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.href = routes[role] || 'browse.html'; el.classList.remove('hidden'); }

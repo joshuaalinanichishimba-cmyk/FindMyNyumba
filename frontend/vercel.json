@@ -1,1 +1,6 @@
-{ "cleanUrls": false }
+{
+  "cleanUrls": false,
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin-login.html" }
+  ]
+}

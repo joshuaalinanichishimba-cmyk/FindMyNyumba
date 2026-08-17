@@ -149,7 +149,7 @@
                     <select id="f-type" onchange="updateDoc()"
                             class="w-full p-3 border border-gray-200 rounded-xl text-sm font-semibold outline-none focus:border-[#ea580c]">
                         <option value="landlord">Student → Landlord</option>
-                        <option value="student_host">Student → Student Host</option>
+                        <option value="student_host">Student → Accommodation Assistant</option>
                     </select>
                 </div>
                 <hr class="border-gray-100">
@@ -409,7 +409,7 @@ function updateDoc() {
     const type        = v('f-type');
     const isHost      = type === 'student_host';
     const party2Label = isHost ? 'STUDENT HOST' : 'LANDLORD';
-    const party2Type  = isHost ? 'Student Host' : 'Landlord';
+    const party2Type  = isHost ? 'Accommodation Assistant' : 'Landlord';
     const titleText   = isHost ? 'STUDENT HOST BEDSPACE AGREEMENT' : 'RESIDENTIAL TENANCY AGREEMENT';
     // FIX: Corrected garbled em-dash encoding — was "StudentÃƒÆ’Ã‚Â¢ÃƒÂ¢â‚¬Â¢"Student Host..."
     const subtitleTxt = isHost ? 'Student\u2013Student Host Accommodation Agreement' : 'Student\u2013Landlord Rental Agreement';

@@ -101,7 +101,7 @@
                                 <div class="relative"><i class="fas fa-user-group fld-icon"></i>
                                     <select id="role_select" class="fld cursor-pointer text-slate-700 appearance-none">
                                         <option value="student">Looking for a place (Student)</option>
-                                        <option value="student_host">Offering a bedspace (Student Host)</option>
+                                        <option value="accommodation_assistant">Assisting students find accommodation (Accommodation Assistant)</option>
                                     </select>
                                     <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
                                 </div>
@@ -319,7 +319,7 @@
                 if (!res.ok) throw new Error(data.detail || 'Google sign-in failed. Please try again.');
                 localStorage.setItem('token', data.access_token);
                 localStorage.setItem('role', data.role);
-                const routes = { student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html', student:'dashboard-student.html', admin:'admin.html' };
+                const routes = { student_host:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', landlord:'dashboard-landlord.html', student:'dashboard-student.html', admin:'admin.html' };
                 window.location.href = routes[data.role] || 'browse.html';
             } catch (err) {
                 showError(err.message || 'Network error connecting to authentication server.');

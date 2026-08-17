@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -405,6 +405,7 @@
                                                         <option value="shared">Shared Room</option>
                                                         <option value="flat">Flat / Apartment</option>
                                                         <option value="house">House</option>
+                                                        <option value="boarding-house">Boarding House</option>
                                                         <option value="studio">Studio</option>
                                                     </select>
                                                 </div>
@@ -961,7 +962,7 @@ async function initDashboard() {
         const user = await res.json();
         // Role guard - redirect if not landlord
         if (user.role !== 'landlord') {
-            const dest = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', admin: 'admin.html' };
+            const dest = { student: 'dashboard-student.html', student_host: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html', admin: 'admin.html' };
             window.location.replace(dest[user.role] || 'login.html');
             return;
         }
@@ -1511,6 +1512,32 @@ async function submitProperty() {
     // parking, amenities, map lat-lng) are UI-only until backend columns exist.
     fd.append('nearest_institution', document.getElementById('prop-institution').value.trim());
     fd.append('availability_status', document.getElementById('prop-availability').value);
+
+    // ── Listing attributes: now REAL columns, wired through to create/update. ──
+    // Guarded with ?. so a missing input contributes empty (backend is lenient)
+    // rather than throwing and breaking submit.
+    const _av = id => (document.getElementById(id)?.value || '').trim();
+    const _lt = _av('prop-type');
+    if (_lt !== '') fd.append('listing_type', _lt);
+    const _attrs = {
+        bedrooms:           _av('prop-bedrooms'),
+        bathrooms:          _av('prop-bathrooms'),
+        furnished:          _av('prop-furnished'),
+        water_supply:       _av('prop-water'),
+        electricity:        _av('prop-electricity'),
+        parking:            _av('prop-parking'),
+        curfew:             _av('prop-curfew'),
+        gender_preference:  _av('prop-gender'),
+        distance_to_campus: _av('prop-distance'),
+    };
+    for (const [k, v] of Object.entries(_attrs)) {
+        if (v !== '') fd.append(k, v);
+    }
+    // amenities is a JSON list of strings server-side; stringify the selection.
+    try {
+        const _ams = (typeof _selectedAmenities === 'function') ? _selectedAmenities() : [];
+        if (_ams && _ams.length) fd.append('amenities', JSON.stringify(_ams));
+    } catch (e) { /* no amenities grid -> skip */ }
 
     if (landlordMediaUploader) landlordMediaUploader.appendTo(fd);     // field name 'media'
 

@@ -81,7 +81,7 @@
     <div class="max-w-3xl space-y-4 mb-12">
       <p class="text-slate-500 font-medium leading-relaxed">Every Zambian student deserves a safe, clean, and affordable place to call home while they pursue their education. Too many students spend weeks searching for accommodation, fall victim to scams, or end up in unsuitable housing.</p>
       <p class="text-slate-500 font-medium leading-relaxed">FindMyNyumba was built to solve this problem — a trusted, transparent platform that connects verified students with verified landlords, making the process simple, fast, and safe.</p>
-      <p class="text-slate-500 font-medium leading-relaxed">We also empower student hosts — fellow students who want to help by offering affordable bedspaces — creating a community-first approach to student housing.</p>
+      <p class="text-slate-500 font-medium leading-relaxed">We also empower Accommodation Assistants — fellow students who want to help by offering affordable bedspaces — creating a community-first approach to student housing.</p>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -231,7 +231,7 @@
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
     if (!token || !role) return;
-    const routes = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html', admin:'admin.html' };
+    const routes = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', landlord:'dashboard-landlord.html', admin:'admin.html' };
     ['nav-dashboard-desk','nav-dashboard-mob'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.href = routes[role] || 'browse.html'; el.classList.remove('hidden'); }

@@ -684,7 +684,7 @@ async function initDashboard() {
         if (!res.ok) throw new Error();
         const user = await res.json();
         if (user.role !== 'student') {
-            const dest = { student_host: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
+            const dest = { student_host: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html', accommodation_assistant: 'dashboard-student-host.html', landlord: 'dashboard-landlord.html', admin: 'admin.html' };
             window.location.replace(dest[user.role] || 'login.html');
             return;
         }

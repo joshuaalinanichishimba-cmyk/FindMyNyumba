@@ -1,4 +1,4 @@
-﻿a<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -407,8 +407,9 @@ const API = (function () {
 /* Redirect if already authenticated */
 (function () {
     const token = sessionStorage.getItem('adminToken');
-    const role  = sessionStorage.getItem('adminRole');
-    if (token && role === 'admin') window.location.replace('admin.html');
+    const role  = (sessionStorage.getItem('adminRole') || '').toLowerCase();
+    const _STAFF = ['ceo','admin','moderator','trust_safety','finance','marketing','customer_support','landlord_acquisition','admin_operations'];
+    if (token && _STAFF.includes(role)) window.location.replace('admin.html');
 })();
 
 /* Password visibility toggle */
@@ -497,19 +498,27 @@ document.getElementById('admin-form').addEventListener('submit', async e => {
             throw new Error(data.detail || 'Authentication failed. Access denied.');
         }
 
-        /* Enforce admin-only access on the client side as a second check */
-        if (data.role !== 'admin') {
-            throw new Error('Access denied. This portal is for administrators only.');
+        /* Staff-only gate. Redirect is convenience; backend require() guards
+           enforce real access on every data request (403 if bypassed). */
+        const ROLE_HOME = {
+            ceo:'admin.html', admin:'admin.html', moderator:'admin.html',
+            trust_safety:'admin.html', finance:'admin.html', marketing:'admin.html',
+            customer_support:'admin.html', landlord_acquisition:'admin.html',
+            admin_operations:'admin.html',
+        };
+        const _role = (data.role || '').toLowerCase();
+        if (!(_role in ROLE_HOME)) {
+            throw new Error('Access denied. This portal is for staff accounts only.');
         }
 
         /* Store in sessionStorage only (clears on tab close) */
         sessionStorage.setItem('adminToken', data.access_token);
-        sessionStorage.setItem('adminRole',  'admin');
-        sessionStorage.setItem('adminName',  data.full_name || 'Admin');
+        sessionStorage.setItem('adminRole',  _role);
+        sessionStorage.setItem('adminName',  data.full_name || 'Staff');
 
         attemptBar.style.display = 'none';
         showAlert('Access granted. Redirecting\u2026', 'success');
-        setTimeout(() => window.location.replace('admin.html'), 900);
+        setTimeout(() => window.location.replace(ROLE_HOME[_role] || 'admin.html'), 900);
 
     } catch (err) {
         const msg = err.message || 'Authentication failed.';

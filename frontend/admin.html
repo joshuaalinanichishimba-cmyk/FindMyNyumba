@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -145,6 +145,8 @@
       <div class="space-y-1">
         <div class="sb-group-label px-3 mb-2">Management</div>
         <div class="sb-link" id="nav-users" onclick="showTab('users')"><i class="fas fa-users"></i>Users</div>
+              <div class="sb-link" id="nav-staff" onclick="showTab('staff')"><i class="fas fa-users"></i>Staff Accounts</div>
+              <div class="sb-link" id="nav-activity" onclick="showTab('activity')"><i class="fas fa-users"></i>Staff Activity</div>
         <div class="sb-link" id="nav-listings" onclick="showTab('listings')"><i class="fas fa-building"></i>Listings</div>
         <div class="sb-link" id="nav-institutions" onclick="showTab('institutions')"><i class="fas fa-graduation-cap"></i>Institutions</div>
       </div>
@@ -310,6 +312,71 @@
       <!-- ============================================================
            USERS
       ============================================================= -->
+      <section id="tab-activity" class="tab-section">
+        <div class="card overflow-hidden">
+          <div style="padding:16px 18px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <div><div style="font-size:15px;font-weight:800">Staff activity</div>
+              <div style="font-size:12.5px;color:#64748b">Live presence, last login, device and session per team member.</div></div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="act-updated" style="font-size:11.5px;color:#94a3b8"></span>
+              <button onclick="loadActivity()" style="background:#0F172A;color:#fff;border:0;font-weight:700;font-size:12px;padding:8px 14px;border-radius:9px;cursor:pointer">Refresh</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+              <thead><tr style="text-align:left;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.5px">
+                <th style="padding:10px 14px">Name</th><th style="padding:10px 14px">Department</th>
+                <th style="padding:10px 14px">Status</th><th style="padding:10px 14px">Last login</th>
+                <th style="padding:10px 14px">Last logout</th><th style="padding:10px 14px">Device</th>
+                <th style="padding:10px 14px">IP</th><th style="padding:10px 14px">Session</th>
+                <th style="padding:10px 14px;text-align:right">Action</th></tr></thead>
+              <tbody id="activity-tbody"><tr><td colspan="9" style="padding:24px;text-align:center;color:#94a3b8">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section id="tab-staff" class="tab-section">
+        <div class="card" style="padding:22px 24px;margin-bottom:18px">
+          <div style="margin-bottom:16px">
+            <div style="font-size:15px;font-weight:800">Create staff account</div>
+            <div style="font-size:12.5px;color:#64748b">New members get a temporary password to change on first login.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
+            <input id="stf-name" placeholder="Full name" class="stf-in">
+            <input id="stf-email" placeholder="Email" type="email" class="stf-in">
+            <input id="stf-pass" placeholder="Temp password" class="stf-in">
+            <select id="stf-role" class="stf-in">
+              <option value="">Department / Role</option>
+              <option value="ceo">CEO</option>
+              <option value="finance">Finance Lead</option>
+              <option value="trust_safety">Trust &amp; Safety Lead</option>
+              <option value="customer_support">Customer Support Lead</option>
+              <option value="marketing">Marketing &amp; Growth Lead</option>
+              <option value="landlord_acquisition">Landlord Acquisition Lead</option>
+              <option value="admin_operations">Administration &amp; Operations Lead</option>
+            </select>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap">
+            <button onclick="createStaff()" style="background:#EA580C;color:#fff;border:0;font-weight:700;font-size:13px;padding:10px 18px;border-radius:10px;cursor:pointer">Create staff member</button>
+            <span id="stf-msg" style="font-size:12.5px;font-weight:600"></span>
+          </div>
+        </div>
+        <div class="card overflow-hidden">
+          <div style="padding:16px 18px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <div style="font-size:15px;font-weight:800">All accounts</div>
+            <input id="stf-search" oninput="renderStaff()" placeholder="Search name or email" style="border:1px solid #e2e8f0;border-radius:9px;padding:7px 12px;font-size:13px;min-width:200px">
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr style="text-align:left;color:#94a3b8;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px">
+                <th style="padding:10px 16px">Name</th><th style="padding:10px 16px">Email</th>
+                <th style="padding:10px 16px">Department</th><th style="padding:10px 16px">Status</th>
+                <th style="padding:10px 16px;text-align:right">Actions</th></tr></thead>
+              <tbody id="staff-tbody"><tr><td colspan="5" style="padding:24px;text-align:center;color:#94a3b8">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
       <section id="tab-users" class="tab-section">
         <div class="card overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
@@ -321,7 +388,7 @@
               <option value="">All roles</option>
               <option value="student">Students</option>
               <option value="landlord">Landlords</option>
-              <option value="student_host">Student hosts</option>
+              <option value="student_host">Accommodation Assistants</option>
               <option value="admin">Admins</option>
             </select>
             <div class="relative">
@@ -829,7 +896,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const STAFF_ROLES = ['admin','ceo','trust_safety','landlord_acquisition','finance','marketing','customer_support','admin_operations','moderator'];
     if (!STAFF_ROLES.includes((me.role || '').toLowerCase())) {
       ['adminToken','adminRole','adminName'].forEach(k => sessionStorage.removeItem(k));
-      const fallback = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', landlord:'dashboard-landlord.html' }[me.role] || 'login.html';
+      const fallback = { student:'dashboard-student.html', student_host:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', accommodation_assistant:'dashboard-student-host.html', landlord:'dashboard-landlord.html' }[me.role] || 'login.html';
       window.location.replace(fallback); return;
     }
     if (!sessionStorage.getItem('adminName')) sessionStorage.setItem('adminName', me.full_name || 'Admin');
@@ -857,6 +924,8 @@ function logout(){
 /* ---------- navigation ---------- */
 const TAB_META = {
   dashboard:   ['Dashboard',          "Welcome back — here's what's happening today"],
+  staff:     ['Staff Accounts', 'Create and manage team members'],
+  activity:  ['Staff Activity', 'Who is online, last seen, and sessions'],
   users:       ['Users',              'Manage students, landlords and staff'],
   listings:    ['Listings',           'Every property on the platform'],
   verifications:['Verification Queue','Review submitted documents'],
@@ -885,6 +954,10 @@ function showTab(name){
   closeSidebar();
 
   if (name === 'users')         loadUsers();
+
+  if (name === 'staff')          loadStaff();
+
+  if (name === 'activity')       loadActivity();
   if (name === 'settings')      loadSessions();
   if (name === 'listings')      loadListings();
   if (name === 'verifications') loadVerifications();
@@ -938,7 +1011,7 @@ async function loadDashboard(){
   _reportsCount = Array.isArray(reports) ? reports.length : 0;
 
   const students  = _users.filter(u => u.role === 'student').length;
-  const landlords = _users.filter(u => u.role === 'landlord' || u.role === 'student_host').length;
+  const landlords = _users.filter(u => u.role === 'landlord' || u.role === 'student_host' || u.role === 'accommodation_assistant' || u.role === 'accommodation_assistant').length;
   const activeL   = _listings.filter(l => l.status === 'active').length;
   const pendingL  = stats.pending_listings ?? _listings.filter(l => l.status === 'pending').length;
   const boostedL  = _listings.filter(l => l.is_boosted === true).length;
@@ -1112,13 +1185,19 @@ function toggleSuspend(userId, email, isActive){
 /* ====================================================================
    LISTINGS
 ==================================================================== */
+let _contactFlags = {};
 async function loadListings(){
   const tbody = document.getElementById('listings-table');
   tbody.innerHTML = skeletonRows(5, 5);
   try {
-    const res = await fetch(`${API}/admin/all-listings`);
-    if (!res.ok) throw new Error();
-    _listings = await res.json();
+    const [lRes, fRes] = await Promise.all([
+      fetch(`${API}/admin/all-listings`),
+      fetch(`${API}/admin/contact-flags`).catch(() => null)
+    ]);
+    if (!lRes.ok) throw new Error();
+    _listings = await lRes.json();
+    try { _contactFlags = (fRes && fRes.ok) ? ((await fRes.json()).flagged || {}) : {}; }
+    catch { _contactFlags = {}; }
     renderListings();
   } catch { tbody.innerHTML = errorRow(5,'Failed to load listings.'); }
 }
@@ -1136,7 +1215,7 @@ function renderListings(){
   if (!rows.length) { tbody.innerHTML = emptyRow(5,'No listings match your filters.'); return; }
   tbody.innerHTML = rows.map(l => `
     <tr class="hover:bg-slate-50">
-      <td class="data-td font-bold text-slate-900 max-w-[220px]"><button onclick="openListingDetail(${l.id})" class="block truncate text-left hover:text-orange-600">${esc(l.title)}</button></td>
+      <td class="data-td font-bold text-slate-900 max-w-[220px]"><button onclick="openListingDetail(${l.id})" class="block truncate text-left hover:text-orange-600">${esc(l.title)}</button>${_contactFlags[l.id] ? ` <span class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold" title="This listing has a phone number in its description. Ask the landlord to remove it before approving."><i class="fas fa-phone-slash"></i> Phone in description</span>` : ''}</td>
       <td class="data-td text-slate-500 hidden md:table-cell">${esc(l.location)}</td>
       <td class="data-td text-slate-700 font-semibold tabnum hidden lg:table-cell">${l.price != null ? fmtK(l.price) : '—'}</td>
       <td class="data-td">${statusBadge(l.status)}</td>
@@ -2586,6 +2665,106 @@ async function submitAddListing(){
 }
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(initAddListingButton, 1200); });
 </script>
+
+
+
+<!-- FMN_ROLE_GATE_V2: role-based module visibility. CEO/admin see everything.
+     Each lead sees only their sections. Hidden nav items, orphaned section
+     headers, and their panels are all hidden; user lands on first allowed tab
+     so no forbidden panel ever loads (no 'failed to load'). Backend still
+     enforces real access via require() guards. -->
+<script>
+(function(){
+  var role = (window.ADMIN_ROLE || sessionStorage.getItem('adminRole') || '').toLowerCase();
+
+  // nav id suffix -> allowed. dashboard is allowed for everyone.
+  var ALLOW = {
+    finance:              ['dashboard','revenue','transactions','escrow'],
+    landlord_acquisition: ['dashboard','listings'],
+    trust_safety:         ['dashboard','verifications','trust','reviews','fraud'],
+    customer_support:     ['dashboard','support'],
+    marketing:            ['dashboard','analytics','announcements'],
+    admin_operations:     ['dashboard','institutions','announcements']
+  };
+  var FULL = (role === 'ceo' || role === 'admin');
+
+  function firstAllowedTab(){
+    var a = ALLOW[role] || ['dashboard'];
+    return a[0] || 'dashboard';
+  }
+
+  function apply(){
+    var navs = document.querySelectorAll('[id^="nav-"]');
+    if(!navs.length) return false;
+
+    if(!FULL){
+      var allowed = ALLOW[role] || ['dashboard'];
+      // 1) hide nav items not allowed
+      navs.forEach(function(el){
+        var id = el.id.replace('nav-','');
+        if(allowed.indexOf(id) === -1){ el.style.display='none'; }
+        else { el.style.display=''; }
+      });
+
+      // 2) hide orphaned section headers. Headers carry class 'sb-group-label'.
+      //    Hide a header if no visible nav- item sits between it and the next header.
+      var labels = document.querySelectorAll('.sb-group-label');
+      labels.forEach(function(lbl){
+        var el = lbl.nextElementSibling;
+        var anyVisible = false;
+        while(el && !el.classList.contains('sb-group-label')){
+          if(el.id && el.id.indexOf('nav-')===0 && el.style.display !== 'none'){ anyVisible = true; break; }
+          el = el.nextElementSibling;
+        }
+        lbl.style.display = anyVisible ? '' : 'none';
+      });
+
+      // 3) land on first allowed tab so no forbidden panel auto-loads
+      try{
+        var active = document.querySelector('[id^="nav-"].active');
+        var activeId = active ? active.id.replace('nav-','') : 'dashboard';
+        if(allowed.indexOf(activeId) === -1){
+          if(typeof showTab === 'function'){ showTab(firstAllowedTab()); }
+        }
+      }catch(e){}
+    }
+    return true;
+  }
+
+  function boot(tries){ if(apply()) return; if(tries>0) setTimeout(function(){boot(tries-1);},150); }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',function(){boot(20);}); }
+  else { boot(20); }
+})();
+</script>
+
+
+<style>.stf-in{border:1px solid #e2e8f0;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;width:100%}.stf-act{border:1px solid #e2e8f0;background:#fff;border-radius:7px;padding:4px 9px;font-size:11.5px;font-weight:700;cursor:pointer;margin-left:5px;font-family:inherit}.stf-act:hover{background:#f8fafc}</style>
+<script>
+var _staffUsers=[];
+var STAFF_ROLE_LABELS={ceo:'CEO',admin:'Admin',moderator:'Moderator',finance:'Finance Lead',trust_safety:'Trust & Safety Lead',customer_support:'Customer Support Lead',marketing:'Marketing & Growth Lead',landlord_acquisition:'Landlord Acquisition Lead',admin_operations:'Admin & Operations Lead',student:'Student',landlord:'Landlord',student_host:'Accommodation Assistant'};
+function _sfEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+async function loadStaff(){var tb=document.getElementById('staff-tbody');try{var r=await fetch(API+'/admin/users');if(!r.ok)throw new Error('HTTP '+r.status);_staffUsers=await r.json();renderStaff();}catch(e){tb.innerHTML='<tr><td colspan=5 style="padding:24px;text-align:center;color:#dc2626">Could not load accounts.</td></tr>';}}
+function renderStaff(){var tb=document.getElementById('staff-tbody');var q=(document.getElementById('stf-search').value||'').toLowerCase();var rows=_staffUsers.filter(function(u){return !q||(u.full_name||'').toLowerCase().indexOf(q)>-1||(u.email||'').toLowerCase().indexOf(q)>-1;});if(!rows.length){tb.innerHTML='<tr><td colspan=5 style="padding:24px;text-align:center;color:#94a3b8">No accounts.</td></tr>';return;}tb.innerHTML=rows.map(function(u){var a=u.is_active!==false;var dept=STAFF_ROLE_LABELS[u.role]||u.role||'-';var st=a?'<span style="background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px">Active</span>':'<span style="background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px">Suspended</span>';return '<tr style="border-top:1px solid #f1f5f9"><td style="padding:12px 16px;font-weight:700">'+_sfEsc(u.full_name||'-')+'</td><td style="padding:12px 16px;color:#64748b">'+_sfEsc(u.email)+'</td><td style="padding:12px 16px">'+_sfEsc(dept)+'</td><td style="padding:12px 16px">'+st+'</td><td style="padding:12px 16px;text-align:right;white-space:nowrap"><button onclick="staffRole('+u.id+')" class="stf-act">Role</button><button onclick="staffReset('+u.id+')" class="stf-act">Reset PW</button><button onclick="staffLogout('+u.id+')" class="stf-act">Force logout</button><button onclick="staffSuspend('+u.id+','+a+')" class="stf-act" style="color:'+(a?'#dc2626':'#16a34a')+'">'+(a?'Suspend':'Activate')+'</button></td></tr>';}).join('');}
+async function createStaff(){var msg=document.getElementById('stf-msg');var name=document.getElementById('stf-name').value.trim();var email=document.getElementById('stf-email').value.trim();var pass=document.getElementById('stf-pass').value;var role=document.getElementById('stf-role').value;if(!name||!email||!pass||!role){msg.style.color='#dc2626';msg.textContent='Fill in all fields.';return;}msg.style.color='#64748b';msg.textContent='Creating...';try{var reg=await fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,full_name:name,role:'student'})});var rd=await reg.json();if(!reg.ok)throw new Error(rd.detail||'Register failed');var rr=await fetch(API+'/admin/users/'+rd.id+'/role',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:role})});if(!rr.ok){var e=await rr.json().catch(function(){return{};});throw new Error(e.detail||'Role assign failed');}msg.style.color='#16a34a';msg.textContent=name+' created as '+(STAFF_ROLE_LABELS[role]||role)+'.';document.getElementById('stf-name').value='';document.getElementById('stf-email').value='';document.getElementById('stf-pass').value='';document.getElementById('stf-role').value='';loadStaff();}catch(e){msg.style.color='#dc2626';msg.textContent=e.message;}}
+async function staffRole(id){var u=_staffUsers.find(function(x){return x.id===id;});var role=prompt('New role (ceo, finance, trust_safety, customer_support, marketing, landlord_acquisition, admin_operations, student, landlord):',u?u.role:'');if(!role)return;var r=await fetch(API+'/admin/users/'+id+'/role',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:role.trim()})});var d=await r.json().catch(function(){return{};});alert(r.ok?(d.message||'Role updated.'):('Failed: '+(d.detail||r.status)));loadStaff();}
+async function staffReset(id){var u=_staffUsers.find(function(x){return x.id===id;});var pw=prompt('New temp password for '+(u?u.email:id)+' (8+ chars, upper, lower, number, special):');if(!pw)return;var r=await fetch(API+'/admin/users/'+id+'/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({new_password:pw})});var d=await r.json().catch(function(){return{};});alert(r.ok?(d.message||'Password reset.'):('Failed: '+(d.detail||r.status)));}
+async function staffLogout(id){if(!confirm('Force this user to log out of all devices? (account stays active)'))return;var r=await fetch(API+'/admin/users/'+id+'/force-logout',{method:'POST'});var d=await r.json().catch(function(){return{};});alert(r.ok?(d.message||'Logged out.'):('Failed: '+(d.detail||r.status)));}
+async function staffSuspend(id,isActive){if(!confirm((isActive?'Suspend':'Activate')+' this account?'))return;var r=await fetch(API+'/admin/users/'+id+'/suspend',{method:'POST'});var d=await r.json().catch(function(){return{};});alert(r.ok?(d.message||'Done.'):('Failed: '+(d.detail||r.status)));loadStaff();}
+</script>
+
+
+<script>
+var _actTimer=null;
+function _actAgo(iso){if(!iso)return '-';var d=new Date(iso);if(isNaN(d))return '-';var s=Math.floor((Date.now()-d.getTime())/1000);if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+function _actDot(st){var col=st==='online'?'#16a34a':st==='idle'?'#d97706':'#94a3b8';var lbl=st.charAt(0).toUpperCase()+st.slice(1);return '<span style="display:inline-flex;align-items:center;gap:6px;font-weight:700;color:'+col+'"><span style="width:8px;height:8px;border-radius:50%;background:'+col+'"></span>'+lbl+'</span>';}
+function _actEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+async function loadActivity(){var tb=document.getElementById('activity-tbody');try{var r=await fetch(API+'/admin/staff-activity');if(!r.ok)throw new Error('HTTP '+r.status);var rows=await r.json();document.getElementById('act-updated').textContent='Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});if(!rows.length){tb.innerHTML='<tr><td colspan=9 style="padding:24px;text-align:center;color:#94a3b8">No staff sessions yet.</td></tr>';return;}var LB=(window.STAFF_ROLE_LABELS||{});tb.innerHTML=rows.map(function(u){return '<tr style="border-top:1px solid #f1f5f9"><td style="padding:11px 14px;font-weight:700">'+_actEsc(u.name||'-')+'</td><td style="padding:11px 14px;color:#64748b">'+_actEsc(LB[u.role]||u.role)+'</td><td style="padding:11px 14px">'+_actDot(u.status||'offline')+'</td><td style="padding:11px 14px;color:#64748b">'+_actAgo(u.last_login)+'</td><td style="padding:11px 14px;color:#64748b">'+_actAgo(u.last_logout)+'</td><td style="padding:11px 14px;color:#64748b">'+_actEsc(u.device||'-')+'</td><td style="padding:11px 14px;color:#64748b;font-variant-numeric:tabular-nums">'+_actEsc(u.ip||'-')+'</td><td style="padding:11px 14px">'+(u.active_session?'<span style="color:#16a34a;font-weight:700">Active</span>':'<span style="color:#94a3b8">-</span>')+'</td><td style="padding:11px 14px;text-align:right">'+(u.active_session?'<button onclick="staffLogout('+u.id+')" class="stf-act">Force logout</button>':'')+'</td></tr>';}).join('');}catch(e){tb.innerHTML='<tr><td colspan=9 style="padding:24px;text-align:center;color:#dc2626">Could not load activity.</td></tr>';}}
+// auto-refresh while the activity tab is visible
+setInterval(function(){var t=document.getElementById('tab-activity');if(t&&t.classList.contains('active'))loadActivity();},30000);
+// global heartbeat: keep this staff member marked online
+setInterval(function(){var tok=sessionStorage.getItem('adminToken');if(tok){fetch(API+'/auth/heartbeat',{method:'POST'}).catch(function(){});}},60000);
+</script>
+
 </body>
 </html>
 <script>
