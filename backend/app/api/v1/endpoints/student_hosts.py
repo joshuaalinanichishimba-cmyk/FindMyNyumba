@@ -877,3 +877,18 @@ def public_profile(user_id: int, db: Session = Depends(get_db)):
     data["listing_count"] = len(data["listings"])
     return data
 
+
+# -- POST /student-host/profile/photo : avatar upload for assistants --
+from app.api.v1.endpoints.landlords import _upload_avatar_to_cloudinary as _upload_avatar
+
+@router.post("/profile/photo")
+async def upload_assistant_photo(
+    file: UploadFile = File(...),
+    host: User = Depends(require_student_host),
+    db: Session = Depends(get_db),
+):
+    url = await _upload_avatar(file)
+    host.avatar_url = url
+    db.commit()
+    return {"status": "success", "avatar_url": url}
+

@@ -1174,7 +1174,7 @@ async function uploadAvatar(input) {
     const fd = new FormData(); fd.append('file', file);
     showToast('Uploading photo...', 'success');
     try {
-        const res = await fetch(`${API_BASE}/users/me/photo`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
+        const res = await fetch(`${API_BASE}/student-host/profile/photo`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Upload failed.');
         const av = document.getElementById('sh-avatar'); if (av) av.src = data.avatar_url;
