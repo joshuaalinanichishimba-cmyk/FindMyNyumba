@@ -74,6 +74,7 @@ from app.models.trust_models import (                 # noqa: E402,F401
     FraudReport, RiskScore, TrustBanner,
 )
 from app.models.assistant_profile import AssistantProfile  # noqa: E402,F401
+from app.models.service_package import ServicePackage, ServicePackagePriceHistory  # noqa: E402,F401
 
 # --- Create any missing tables (idempotent; safe on every startup) --------
 Base.metadata.create_all(bind=engine)

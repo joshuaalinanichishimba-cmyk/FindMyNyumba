@@ -5,6 +5,7 @@ from app.models.saved_listing import SavedListing
 from app.models.report import Report
 from app.models.listing_media import ListingMedia
 from app.models.assistant_profile import AssistantProfile
+from app.models.service_package import ServicePackage, ServicePackagePriceHistory
 
 __all__ = [
     "User",
@@ -13,4 +14,6 @@ __all__ = [
     "Report",
     "ListingMedia",
     "AssistantProfile",
+    "ServicePackage",
+    "ServicePackagePriceHistory",
 ]
