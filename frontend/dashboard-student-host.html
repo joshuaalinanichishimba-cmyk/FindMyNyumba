@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -741,6 +741,61 @@
                     </form>
                 </div>
                 <div class="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-black text-gray-900 mb-1 flex items-center gap-2">
+                        <i class="fas fa-id-badge text-[#ea580c]"></i> Professional Profile
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-4">This is what students see. A complete profile earns more trust.</p>
+
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between text-xs font-bold text-gray-500 mb-1">
+                            <span>Profile completeness</span><span id="prof-completeness">0%</span>
+                        </div>
+                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div id="prof-completeness-bar" class="h-full bg-[#ea580c] rounded-full transition-all" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">About you</label>
+                            <textarea id="prof-bio" rows="3" placeholder="Tell students how you help them find accommodation near campus..." class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ea580c]/30 focus:border-[#ea580c] outline-none resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Areas you cover</label>
+                            <input id="prof-areas" placeholder="Riverside, Kansenshi, Nkana East" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ea580c]/30 focus:border-[#ea580c] outline-none">
+                            <p class="text-[11px] text-gray-400 mt-1">Separate with commas.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Languages you speak</label>
+                            <input id="prof-languages" placeholder="English, Bemba, Nyanja" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ea580c]/30 focus:border-[#ea580c] outline-none">
+                            <p class="text-[11px] text-gray-400 mt-1">Separate with commas.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Current availability</label>
+                            <select id="prof-status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ea580c]/30 focus:border-[#ea580c] outline-none bg-white">
+                                <option value="available">Available</option>
+                                <option value="busy">Busy</option>
+                                <option value="offline">Offline</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="saveProfileDetails()" class="bg-[#ea580c] text-white px-8 py-3 rounded-xl font-black hover:bg-[#c2410c] shadow transition text-sm">Save Professional Profile</button>
+                        <span id="prof-details-msg" class="text-xs font-bold ml-2"></span>
+                    </div>
+
+                    <div class="mt-6 pt-5 border-t border-gray-100">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Your reputation</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div class="bg-gray-50 rounded-xl p-3 text-center"><div id="rep-trust" class="text-xl font-black text-gray-900">0</div><div class="text-[11px] text-gray-400 font-bold">Trust score</div></div>
+                            <div class="bg-gray-50 rounded-xl p-3 text-center"><div id="rep-rating" class="text-xl font-black text-gray-900">0.0</div><div class="text-[11px] text-gray-400 font-bold">Rating</div></div>
+                            <div class="bg-gray-50 rounded-xl p-3 text-center"><div id="rep-placements" class="text-xl font-black text-gray-900">0</div><div class="text-[11px] text-gray-400 font-bold">Placements</div></div>
+                            <div class="bg-gray-50 rounded-xl p-3 text-center"><div id="rep-response" class="text-xl font-black text-gray-900">0%</div><div class="text-[11px] text-gray-400 font-bold">Response rate</div></div>
+                            <div class="bg-gray-50 rounded-xl p-3 text-center"><div id="rep-years" class="text-xl font-black text-gray-900">0</div><div class="text-[11px] text-gray-400 font-bold">Years active</div></div>
+                            <div class="bg-gray-50 rounded-xl p-3 text-center"><div id="rep-reviews" class="text-xl font-black text-gray-900">0</div><div class="text-[11px] text-gray-400 font-bold">Reviews</div></div>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-3">These are calculated from your placements and student reviews. They grow as you help more students.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 lg:p-8 rounded-2xl shadow-sm border border-gray-100">
                     <h3 class="font-black text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
                         <i class="fas fa-lock text-[#ea580c]"></i> Change Password
                     </h3>
@@ -1138,7 +1193,58 @@ function loadProfile() {
     if (el('prof-phone')) el('prof-phone').value = _currentUser.phone     || '';
     if (el('prop-contact-phone') && !el('prop-contact-phone').value) el('prop-contact-phone').value = _currentUser.phone || '';
     if (el('prof-email')) el('prof-email').value = _currentUser.email     || '';
+    loadProfileDetails();
 }
+
+async function loadProfileDetails() {
+    try {
+        const res = await fetch(`${API_BASE}/student-host/profile-details`, { headers: authHeaders() });
+        if (!res.ok) return;
+        const p = await res.json();
+        const el = (id) => document.getElementById(id);
+        if (el('prof-bio'))       el('prof-bio').value       = p.bio || '';
+        if (el('prof-areas'))     el('prof-areas').value     = (p.areas_covered || []).join(', ');
+        if (el('prof-languages')) el('prof-languages').value = (p.languages || []).join(', ');
+        if (el('prof-status'))    el('prof-status').value    = p.current_status || 'available';
+        const pct = p.profile_completeness || 0;
+        if (el('prof-completeness'))     el('prof-completeness').textContent = pct + '%';
+        if (el('prof-completeness-bar')) el('prof-completeness-bar').style.width = pct + '%';
+        if (el('rep-trust'))      el('rep-trust').textContent      = p.trust_score || 0;
+        if (el('rep-rating'))     el('rep-rating').textContent     = (Number(p.rating) || 0).toFixed(1);
+        if (el('rep-placements')) el('rep-placements').textContent = p.successful_placements || 0;
+        if (el('rep-response'))   el('rep-response').textContent   = (Number(p.response_rate) || 0) + '%';
+        if (el('rep-years'))      el('rep-years').textContent      = Number(p.years_active) || 0;
+        if (el('rep-reviews'))    el('rep-reviews').textContent    = p.rating_count || 0;
+    } catch (e) {}
+}
+
+async function saveProfileDetails() {
+    const msg = document.getElementById('prof-details-msg');
+    const val = (id) => (document.getElementById(id)?.value || '');
+    const toList = (s) => s.split(',').map(x => x.trim()).filter(Boolean);
+    if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Saving...'; }
+    try {
+        const res = await fetch(`${API_BASE}/student-host/profile-details`, {
+            method: 'PUT', headers: authHeaders(true),
+            body: JSON.stringify({
+                bio: val('prof-bio'),
+                areas_covered: toList(val('prof-areas')),
+                languages: toList(val('prof-languages')),
+                current_status: val('prof-status')
+            })
+        });
+        if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.detail || 'Save failed'); }
+        const p = await res.json();
+        if (msg) { msg.style.color = '#16a34a'; msg.textContent = 'Saved.'; }
+        const pct = p.profile_completeness || 0;
+        const cel = document.getElementById('prof-completeness');
+        const bar = document.getElementById('prof-completeness-bar');
+        if (cel) cel.textContent = pct + '%';
+        if (bar) bar.style.width = pct + '%';
+        setTimeout(() => { if (msg) msg.textContent = ''; }, 2500);
+    } catch (e) { if (msg) { msg.style.color = '#dc2626'; msg.textContent = e.message; } }
+}
+
 
 function logout() {
     if (!confirm('Are you sure you want to log out?')) return;
