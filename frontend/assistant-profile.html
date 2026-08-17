@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accommodation Assistant | FindMyNyumba</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background:#f8fafc; }
+  .brand-navy { color:#0F172A; } .brand-orange { color:#ea580c; }
+</style>
+</head>
+<body class="min-h-screen">
+  <header class="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 font-black text-lg"><span class="brand-navy">FindMy</span><span class="brand-orange">Nyumba</span></a>
+      <a href="browse.html" class="text-sm font-bold text-gray-500 hover:text-[#ea580c]"><i class="fas fa-arrow-left mr-1"></i> Browse</a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6" id="root">
+    <div id="loading" class="text-center py-20 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl"></i><p class="mt-3 text-sm">Loading profile...</p></div>
+    <div id="notfound" class="hidden text-center py-20"><i class="fas fa-user-slash text-4xl text-gray-300"></i><p class="mt-3 font-bold text-gray-500">Assistant not found</p><a href="browse.html" class="text-[#ea580c] text-sm font-bold mt-2 inline-block">Browse listings</a></div>
+    <div id="content" class="hidden space-y-5"></div>
+  </main>
+
+<script>
+const API_BASE = "https://findmynyumba.onrender.com/api/v1";
+const params = new URLSearchParams(location.search);
+const uid = params.get('id');
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function statusPill(s){
+  const map={available:['Available','#16a34a','#dcfce7'],busy:['Busy','#d97706','#fef3c7'],offline:['Offline','#64748b','#f1f5f9']};
+  const [t,c,bg]=map[s]||map.offline;
+  return `<span style="background:${bg};color:${c}" class="text-xs font-bold px-3 py-1 rounded-full">${t}</span>`;
+}
+function stars(r){r=Number(r)||0;let h='';for(let i=1;i<=5;i++)h+=`<i class="fa-star ${i<=Math.round(r)?'fas':'far'}" style="color:#f59e0b"></i>`;return h;}
+function chip(t){return `<span class="inline-block bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg">${esc(t)}</span>`;}
+
+async function load(){
+  if(!uid){show('notfound');return;}
+  try{
+    const res=await fetch(`${API_BASE}/student-host/directory/${uid}/public`);
+    if(!res.ok)throw 0;
+    const d=await res.json();
+    render(d);
+  }catch(e){show('notfound');}
+}
+function show(id){['loading','notfound','content'].forEach(x=>document.getElementById(x).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
+
+function render(d){
+  const initial=(d.name||'A').charAt(0).toUpperCase();
+  const avatar=d.avatar_url
+    ? `<img src="${esc(d.avatar_url)}" class="w-20 h-20 rounded-2xl object-cover">`
+    : `<div class="w-20 h-20 rounded-2xl bg-[#ea580c] text-white flex items-center justify-center text-2xl font-black">${initial}</div>`;
+  const verified=d.is_verified?`<span class="text-xs font-bold text-green-600"><i class="fas fa-circle-check"></i> FindMyNyumba Verified</span>`:'';
+
+  const rep=[
+    ['Trust score',(d.trust_score||0)],
+    ['Rating',(Number(d.rating)||0).toFixed(1)],
+    ['Placements',(d.successful_placements||0)],
+    ['Response',(Number(d.response_rate)||0)+'%'],
+    ['Years active',(Number(d.years_active)||0)],
+  ].map(([l,v])=>`<div class="bg-white rounded-xl p-3 text-center border border-gray-100"><div class="text-lg font-black brand-navy">${v}</div><div class="text-[10px] text-gray-400 font-bold uppercase tracking-wide">${l}</div></div>`).join('');
+
+  const areas=(d.areas_covered||[]).length?`<div><p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Areas covered</p><div class="flex flex-wrap gap-2">${d.areas_covered.map(chip).join('')}</div></div>`:'';
+  const langs=(d.languages||[]).length?`<div><p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Languages</p><div class="flex flex-wrap gap-2">${d.languages.map(chip).join('')}</div></div>`:'';
+  const bio=d.bio?`<div><p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">About</p><p class="text-sm text-gray-700 leading-relaxed">${esc(d.bio)}</p></div>`:'';
+
+  const listings=(d.listings||[]);
+  const listingCards=listings.length
+    ? listings.map(l=>`<a href="listing.html?id=${l.id}" class="block bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition"><div class="flex items-center justify-between"><div><p class="font-bold text-sm brand-navy">${esc(l.title)}</p><p class="text-xs text-gray-400 mt-0.5">${l.availability_status?esc(l.availability_status):''}</p></div><div class="text-right"><p class="font-black brand-orange">K${l.price!=null?l.price:'-'}</p><p class="text-[11px] text-gray-400">View & contact <i class="fas fa-chevron-right text-[9px]"></i></p></div></div></a>`).join('')
+    : `<div class="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-400"><i class="fas fa-house text-2xl mb-2"></i><p class="text-sm">No active listings yet.</p></div>`;
+
+  document.getElementById('content').innerHTML=`
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 lg:p-6">
+      <div class="flex items-start gap-4">
+        ${avatar}
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-xl font-black brand-navy">${esc(d.name||'Accommodation Assistant')}</h1>
+            ${statusPill(d.current_status)}
+          </div>
+          <p class="text-sm text-gray-500 mt-0.5">Accommodation Assistant</p>
+          <div class="flex items-center gap-2 mt-1">${stars(d.rating)} <span class="text-xs text-gray-400">(${d.rating_count||0})</span></div>
+          <div class="mt-1">${verified}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">${rep}</div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 lg:p-6 space-y-5">
+      ${bio||'<p class="text-sm text-gray-400">This assistant has not added a bio yet.</p>'}
+      ${areas}
+      ${langs}
+    </div>
+
+    <div>
+      <p class="text-sm font-black brand-navy mb-3">Listings by this assistant <span class="text-gray-400 font-bold">(${listings.length})</span></p>
+      <div class="space-y-3">${listingCards}</div>
+      <p class="text-[11px] text-gray-400 mt-3 text-center">Tap a listing to view details and contact this assistant through FindMyNyumba.</p>
+    </div>
+  `;
+  show('content');
+  document.title=`${d.name||'Assistant'} | FindMyNyumba`;
+}
+load();
+</script>
+</body>
+</html>
