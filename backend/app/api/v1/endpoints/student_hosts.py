@@ -864,5 +864,16 @@ def public_profile(user_id: int, db: Session = Depends(get_db)):
     data = _profile_dict(prof, user)
     # public view omits private contact until later policy work
     data.pop("email", None)
+    # include this assistant's active listings so the public profile can show them
+    rows = (db.query(Listing)
+              .filter(Listing.owner_id == user_id, Listing.status == "active")
+              .order_by(Listing.id.desc()).limit(30).all())
+    data["listings"] = [{
+        "id": l.id,
+        "title": l.title,
+        "price": float(l.price) if l.price is not None else None,
+        "availability_status": getattr(l, "availability_status", None),
+    } for l in rows]
+    data["listing_count"] = len(data["listings"])
     return data
 
