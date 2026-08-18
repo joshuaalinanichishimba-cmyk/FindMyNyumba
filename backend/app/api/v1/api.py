@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/api/v1/api.py
 Master API router.
 This is the ONLY place sub-routers are registered.
@@ -8,7 +8,7 @@ must NOT include "/api/v1" in its own prefix.
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import auth, admin, listings, messages, landlords, student_hosts, students, notifications
-from app.api.v1.endpoints import trust, verification, fraud, admin_trust, admin_extra, viewing_requests, payments
+from app.api.v1.endpoints import trust, verification, fraud, admin_trust, admin_extra, viewing_requests, payments, packages
 
 api_router = APIRouter()
 
@@ -17,6 +17,7 @@ api_router.include_router(auth.router)         # /api/v1/auth/...
 api_router.include_router(listings.router)     # /api/v1/properties/...
 api_router.include_router(messages.router)
 api_router.include_router(payments.router)         # /api/v1/payments/...     # /api/v1/messages/...
+api_router.include_router(packages.router)          # /api/v1/packages + /admin/packages
 
 # â”€â”€ Role dashboards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 api_router.include_router(landlords.router)    # /api/v1/landlord/...
