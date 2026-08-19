@@ -175,7 +175,7 @@ let currentTxnId = null;
 let pollTimer = null;
 let countdownTimer = null;
 
-function chooseTier(key, price, label){
+function setTier(key, price, label){
   selectedTier = { key: key, price: price, label: label };
   var payBtn = document.getElementById('pay-btn');
   if (payBtn) payBtn.textContent = 'Pay K' + price;
@@ -183,6 +183,9 @@ function chooseTier(key, price, label){
   if (rcAmt) rcAmt.textContent = 'ZMW ' + price + '.00';
   var rcPlan = document.getElementById('rc-plan');
   if (rcPlan) rcPlan.textContent = label;
+}
+function chooseTier(key, price, label){
+  setTier(key, price, label);
   goStep(2);
 }
 
@@ -238,7 +241,7 @@ async function loadPackages(){
       });
     });
     var first = box.querySelector('.tier-btn');
-    if(first){ chooseTier(first.dataset.code, Number(first.dataset.fee), first.dataset.name); first.classList.remove('border-slate-100'); first.classList.add('border-[#ea580c]'); }
+    if(first){ setTier(first.dataset.code, Number(first.dataset.fee), first.dataset.name); first.classList.remove('border-slate-100'); first.classList.add('border-[#ea580c]'); }
   } catch(e){
     box.innerHTML = '<p class="text-center text-sm text-red-500 py-6">Could not load plans. Please refresh.</p>';
   }
