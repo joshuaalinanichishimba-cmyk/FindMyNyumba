@@ -23,6 +23,8 @@ class ServicePackage(Base):
     description   = Column(Text, nullable=True)
     is_active     = Column(Boolean, default=True, nullable=False)
     sort_order    = Column(Integer, default=0, nullable=False)
+    audience      = Column(String, default="student", index=True)   # student | landlord
+    grant_type    = Column(String, default="student_access")        # student_access | listing_boost
     created_at    = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

@@ -2765,6 +2765,8 @@ setInterval(function(){var t=document.getElementById('tab-activity');if(t&&t.cla
 setInterval(function(){var tok=sessionStorage.getItem('adminToken');if(tok){fetch(API+'/auth/heartbeat',{method:'POST'}).catch(function(){});}},60000);
 </script>
 
+<script src="fmn-pricing-admin.js"></script>
+<script src="fmn-pricing-new.js"></script>
 </body>
 </html>
 <script>
