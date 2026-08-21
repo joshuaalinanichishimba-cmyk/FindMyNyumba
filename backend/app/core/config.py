@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/core/config.py
 Application settings loaded from environment variables / .env file.
 SECURITY: SECRET_KEY has no default â€” must be set in .env or the app
@@ -50,6 +50,12 @@ class Settings(BaseSettings):
     MOMO_API_USER: str          = ""
     MOMO_API_KEY: str           = ""
     MOMO_CALLBACK_HOST: str     = "findmynyumba.onrender.com"
+
+    # ---- Lenco (BroadPay) - live payment provider, replaces MTN MoMo direct ----
+    # LENCO_SECRET_KEY is the API token from the Lenco dashboard. It also seeds
+    # the webhook hash key, so the same value verifies X-Lenco-Signature.
+    LENCO_SECRET_KEY: str       = ""
+    LENCO_CURRENCY: str         = "ZMW"
     # MoneyUnify aggregator (MTN + Airtel + Zamtel via one API)
     MONEYUNIFY_AUTH_ID: str     = ""
     MONEYUNIFY_BASE_URL: str    = "https://api.moneyunify.one"

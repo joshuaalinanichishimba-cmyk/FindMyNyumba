@@ -266,20 +266,7 @@ def get_all_properties(
 
 
 # â”€â”€ GET /properties/{id} â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-def _student_has_paid_access(db, user_id) -> bool:
-    """True if the user has a successful verification_fee payment in the last 30 days."""
-    if not user_id:
-        return False
-    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
-    from app.models.admin_models import Transaction
-    cutoff = _dt.now(_tz.utc) - _td(days=30)
-    txn = db.query(Transaction).filter(
-        Transaction.user_id == user_id,
-        Transaction.type == "verification_fee",
-        Transaction.status == "success",
-        Transaction.created_at >= cutoff,
-    ).first()
-    return txn is not None
+from app.core.entitlements import has_active_access as _student_has_paid_access
 
 
 @router.get("/{listing_id}")

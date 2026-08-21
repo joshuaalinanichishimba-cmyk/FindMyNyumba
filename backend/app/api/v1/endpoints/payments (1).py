@@ -102,19 +102,6 @@ def _settle(db: Session, txn: Transaction, new_state: str, provider_ref=None, re
         txn.failure_reason = reason
     db.commit()
 
-    if new_state == "success":
-        try:
-            from app.core.entitlements import grant_access
-            from app.models.service_package import ServicePackage
-            code = (txn.ref or "").replace("FMN-", "", 1).rsplit("-", 1)[0].lower().replace("-", "_")
-            pkg = db.query(ServicePackage).filter(ServicePackage.code == code).first()
-            if pkg:
-                grant_access(db, txn.user_id, pkg, txn)
-            else:
-                logger.error("grant.no_package ref=%s derived_code=%s", txn.ref, code)
-        except Exception:
-            logger.exception("grant.failed ref=%s user=%s MANUAL GRANT REQUIRED", txn.ref, txn.user_id)
-
     logger.info("state.settled ref=%s state=%s amount=%s %s user=%s providerRef=%s reason=%s",
                 txn.ref, new_state, txn.amount, txn.currency, txn.user_id,
                 provider_ref, reason)
