@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/models/listing.py
 
 FIX: status default changed from "active" â†’ "pending".
@@ -24,6 +24,12 @@ class Listing(Base):
     title       = Column(String, index=True, nullable=False)
     description = Column(String, nullable=True)
     price       = Column(Float, nullable=False)
+    # Stage 2 price-review annotations (never overwrite price above)
+    market_low             = Column(Float, nullable=True)
+    market_high            = Column(Float, nullable=True)
+    price_confidence       = Column(String, default="unverified")
+    price_review_status    = Column(String, default="unreviewed")
+    price_last_reviewed_at = Column(DateTime(timezone=True), nullable=True)
     location    = Column(String, nullable=False, index=True)
     image_url   = Column(String, nullable=True)
 
