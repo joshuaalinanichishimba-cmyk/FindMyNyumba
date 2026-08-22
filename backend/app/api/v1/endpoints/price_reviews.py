@@ -163,6 +163,7 @@ def price_insight(listing_id: int, db: Session = Depends(get_db)):
         "review_status": getattr(listing, "price_review_status", None) or "unreviewed",
         "market_low": getattr(listing, "market_low", None),
         "market_high": getattr(listing, "market_high", None),
+        "verified_market_price": getattr(listing, "verified_market_price", None),
         "based_on_reviews": accepted,
     }
 
@@ -236,3 +237,95 @@ def dismiss_review(review_id: int, body: ModerateBody = ModerateBody(),
                    db: Session = Depends(get_db)):
     review, listing = _moderate(db, review_id, admin, "dismissed", body.note)
     return {"id": review.id, "status": "dismissed"}
+
+
+import statistics
+
+
+def _median_of_accepted(db: Session, listing_id: int):
+    """Median reported price across accepted reviews that cite a price."""
+    rows = (db.query(PriceReview)
+              .filter(PriceReview.listing_id == listing_id,
+                      PriceReview.status == "accepted",
+                      PriceReview.reported_price.isnot(None))
+              .all())
+    prices = [float(r.reported_price) for r in rows
+              if r.review_type != "confirmed_accurate"]
+    if not prices:
+        return None, 0
+    return round(statistics.median(prices), 2), len(prices)
+
+
+@router.get("/admin/listings/{listing_id}/price-review-detail")
+def price_review_detail(listing_id: int,
+                        admin: User = Depends(require(MODERATE_PERM)),
+                        db: Session = Depends(get_db)):
+    """
+    Everything an admin needs to set a verified price: the listing's asking
+    price, its accepted reviews, the suggested median, and any verified price
+    already set.
+    """
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+
+    accepted = (db.query(PriceReview)
+                  .filter(PriceReview.listing_id == listing_id,
+                          PriceReview.status == "accepted")
+                  .order_by(PriceReview.created_at.desc())
+                  .all())
+    median, n_priced = _median_of_accepted(db, listing_id)
+
+    return {
+        "listing_id": listing_id,
+        "asking_price": float(listing.price) if listing.price is not None else None,
+        "confidence": getattr(listing, "price_confidence", None) or "unverified",
+        "verified_market_price": getattr(listing, "verified_market_price", None),
+        "verified_price_set_by_name": getattr(listing, "verified_price_set_by_name", None),
+        "verified_price_set_at": (listing.verified_price_set_at.isoformat()
+                                  if getattr(listing, "verified_price_set_at", None) else None),
+        "suggested_price": median,
+        "based_on_priced_reviews": n_priced,
+        "accepted_reviews": [_review_dict(r) for r in accepted],
+    }
+
+
+class VerifiedPriceBody(BaseModel):
+    verified_market_price: float | None = Field(..., ge=0,
+        description="Set the FindMyNyumba verified fair price. Null clears it.")
+
+
+@router.post("/admin/listings/{listing_id}/verified-price")
+def set_verified_price(listing_id: int, body: VerifiedPriceBody,
+                       admin: User = Depends(require(MODERATE_PERM)),
+                       db: Session = Depends(get_db)):
+    """
+    Set (or clear) the FindMyNyumba verified market price on a listing.
+
+    SEPARATION RULE: listings.price (the landlord's asking price) is NEVER
+    written here. verified_market_price is a distinct annotation, shown
+    alongside the landlord's price, representing FindMyNyumba's own conclusion.
+    """
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+
+    listing.verified_market_price = body.verified_market_price
+    if hasattr(listing, "verified_price_set_by"):
+        listing.verified_price_set_by = admin.id
+    if hasattr(listing, "verified_price_set_by_name"):
+        listing.verified_price_set_by_name = getattr(admin, "full_name", None)
+    if hasattr(listing, "verified_price_set_at"):
+        listing.verified_price_set_at = _now() if body.verified_market_price is not None else None
+
+    db.commit()
+    logger.info("verified_price.set listing=%s value=%s by=%s",
+                listing_id, body.verified_market_price, admin.id)
+    return {
+        "listing_id": listing_id,
+        "asking_price": float(listing.price) if listing.price is not None else None,
+        "verified_market_price": listing.verified_market_price,
+    }
+
+
+# ============================================================

@@ -30,6 +30,11 @@ class Listing(Base):
     price_confidence       = Column(String, default="unverified")
     price_review_status    = Column(String, default="unreviewed")
     price_last_reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    # FindMyNyumba verified price (separate from landlord price above)
+    verified_market_price      = Column(Float, nullable=True)
+    verified_price_set_by      = Column(Integer, nullable=True)
+    verified_price_set_by_name = Column(String, nullable=True)
+    verified_price_set_at      = Column(DateTime(timezone=True), nullable=True)
     location    = Column(String, nullable=False, index=True)
     image_url   = Column(String, nullable=True)
 
