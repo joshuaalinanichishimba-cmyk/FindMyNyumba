@@ -110,6 +110,7 @@ def _settle(db: Session, txn: Transaction, new_state: str, provider_ref=None, re
             pkg = db.query(ServicePackage).filter(ServicePackage.code == code).first()
             if pkg:
                 grant_access(db, txn.user_id, pkg, txn)
+                _payment_success_side_effects(db, txn, pkg)
             else:
                 logger.error("grant.no_package ref=%s derived_code=%s", txn.ref, code)
         except Exception:
@@ -343,3 +344,68 @@ async def lenco_webhook(request: Request, db: Session = Depends(get_db)):
         logger.info("webhook.ignored ref=%s status=%s", reference, provider_status)
 
     return Response(status_code=200)
+
+
+def _payment_success_side_effects(db, txn, package=None):
+    """
+    Called once, immediately after a transaction settles to success.
+    Creates an in-app Notification (type='payment') and sends a receipt email.
+    Both are best-effort and independently guarded.
+    """
+    from app.models.user import User
+
+    user = db.query(User).filter(User.id == txn.user_id).first()
+    if not user:
+        return
+
+    pkg_name = getattr(package, "name", None) or "Verified Access"
+    amount = txn.amount
+    currency = txn.currency or "ZMW"
+    amount_disp = (f"K{int(amount):,}" if currency == "ZMW"
+                   else f"{currency} {int(amount):,}")
+
+    # work out expiry from any subscription just granted
+    expires_on = None
+    try:
+        from app.core.entitlements import get_active_subscription
+        sub = get_active_subscription(db, txn.user_id)
+        if sub and sub.expires_at:
+            expires_on = sub.expires_at.strftime("%d %b %Y")
+    except Exception:
+        pass
+
+    # 1) in-app notification (type 'payment' is already a valid Notification type)
+    try:
+        from app.models.admin_models import Notification
+        body = f"Your {amount_disp} {pkg_name} payment was received."
+        if expires_on:
+            body += f" Access is active until {expires_on}."
+        db.add(Notification(
+            user_id=txn.user_id,
+            type="payment",
+            title="Payment received",
+            body=body,
+            channel="in_app",
+        ))
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("notify.failed ref=%s user=%s", txn.ref, txn.user_id)
+
+    # 2) receipt email (respects the user's email_alerts preference)
+    try:
+        if getattr(user, "email_alerts", True) and getattr(user, "email", None):
+            from app.utils.email import send_payment_receipt_email
+            send_payment_receipt_email(
+                to_email=user.email,
+                full_name=getattr(user, "full_name", None),
+                package_name=pkg_name,
+                amount=amount,
+                currency=currency,
+                method=txn.method,
+                reference=txn.ref,
+                expires_on=expires_on,
+            )
+    except Exception:
+        logger.exception("receipt.failed ref=%s user=%s", txn.ref, txn.user_id)
+

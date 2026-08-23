@@ -221,3 +221,133 @@ def send_login_alert_email(to_email: str, full_name: str, device: str, ip: str, 
 
     response = resend.Emails.send(params)
     log.info("Login alert email sent to %s (id: %s)", to_email, response.get("id"))
+
+
+def send_payment_receipt_email(to_email: str, full_name: str,
+                               package_name: str, amount, currency: str,
+                               method: str, reference: str,
+                               expires_on: str = None,
+                               unlocks: str = "message landlords and see contact details") -> None:
+    """
+    Send a Verified Access payment receipt via Resend.
+
+    Mirrors send_password_reset_email mechanics exactly. Raises on Resend error
+    so the caller can log it; the caller must never let a failure here undo a
+    settled payment.
+
+    amount/currency: e.g. 150, "ZMW"  -> shown as "K150"
+    method: airtel_money | mtn_money | zamtel_money -> shown friendly
+    """
+    resend.api_key = settings.RESEND_API_KEY
+    first_name = (full_name or "").split()[0] if full_name else "there"
+
+    def _money(a, c):
+        try:
+            n = "{:,.0f}".format(float(a))
+        except (TypeError, ValueError):
+            return str(a)
+        return ("K" + n) if (c or "ZMW") == "ZMW" else ((c or "") + " " + n)
+
+    method_label = {
+        "airtel_money": "Airtel Money",
+        "mtn_money": "MTN Mobile Money",
+        "zamtel_money": "Zamtel Money",
+        "bank_transfer": "Bank transfer",
+    }.get((method or "").lower(), "Mobile money")
+
+    amount_display = _money(amount, currency)
+    expiry_row = ""
+    if expires_on:
+        expiry_row = f"""
+                    <tr>
+                      <td style="padding:8px 0;color:#64748b;font-size:14px;">Access until</td>
+                      <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:700;text-align:right;">{expires_on}</td>
+                    </tr>"""
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0"
+                 style="background:#ffffff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden;max-width:600px;width:100%;">
+            <!-- Header -->
+            <tr>
+              <td style="background:#0F172A;padding:32px 40px;text-align:center;">
+                <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px;">FindMyNyumba</h1>
+                <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Payment receipt</p>
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td style="padding:36px 40px 8px;">
+                <p style="margin:0 0 6px;color:#0f172a;font-size:17px;font-weight:700;">Thank you, {first_name}.</p>
+                <p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.6;">
+                  Your payment was received and your Verified Access is now active.
+                  You can {unlocks}.
+                </p>
+
+                <!-- amount card -->
+                <table width="100%" cellpadding="0" cellspacing="0"
+                       style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;margin-bottom:24px;">
+                  <tr><td style="padding:18px 22px;text-align:center;">
+                    <p style="margin:0 0 2px;color:#9a3412;font-size:12px;text-transform:uppercase;letter-spacing:.05em;">Amount paid</p>
+                    <p style="margin:0;color:#ea580c;font-size:30px;font-weight:800;">{amount_display}</p>
+                  </td></tr>
+                </table>
+
+                <!-- details -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:8px 0;color:#64748b;font-size:14px;border-bottom:1px solid #f1f5f9;">Package</td>
+                    <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:700;text-align:right;border-bottom:1px solid #f1f5f9;">{package_name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;color:#64748b;font-size:14px;border-bottom:1px solid #f1f5f9;">Paid with</td>
+                    <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:700;text-align:right;border-bottom:1px solid #f1f5f9;">{method_label}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;color:#64748b;font-size:14px;border-bottom:1px solid #f1f5f9;">Reference</td>
+                    <td style="padding:8px 0;color:#0f172a;font-size:13px;font-weight:700;text-align:right;border-bottom:1px solid #f1f5f9;">{reference}</td>
+                  </tr>{expiry_row}
+                </table>
+
+                <!-- trust line -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;">
+                  <tr><td style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;">
+                    <p style="margin:0;color:#166534;font-size:13px;line-height:1.6;">
+                      This fee is for FindMyNyumba Verified Access only. Rent is always paid
+                      directly to your landlord, never through FindMyNyumba.
+                    </p>
+                  </td></tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="background:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
+                <p style="margin:0;color:#9ca3af;font-size:12px;">&copy; 2026 FindMyNyumba &mdash; Zambia Student Accommodation</p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+      </table>
+    </body>
+    </html>
+    """
+
+    params: resend.Emails.SendParams = {
+        "from": f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>",
+        "to":   [to_email],
+        "subject": f"Your FindMyNyumba receipt - {reference}",
+        "html": html_body,
+    }
+    response = resend.Emails.send(params)
+    log.info("Payment receipt email sent to %s ref=%s (id: %s)",
+             to_email, reference, response.get("id"))
+
