@@ -1,0 +1,20 @@
+﻿
+import json
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user, get_current_user_optional
+from app.core.contact_guard import mask_numbers as _mask_contacts
+from app.core.database import get_db
+from app.models.listing import Listing
+from app.models.listing_media import ListingMedia
+from app.models.report import Report
+from app.models.review import Review
+from app.models.viewing_request import ViewingRequest, ViewingStatus
+from app.models.user import User
+
+router = APIRouter(prefix="/properties", tags=["Properties"])
+

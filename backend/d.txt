@@ -1,0 +1,14 @@
+﻿
+          try:
+              from app.core.entitlements import grant_access
+              from app.models.service_package import ServicePackage
+              code = (txn.ref or "").replace("FMN-", "", 1).rsplit("-", 1)[0].lower().replace("-", "_")
+              pkg = db.query(ServicePackage).filter(ServicePackage.code == code).first()
+              if pkg:
+>                 grant_access(db, txn.user_id, pkg, txn)
+                  _payment_success_side_effects(db, txn, pkg)
+              else:
+                  logger.error("grant.no_package ref=%s derived_code=%s", txn.ref, code)
+          except Exception:
+
+

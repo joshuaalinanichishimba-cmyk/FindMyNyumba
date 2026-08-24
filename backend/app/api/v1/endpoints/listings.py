@@ -27,6 +27,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from sqlalchemy import case, and_
+from datetime import datetime, timezone
 
 from app.api.deps import get_current_user, get_current_user_optional
 from app.core.contact_guard import mask_numbers as _mask_contacts
@@ -39,6 +41,18 @@ from app.models.viewing_request import ViewingRequest, ViewingStatus
 from app.models.user import User
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
+
+
+# --- Boost ranking: active (non-expired) boosts pin to the top; expired ones
+#     score 0 and fall back to normal ordering with no manual cleanup. ---
+def _active_boost_rank():
+    now = datetime.now(timezone.utc)
+    return case(
+        (and_(Listing.is_boosted == True,  # noqa: E712
+              Listing.boost_expires_at.isnot(None),
+              Listing.boost_expires_at > now), 1),
+        else_=0,
+    )
 
 
 # â”€â”€ Request models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -112,6 +126,7 @@ def _listing_card(l: Listing, request: Request) -> dict:
         "price":      l.price,
         "location":   l.location,
         "is_boosted": l.is_boosted,
+        "is_featured": bool(l.is_boosted and l.boost_expires_at and l.boost_expires_at > datetime.now(timezone.utc)),
         "image_url":  _watermark(_absolute_image_url(l.image_url, request)),
         "media":      [_media_response(m, request) for m in (l.media or [])],
         "cover_url":  _watermark(_absolute_image_url(l.cover_url, request)),
@@ -231,7 +246,7 @@ def get_all_properties(
             ))
 
     listings = (
-        query.order_by(Listing.is_boosted.desc(), Listing.created_at.desc())
+        query.order_by(_active_boost_rank().desc(), Listing.created_at.desc())
              .offset(offset)
              .limit(limit)
              .all()

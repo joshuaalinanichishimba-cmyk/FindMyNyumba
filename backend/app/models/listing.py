@@ -43,6 +43,9 @@ class Listing(Base):
 
     # Boost: when True, listing appears at top of browse results
     is_boosted  = Column(Boolean, default=False, nullable=False)
+    boost_expires_at = Column(DateTime(timezone=True), nullable=True)
+    boost_tier       = Column(String, nullable=True)
+    boosted_at       = Column(DateTime(timezone=True), nullable=True)
 
     # Listing type (e.g. "Room for Rent", "Self-contained", "Bedspace"). Nullable
     # so existing rows are valid; populated by the create/edit forms going forward.

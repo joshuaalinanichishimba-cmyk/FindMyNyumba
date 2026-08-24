@@ -1,0 +1,25 @@
+﻿"""
+app/api/v1/endpoints/listings.py
+
+Public listing endpoints used by browse.html, listing.html, and the
+search bars on every dashboard.
+
+FIXES vs original:
+- Image URLs are now resolved to ABSOLUTE URLs on the backend (using the
+  request's host) before being returned. The original returned bare
+  paths like "/static/uploads/properties/x.jpg" which forced every
+  frontend page to invent a "guess the backend host" helper. Several of
+  those guess functions were broken (URL-inside-URL 404s).
+- GET /properties is paginated by default (limit/offset) so a future
+  10K-listing browse page doesn't dump a multi-MB JSON blob to mobile.
+- Trim/clamp on filter inputs prevents nuisance crashes from oversized
+  or malformed query strings.
+- Review submission no longer silently lies. Until a Review model is
+  added, the endpoint is explicit that nothing is persisted, and the
+  payload is validated so future wiring is one-line.
+- Report endpoint deduplicates: a single user can only have one open
+  (pending) report per listing, preventing trivial spam.
+"""
+
+import json
+from typing import Optional

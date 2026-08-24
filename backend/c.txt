@@ -1,0 +1,30 @@
+﻿    }
+
+
+def _listing_card(l: Listing, request: Request) -> dict:
+    """Compact representation for browse and dashboard grids."""
+    return {
+        "id":         l.id,
+        "title":      l.title,
+        "price":      l.price,
+        "location":   l.location,
+        "is_boosted": l.is_boosted,
+        "image_url":  _watermark(_absolute_image_url(l.image_url, request)),
+        "media":      [_media_response(m, request) for m in (l.media or [])],
+        "cover_url":  _watermark(_absolute_image_url(l.cover_url, request)),
+        "created_at": l.created_at.isoformat() if l.created_at else None,
+        "available_spots": l.available_spots,
+        "total_spots": l.total_spots,
+        "availability_status": l.availability_status,
+        "view_count": getattr(l, "_view_count", 0),
+        "bedrooms":           l.bedrooms,
+        "bathrooms":          l.bathrooms,
+        "furnished":          l.furnished,
+        "water_supply":       l.water_supply,
+        "electricity":        l.electricity,
+        "parking":            l.parking,
+        "curfew":             l.curfew,
+        "gender_preference":  l.gender_preference,
+        "distance_to_campus": l.distance_to_campus,
+        "amenities":          _parse_amenities(l.amenities),
+    }

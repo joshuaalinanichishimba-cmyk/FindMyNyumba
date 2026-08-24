@@ -1,0 +1,22 @@
+﻿
+> app\models\admin_models.py:29:class Transaction(Base):
+  app\models\admin_models.py:30:    __tablename__ = "transactions"
+  app\models\admin_models.py:31:    __table_args__ = {"extend_existing": True}
+  app\models\admin_models.py:32:
+  app\models\admin_models.py:33:    id          = Column(Integer, primary_key=True, index=True)
+  app\models\admin_models.py:34:    ref         = Column(String, unique=True, index=True)        # 'TXN-000123'
+  app\models\admin_models.py:35:    user_id     = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+  app\models\admin_models.py:36:    listing_id  = Column(Integer, ForeignKey("listings.id"), nullable=True, index=True)
+  app\models\admin_models.py:37:
+  app\models\admin_models.py:38:    # verification_fee | featured | boost | escrow_deposit | viewing_fee
+  app\models\admin_models.py:39:    type        = Column(String, nullable=False, index=True)
+  app\models\admin_models.py:40:    amount      = Column(Float,  nullable=False)
+  app\models\admin_models.py:41:    currency    = Column(String, nullable=False, default="ZMW")
+  app\models\admin_models.py:42:
+  app\models\admin_models.py:43:    # airtel_money | mtn_money | zamtel_money | bank_transfer
+  app\models\admin_models.py:44:    method      = Column(String, nullable=False)
+  app\models\admin_models.py:45:    # pending | success | failed | refunded
+  app\models\admin_models.py:46:    status      = Column(String, nullable=False, default="pending", index=True)
+  app\models\admin_models.py:47:    provider_ref = Column(String, nullable=True)                 # mobile-money/bank ref (e.g. MTN financialTransactionId)
+
+

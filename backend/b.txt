@@ -1,0 +1,9 @@
+﻿
+>                 if getattr(pkg, "grant_type", "student_access") == "listing_boost":
+                      _activate_listing_boost(db, txn, pkg)
+                  else:
+                      grant_access(db, txn.user_id, pkg, txn)
+                  _payment_success_side_effects(db, txn, pkg)
+              else:
+
+

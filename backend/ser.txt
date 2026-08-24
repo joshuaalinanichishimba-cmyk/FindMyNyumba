@@ -1,0 +1,20 @@
+﻿def _media_response(m, request: Request) -> dict:
+    return {
+        "id": m.id,
+        "listing_id": m.listing_id,
+        "media_url": (_watermark(_absolute_image_url(m.media_url, request)) if m.media_type == "photo" else _absolute_image_url(m.media_url, request)),
+        "media_type": m.media_type,
+        "public_id": m.public_id,
+        "width": m.width,
+        "height": m.height,
+        "duration": m.duration,
+        "position": m.position,
+        "is_cover": m.is_cover,
+    }
+
+
+def _listing_card(l: Listing, request: Request) -> dict:
+    """Compact representation for browse and dashboard grids."""
+    return {
+        "id":         l.id,
+        "title":      l.title,

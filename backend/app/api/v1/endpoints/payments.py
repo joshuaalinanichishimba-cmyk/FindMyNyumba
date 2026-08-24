@@ -109,7 +109,10 @@ def _settle(db: Session, txn: Transaction, new_state: str, provider_ref=None, re
             code = (txn.ref or "").replace("FMN-", "", 1).rsplit("-", 1)[0].lower().replace("-", "_")
             pkg = db.query(ServicePackage).filter(ServicePackage.code == code).first()
             if pkg:
-                grant_access(db, txn.user_id, pkg, txn)
+                if getattr(pkg, "grant_type", "student_access") == "listing_boost":
+                    _activate_listing_boost(db, txn, pkg)
+                else:
+                    grant_access(db, txn.user_id, pkg, txn)
                 _payment_success_side_effects(db, txn, pkg)
             else:
                 logger.error("grant.no_package ref=%s derived_code=%s", txn.ref, code)
@@ -408,4 +411,54 @@ def _payment_success_side_effects(db, txn, package=None):
             )
     except Exception:
         logger.exception("receipt.failed ref=%s user=%s", txn.ref, txn.user_id)
+
+
+def _activate_listing_boost(db, txn, package):
+    """
+    Turn on a time-boxed boost for the listing a boost purchase targets.
+
+    The listing is taken from txn.listing_id (a boost purchase must record which
+    listing it is for). Sets is_boosted + boost_expires_at = now + duration.
+    Never touches the listing's price or content.
+
+    Idempotent-ish: re-running extends from the later of (now, current expiry),
+    so a webhook replay does not shorten an active boost.
+    """
+    from datetime import datetime, timedelta, timezone
+    from app.models.listing import Listing
+
+    listing_id = getattr(txn, "listing_id", None)
+    if not listing_id:
+        logger.error("boost.no_listing ref=%s user=%s - boost purchase had no listing_id",
+                     txn.ref, txn.user_id)
+        return None
+
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        logger.error("boost.listing_missing ref=%s listing=%s", txn.ref, listing_id)
+        return None
+
+    duration = int(getattr(package, "duration_days", 0) or 0)
+    if duration <= 0:
+        duration = 30  # safe default
+
+    now = datetime.now(timezone.utc)
+    # extend rather than overwrite, so a replay/renew never shortens an active boost
+    base = now
+    current = getattr(listing, "boost_expires_at", None)
+    if current and current > now:
+        base = current
+
+    listing.is_boosted = True
+    listing.boost_expires_at = base + timedelta(days=duration)
+    if hasattr(listing, "boost_tier"):
+        listing.boost_tier = getattr(package, "code", None)
+    if hasattr(listing, "boosted_at"):
+        listing.boosted_at = now
+
+    db.commit()
+    logger.info("boost.activated ref=%s listing=%s tier=%s expires=%s",
+                txn.ref, listing_id, getattr(package, "code", None),
+                listing.boost_expires_at)
+    return listing
 

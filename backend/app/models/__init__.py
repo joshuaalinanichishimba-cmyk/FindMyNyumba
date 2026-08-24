@@ -17,3 +17,4 @@ __all__ = [
     "ServicePackage",
     "ServicePackagePriceHistory",
 ]
+from app.models.price_review import PriceReview

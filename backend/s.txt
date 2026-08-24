@@ -1,0 +1,5 @@
+﻿
+app\models\listing.py:44:    # Boost: when True, listing appears at top of browse results
+app\models\listing.py:45:    is_boosted  = Column(Boolean, default=False, nullable=False)
+
+
