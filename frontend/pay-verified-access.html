@@ -63,10 +63,11 @@
           <span class="flex-1"><span class="block font-bold text-slate-900 text-[14px]">MTN Mobile Money</span><span class="block text-[11.5px] text-slate-400">Approve on your phone with your MoMo PIN</span></span>
           <i class="fas fa-circle-check text-[#ea580c]"></i>
         </label>
-        <label class="flex items-center gap-3 p-4 rounded-xl border border-slate-100 opacity-55 cursor-not-allowed">
-          <input type="radio" name="method" value="airtel_money" disabled>
+        <label class="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-[#ea580c] cursor-pointer">
+          <input type="radio" name="method" value="airtel_money" class="accent-[#ea580c]">
           <span class="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center font-black text-[10px] text-white">Airtel</span>
-          <span class="flex-1"><span class="block font-bold text-slate-900 text-[14px]">Airtel Money</span><span class="block text-[11.5px] text-slate-400">Coming soon</span></span>
+          <span class="flex-1"><span class="block font-bold text-slate-900 text-[14px]">Airtel Money</span><span class="block text-[11.5px] text-slate-400">Approve on your phone with your Airtel PIN</span></span>
+          <i class="fas fa-circle-check text-[#ea580c]" style="display:none"></i>
         </label>
         <label class="flex items-center gap-3 p-4 rounded-xl border border-slate-100 opacity-55 cursor-not-allowed">
           <input type="radio" name="method" value="bank_transfer" disabled>
@@ -85,8 +86,9 @@
   <section class="step-pane" data-step="3">
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
       <h1 class="text-xl font-extrabold text-slate-900 mb-1">Enter mobile number</h1>
-      <p class="text-[13px] text-slate-400 font-medium mb-5">The MTN MoMo number you'll approve the payment on.</p>
-      <label class="block text-[12px] font-bold text-slate-600 mb-1.5">MTN Mobile Money number</label>
+      <p class="text-[13px] text-slate-400 font-medium mb-5">The mobile money number you'll approve the payment on.</p>
+      <div id="checkout-breakdown"></div>
+      <label class="block text-[12px] font-bold text-slate-600 mb-1.5">Mobile money number</label>
       <div class="flex items-center gap-2 mb-1">
         <span class="px-3 py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm">+260</span>
         <input id="msisdn" type="tel" inputmode="numeric" maxlength="9" placeholder="97 123 4567" class="flex-1 px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-200 text-sm">
@@ -183,6 +185,7 @@ function setTier(key, price, label){
   if (rcAmt) rcAmt.textContent = 'ZMW ' + price + '.00';
   var rcPlan = document.getElementById('rc-plan');
   if (rcPlan) rcPlan.textContent = label;
+  if (window.renderCheckoutBreakdown) renderCheckoutBreakdown(key);
 }
 function chooseTier(key, price, label){
   setTier(key, price, label);
@@ -318,5 +321,6 @@ function showPreviewNotice(){ document.getElementById('fail-msg').textContent = 
 renderStepper(1);
 document.getElementById('msisdn').addEventListener('input', function(){ document.getElementById('msisdn-err').textContent=''; });
 </script>
+<script src="fmn-checkout-breakdown.js"></script>
 </body>
 </html>
