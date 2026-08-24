@@ -147,6 +147,7 @@ def _load_package(db: Session, code: str) -> ServicePackage:
 class InitiateBody(BaseModel):
     msisdn: str = Field(..., min_length=9, max_length=16)
     tier: str = Field(..., min_length=2, max_length=64)
+    listing_id: int | None = None  # required only for listing_boost purchases
 
 
 @router.post("/verified-access/initiate")
@@ -154,6 +155,17 @@ def initiate(body: InitiateBody,
              current_user: User = Depends(get_current_user),
              db: Session = Depends(get_db)):
     pkg = _load_package(db, body.tier)
+    _boost_listing_id = None
+    if getattr(pkg, "grant_type", "student_access") == "listing_boost":
+        if not body.listing_id:
+            raise HTTPException(status_code=400, detail="A listing must be selected to boost.")
+        from app.models.listing import Listing
+        _lst = db.query(Listing).filter(Listing.id == body.listing_id).first()
+        if not _lst:
+            raise HTTPException(status_code=404, detail="Listing not found.")
+        if _lst.owner_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only boost your own listing.")
+        _boost_listing_id = body.listing_id
     price = float(pkg.service_fee)          # from service_packages, never the client
     currency = (pkg.currency or "ZMW").upper()
 
@@ -169,7 +181,8 @@ def initiate(body: InitiateBody,
     txn = Transaction(
         ref=ref,
         user_id=current_user.id,
-        type="verification_fee",
+        type=("boost" if _boost_listing_id else "verification_fee"),
+        listing_id=_boost_listing_id,
         amount=price,
         currency=currency,
         method=_METHOD_BY_OPERATOR.get(operator, "mobile_money"),
