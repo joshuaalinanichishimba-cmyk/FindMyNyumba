@@ -1058,7 +1058,8 @@ function propertyCard(p) {
             <p class="text-xs text-slate-400 font-medium mb-2"><i class="fas fa-map-marker-alt mr-1 text-[#ea580c]"></i>${esc(p.location || '')}</p>
             <p class="text-[#ea580c] font-black text-sm">ZMW ${Number(p.price || 0).toLocaleString()}<span class="text-slate-400 font-medium text-xs">/mo</span></p>
             <div class="flex gap-2 mt-3">
-                <button onclick="editProperty(${p.id})" class="flex-1 bg-slate-100 text-slate-700 text-xs font-bold py-2 rounded-xl hover:bg-slate-200 transition">
+                ${(p.status==='approved') ? `<button onclick="boostListing(${p.id})" class="flex-1 bg-[#ea580c] text-white text-xs font-bold py-2 rounded-lg hover:bg-[#c2410c]"><i class="fas fa-rocket mr-1"></i> Boost</button>` : ``}
+                    <button onclick="editProperty(${p.id})" class="flex-1 bg-slate-100 text-slate-700 text-xs font-bold py-2 rounded-xl hover:bg-slate-200 transition">
                     <i class="fas fa-edit mr-1"></i> Edit
                 </button>
                 <button onclick="deleteProperty(${p.id})" class="flex-1 bg-red-50 text-red-500 text-xs font-bold py-2 rounded-xl hover:bg-red-100 transition">
@@ -1069,6 +1070,9 @@ function propertyCard(p) {
     </div>`;
 }
 
+function boostListing(id){
+  window.location.href = 'pay-verified-access.html?boost=1&listing_id=' + id + '&tier=featured_7d';
+}
 // Properties tab
 async function loadProperties() {
     const token = getToken();

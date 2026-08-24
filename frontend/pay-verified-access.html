@@ -250,7 +250,32 @@ async function loadPackages(){
   }
 }
 function escHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
-document.addEventListener('DOMContentLoaded', loadPackages);
+// --- Boost mode: when arriving from a landlord "Boost" button ---
+(function(){
+  var qs = new URLSearchParams(window.location.search);
+  if(qs.get('boost') === '1'){
+    window.BOOST_LISTING_ID = parseInt(qs.get('listing_id'), 10) || null;
+    window.BOOST_TIER = qs.get('tier') || 'featured_7d';
+  }
+})();
+async function loadPackagesBoostAware(){
+  await loadPackages();
+  if(!window.BOOST_LISTING_ID) return;
+  // keep only the boost tier button; preselect it
+  var box = document.getElementById('tier-list');
+  if(!box) return;
+  var kept = null;
+  Array.prototype.forEach.call(box.querySelectorAll('.tier-btn'), function(btn){
+    if(btn.dataset.code === window.BOOST_TIER){ kept = btn; } else { btn.style.display = 'none'; }
+  });
+  if(kept){
+    setTier(kept.dataset.code, Number(kept.dataset.fee), kept.dataset.name);
+    kept.classList.remove('border-slate-100'); kept.classList.add('border-[#ea580c]');
+  }
+  // update page heading to reflect boosting
+  var h = document.querySelector('h1, .step-title');
+}
+document.addEventListener('DOMContentLoaded', loadPackagesBoostAware);
 
 async function initiatePayment(){
   var raw = document.getElementById('msisdn').value.trim();
@@ -265,7 +290,7 @@ async function initiatePayment(){
     var res = await fetch(API_BASE + '/payments/verified-access/initiate', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + (getToken()||'') },
-      body: JSON.stringify({ msisdn: msisdn, tier: selectedTier.key })
+      body: JSON.stringify(Object.assign({ msisdn: msisdn, tier: selectedTier.key }, window.BOOST_LISTING_ID ? { listing_id: window.BOOST_LISTING_ID } : {}))
     });
     if(res.status === 404){ showPreview(); goStep(4); startCountdown(); return; }
     if(!res.ok) throw new Error('initiate failed');
