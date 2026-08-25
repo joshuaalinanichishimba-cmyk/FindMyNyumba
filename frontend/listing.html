@@ -224,6 +224,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-xl font-bold text-gray-800">Reviews</h4>
                     <div id="reviews-summary" class="text-sm font-bold text-gray-500"></div>
+                <div id="reviews-breakdown" class="mt-3"></div>
                 </div>
                 <div id="reviews-list"><p class="text-sm text-gray-400">Loading reviews...</p></div>
             </div>
@@ -251,6 +252,8 @@
                         <div class="flex items-center justify-between"><span class="text-[12px] text-gray-500">Accuracy <span class="text-gray-300">(as described?)</span></span><div class="flex gap-1 text-lg cat-stars" data-cat="accuracy"><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i></div></div>
                         <div class="flex items-center justify-between"><span class="text-[12px] text-gray-500">Landlord <span class="text-gray-300">(communication)</span></span><div class="flex gap-1 text-lg cat-stars" data-cat="landlord"><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i></div></div>
                         <div class="flex items-center justify-between"><span class="text-[12px] text-gray-500">Value <span class="text-gray-300">(worth the price)</span></span><div class="flex gap-1 text-lg cat-stars" data-cat="value"><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i></div></div>
+                        <div class="flex items-center justify-between"><span class="text-[12px] text-gray-500">Cleanliness <span class="text-gray-300">(well-kept?)</span></span><div class="flex gap-1 text-lg cat-stars" data-cat="cleanliness"><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i></div></div>
+                        <div class="flex items-center justify-between"><span class="text-[12px] text-gray-500">Location <span class="text-gray-300">(area &amp; transport)</span></span><div class="flex gap-1 text-lg cat-stars" data-cat="location"><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i><i class="fas fa-star cursor-pointer" style="color:#d1d5db"></i></div></div>
                     </div>
                     <button id="post-review-btn" disabled class="px-6 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all text-sm disabled:opacity-40 disabled:cursor-not-allowed">Post Review</button>
                 </div>
@@ -1082,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${API_BASE}/properties/${currentProperty.id}/reviews`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ rating: selectedRating, comment, rating_accuracy: catRatings.accuracy || null, rating_landlord: catRatings.landlord || null, rating_value: catRatings.value || null }),
+                body: JSON.stringify({ rating: selectedRating, comment, rating_accuracy: catRatings.accuracy || null, rating_landlord: catRatings.landlord || null, rating_value: catRatings.value || null, rating_cleanliness: catRatings.cleanliness || null, rating_location: catRatings.location || null }),
             });
             if (res.ok) { showToast('Review submitted! It will appear after approval.', 'success'); document.getElementById('review-comment').value = ''; catRatings={accuracy:0,landlord:0,value:0}; document.querySelectorAll('.cat-stars .fa-star').forEach(function(s){s.style.color='#d1d5db';}); loadPropertyReviews(); }
             else { const d = await res.json().catch(() => ({})); showToast(typeof d.detail === 'string' ? d.detail : 'Failed to post review.', 'error'); }
@@ -1140,6 +1143,23 @@ async function loadPropertyReviews(){
     var data=await res.json();
     var rows=data.reviews||[];
     if(sum){ sum.innerHTML = data.count ? ('<i class="fas fa-star text-amber-400 mr-1"></i>'+data.average+' &middot; '+data.count+' review'+(data.count===1?'':'s')) : ''; }
+    var bd=document.getElementById("reviews-breakdown");
+    if(bd){
+      var cats=[["Cleanliness","cleanliness_avg"],["Location","location_avg"],["Accuracy","accuracy_avg"],["Landlord","landlord_avg"],["Value","value_avg"]];
+      var haveAny=cats.some(function(c){return data[c[1]]!=null;});
+      if(haveAny){
+        bd.innerHTML='<p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">Rating breakdown</p>'+cats.map(function(c){
+          var v=data[c[1]];
+          if(v==null)return '';
+          var pct=Math.round((v/5)*100);
+          return '<div class="flex items-center gap-3 mb-1.5">'+
+                   '<span class="text-[12px] text-gray-500 w-24 flex-shrink-0">'+c[0]+'</span>'+
+                   '<div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-brand rounded-full" style="width:'+pct+'%"></div></div>'+
+                   '<span class="text-[12px] font-bold text-gray-700 w-8 text-right">'+v.toFixed(1)+'</span>'+
+                 '</div>';
+        }).join('');
+      } else { bd.innerHTML=''; }
+    }
     var tb=document.getElementById("trust-badge"); if(tb){ tb.innerHTML = data.count ? ('<span class="inline-flex items-center gap-1.5 text-[12px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full"><i class="fas fa-star"></i>'+data.average+' &middot; '+data.count+' verified review'+(data.count===1?'':'s')+'</span>') : '<span class="inline-flex items-center gap-1.5 text-[12px] font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full"><i class="fas fa-seedling"></i>New &middot; no reviews yet</span>'; }
     if(!rows.length){ list.innerHTML='<p class="text-sm text-gray-400">No reviews yet. Reviews can only be left by students who completed a viewing of this property.</p>'; return; }
     list.innerHTML=rows.map(function(r){
@@ -1267,7 +1287,7 @@ async function submitReviewReply(id){
 </script>
 
 <script>
-var catRatings = { accuracy: 0, landlord: 0, value: 0 };
+var catRatings = { accuracy: 0, landlord: 0, value: 0, cleanliness: 0, location: 0 };
 function initCategoryStars(){
   document.querySelectorAll(".cat-stars").forEach(function(row){
     var cat = row.getAttribute("data-cat");
