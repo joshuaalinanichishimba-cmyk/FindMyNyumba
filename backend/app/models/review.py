@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/models/review.py
 
 A rating + written comment a student leaves on a listing.
@@ -39,3 +39,5 @@ class Review(Base):
     rating_accuracy      = Column(Integer, nullable=True)  # was it as described?
     rating_landlord      = Column(Integer, nullable=True)  # communication / helpfulness
     rating_value         = Column(Integer, nullable=True)  # worth the price
+    rating_cleanliness   = Column(Integer, nullable=True)  # tidy / well-kept
+    rating_location      = Column(Integer, nullable=True)  # area, safety, transport
