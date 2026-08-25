@@ -506,7 +506,18 @@ def list_property_reviews(listing_id: int, db: Session = Depends(get_db)):
             "rating_location": r.rating_location,
         })
     avg = round(sum(x["rating"] for x in out) / len(out), 1) if out else None
-    return {"count": len(out), "average": avg, "reviews": out}
+    _catavg = lambda key: (lambda v: round(sum(v)/len(v),1) if v else None)([x[key] for x in out if x.get(key) is not None])
+    return {
+        "count": len(out),
+        "average": avg,
+        "rating_avg": avg,
+        "cleanliness_avg": _catavg("rating_cleanliness"),
+        "location_avg":    _catavg("rating_location"),
+        "accuracy_avg":    _catavg("rating_accuracy"),
+        "landlord_avg":    _catavg("rating_landlord"),
+        "value_avg":       _catavg("rating_value"),
+        "reviews": out,
+    }
 
 
 # -- POST /properties/reviews/{id}/report -----------------------------------
