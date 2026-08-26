@@ -95,7 +95,7 @@
       </div>
       <p id="msisdn-err" class="text-[11.5px] text-red-500 font-semibold mb-4 h-4"></p>
       <div class="flex gap-3">
-        <button onclick="goStep(2)" class="flex-1 border border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50">Back</button>
+        <button onclick="goStep(1)" class="flex-1 border border-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-50">Back</button>
         <button id="pay-btn" onclick="initiatePayment()" class="flex-1 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold py-3 rounded-xl">Pay K150</button>
       </div>
     </div>
@@ -189,16 +189,16 @@ function setTier(key, price, label){
 }
 function chooseTier(key, price, label){
   setTier(key, price, label);
-  goStep(2);
+  goStep(3);  // skip removed method-picker step
 }
 
 function renderStepper(active){
   const box = document.getElementById('stepper');
-  const shown = [1,2,3,4,5,6];
+  const shown = [1,3,4,5,6];  // step 2 (manual method picker) removed
   box.innerHTML = shown.map(function(n,i){
     const reached = (active>=n) || (active===7 && n===6);
     const dot = '<div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black '
-      + (reached ? 'bg-[#ea580c] text-white' : 'bg-slate-200 text-slate-400') + '">' + n + '</div>';
+      + (reached ? 'bg-[#ea580c] text-white' : 'bg-slate-200 text-slate-400') + '">' + (i+1) + '</div>';
     const line = i < shown.length-1 ? '<div class="flex-1 h-0.5 '+(active>n?'bg-[#ea580c]':'bg-slate-200')+'"></div>' : '';
     return '<div class="flex items-center '+(i<shown.length-1?'flex-1':'')+'">'+dot+line+'</div>';
   }).join('');
@@ -281,7 +281,7 @@ async function loadPackagesBoostAware(){
       '<div class="text-right"><span class="text-2xl font-black text-slate-900">K'+fee+'</span>'+
       '<p class="text-[10px] text-slate-400">'+(b.currency||'ZMW')+'</p></div>'+
       '</div>'+desc+'</button>';
-    setTier(b.code, fee, b.name);
+    var _btn = box.querySelector('.tier-btn'); if(_btn){ _btn.addEventListener('click', function(){ chooseTier(b.code, fee, b.name); }); } setTier(b.code, fee, b.name);
   } catch(e){ box.innerHTML = '<p class="text-center text-sm text-red-500 py-6">Could not load the boost plan.</p>'; }
 }
 document.addEventListener('DOMContentLoaded', loadPackagesBoostAware);
