@@ -161,7 +161,8 @@
 
       <div class="space-y-1">
         <div class="sb-group-label px-3 mb-2">Financial</div>
-        <div class="sb-link" id="nav-revenue" onclick="showTab('revenue')"><i class="fas fa-coins"></i>Revenue</div>
+        <div class="sb-link" id="nav-packages" onclick="showTab('packages')"><i class="fas fa-box-open w-5"></i> Packages</div>
+            <div class="sb-link" id="nav-revenue" onclick="showTab('revenue')"><i class="fas fa-coins"></i>Revenue</div>
         <div class="sb-link" id="nav-transactions" onclick="showTab('transactions')"><i class="fas fa-receipt"></i>Transactions</div>
         <div class="sb-link" id="nav-escrow" onclick="showTab('escrow')"><i class="fas fa-vault"></i>Escrow</div>
       </div>
@@ -515,6 +516,7 @@
            REVENUE (PREVIEW)
       ============================================================= -->
       <section id="tab-revenue" class="tab-section"></section>
+      <section id="tab-packages" class="tab-section"><div id="admin-packages-root" class="p-1"></div></section>
 
       <!-- ============================================================
            ESCROW (PREVIEW)
@@ -923,6 +925,7 @@ function logout(){
 
 /* ---------- navigation ---------- */
 const TAB_META = {
+  packages: ['Package Management', 'Adjust pricing, duration and availability'],
   dashboard:   ['Dashboard',          "Welcome back — here's what's happening today"],
   staff:     ['Staff Accounts', 'Create and manage team members'],
   activity:  ['Staff Activity', 'Who is online, last seen, and sessions'],
@@ -964,6 +967,7 @@ function showTab(name){
   if (name === 'trust')         loadReports();
   if (name === 'fraud')         { loadFraud(); loadFraudExtras(); }
   if (name === 'revenue')       loadRevenue();
+    if (name === 'packages')      loadAdminPackages();
   if (name === 'transactions')  loadTransactions();
   if (name === 'escrow')        loadEscrow();
   if (name === 'institutions')  loadInstitutions();
@@ -2769,6 +2773,7 @@ setInterval(function(){var tok=sessionStorage.getItem('adminToken');if(tok){fetc
 <script src="fmn-pricing-new.js"></script>
 <script src="fmn-price-review-admin.js"></script>
 <script src="fmn-verified-price.js"></script>
+<script src="fmn-admin-packages.js"></script>
 </body>
 </html>
 <script>
