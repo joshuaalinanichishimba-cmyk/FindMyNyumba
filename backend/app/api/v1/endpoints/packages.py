@@ -117,11 +117,7 @@ def admin_create_package(payload: PackageCreate,
     if grant not in VALID_GRANT_TYPES:
         raise HTTPException(status_code=400, detail="Unknown grant type.")
 
-    # Guard against selling something the backend cannot yet deliver.
-    if grant == "listing_boost" and payload.is_active:
-        raise HTTPException(
-            status_code=409,
-            detail="Listing boost packages cannot be activated yet: purchase activation is not implemented. Save it inactive.")
+    # Boost purchase activation is implemented; boost packages may be active.
 
     if db.query(ServicePackage).filter(ServicePackage.code == code).first():
         raise HTTPException(status_code=409, detail="A package with that code already exists.")
@@ -206,11 +202,7 @@ def admin_update_package(pkg_id: int, payload: PackageUpdate,
         if hasattr(p, "grant_type"):
             p.grant_type = grant
 
-    effective_grant = (getattr(p, "grant_type", None) or "student_access")
-    if payload.is_active is True and effective_grant == "listing_boost":
-        raise HTTPException(
-            status_code=409,
-            detail="Listing boost packages cannot be activated yet: purchase activation is not implemented.")
+    # Boost purchase activation is implemented; boost packages may be active.
 
     if payload.name is not None:
         p.name = payload.name.strip()
