@@ -976,6 +976,7 @@ function showTab(name){
   if (name === 'analytics')     { loadAnalytics(); loadSearchGeo(); loadAreaInsights(); }
   if (name === 'system')        loadSystemHealth();
   if (name === 'settings')      loadRoles();
+    if (name === 'settings')      loadBusinessInfo();
 }
 
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('overlay').classList.toggle('hidden'); }
@@ -2774,6 +2775,7 @@ setInterval(function(){var tok=sessionStorage.getItem('adminToken');if(tok){fetc
 <script src="fmn-price-review-admin.js"></script>
 <script src="fmn-verified-price.js"></script>
 <script src="fmn-admin-packages.js"></script>
+<script src="fmn-admin-business.js"></script>
 </body>
 </html>
 <script>
