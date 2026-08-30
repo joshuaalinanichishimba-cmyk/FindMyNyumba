@@ -173,7 +173,7 @@ def toggle_suspend(user_id: int, admin: User = Depends(require("users.suspend"))
 # â”€â”€ GET /admin/all-listings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/all-listings")
 def get_all_listings(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
-    listings = db.query(Listing).order_by(Listing.created_at.desc()).all()
+    listings = db.query(Listing).filter(Listing.status != "deleted").order_by(Listing.created_at.desc()).all()
     return [
         {
             "id":         l.id,
@@ -254,7 +254,10 @@ def delete_listing(listing_id: int, admin: User = Depends(require("listings.dele
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
-    db.delete(listing)
+    # Soft delete: preserve all related records (reviews, transactions,
+    # viewings, events) and simply mark the listing deleted so it drops
+    # out of every status-gated query (browse filters status == "active").
+    listing.status = "deleted"
     db.commit()
     return {"status": "success", "message": "Listing deleted."}
 

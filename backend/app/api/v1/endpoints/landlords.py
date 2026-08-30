@@ -1,4 +1,4 @@
-﻿"""
+"""
 app/api/v1/endpoints/landlords.py
 """
 
@@ -227,7 +227,7 @@ def get_stats(landlord: User = Depends(require_landlord), db: Session = Depends(
 # â”€â”€ Properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.get("/properties")
 def get_properties(request: Request, landlord: User = Depends(require_landlord), db: Session = Depends(get_db)):
-    listings = db.query(Listing).filter(Listing.owner_id == landlord.id).order_by(Listing.created_at.desc()).all()
+    listings = db.query(Listing).filter(Listing.owner_id == landlord.id, Listing.status != "deleted").order_by(Listing.created_at.desc()).all()
     return [
         {
             "id":         l.id,
@@ -321,7 +321,7 @@ async def create_property(
         try:
             created = await _process_media_uploads(media, listing.id, db, make_first_cover=True)
         except mv.MediaValidationError as e:
-            db.delete(listing); db.commit()
+            listing.status = "deleted"; db.commit()  # soft delete - preserve related records
             raise HTTPException(status_code=400, detail=e.message)
         cover = next((m for m in created if m.is_cover), None) or (created[0] if created else None)
         if cover and not listing.image_url:
