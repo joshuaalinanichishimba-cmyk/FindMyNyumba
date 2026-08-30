@@ -17,12 +17,10 @@
 
   /* ---- prefixes must match backend lenco_service.detect_operator ---- */
   var OPERATORS = {
-    '96': { name: 'MTN',    color: '#ffcc00', text: '#1a1a1a' },
-    '76': { name: 'MTN',    color: '#ffcc00', text: '#1a1a1a' },
-    '97': { name: 'Airtel', color: '#ed1c24', text: '#ffffff' },
-    '77': { name: 'Airtel', color: '#ed1c24', text: '#ffffff' },
-    '95': { name: 'Zamtel', color: '#009639', text: '#ffffff' },
-    '75': { name: 'Zamtel', color: '#009639', text: '#ffffff' }
+    '96': { name: 'MTN',    color: '#ffcc00', text: '#854d0e', tint: '#fef9c3', border: '#fde68a' },
+    '76': { name: 'MTN',    color: '#ffcc00', text: '#854d0e', tint: '#fef9c3', border: '#fde68a' },
+    '97': { name: 'Airtel', color: '#ed1c24', text: '#b91c1c', tint: '#fee2e2', border: '#fecaca' },
+    '77': { name: 'Airtel', color: '#ed1c24', text: '#b91c1c', tint: '#fee2e2', border: '#fecaca' },
   };
 
   function esc(s) {
@@ -140,8 +138,13 @@
     var wrap = document.getElementById('cb-operator');
     if (!wrap) return;
     if (!op) { wrap.classList.remove('show'); return; }
-    wrap.querySelector('.chip').style.background = op.color;
-    wrap.querySelector('.chip').style.color = op.text;
+    var chip = wrap.querySelector('.chip');
+    chip.style.background = op.tint || op.color;
+    chip.style.color = op.text;
+    chip.style.border = '1px solid ' + (op.border || op.color);
+    var dot = chip.querySelector('.op-dot');
+    if(!dot){ dot = document.createElement('span'); dot.className = 'op-dot'; chip.insertBefore(dot, chip.firstChild); }
+    dot.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;background:' + op.color + ';margin-right:2px;';
     wrap.querySelector('.chip .nm').textContent = op.name;
     wrap.classList.add('show');
     try {
@@ -181,8 +184,7 @@
     menu.id = 'cb-op-menu';
     menu.innerHTML =
       '<button type="button" onclick="cbPickOperator(\'Airtel\')">Airtel</button>' +
-      '<button type="button" onclick="cbPickOperator(\'MTN\')">MTN</button>' +
-      '<button type="button" onclick="cbPickOperator(\'Zamtel\')">Zamtel</button>';
+      '<button type="button" onclick="cbPickOperator(\'MTN\')">MTN</button>';
 
     // place after the msisdn error line if present, else after the input
     var errEl = document.getElementById('msisdn-err');

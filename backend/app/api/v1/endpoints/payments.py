@@ -1,6 +1,6 @@
 """
 app/api/v1/endpoints/payments.py
-Verified Access payments via LENCO (mobile money: Airtel, MTN, Zamtel).
+Verified Access payments via LENCO (mobile money: Airtel, MTN).
 
 PRICING RULE
 service_packages is the SINGLE SOURCE OF TRUTH for fee, currency and name. The
@@ -51,7 +51,6 @@ IDEMPOTENCY_WINDOW_SECONDS = 180
 _METHOD_BY_OPERATOR = {
     "airtel": "airtel_money",
     "mtn": "mtn_money",
-    "zamtel": "zamtel_money",
 }
 
 _PROVIDER_SUCCESS = ("successful", "success", "completed")
