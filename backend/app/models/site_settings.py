@@ -28,6 +28,11 @@ class SiteSettings(Base):
     support_email      = Column(String, nullable=True)
     support_phone      = Column(String, nullable=True)
     website_url        = Column(String, nullable=True)
+    facebook_url       = Column(String, nullable=True)
+    instagram_url      = Column(String, nullable=True)
+    tiktok_url         = Column(String, nullable=True)
+    twitter_url        = Column(String, nullable=True)
+    whatsapp_url       = Column(String, nullable=True)
     registered_address = Column(Text,   nullable=True)
 
     # Service commitments

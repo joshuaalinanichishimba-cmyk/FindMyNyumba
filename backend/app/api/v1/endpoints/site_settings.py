@@ -30,6 +30,11 @@ def _dict(row: SiteSettings) -> dict:
         "support_email":      row.support_email,
         "support_phone":      row.support_phone,
         "website_url":        row.website_url,
+        "facebook_url":       row.facebook_url,
+        "instagram_url":      row.instagram_url,
+        "tiktok_url":         row.tiktok_url,
+        "twitter_url":        row.twitter_url,
+        "whatsapp_url":       row.whatsapp_url,
         "registered_address": row.registered_address,
         "support_sla":        row.support_sla,
         "platform_name":      row.platform_name,
@@ -64,6 +69,11 @@ class SiteSettingsUpdate(BaseModel):
     support_email:      Optional[str]  = None
     support_phone:      Optional[str]  = None
     website_url:        Optional[str]  = None
+    facebook_url:       Optional[str]  = None
+    instagram_url:      Optional[str]  = None
+    tiktok_url:         Optional[str]  = None
+    twitter_url:        Optional[str]  = None
+    whatsapp_url:       Optional[str]  = None
     registered_address: Optional[str]  = None
     support_sla:        Optional[str]  = None
     platform_name:      Optional[str]  = None
