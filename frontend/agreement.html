@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -251,7 +251,7 @@
         <!-- Edit mode toolbar -->
         <div id="edit-toolbar" class="edit-toolbar no-print">
             <i class="fas fa-pen-to-square text-[#ea580c]"></i>
-            <span><strong>Edit Mode ON</strong> — Click any text in the document to edit it directly.</span>
+            <span><strong>Edit Mode ON</strong> - Click any text in the document to edit it directly.</span>
             <button onclick="resetEdits()"
                     class="ml-auto text-xs font-bold px-3 py-1.5 rounded-lg bg-orange-100 hover:bg-orange-200 text-orange-800 transition">
                 <i class="fas fa-rotate-left mr-1"></i>Reset Edits
@@ -271,7 +271,7 @@
                 <div style="font-family: ui-sans-serif, sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: #ea580c; margin-bottom: 4px;">FindMyNyumba</div>
                 <h1 style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;" id="doc-title" contenteditable="false">RESIDENTIAL TENANCY AGREEMENT</h1>
                 <div style="width: 60px; height: 3px; background: #ea580c; margin: 8px auto;"></div>
-                <!-- FIX: Corrected garbled em-dash encoding — was "StudentÃƒÆ’Ã‚Â¢ÃƒÂ¢â‚¬Â¢"Landlord" -->
+                <!-- FIX: Corrected garbled em-dash encoding - was "StudentÃƒÆ’Ã‚Â¢ÃƒÂ¢â‚¬Â¢"Landlord" -->
                 <p style="font-size: 11px; color: #666;" id="doc-subtitle" contenteditable="false">Student"Landlord Rental Agreement</p>
             </div>
 
@@ -411,7 +411,7 @@ function updateDoc() {
     const party2Label = isHost ? 'STUDENT HOST' : 'LANDLORD';
     const party2Type  = isHost ? 'Accommodation Assistant' : 'Landlord';
     const titleText   = isHost ? 'STUDENT HOST BEDSPACE AGREEMENT' : 'RESIDENTIAL TENANCY AGREEMENT';
-    // FIX: Corrected garbled em-dash encoding — was "StudentÃƒÆ’Ã‚Â¢ÃƒÂ¢â‚¬Â¢"Student Host..."
+    // FIX: Corrected garbled em-dash encoding - was "StudentÃƒÆ’Ã‚Â¢ÃƒÂ¢â‚¬Â¢"Student Host..."
     const subtitleTxt = isHost ? 'Student\u2013Student Host Accommodation Agreement' : 'Student\u2013Landlord Rental Agreement';
 
     s('doc-title', titleText);

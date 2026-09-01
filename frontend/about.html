@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About Us — FindMyNyumba</title>
+<title>About Us - FindMyNyumba</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="icon" type="image/png" href="logo.png">
@@ -80,33 +80,33 @@
     <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-4 mb-6">Making Student Housing Accessible</h2>
     <div class="max-w-3xl space-y-4 mb-12">
       <p class="text-slate-500 font-medium leading-relaxed">Every Zambian student deserves a safe, clean, and affordable place to call home while they pursue their education. Too many students spend weeks searching for accommodation, fall victim to scams, or end up in unsuitable housing.</p>
-      <p class="text-slate-500 font-medium leading-relaxed">FindMyNyumba was built to solve this problem — a trusted, transparent platform that connects verified students with verified landlords, making the process simple, fast, and safe.</p>
-      <p class="text-slate-500 font-medium leading-relaxed">We also empower Accommodation Assistants — fellow students who want to help by offering affordable bedspaces — creating a community-first approach to student housing.</p>
+      <p class="text-slate-500 font-medium leading-relaxed">FindMyNyumba was built to solve this problem - a trusted, transparent platform that connects verified students with verified landlords, making the process simple, fast, and safe.</p>
+      <p class="text-slate-500 font-medium leading-relaxed">We also empower Accommodation Assistants - fellow students who want to help by offering affordable bedspaces - creating a community-first approach to student housing.</p>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
         <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-house"></i></div>
-        <div class="text-2xl font-extrabold text-[#ea580c]">500+</div>
+        <div class="text-2xl font-extrabold text-[#ea580c]" data-stat="active_listings">-</div>
         <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Listings</div>
         <p class="text-[11px] text-slate-400 font-medium mt-1">Active and verified properties</p>
       </div>
       <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
         <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-graduation-cap"></i></div>
-        <div class="text-2xl font-extrabold text-[#ea580c]">2,000+</div>
+        <div class="text-2xl font-extrabold text-[#ea580c]" data-stat="students">-</div>
         <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Students</div>
         <p class="text-[11px] text-slate-400 font-medium mt-1">Students helped find their home</p>
       </div>
       <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
         <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-key"></i></div>
-        <div class="text-2xl font-extrabold text-[#ea580c]">200+</div>
+        <div class="text-2xl font-extrabold text-[#ea580c]" data-stat="verified_landlords">-</div>
         <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Landlords</div>
         <p class="text-[11px] text-slate-400 font-medium mt-1">Verified and trusted landlords</p>
       </div>
       <div class="card-hover bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
         <div class="w-11 h-11 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center text-lg mx-auto mb-3"><i class="fas fa-building-columns"></i></div>
-        <div class="text-2xl font-extrabold text-[#ea580c]">6+</div>
-        <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Universities</div>
+        <div class="text-2xl font-extrabold text-[#ea580c]" data-stat="accommodation_assistants">-</div>
+        <div class="text-[11px] font-black text-slate-700 uppercase tracking-wide mt-1">Assistants</div>
         <p class="text-[11px] text-slate-400 font-medium mt-1">Covered across Zambia</p>
       </div>
     </div>
@@ -254,5 +254,6 @@
   document.getElementById('current-year').textContent = new Date().getFullYear();
 </script>
 <script src="fmn-footer.js"></script>
+<script src="fmn-home-stats.js"></script>
 </body>
 </html>
