@@ -57,10 +57,30 @@ def home_stats(request: Request, db: Session = Depends(get_db)):
     )
     featured = [_listing_card(l, request) for l in rows]
 
+    # Real areas: detect a known city inside each active listing's location text,
+    # group and count. Only cities that actually have active listings are returned.
+    _CITIES = ["Kitwe","Ndola","Lusaka","Kabwe","Chingola","Mufulira","Livingstone",
+               "Kasama","Chipata","Solwezi","Luanshya","Kalulushi","Choma","Mongu"]
+    _loc_rows = db.query(Listing.location).filter(Listing.status == "active").all()
+    _area_counts = {}
+    for (loc,) in _loc_rows:
+        if not loc:
+            continue
+        low = loc.lower()
+        for city in _CITIES:
+            if city.lower() in low:
+                _area_counts[city] = _area_counts.get(city, 0) + 1
+                break
+    areas = sorted(
+        [{"city": c, "count": n} for c, n in _area_counts.items()],
+        key=lambda a: a["count"], reverse=True,
+    )
+
     return {
         "active_listings": active_listings,
         "students": students,
         "verified_landlords": verified_landlords,
         "accommodation_assistants": accommodation_assistants,
         "featured_listings": featured,
+        "areas": areas,
     }
