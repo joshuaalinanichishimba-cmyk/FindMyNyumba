@@ -134,18 +134,19 @@
             </div>
           </div>
 
-          <!-- Right: photo + trust card -->
+          <!-- Right: branded trust panel (no image dependency) -->
           <div class="relative hidden lg:block">
-            <div class="rounded-3xl overflow-hidden shadow-lg aspect-[4/3] bg-slate-100">
-              <img src="fmn-hero.jpg" alt="Student studying at home" class="w-full h-full object-cover"
-                   onerror="this.parentNode.style.background='linear-gradient(135deg,#0f172a,#15803d)';this.style.display='none';">
-            </div>
-            <div class="absolute top-5 right-5 bg-white rounded-2xl shadow-lg px-4 py-3 flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-green-100 text-[#15803d] flex items-center justify-center"><i class="fas fa-shield-halved"></i></div>
-              <div>
-                <p class="text-[13px] font-black text-slate-900 leading-tight">Verified &amp; Safe</p>
-                <p class="text-[11px] text-slate-400 font-medium">Every listing is checked</p>
+            <div class="rounded-3xl bg-slate-900 p-8 shadow-lg">
+              <div class="w-12 h-12 rounded-2xl bg-green-500/20 text-green-400 flex items-center justify-center mb-5">
+                <i class="fas fa-shield-halved text-xl"></i>
               </div>
+              <h3 class="text-white text-xl font-black mb-2">Verified &amp; Safe</h3>
+              <p class="text-slate-400 text-sm font-medium mb-6">We check every listing before it goes live, so you can search with confidence.</p>
+              <ul class="space-y-3">
+                <li class="flex items-start gap-3 text-slate-200 text-sm font-medium"><i class="fas fa-circle-check text-green-400 mt-0.5"></i> Every listing is checked before it appears</li>
+                <li class="flex items-start gap-3 text-slate-200 text-sm font-medium"><i class="fas fa-circle-check text-green-400 mt-0.5"></i> Connect directly with landlords &mdash; rent is paid to them, never us</li>
+                <li class="flex items-start gap-3 text-slate-200 text-sm font-medium"><i class="fas fa-circle-check text-green-400 mt-0.5"></i> Accommodation Assistants help you view and move in safely</li>
+              </ul>
             </div>
           </div>
 
