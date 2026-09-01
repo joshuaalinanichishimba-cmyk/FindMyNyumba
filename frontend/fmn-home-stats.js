@@ -75,6 +75,23 @@
     box.innerHTML = list.map(listingCard).join('');
   }
 
+  function fillAreas(areas) {
+    var box = document.getElementById('home-areas');
+    if (!box) return;
+    if (!areas || !areas.length) {
+      box.innerHTML = '<div class="col-span-full bg-white rounded-2xl border border-dashed border-slate-200 p-8 text-center"><p class="text-slate-500 font-bold text-sm">No areas yet</p><p class="text-slate-400 text-xs mt-1">Towns will appear here as verified homes are listed.</p></div>';
+      return;
+    }
+    box.innerHTML = areas.map(function (a) {
+      var n = a.count;
+      return '<a href="browse.html?q=' + encodeURIComponent(a.city) + '" class="block bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md hover:border-[#ea580c]/30 transition">' +
+        '<div class="w-10 h-10 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center mb-3"><i class="fas fa-location-dot"></i></div>' +
+        '<p class="font-black text-slate-900">' + esc(a.city) + '</p>' +
+        '<p class="text-[13px] font-bold text-slate-500 mt-0.5">' + n + ' home' + (n === 1 ? '' : 's') + ' available</p>' +
+      '</a>';
+    }).join('');
+  }
+
   async function load() {
     try {
       var res = await fetch(apiBase() + '/stats/home');
@@ -82,6 +99,7 @@
       var d = await res.json();
       fillStats(d);
       fillListings(d.featured_listings);
+      fillAreas(d.areas);
     } catch (e) {
       // leave the placeholder dashes; render an honest empty listings state
       fillListings([]);
