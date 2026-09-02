@@ -54,6 +54,15 @@
       if (d.support_phone) {
         document.querySelectorAll('#footer-phone').forEach(function (el) { el.textContent = d.support_phone; });
       }
+            // social links: show only the ones with a URL set
+      [['soc-facebook','facebook_url'],['soc-instagram','instagram_url'],
+       ['soc-tiktok','tiktok_url'],['soc-whatsapp','whatsapp_url']].forEach(function(pair){
+        var el = document.getElementById(pair[0]);
+        if(!el) return;
+        var url = d[pair[1]];
+        if(url){ el.href = url; el.target = '_blank'; el.rel = 'noopener'; el.style.display = ''; }
+        else { el.style.display = 'none'; }
+      });
       if (d.legal_name) {
         document.querySelectorAll('#footer-legal').forEach(function (el) { el.textContent = d.legal_name; });
       }

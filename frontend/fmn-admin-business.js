@@ -39,6 +39,10 @@
     ['website_url',        'Website URL',                 'https://findmynyumba.com'],
     ['registered_address', 'Registered address',          'Lusaka, Zambia'],
     ['support_sla',        'Support SLA statement',       'Customer inquiries are addressed within 1 business day.'],
+    ['facebook_url',       'Facebook URL',                'https://facebook.com/...'],
+    ['instagram_url',      'Instagram URL',               'https://instagram.com/...'],
+    ['tiktok_url',         'TikTok URL',                  'https://tiktok.com/@...'],
+    ['whatsapp_url',       'WhatsApp link',               'https://wa.me/260...'],
   ];
 
   function cardShell() {
