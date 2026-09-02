@@ -42,8 +42,17 @@
   var _filter = 'all';
 
   window.loadAdminTickets = async function () {
+    var tab = document.getElementById('tab-support');
+    if (!tab) return;
     var root = document.getElementById('tickets-panel');
-    if (!root) return;
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'tickets-panel';
+      root.className = 'mb-5';
+      tab.insertBefore(root, tab.firstChild);
+    } else if (root.parentNode !== tab) {
+      tab.insertBefore(root, tab.firstChild);
+    }
     root.innerHTML = '<div class="card p-5"><p class="text-sm text-slate-400"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading support tickets...</p></div>';
     try {
       var res = await fetch(apiBase() + '/admin/support/tickets');

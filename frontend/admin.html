@@ -1632,7 +1632,7 @@ function buildModuleSections(){
 
   /* ---------------- TRANSACTION CENTER ---------------- */
   document.getElementById('tab-transactions').innerHTML =
-    `<div id="tickets-panel" class="mb-5"></div><div class="card overflow-hidden">
+    `<div class="card overflow-hidden">
        <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-2.5">
          <div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Transactions <span id="txn-count" class="ml-1 text-[12px] font-semibold text-slate-400"></span></h3>
            <p class="text-[12px] text-slate-400 font-medium">Every payment across FindMyNyumba</p></div>
@@ -1696,7 +1696,7 @@ function buildModuleSections(){
 
   /* ---------------- SUPPORT / MESSAGES ---------------- */
   document.getElementById('tab-support').innerHTML =
-    `<div id="tickets-panel" class="mb-5"></div><div class="card overflow-hidden">
+    `<div class="card overflow-hidden">
        <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-2.5">
          <div class="mr-auto"><h3 class="font-extrabold text-slate-900 text-[15px]">Messages &amp; Support</h3>
            <p class="text-[12px] text-slate-400 font-medium">Student↔Landlord - Student↔Support - Admin broadcasts</p></div>
@@ -1710,7 +1710,7 @@ function buildModuleSections(){
 
   /* ---------------- INSTITUTIONS ---------------- */
   document.getElementById('tab-institutions').innerHTML =
-    `<div id="tickets-panel" class="mb-5"></div><div class="card overflow-hidden">
+    `<div class="card overflow-hidden">
        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
          <div><h3 class="font-extrabold text-slate-900 text-[15px]">Institutions <span id="inst-count" class="ml-1 text-[12px] font-semibold text-slate-400"></span></h3>
            <p class="text-[12px] text-slate-400 font-medium">Universities &amp; colleges students search near</p></div>
@@ -2151,7 +2151,7 @@ function riskFactor(ok, label){
   return `<div class="flex items-center gap-2 text-[12px]"><i class="fas ${ok?'fa-circle-check text-emerald-500':'fa-circle-xmark text-slate-300'}"></i><span class="text-slate-600">${label}</span></div>`;
 }
 function ldSectionCard(title, inner, action){
-  return `<div id="tickets-panel" class="mb-5"></div><div class="card overflow-hidden">
+  return `<div class="card overflow-hidden">
     <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between"><h3 class="font-extrabold text-slate-900 text-[14px]">${title}</h3>${action||''}</div>
     <div class="p-5">${inner}</div></div>`;
 }
