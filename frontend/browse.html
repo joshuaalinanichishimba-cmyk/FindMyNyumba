@@ -480,7 +480,7 @@
     }
 
     /* Area chips */
-    const AREAS = ['Riverside','Nkana East','Chipata Compound','Parklands','Nkana West','Kalundu','Kalingalinga','Kamloops','Roma','Avondale'];
+    let AREAS = [];  // populated from /stats/home (real areas with active listings)
     function buildAreaChips() {
         const wrap = document.getElementById('area-chips');
         if (!wrap) return;

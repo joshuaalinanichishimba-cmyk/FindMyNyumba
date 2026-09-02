@@ -64,7 +64,7 @@
     } catch (e) {}
   }
 
-  var DOT = { info: "#16a34a", success: "#16a34a", warning: "#16a34a" };
+  var DOT = { info: "#d97706", success: "#d97706", warning: "#d97706" };
 
   // ── Trust banner strip ────────────────────────────────────────────────────
   function buildBanner(banners) {
@@ -92,10 +92,8 @@
       "max-width:1152px;margin:0 auto;display:flex;align-items:center;gap:12px;" +
       "padding:10px 16px;";
 
-    var dot = el("span");
-    dot.style.cssText =
-      "flex:0 0 auto;width:9px;height:9px;border-radius:9999px;background:#16a34a;" +
-      "box-shadow:0 0 0 4px rgba(22,163,74,.18);";
+    var dot = el("span", null, '<i class="fas fa-triangle-exclamation"></i>');
+    dot.style.cssText = "flex:0 0 auto;color:#d97706;font-size:15px;line-height:1;";
 
     var msg = el("span", "fmn-trust-msg");
     msg.style.cssText =
@@ -160,7 +158,7 @@
       msg.style.opacity = "0";
       setTimeout(function () {
         msg.innerHTML = icon + escapeHtml(b.message);
-        dot.style.background = DOT[b.level] || "#16a34a";
+        dot.style.background = DOT[b.level] || "#d97706";
         msg.style.opacity = "1";
       }, 180);
     }
