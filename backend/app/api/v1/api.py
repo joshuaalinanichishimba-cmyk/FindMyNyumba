@@ -10,6 +10,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import auth, admin, listings, messages, landlords, student_hosts, students, notifications
 from app.api.v1.endpoints import site_settings
 from app.api.v1.endpoints import stats
+from app.api.v1.endpoints import support
 from app.api.v1.endpoints import trust, verification, fraud, admin_trust, admin_extra, viewing_requests, payments, packages, price_reviews
 
 api_router = APIRouter()
@@ -23,6 +24,7 @@ api_router.include_router(payments.router)         # /api/v1/payments/...     # 
 api_router.include_router(packages.router)          # /api/v1/packages + /admin/packages
 api_router.include_router(site_settings.router)  # /api/v1/site-settings, /admin/site-settings
 api_router.include_router(stats.router)  # /api/v1/stats/home
+api_router.include_router(support.router)  # /support/tickets, /admin/support/tickets
 
 # â”€â”€ Role dashboards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 api_router.include_router(landlords.router)    # /api/v1/landlord/...
