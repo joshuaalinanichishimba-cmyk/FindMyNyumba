@@ -68,7 +68,31 @@
       var d = await res.json().catch(function () { return {}; });
       if (!res.ok) throw new Error(typeof d.detail === 'string' ? d.detail : 'Could not submit your ticket.');
 
-      okBox.innerHTML = '<i class="fas fa-circle-check mr-1"></i> Ticket submitted. Your ticket ID is <span class="font-black">' + esc(d.ticket_id) + '</span> - save it to track your request.';
+      okBox.innerHTML = '<div class="flex items-center flex-wrap gap-2">' +
+        '<i class="fas fa-circle-check"></i>' +
+        '<span>Ticket submitted. Your ticket ID is</span>' +
+        '<span class="inline-flex items-center gap-2 bg-white border border-green-200 rounded-lg px-2.5 py-1">' +
+          '<span id="tk-id-value" class="font-black tracking-wide">' + esc(d.ticket_id) + '</span>' +
+          '<button type="button" id="tk-copy" title="Copy ticket ID" class="text-green-700 hover:text-green-900"><i class="fas fa-copy"></i></button>' +
+        '</span>' +
+        '<span class="text-green-700">- save it to track your request.</span>' +
+        '</div>';
+      var copyBtn = document.getElementById('tk-copy');
+      if(copyBtn){
+        copyBtn.addEventListener('click', function(){
+          var id = d.ticket_id;
+          function done(){ copyBtn.innerHTML = '<i class="fas fa-check"></i>'; setTimeout(function(){ copyBtn.innerHTML = '<i class="fas fa-copy"></i>'; }, 1500); }
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(id).then(done).catch(function(){ fallbackCopy(id); done(); });
+          } else { fallbackCopy(id); done(); }
+        });
+      }
+      function fallbackCopy(text){
+        var ta = document.createElement('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch(e){}
+        document.body.removeChild(ta);
+      }
       show(okBox);
       // clear the form
       ['tk-subject', 'tk-message', 'tk-email', 'tk-reference'].forEach(function (id) {
