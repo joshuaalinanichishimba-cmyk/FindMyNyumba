@@ -111,8 +111,14 @@
             <!-- FAQ Section -->
             <div class="max-w-3xl mx-auto">
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 mb-8 text-center">Common Questions</h2>
-                <div class="space-y-4">
-                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                <div class="flex flex-wrap justify-center gap-2 mb-6">
+              <button type="button" class="faq-tab px-4 py-2 rounded-full text-sm font-bold bg-[#ea580c] text-white" data-filter="all">All</button>
+              <button type="button" class="faq-tab px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:border-[#ea580c]" data-filter="students">Students</button>
+              <button type="button" class="faq-tab px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:border-[#ea580c]" data-filter="landlords">Landlords</button>
+              <button type="button" class="faq-tab px-4 py-2 rounded-full text-sm font-bold bg-white border border-slate-200 text-slate-600 hover:border-[#ea580c]" data-filter="payments">Payments &amp; Safety</button>
+            </div>
+            <div class="space-y-4" id="faq-list">
+                    <details data-faq-cat="students" class="bg-slate-50 rounded-2xl border border-slate-100 group">
                         <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
                             How do I create an account?
                             <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
@@ -121,7 +127,7 @@
                             Click on "Register" in the navigation menu. Choose whether you're a student or landlord and fill in your details. Students need a valid email, university name, and student ID.
                         </div>
                     </details>
-                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <details data-faq-cat="students" class="bg-slate-50 rounded-2xl border border-slate-100 group">
                         <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
                             I forgot my password. How do I reset it?
                             <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
@@ -130,7 +136,7 @@
                             On the login page, click "Forgot password?" and enter your registered email address. We'll send you a password reset link immediately.
                         </div>
                     </details>
-                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <details data-faq-cat="students" class="bg-slate-50 rounded-2xl border border-slate-100 group">
                         <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
                             How do I contact a landlord?
                             <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
@@ -139,7 +145,7 @@
                             Open any property listing and click "Message Host". You must be logged in to send messages. Type your inquiry and hit send - the host will be notified.
                         </div>
                     </details>
-                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <details data-faq-cat="payments" class="bg-slate-50 rounded-2xl border border-slate-100 group">
                         <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
                             How do I report a suspicious listing?
                             <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
@@ -148,7 +154,7 @@
                             On the property details page, scroll down and click "Report this listing". Select the reason and add any details. Our team reviews all reports within 24 hours.
                         </div>
                     </details>
-                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <details data-faq-cat="landlords" class="bg-slate-50 rounded-2xl border border-slate-100 group">
                         <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
                             How do I post a property as a landlord?
                             <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
@@ -157,7 +163,7 @@
                             First, register as a landlord. Once your account is approved, log in to your dashboard and click "Post Property". Fill in your property details, upload photos, and publish.
                         </div>
                     </details>
-                    <details class="bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <details data-faq-cat="payments" class="bg-slate-50 rounded-2xl border border-slate-100 group">
                         <summary class="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-900 text-sm">
                             Is my personal information safe?
                             <i class="fas fa-chevron-down text-[#ea580c] group-open:rotate-180 transition-transform text-xs"></i>
@@ -332,6 +338,23 @@
     document.getElementById('current-year').textContent = new Date().getFullYear();
 </script>
 <script src="fmn-support.js"></script>
+<script>
+(function(){
+  var tabs = document.querySelectorAll('.faq-tab');
+  var items = document.querySelectorAll('#faq-list [data-faq-cat]');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var f = tab.getAttribute('data-filter');
+      tabs.forEach(function(x){
+        x.className = 'faq-tab px-4 py-2 rounded-full text-sm font-bold ' + (x===tab ? 'bg-[#ea580c] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-[#ea580c]');
+      });
+      items.forEach(function(it){
+        it.style.display = (f==='all' || it.getAttribute('data-faq-cat')===f) ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>
 
