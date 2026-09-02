@@ -68,7 +68,11 @@
 
   // ── Trust banner strip ────────────────────────────────────────────────────
   function buildBanner(banners) {
-    if (!banners || !banners.length || dismissedRecently()) return;
+    if (dismissedRecently()) return;
+    // Fallback: if no admin banner is active, show the default safety tip.
+    if (!banners || !banners.length) {
+      banners = [{ message: "Safety Tip: Never pay rent or holding deposits before physically inspecting the accommodation." }];
+    }
 
     var bar = el(
       "div",
@@ -77,7 +81,8 @@
     );
     // Inline styles so the strip looks right even on pages without extra CSS.
     bar.style.cssText =
-      "background:#0f172a;color:#fff;font-size:14px;line-height:1.3;" +
+      "background:#fffbeb;color:#78350f;font-size:14px;line-height:1.3;" +
+      "border-bottom:1px solid #fde68a;" +
       "width:100%;z-index:40;";
     bar.setAttribute("role", "region");
     bar.setAttribute("aria-label", "Safety notice");
@@ -100,17 +105,17 @@
     var report = el(
       "a",
       "fmn-trust-report",
-      '<i class="fas fa-flag" style="margin-right:6px"></i>Report'
+      '<i class="fas fa-flag" style="margin-right:6px"></i>Report Listing'
     );
     report.href = "safety.html#report";
     report.style.cssText =
-      "flex:0 0 auto;color:#bbf7d0;font-weight:700;text-decoration:none;" +
+      "flex:0 0 auto;color:#b45309;font-weight:700;text-decoration:none;" +
       "font-size:13px;white-space:nowrap;";
 
     var close = el("button", null, '<i class="fas fa-times"></i>');
     close.setAttribute("aria-label", "Dismiss safety notice");
     close.style.cssText =
-      "flex:0 0 auto;background:transparent;border:0;color:#94a3b8;cursor:pointer;" +
+      "flex:0 0 auto;background:transparent;border:0;color:#b45309;cursor:pointer;" +
       "font-size:15px;padding:4px;line-height:1;";
     close.addEventListener("click", function () {
       markDismissed();
