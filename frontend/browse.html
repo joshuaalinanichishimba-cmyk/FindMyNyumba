@@ -481,6 +481,15 @@
 
     /* Area chips */
     let AREAS = [];  // populated from /stats/home (real areas with active listings)
+    async function loadRealAreas() {
+      try {
+        const res = await fetch(`${API_BASE}/stats/home`);
+        const d = await res.json();
+        AREAS = (d.areas || []).map(a => a.city);
+      } catch (e) { AREAS = []; }
+      buildAreaChips();
+    }
+
     function buildAreaChips() {
         const wrap = document.getElementById('area-chips');
         if (!wrap) return;
