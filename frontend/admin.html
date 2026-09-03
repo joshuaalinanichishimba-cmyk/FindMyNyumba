@@ -840,6 +840,13 @@
           </div>
           <div id="thread-body" class="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50"></div>
           <div id="thread-compose" class="p-3 border-t border-slate-100 flex gap-2 flex-shrink-0">
+            <select id="canned-select" onchange="insertCanned(this.value); this.selectedIndex=0;" class="fmn-input w-auto flex-shrink-0 text-[13px]" title="Insert a quick reply">
+              <option value="">Quick reply...</option>
+              <option value="payment">Payment verification</option>
+              <option value="connect">Connect access</option>
+              <option value="safety">Safety caution</option>
+              <option value="assist">Assist track</option>
+            </select>
             <input id="thread-input" class="fmn-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendThreadMessage()">
             <button class="btn btn-pri" onclick="sendThreadMessage()"><i class="fas fa-paper-plane"></i></button>
           </div>
@@ -2453,6 +2460,20 @@ async function loadThread(url){
         <div class="text-[10px] mt-1 ${m.mine ? 'text-orange-100' : 'text-slate-400'}">${m.created_at ? esc(new Date(m.created_at).toLocaleString()) : ''}</div>
       </div></div>`).join('');
   body.scrollTop = body.scrollHeight;
+}
+var CANNED_REPLIES = {
+  payment: "To verify your mobile money payment, please reply with the transaction reference from your Airtel or MTN confirmation SMS. We will match it against our records and confirm within one business day.",
+  connect: "Once your Verified Access payment is confirmed, the landlord's contact details unlock automatically on the listing. Log in, open the listing, and you will see the Call and WhatsApp buttons.",
+  safety: "Safety reminder: never pay rent or a deposit before you have physically inspected the accommodation in person. FindMyNyumba never collects rent on a landlord's behalf - rent is always paid directly to the property provider.",
+  assist: "Your Assisted Move request has been assigned to one of our support agents. They will be in touch shortly to arrange viewings and guide you through moving in safely."
+};
+function insertCanned(key){
+  if(!key) return;
+  var input = document.getElementById('thread-input');
+  if(!input) return;
+  var text = CANNED_REPLIES[key] || '';
+  input.value = input.value ? (input.value.trim() + ' ' + text) : text;
+  input.focus();
 }
 async function sendThreadMessage(){
   if (!_threadTarget) return;
