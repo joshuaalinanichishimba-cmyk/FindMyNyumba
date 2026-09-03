@@ -41,7 +41,13 @@
   var _tickets = [];
   var _filter = 'all';
 
-  window.loadAdminTickets = async function () {
+  window.loadAdminTickets = function () {
+  // loadSupport() also rewrites #tab-support innerHTML on tab open; defer so our
+  // panel injects AFTER that, then again shortly after in case of slow render.
+  setTimeout(_renderAdminTickets, 60);
+  setTimeout(_renderAdminTickets, 400);
+};
+async function _renderAdminTickets() {
     var tab = document.getElementById('tab-support');
     if (!tab) return;
     var root = document.getElementById('tickets-panel');
