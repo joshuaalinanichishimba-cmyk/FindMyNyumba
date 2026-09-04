@@ -973,6 +973,7 @@ function showTab(name){
   if (name === 'settings')      loadSessions();
   if (name === 'listings')      loadListings();
   if (name === 'verifications') loadVerifications();
+  if (name === 'verifications') initListingVerify();
   if (name === 'trust')         loadReports();
   if (name === 'fraud')         { loadFraud(); loadFraudExtras(); }
   if (name === 'revenue')       loadRevenue();
@@ -2845,6 +2846,7 @@ setInterval(function(){var tok=sessionStorage.getItem('adminToken');if(tok){fetc
 <script src="fmn-admin-packages.js"></script>
 <script src="fmn-admin-business.js"></script>
 <script src="fmn-admin-tickets.js"></script>
+<script src="fmn-admin-listing-verify.js"></script>
 </body>
 </html>
 <script>
