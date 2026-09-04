@@ -470,6 +470,7 @@
             </div>
             <button class="btn btn-ghost" onclick="loadReports()"><i class="fas fa-rotate"></i>Refresh</button>
           </div>
+          <div id="report-filters" class="flex flex-wrap gap-2 px-5 py-3 border-b border-slate-100"></div>
           <div id="reports-list" class="divide-y divide-slate-50"></div>
         </div>
       </section>
@@ -1313,6 +1314,42 @@ async function rejectVerification(userId){
 /* ====================================================================
    TRUST & SAFETY — reports
 ==================================================================== */
+let _reportFilter = 'all';
+let _allReports = [];
+function renderReportFilters(){
+  const box = document.getElementById('report-filters');
+  if(!box) return;
+  const counts = { all:_allReports.length, pending:0, investigating:0, resolved:0, dismissed:0 };
+  _allReports.forEach(r => { if(counts[r.status]!=null) counts[r.status]++; });
+  const tabs = [['all','All'],['pending','New'],['investigating','Under Investigation'],['resolved','Resolved'],['dismissed','Dismissed']];
+  box.innerHTML = tabs.map(([f,label]) => `<button onclick="setReportFilter('${f}')" class="px-3 py-1.5 rounded-full text-[12px] font-bold ${_reportFilter===f?'bg-[#ea580c] text-white':'bg-white border border-slate-200 text-slate-600 hover:border-[#ea580c]'}">${label}${counts[f]!=null?' ('+counts[f]+')':''}</button>`).join('');
+}
+function setReportFilter(f){ _reportFilter = f; renderReportFilters(); renderReportsList(); }
+function renderReportsList(){
+  const el = document.getElementById('reports-list');
+  if(!el) return;
+  const reports = _reportFilter==='all' ? _allReports : _allReports.filter(r => r.status===_reportFilter);
+  if(!reports.length){ el.innerHTML = `<div class="px-5 py-12 text-center text-slate-400 text-sm">No reports in this view.</div>`; return; }
+  const statusPill = { pending:'bg-orange-50 text-orange-600', investigating:'bg-blue-50 text-blue-600', reviewed:'bg-blue-50 text-blue-600', resolved:'bg-emerald-50 text-emerald-600', dismissed:'bg-slate-100 text-slate-500' };
+  el.innerHTML = reports.map(r => `
+    <div class="px-5 py-4 hover:bg-slate-50 transition">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-extrabold text-slate-900 text-sm">${esc(r.listing_title || ('Listing #' + r.listing_id))}</span>
+            <span class="pill ${statusPill[r.status] || 'bg-slate-100 text-slate-500'}">${esc(r.status)}</span>
+          </div>
+          <div class="text-[11.5px] text-slate-400 mt-1">Report #${esc(r.id)} - by ${esc(r.reporter_name || 'User')}</div>
+          <div class="mt-2 text-[13.5px] text-slate-700"><span class="font-bold">Reason:</span> ${esc(r.reason)}</div>
+          ${r.description ? `<div class="mt-1 text-[13px] text-slate-500">${esc(r.description)}</div>` : ''}
+          ${r.resolution ? `<div class="mt-1 text-[12px] text-emerald-600"><span class="font-bold">Resolution:</span> ${esc(r.resolution)}</div>` : ''}
+        </div>
+        ${r.status === 'pending' || r.status === 'investigating'
+          ? `<div class="flex flex-wrap gap-1.5 flex-shrink-0"><button onclick="takedownReport(${r.id})" class="btn bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 text-[12px]">Take down</button><button onclick="resolveReportWithNote(${r.id})" class="btn bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 text-[12px]">Send update</button><button onclick="dismissReport(${r.id})" class="btn btn-ghost px-3 py-1.5 text-[12px]">Dismiss</button></div>`
+          : `<span class="text-[11px] font-semibold text-slate-300 flex-shrink-0 self-center">closed</span>`}
+      </div>
+    </div>`).join('');
+}
 async function loadReports(){
   const el = document.getElementById('reports-list');
   el.innerHTML = `<div class="px-5 py-10 text-center text-slate-400 text-sm"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
@@ -1325,6 +1362,10 @@ async function loadReports(){
     reports.sort((a,b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
     _reportsCount = reports.filter(r => r.status === 'pending').length;
     renderTrustKpis(reports);
+    _allReports = reports;
+    renderReportFilters();
+    renderReportsList();
+    return;
     if (!reports.length) { el.innerHTML = `<div class="px-5 py-12 text-center text-slate-400"><i class="fas fa-circle-check text-3xl text-emerald-400 mb-3 block"></i>No reports — all clear.</div>`; return; }
     const statusPill = { pending:'bg-orange-50 text-orange-600', reviewed:'bg-blue-50 text-blue-600', dismissed:'bg-slate-100 text-slate-500' };
     el.innerHTML = reports.map(r => `
