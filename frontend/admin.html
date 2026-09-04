@@ -1366,6 +1366,20 @@ function renderTrustKpis(reports){
 
 async function dismissReport(id){ const res = await fetch(`${API}/admin/reports/${id}/dismiss`, { method:'PATCH' }); if (res.ok) { showToast('Report dismissed.'); loadReports(); } }
 
+async function takedownReport(id){
+  const note = prompt('Reason for taking down this listing (emailed to the reporter):', 'Removed following a safety report.');
+  if(note === null) return;
+  const res = await fetch(`${API}/admin/reports/${id}/takedown`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ resolution: note }) });
+  if(res.ok){ showToast('Listing taken down. Report resolved.','success'); loadReports(); }
+  else { showToast('Take down failed.','error'); }
+}
+async function resolveReportWithNote(id){
+  const note = prompt('Resolution note (emailed to the reporter):', 'Your report has been reviewed and actioned.');
+  if(note === null) return;
+  const res = await fetch(`${API}/admin/reports/${id}/resolve`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ resolution: note }) });
+  if(res.ok){ showToast('Report resolved. Reporter notified.','success'); loadReports(); }
+  else { showToast('Resolve failed.','error'); }
+}
 /* ====================================================================
    FRAUD — real "most-reported listings" risk panel
    Derived by joining /admin/reports to /admin/all-listings (no new backend).
