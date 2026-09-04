@@ -1057,7 +1057,8 @@ function propertyCard(p) {
             </div>
             <p class="text-xs text-slate-400 font-medium mb-2"><i class="fas fa-map-marker-alt mr-1 text-[#ea580c]"></i>${esc(p.location || '')}</p>
             <p class="text-[#ea580c] font-black text-sm">ZMW ${Number(p.price || 0).toLocaleString()}<span class="text-slate-400 font-medium text-xs">/mo</span></p>
-            <div class="flex gap-2 mt-3">
+            ${p.status==='rejected' ? `<div class="mt-3 p-3 rounded-xl bg-red-50 border border-red-100"><p class="text-[12px] font-bold text-red-700"><i class="fas fa-circle-xmark mr-1"></i>Listing rejected</p><p class="text-[12px] text-red-600 mt-1">${esc(p.rejection_reason || 'Please review and update your listing details, then resubmit.')}</p><button onclick="editProperty(${p.id})" class="mt-2 text-[12px] font-bold text-[#ea580c] hover:underline">Edit &amp; resubmit</button></div>` : ''}
+                <div class="flex gap-2 mt-3">
                 ${(p.status==='approved' || p.status==='active') ? `<button onclick="boostListing(${p.id})" class="flex-1 bg-[#ea580c] text-white text-xs font-bold py-2 rounded-lg hover:bg-[#c2410c]"><i class="fas fa-rocket mr-1"></i> Boost</button>` : ``}
                     <button onclick="editProperty(${p.id})" class="flex-1 bg-slate-100 text-slate-700 text-xs font-bold py-2 rounded-xl hover:bg-slate-200 transition">
                     <i class="fas fa-edit mr-1"></i> Edit
