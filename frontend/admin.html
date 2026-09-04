@@ -838,6 +838,7 @@
             <div><h3 id="thread-title" class="font-extrabold text-slate-900 text-[15px]"></h3><p id="thread-sub" class="text-[12px] text-slate-400"></p></div>
             <button onclick="closeThread()" class="w-9 h-9 rounded-xl hover:bg-slate-100 text-slate-500"><i class="fas fa-xmark"></i></button>
           </div>
+          <div id="thread-context" class="hidden px-5 py-3 border-b border-slate-100 bg-slate-50/60 flex-shrink-0"></div>
           <div id="thread-body" class="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50"></div>
           <div id="thread-compose" class="p-3 border-t border-slate-100 flex gap-2 flex-shrink-0">
             <select id="canned-select" onchange="insertCanned(this.value); this.selectedIndex=0;" class="fmn-input w-auto flex-shrink-0 text-[13px]" title="Insert a quick reply">
@@ -2429,6 +2430,38 @@ function suspendFromUserDetail(id, email, willSuspend){
    MESSAGE THREAD  (admin ↔ user with reply, or read-only pair thread)
 ==================================================================== */
 let _threadTarget = null;   // {userId} when admin can reply; null = read-only
+async function _ensureUsers(){
+  if(Array.isArray(_users) && _users.length) return;
+  try { var r = await fetch(`${API}/admin/users`); if(r.ok){ var u = await r.json(); _users = Array.isArray(u) ? u : []; } } catch(e){}
+}
+function _clearThreadContext(){
+  var el = document.getElementById('thread-context'); if(el){ el.classList.add('hidden'); el.innerHTML=''; }
+}
+async function fillThreadContext(userId){
+  var el = document.getElementById('thread-context'); if(!el) return;
+  await _ensureUsers();
+  var u = _users.find(function(x){ return String(x.id) === String(userId); });
+  if(!u){ _clearThreadContext(); return; }
+  var role = (u.role||'user');
+  var roleLabel = {student:'Student', landlord:'Landlord', accommodation_assistant:'Assistant', admin:'Admin', finance:'Staff', trust_safety:'Staff', customer_support:'Staff', landlord_acquisition:'Staff'}[role] || role;
+  var verified = (u.verification_status==='approved' || u.verification_status==='verified' || u.is_verified===true);
+  var vBadge = verified
+    ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-green-100 text-green-700"><i class="fas fa-shield-halved mr-1"></i>Verified</span>'
+    : '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Unverified</span>';
+  el.innerHTML =
+    '<div class="flex items-center gap-3">' +
+      '<div class="w-9 h-9 rounded-full bg-orange-100 text-[#ea580c] flex items-center justify-center font-black text-sm flex-shrink-0">' + esc((u.full_name||'U').charAt(0).toUpperCase()) + '</div>' +
+      '<div class="min-w-0 flex-1">' +
+        '<div class="flex items-center gap-2 flex-wrap"><span class="font-black text-slate-900 text-[13.5px]">' + esc(u.full_name||'User') + '</span>' +
+        '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">' + esc(roleLabel) + '</span>' + vBadge + '</div>' +
+        '<div class="text-[11px] text-slate-400 mt-0.5 flex flex-wrap gap-3">' +
+          (u.phone ? '<span><i class="fas fa-phone mr-1"></i>' + esc(u.phone) + '</span>' : '') +
+          (u.email ? '<span><i class="fas fa-envelope mr-1"></i>' + esc(u.email) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  el.classList.remove('hidden');
+}
 function openThread(userId, name){
   _threadTarget = { userId };
   document.getElementById('thread-title').textContent = name || 'Conversation';
@@ -2441,6 +2474,7 @@ function openConvThread(convId, title){
   _threadTarget = null;
   document.getElementById('thread-title').textContent = title || 'Conversation';
   document.getElementById('thread-sub').textContent = 'Read-only';
+  _clearThreadContext();
   document.getElementById('thread-compose').style.display = 'none';
   document.getElementById('thread-modal').classList.remove('hidden');
   loadThread(`${API}/admin/conversations/${convId}/messages`);
