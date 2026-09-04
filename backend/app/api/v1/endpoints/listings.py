@@ -465,6 +465,18 @@ def report_property(
     )
     db.add(new_report)
     db.commit()
+    # Auto-hold: 2+ unresolved reports on an active listing -> flag & unpublish
+    try:
+        open_reports = db.query(Report).filter(
+            Report.listing_id == listing_id,
+            Report.status.in_(["pending", "open", "investigating"]),
+        ).count()
+        listing = db.query(Listing).filter(Listing.id == listing_id).first()
+        if listing and open_reports >= 2 and listing.status == "active":
+            listing.status = "flagged_pending_review"
+            db.commit()
+    except Exception:
+        db.rollback()
     return {"status": "success", "message": "Report submitted. Our team will review it shortly."}
 
 
