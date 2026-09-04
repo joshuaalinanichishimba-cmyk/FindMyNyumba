@@ -34,7 +34,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Body
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -232,20 +232,46 @@ def approve_listing(listing_id: int, admin: User = Depends(require("listings.app
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
+    from datetime import datetime, timedelta, timezone as _tz
     listing.status = "active"
+    # publication window: 30 days from approval (adjustable per package later)
+    listing.expires_at = datetime.now(_tz.utc) + timedelta(days=30)
     db.commit()
-    return {"status": "success", "message": "Listing approved and now live."}
+    return {"status": "success", "message": "Listing approved and now live.",
+            "expires_at": listing.expires_at.isoformat() if listing.expires_at else None}
 
 
 # â”€â”€ PATCH /admin/listings/{id}/reject â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @router.patch("/listings/{listing_id}/reject")
-def reject_listing(listing_id: int, admin: User = Depends(require("listings.reject")), db: Session = Depends(get_db)):
+def reject_listing(listing_id: int, payload: dict = Body(default={}), admin: User = Depends(require("listings.reject")), db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found.")
     listing.status = "rejected"
+    reason = (payload.get("reason") or "").strip() if isinstance(payload, dict) else ""
+    if reason and hasattr(listing, "rejection_reason"):
+        listing.rejection_reason = reason
     db.commit()
+    # Notify the landlord by email (no-ops cleanly if Resend key is not set).
+    try:
+        from app.utils.email import send_listing_rejection_email
+        owner = db.query(User).filter(User.id == listing.owner_id).first()
+        if owner and getattr(owner, "email", None):
+            send_listing_rejection_email(owner.email, listing.title, reason or "Your listing did not meet our review criteria.")
+    except Exception:
+        pass
     return {"status": "success", "message": "Listing rejected."}
+
+
+# -- PATCH /admin/listings/{id}/inspect-badge : toggle physical inspection --
+@router.patch("/listings/{listing_id}/inspect-badge")
+def toggle_inspect_badge(listing_id: int, admin: User = Depends(require("listings.approve")), db: Session = Depends(get_db)):
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found.")
+    listing.is_physically_inspected = not bool(getattr(listing, "is_physically_inspected", False))
+    db.commit()
+    return {"status": "success", "is_physically_inspected": listing.is_physically_inspected}
 
 
 # â”€â”€ DELETE /admin/listings/{id} â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
