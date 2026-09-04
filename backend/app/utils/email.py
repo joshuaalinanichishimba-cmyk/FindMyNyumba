@@ -430,3 +430,74 @@ def send_listing_rejection_email(to_email: str, listing_title: str, reason: str)
         "html": html_body,
     }
     resend.Emails.send(params)
+
+
+def send_report_resolution_email(to_email: str, note: str) -> None:
+    """
+    Notify a user who submitted a safety report that it has been reviewed and
+    actioned, including the admin's resolution note. Sent via Resend.
+
+    Safe to call without RESEND_API_KEY set: the caller (admin._notify_reporter)
+    wraps this in try/except, so a missing key never blocks the report action.
+    """
+    resend.api_key = settings.RESEND_API_KEY
+
+    note_text = note or "Your report has been reviewed and actioned by our team."
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden;max-width:600px;width:100%;">
+            <tr>
+              <td style="background:#0f172a;padding:32px 40px;text-align:center;">
+                <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px;">FindMyNyumba</h1>
+                <p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Trust &amp; Safety</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:36px 40px 8px;">
+                <h2 style="margin:0 0 12px;color:#0f172a;font-size:19px;">Update on your report</h2>
+                <p style="margin:0 0 16px;color:#475569;font-size:14px;line-height:1.6;">
+                  Thank you for helping keep FindMyNyumba safe. Our Trust &amp; Safety team has reviewed the report you submitted.
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+                  <tr>
+                    <td style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px;">
+                      <p style="margin:0;color:#166534;font-size:13px;font-weight:700;">Outcome</p>
+                      <p style="margin:6px 0 0;color:#15803d;font-size:14px;line-height:1.6;">{note_text}</p>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 8px;color:#475569;font-size:14px;line-height:1.6;">
+                  If you have any further concerns, you can reach us anytime through the Help Center.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 40px 32px;">
+                <p style="margin:20px 0 0;color:#94a3b8;font-size:12px;line-height:1.5;border-top:1px solid #e2e8f0;padding-top:16px;">
+                  Never pay rent or a deposit before physically inspecting a property in person.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+      </table>
+    </body>
+    </html>
+    """
+
+    params: "resend.Emails.SendParams" = {
+        "from": f"{getattr(settings, 'MAIL_FROM_NAME', 'FindMyNyumba')} <{settings.MAIL_FROM}>",
+        "to": [to_email],
+        "subject": "Update on your FindMyNyumba safety report",
+        "html": html_body,
+    }
+    resend.Emails.send(params)

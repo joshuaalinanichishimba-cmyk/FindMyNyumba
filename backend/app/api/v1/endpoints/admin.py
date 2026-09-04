@@ -420,7 +420,40 @@ def resolve_report(report_id: int, body: ResolveBody, admin: User = Depends(requ
     report.handled_by = admin.id
     report.handled_at = datetime.now(timezone.utc)
     db.commit()
+    _notify_reporter(db, report, body.resolution)
     return {"status": "success", "message": "Report resolved."}
+
+
+# -- helper: email the reporter a resolution update (no-op without Resend key) --
+def _notify_reporter(db, report, note):
+    try:
+        from app.utils.email import send_report_resolution_email
+        reporter = db.query(User).filter(User.id == report.reporter_id).first()
+        if reporter and getattr(reporter, "email", None):
+            send_report_resolution_email(reporter.email, note or "Your report has been reviewed and actioned.")
+    except Exception:
+        pass
+
+
+# -- PATCH /admin/reports/{id}/takedown : remove the reported listing --
+@router.patch("/reports/{report_id}/takedown")
+def takedown_report(report_id: int, body: ResolveBody, admin: User = Depends(require("reports.resolve")), db: Session = Depends(get_db)):
+    report = db.query(Report).filter(Report.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found.")
+    if report.listing_id:
+        listing = db.query(Listing).filter(Listing.id == report.listing_id).first()
+        if listing:
+            listing.status = "rejected"
+            if hasattr(listing, "rejection_reason"):
+                listing.rejection_reason = (body.resolution or "Removed following a safety report.")
+    report.status = "resolved"
+    report.resolution = body.resolution or "Listing taken down following review."
+    report.handled_by = admin.id
+    report.handled_at = datetime.now(timezone.utc)
+    db.commit()
+    _notify_reporter(db, report, report.resolution)
+    return {"status": "success", "message": "Listing taken down and report resolved."}
 
 
 # â”€â”€ PATCH /admin/reports/{id}/dismiss â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
