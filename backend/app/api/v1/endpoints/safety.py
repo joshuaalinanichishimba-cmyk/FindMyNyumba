@@ -60,7 +60,7 @@ def verify_landlord(query: str = Query(..., min_length=3, max_length=120),
     #    Match phone or email against users; consider verified if their status is approved/verified.
     user = (
         db.query(User)
-        .filter(or_(User.phone == query.strip(), User.phone == q, User.email == query.strip().lower()))
+        .filter(or_(User.phone_number == query.strip(), User.phone_number == q, User.email == query.strip().lower()))
         .first()
     )
     if user:
@@ -144,10 +144,10 @@ def add_blacklist(payload: BlacklistCreate, admin: User = Depends(require_admin)
     flagged = 0
     try:
         if et in ("phone", "email"):
-            col = User.phone if et == "phone" else User.email
+            col = User.phone_number if et == "phone" else User.email
             owners = db.query(User.id).filter(col.isnot(None)).all()
             match_ids = [uid for (uid,) in owners
-                         if _normalise(getattr(db.query(User).get(uid), et if et == "phone" else "email") or "") == value]
+                         if _normalise(getattr(db.query(User).get(uid), "phone_number" if et == "phone" else "email") or "") == value]
             if match_ids:
                 listings = db.query(Listing).filter(Listing.owner_id.in_(match_ids), Listing.status == "active").all()
                 for l in listings:
