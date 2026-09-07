@@ -78,7 +78,24 @@
   </div>
 </section>
 
-<!-- ===================== SIGNATURE: ZAMBIAN SCAM PLAYBOOK ===================== -->
+    <!-- ===================== LANDLORD VERIFICATION LOOKUP ===================== -->
+    <section class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-lg">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fas fa-shield-halved text-[#16a34a]"></i>
+          <h2 class="text-white text-xl sm:text-2xl font-extrabold">Check a landlord or number</h2>
+        </div>
+        <p class="text-slate-400 text-sm font-medium mb-5">Enter a phone number, mobile-money account, or email to see if it belongs to a verified provider on FindMyNyumba.</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input id="verify-input" type="text" placeholder="e.g. 0977 000 000" class="flex-1 px-4 py-3 rounded-xl text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#16a34a]">
+          <button id="verify-btn" class="bg-[#16a34a] hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl transition flex items-center justify-center gap-2"><i class="fas fa-magnifying-glass"></i> Verify</button>
+        </div>
+        <div id="verify-result" class="hidden mt-4"></div>
+        <p class="text-slate-500 text-[12px] mt-4"><i class="fas fa-circle-info mr-1"></i>A match here is not a guarantee. Always inspect the property in person and never pay before you do.</p>
+      </div>
+    </section>
+
+    <!-- ===================== SIGNATURE: ZAMBIAN SCAM PLAYBOOK ===================== -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="text-center mb-10">
     <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f172a]">The scams we see most</h2>
@@ -278,5 +295,6 @@
 <!-- Trust kit: banners + report modal -->
 <script src="assets/fmn-trust.js" data-page="all"></script>
 <script src="assets/fmn-report.js"></script>
+<script src="fmn-safety-lookup.js"></script>
 </body>
 </html>
