@@ -2554,7 +2554,7 @@ async function loadThread(url, silent){
     <div class="flex ${m.mine ? 'justify-end' : 'justify-start'}">
       <div class="max-w-[75%] px-3.5 py-2 rounded-2xl text-[13px] ${m.mine ? 'bg-orange-500 text-white' : 'bg-white border border-slate-100 text-slate-700'}">
         ${esc(m.content)}
-        <div class="text-[10px] mt-1 ${m.mine ? 'text-orange-100' : 'text-slate-400'}">${m.created_at ? esc(new Date(m.created_at).toLocaleString()) : ''}</div>
+        <div class="text-[10px] mt-1 ${m.mine ? 'text-orange-100' : 'text-slate-400'}">${m.created_at ? esc(new Date(m.created_at).toLocaleString()) : ''}${m.mine ? (m.is_read ? ' <span title="Read">✓✓</span>' : ' <span title="Sent">✓</span>') : ''}</div>
       </div></div>`).join('');
   if(!silent){ body.scrollTop = body.scrollHeight; }
 }
