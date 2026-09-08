@@ -103,6 +103,28 @@ def get_ticket(ticket_id: str, db: Session = Depends(get_db)):
     return _public(t)
 
 
+@router.get("/admin/support/stats")
+def support_stats(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    rows = db.query(SupportTicket).all()
+    total = len(rows)
+    open_count = sum(1 for t in rows if t.status in ("new", "in_progress"))
+    resolved = sum(1 for t in rows if t.status in ("resolved", "closed"))
+    # average handling time (hours) for resolved tickets, from created -> updated
+    durations = []
+    for t in rows:
+        if t.status in ("resolved", "closed") and t.created_at and t.updated_at:
+            secs = (t.updated_at - t.created_at).total_seconds()
+            if secs >= 0:
+                durations.append(secs)
+    avg_hours = round(sum(durations) / len(durations) / 3600, 1) if durations else None
+    return {
+        "total": total,
+        "open": open_count,
+        "resolved": resolved,
+        "avg_resolution_hours": avg_hours,
+    }
+
+
 @router.get("/admin/support/tickets")
 def admin_list_tickets(status: Optional[str] = None,
                        admin: User = Depends(require_admin),
