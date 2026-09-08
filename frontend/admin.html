@@ -2523,6 +2523,22 @@ async function fillThreadContext(userId){
     '</div>';
   el.classList.remove('hidden');
 }
+async function refreshPresence(userId){
+  var sub = document.getElementById('thread-sub');
+  if(!sub) return;
+  try {
+    var res = await fetch(`${API}/admin/users/${userId}/presence`);
+    if(!res.ok) return;
+    var d = await res.json();
+    if(d.online){
+      sub.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-right:5px;"></span>Online';
+    } else if(d.last_seen){
+      sub.innerHTML = 'Last seen ' + (typeof fmnRelTime === 'function' ? fmnRelTime(d.last_seen) : new Date(d.last_seen).toLocaleString());
+    } else {
+      sub.textContent = 'Direct message';
+    }
+  } catch(e){}
+}
 function openThread(userId, name){
   _threadTarget = { userId };
   document.getElementById('thread-title').textContent = name || 'Conversation';
@@ -2543,7 +2559,7 @@ function openConvThread(convId, title){
 function closeThread(){ document.getElementById('thread-modal').classList.add('hidden'); _threadTarget = null; if(_threadPoll){ clearInterval(_threadPoll); _threadPoll = null; } _threadUrl = null; }
 async function loadThread(url, silent){
     _threadUrl = url;
-    if(!_threadPoll){ _threadPoll = setInterval(function(){ if(_threadUrl) loadThread(_threadUrl, true); }, 4000); }
+    if(!_threadPoll){ _threadPoll = setInterval(function(){ if(_threadUrl) loadThread(_threadUrl, true); if(_threadTarget && _threadTarget.userId) refreshPresence(_threadTarget.userId); }, 4000); }
   const body = document.getElementById('thread-body');
   if(!silent) body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
   let data = null;
