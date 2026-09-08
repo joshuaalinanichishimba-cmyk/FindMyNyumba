@@ -44,6 +44,7 @@ from app.models.listing import Listing
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.message import Message
+from app.models.user_session import UserSession
 from app.models.saved_listing import SavedListing
 from app.models.listing_event import ListingEvent
 from app.models.admin_models import (
@@ -681,6 +682,19 @@ def admin_conversation_thread(conv_id: str, admin: User = Depends(require("messa
         u = db.query(User).filter(User.id == uid).first()
         names[uid] = u.full_name if u else f"User {uid}"
     return {"participants": names, "messages": [_msg_dict(m, admin.id) for m in msgs]}
+
+
+@router.get("/admin/users/{user_id}/presence")
+def user_presence(user_id: int, admin: User = Depends(require("messages.view")), db=Depends(get_db)):
+    """Online if the user has a non-revoked session seen in the last 2 minutes."""
+    sess = (db.query(UserSession)
+            .filter(UserSession.user_id == user_id, UserSession.revoked == False)
+            .order_by(UserSession.last_seen.desc()).first())
+    if not sess or not sess.last_seen:
+        return {"online": False, "last_seen": None}
+    ls = sess.last_seen if sess.last_seen.tzinfo else sess.last_seen.replace(tzinfo=timezone.utc)
+    age = (datetime.now(timezone.utc) - ls).total_seconds()
+    return {"online": age < 120, "last_seen": ls.isoformat()}
 
 
 @router.get("/admin/messages/{user_id}")
