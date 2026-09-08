@@ -2489,6 +2489,8 @@ function suspendFromUserDetail(id, email, willSuspend){
    MESSAGE THREAD  (admin ↔ user with reply, or read-only pair thread)
 ==================================================================== */
 let _threadTarget = null;   // {userId} when admin can reply; null = read-only
+    let _threadPoll = null;
+    let _threadUrl = null;
 async function _ensureUsers(){
   if(Array.isArray(_users) && _users.length) return;
   try { var r = await fetch(`${API}/admin/users`); if(r.ok){ var u = await r.json(); _users = Array.isArray(u) ? u : []; } } catch(e){}
@@ -2538,7 +2540,7 @@ function openConvThread(convId, title){
   document.getElementById('thread-modal').classList.remove('hidden');
   loadThread(`${API}/admin/conversations/${convId}/messages`);
 }
-function closeThread(){ document.getElementById('thread-modal').classList.add('hidden'); _threadTarget = null; }
+function closeThread(){ document.getElementById('thread-modal').classList.add('hidden'); _threadTarget = null; if(_threadPoll){ clearInterval(_threadPoll); _threadPoll = null; } _threadUrl = null; }
 async function loadThread(url){
   const body = document.getElementById('thread-body');
   body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
