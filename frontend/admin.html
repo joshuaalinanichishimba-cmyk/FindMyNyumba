@@ -2541,9 +2541,11 @@ function openConvThread(convId, title){
   loadThread(`${API}/admin/conversations/${convId}/messages`);
 }
 function closeThread(){ document.getElementById('thread-modal').classList.add('hidden'); _threadTarget = null; if(_threadPoll){ clearInterval(_threadPoll); _threadPoll = null; } _threadUrl = null; }
-async function loadThread(url){
+async function loadThread(url, silent){
+    _threadUrl = url;
+    if(!_threadPoll){ _threadPoll = setInterval(function(){ if(_threadUrl) loadThread(_threadUrl, true); }, 4000); }
   const body = document.getElementById('thread-body');
-  body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
+  if(!silent) body.innerHTML = `<div class="text-center text-slate-400 text-sm py-8"><i class="fas fa-circle-notch spin mr-2"></i>Loading…</div>`;
   let data = null;
   try { const r = await fetch(url); if (r.ok) data = await r.json(); } catch {}
   const msgs = data?.messages || [];
@@ -2554,7 +2556,7 @@ async function loadThread(url){
         ${esc(m.content)}
         <div class="text-[10px] mt-1 ${m.mine ? 'text-orange-100' : 'text-slate-400'}">${m.created_at ? esc(new Date(m.created_at).toLocaleString()) : ''}</div>
       </div></div>`).join('');
-  body.scrollTop = body.scrollHeight;
+  if(!silent){ body.scrollTop = body.scrollHeight; }
 }
 var CANNED_REPLIES = {
   payment: "To verify your mobile money payment, please reply with the transaction reference from your Airtel or MTN confirmation SMS. We will match it against our records and confirm within one business day.",
