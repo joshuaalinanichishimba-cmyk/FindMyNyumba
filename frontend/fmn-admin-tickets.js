@@ -182,4 +182,24 @@ async function _renderAdminTickets() {
       btn.disabled = false; btn.textContent = old;
     }
   }
+  async function loadSupportStats(){
+    var box = document.getElementById('support-stats');
+    if(!box) return;
+    try {
+      var res = await fetch(apiBase() + '/admin/support/stats');
+      if(!res.ok) return;
+      var d = await res.json();
+      var card = function(label, val, icon, color){
+        return '<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">' +
+          '<div class="w-9 h-9 rounded-xl ' + color + ' flex items-center justify-center mb-2"><i class="fas ' + icon + '"></i></div>' +
+          '<div class="text-2xl font-black text-slate-900">' + (val == null ? '-' : val) + '</div>' +
+          '<p class="text-[12px] font-bold text-slate-500 mt-0.5">' + label + '</p></div>';
+      };
+      box.innerHTML =
+        card('Total tickets', d.total, 'fa-ticket', 'bg-slate-100 text-slate-600') +
+        card('Open', d.open, 'fa-envelope-open', 'bg-amber-50 text-amber-600') +
+        card('Resolved', d.resolved, 'fa-circle-check', 'bg-green-50 text-green-600') +
+        card('Avg resolution (hrs)', (d.avg_resolution_hours == null ? '-' : d.avg_resolution_hours), 'fa-clock', 'bg-blue-50 text-blue-600');
+    } catch(e){}
+  }
 })();
