@@ -495,23 +495,8 @@
                 <div id="payments-section" class="dashboard-section hidden">
                     <h2 class="text-lg font-extrabold text-slate-900 mb-4">Payments</h2>
                     <!-- Verified Access card -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-5 max-w-2xl">
-                        <div class="flex items-start gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-shield-halved text-[#ea580c] text-xl"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <h3 class="font-extrabold text-slate-900">Verified Access</h3>
-                                    <span id="va-status-badge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Not active</span>
-                                </div>
-                                <p class="text-[12.5px] text-slate-500 font-medium mb-3">Choose a Verified Access plan (from K150) to unlock verified listing details and contact landlords. Paid to FindMyNyumba - never to a landlord. Rent is always paid directly to your landlord.</p>
-                                <a href="pay-verified-access.html" id="va-cta" class="inline-flex items-center gap-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-sm px-4 py-2.5 rounded-xl">
-                                    <i class="fas fa-credit-card"></i> Get Verified Access - from K150
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="mb-2"><p class="text-[12.5px] text-slate-500 font-medium">Choose a Verified Access plan to unlock verified listing details and contact landlords. Paid to FindMyNyumba - never to a landlord. Rent is always paid directly to your landlord.</p></div>
+                    <div id="student-plans" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5"><p class="text-[12.5px] text-slate-400">Loading plans...</p></div>
                     <!-- Payment history -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 max-w-2xl">
                         <h3 class="font-extrabold text-slate-900 text-sm mb-3">Payment history</h3>
@@ -1174,5 +1159,6 @@ async function loadViewings(){
 }
 </script>
 
+<script src="fmn-student-payments.js"></script>
 </body>
 </html>
