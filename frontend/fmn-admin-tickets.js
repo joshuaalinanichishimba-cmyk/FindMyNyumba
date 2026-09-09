@@ -135,6 +135,7 @@ async function _renderAdminTickets() {
       '</div>';
 
     wire(root);
+    loadSupportStats();
   }
 
   function statusText(s) {
