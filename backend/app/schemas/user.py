@@ -1,4 +1,4 @@
-﻿from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator
 from app.core.security import validate_password_strength
 from typing import Optional
 from datetime import datetime
@@ -30,6 +30,17 @@ class UserResponse(UserBase):
     verification_status: Optional[str] = "unverified"
     avatar_url: Optional[str] = None
     created_at: Optional[datetime] = None
+    institution: Optional[str] = None
+    student_id_number: Optional[str] = None
+    preferred_zone: Optional[str] = None
+    room_type: Optional[str] = None
+    max_rent: Optional[int] = None
+    guardian_name: Optional[str] = None
+    guardian_phone: Optional[str] = None
+    whatsapp_alerts: Optional[bool] = None
+    sms_notifications: Optional[bool] = None
+    hide_phone: Optional[bool] = None
+    email_alerts: Optional[bool] = None
 
     class Config:
         from_attributes = True
