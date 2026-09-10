@@ -158,7 +158,7 @@
       msg.style.opacity = "0";
       setTimeout(function () {
         msg.innerHTML = icon + escapeHtml(b.message);
-        dot.style.background = DOT[b.level] || "#d97706";
+        dot.style.color = DOT[b.level] || "#d97706";
         msg.style.opacity = "1";
       }, 180);
     }
