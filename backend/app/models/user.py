@@ -52,6 +52,17 @@ class User(Base):
     # Notification preferences
     email_alerts = Column(Boolean, default=True)
     sms_alerts   = Column(Boolean, default=False)
+    whatsapp_alerts = Column(Boolean, default=True)
+    sms_notifications = Column(Boolean, default=False)
+    hide_phone = Column(Boolean, default=False)
+    # Student profile: academic, housing prefs, emergency contact
+    institution = Column(String, nullable=True)
+    student_id_number = Column(String, nullable=True)
+    preferred_zone = Column(String, nullable=True)
+    room_type = Column(String, nullable=True)
+    max_rent = Column(Integer, nullable=True)
+    guardian_name = Column(String, nullable=True)
+    guardian_phone = Column(String, nullable=True)
 
     # Verification workflow
     verification_status           = Column(String, default="unverified")

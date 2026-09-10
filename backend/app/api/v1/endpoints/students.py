@@ -1,4 +1,4 @@
-﻿"""app/api/v1/endpoints/students.py - Student dashboard endpoints.
+"""app/api/v1/endpoints/students.py - Student dashboard endpoints.
 
 All endpoints require student role. SavedListing model ensures
 persistent saved listings across sessions and server restarts.
@@ -229,6 +229,18 @@ def update_profile(
     student.full_name = payload.full_name.strip()
     if payload.phone is not None:
         student.phone_number = payload.phone.strip() or None
+
+    # Extended profile fields
+    for _f in ["institution", "student_id_number", "preferred_zone", "room_type", "guardian_name", "guardian_phone"]:
+        _v = getattr(payload, _f, None)
+        if _v is not None:
+            setattr(student, _f, (_v.strip() or None))
+    if getattr(payload, "max_rent", None) is not None:
+        student.max_rent = payload.max_rent
+    for _b in ["whatsapp_alerts", "sms_notifications", "hide_phone", "email_alerts"]:
+        _v = getattr(payload, _b, None)
+        if _v is not None:
+            setattr(student, _b, bool(_v))
 
     db.commit()
 
