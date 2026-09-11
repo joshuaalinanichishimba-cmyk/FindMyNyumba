@@ -418,3 +418,38 @@ def list_student_reviews(
             for r in rows
         ],
     }
+
+
+# ── POST /students/deactivate : soft-disable the account ──────────────
+@router.post("/deactivate")
+def deactivate_account(student: User = Depends(require_student), db: Session = Depends(get_db)):
+    """Deactivate the student's account (reversible via support). Sets is_active=False."""
+    student.is_active = False
+    db.commit()
+    return {"status": "success", "message": "Account deactivated."}
+
+
+# ── DELETE /students/account : soft-delete + anonymise ────────────────
+@router.delete("/account")
+def delete_account(student: User = Depends(require_student), db: Session = Depends(get_db)):
+    """
+    Soft-delete the account: deactivate and anonymise personal fields so the
+    user can no longer sign in and their details are scrubbed, without hard-
+    deleting the row (which would break foreign-key references from messages,
+    transactions, reviews, etc. on a live system).
+    """
+    import time
+    student.is_active = False
+    student.email = f"deleted_{student.id}_{int(time.time())}@deleted.findmynyumba"
+    student.full_name = "Deleted user"
+    student.phone_number = None
+    student.avatar_url = None
+    # scrub optional profile fields if present
+    for _f in ["institution", "student_id_number", "preferred_zone", "room_type",
+               "guardian_name", "guardian_phone"]:
+        if hasattr(student, _f):
+            setattr(student, _f, None)
+    if hasattr(student, "max_rent"):
+        student.max_rent = None
+    db.commit()
+    return {"status": "success", "message": "Account deleted."}
