@@ -209,6 +209,7 @@ def register(request: Request, user_in: UserCreate, db: Session = Depends(get_db
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         role=safe_role,
+        phone_number=normalized_phone,
         is_active=True,
     )
     db.add(new_user)
