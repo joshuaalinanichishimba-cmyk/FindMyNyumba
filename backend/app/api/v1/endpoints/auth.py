@@ -333,7 +333,6 @@ def google_login(request: Request, body: GoogleLoginRequest, db: Session = Depen
             full_name=info.get("name", ""),
             hashed_password=get_password_hash(secrets.token_urlsafe(32)),
             role="student",          # default role; adjust if you prefer
-            phone_number=normalized_phone,
             is_active=True,
         )
         db.add(user)
