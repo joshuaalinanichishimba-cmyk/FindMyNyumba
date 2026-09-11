@@ -191,6 +191,13 @@ def register(request: Request, user_in: UserCreate, db: Session = Depends(get_db
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    # Validate + normalise the Zambian phone number, and enforce uniqueness.
+    normalized_phone = normalize_zm_phone(getattr(user_in, "phone_number", None))
+    if normalized_phone:
+        dup_phone = db.query(User).filter(User.phone_number == normalized_phone).first()
+        if dup_phone:
+            raise HTTPException(status_code=400, detail="Phone number is already in use")
+
     # SECURITY: never trust the role from the client. Admin/staff accounts
     # are created by an existing admin, never through public registration.
     safe_role = user_in.role if user_in.role in SELF_SIGNUP_ROLES else "student"
@@ -325,6 +332,7 @@ def google_login(request: Request, body: GoogleLoginRequest, db: Session = Depen
             full_name=info.get("name", ""),
             hashed_password=get_password_hash(secrets.token_urlsafe(32)),
             role="student",          # default role; adjust if you prefer
+            phone_number=normalized_phone,
             is_active=True,
         )
         db.add(user)
@@ -431,3 +439,27 @@ def heartbeat(session_id = Depends(get_current_session_id),
         db.commit()
     return {"ok": True}
 
+# ── Zambian phone validation / E.164 normalisation ──────────────────
+import re as _re
+
+def normalize_zm_phone(raw):
+    """
+    Validate a Zambian mobile number and return it in E.164 form
+    (+260XXXXXXXXX). Accepts local 09X/07X, 260..., and +260... inputs.
+    Returns None for empty input; raises HTTPException on invalid format.
+    Valid MNO prefixes: 095/096/097 (MTN/Airtel/Zamtel) and 075/076/077.
+    """
+    if not raw or not str(raw).strip():
+        return None
+    s = _re.sub(r"[\s\-()]", "", str(raw).strip())
+    body = r"(9[567]\d{7}|7[567]\d{7})"
+    if _re.fullmatch(r"\+260" + body, s):
+        return s
+    if _re.fullmatch(r"260" + body, s):
+        return "+" + s
+    if _re.fullmatch(r"0" + body, s):
+        return "+260" + s[1:]
+    raise HTTPException(
+        status_code=400,
+        detail="Enter a valid Zambian mobile number (e.g. 0977123456).",
+    )
